@@ -59,3 +59,57 @@ func TestTeamLifecycle(t *testing.T) {
 		t.Errorf("description = %q, want %q", updated.Description, updatedDesc)
 	}
 }
+
+// TestCalendarLifecycle creates a calendar, reads it, updates it, and deletes
+// it — a second write-path resource (beyond teams) proving create/update/delete
+// generalize across services. It only ever touches the "gofd-e2e-" calendar it
+// creates and always deletes it on cleanup.
+func TestCalendarLifecycle(t *testing.T) {
+	c := newClient(t)
+	ctx := context.Background()
+
+	name := uniqueName("cal")
+	created, _, err := c.Calendars.CalendarCreate(ctx, &flashduty.CalendarCreateRequest{
+		CalName:  name,
+		Timezone: "Asia/Shanghai",
+		Workdays: []int64{1, 2, 3, 4, 5},
+	})
+	if err != nil {
+		t.Fatalf("create calendar: %v", err)
+	}
+	id := created.CalID
+	if id == "" {
+		t.Fatalf("create calendar returned no cal_id")
+	}
+	t.Cleanup(func() {
+		if _, err := c.Calendars.CalendarDelete(ctx, &flashduty.CalendarIDRequest{CalID: id}); err != nil {
+			t.Errorf("cleanup: delete calendar %s: %v", id, err)
+		}
+	})
+
+	got, _, err := c.Calendars.CalendarInfo(ctx, &flashduty.CalendarIDRequest{CalID: id})
+	if err != nil {
+		t.Fatalf("read calendar: %v", err)
+	}
+	if got.CalName != name {
+		t.Errorf("calendar name = %q, want %q", got.CalName, name)
+	}
+
+	const updatedDesc = "go-flashduty e2e test calendar (updated)"
+	if _, err := c.Calendars.CalendarUpdate(ctx, &flashduty.CalendarUpdateRequest{
+		CalID:       id,
+		CalName:     name,
+		Timezone:    "Asia/Shanghai",
+		Description: updatedDesc,
+	}); err != nil {
+		t.Fatalf("update calendar: %v", err)
+	}
+
+	updated, _, err := c.Calendars.CalendarInfo(ctx, &flashduty.CalendarIDRequest{CalID: id})
+	if err != nil {
+		t.Fatalf("read updated calendar: %v", err)
+	}
+	if updated.Description != updatedDesc {
+		t.Errorf("description = %q, want %q", updated.Description, updatedDesc)
+	}
+}
