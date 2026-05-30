@@ -1,5 +1,5 @@
 // Package retry provides a safe-by-default retrying http.RoundTripper
-// for the Flashduty SDK, in the spirit of go-github's transport middleware.
+// for the Flashduty SDK, usable as a composable transport middleware.
 //
 // It plugs into the client as a composable transport layer:
 //

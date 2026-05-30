@@ -3,7 +3,7 @@
 package flashduty
 
 // service is the shared backing for every typed service; all services view
-// the same Client through it (one allocation), mirroring google/go-github.
+// the same Client through it (one allocation).
 type service struct{ client *Client }
 
 // genServices is embedded in Client to expose the generated service handles.

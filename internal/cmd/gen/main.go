@@ -491,7 +491,7 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		return b.String()
 	}
 	// Collapse the pagination input trio (p + limit [+ search_after_ctx]) into an
-	// embedded ListOptions, the shared go-github-style pagination type. Only
+	// embedded ListOptions, the shared pagination type. Only
 	// applies to JSON body structs; GET query structs keep inline url-tagged
 	// fields (emitGetRequests). Detection requires both p and limit as integers.
 	paginated := isIntProp(props["p"]) && isIntProp(props["limit"])
@@ -681,7 +681,7 @@ func (g *Gen) emitWiring(services []service) string {
 	var b strings.Builder
 	b.WriteString(genHeader)
 	b.WriteString("package flashduty\n\n")
-	b.WriteString("// service is the shared backing for every typed service; all services view\n// the same Client through it (one allocation), mirroring google/go-github.\ntype service struct{ client *Client }\n\n")
+	b.WriteString("// service is the shared backing for every typed service; all services view\n// the same Client through it (one allocation).\ntype service struct{ client *Client }\n\n")
 	b.WriteString("// genServices is embedded in Client to expose the generated service handles.\ntype genServices struct {\n")
 	for _, s := range services {
 		fmt.Fprintf(&b, "\t%s *%sService\n", s.Name, s.Name)
