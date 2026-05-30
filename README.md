@@ -2,7 +2,7 @@
 
 The official Go client for the [Flashduty](https://flashcat.cloud) Open API — a thin, typed wrapper in the style of [google/go-github](https://github.com/google/go-github).
 
-> **Status: release candidate for `v1.0.0`.** The transport core is in place and all 224 Open API endpoints (21 services) are generated from the Flashduty OpenAPI specification.
+> **Status: `v0.1.0` — first public release.** All 224 Open API endpoints (21 services) are generated from the Flashduty OpenAPI specification and covered by tests. The API surface targets stabilization at `v1.0.0` after validation against the live API.
 
 ## Install
 
