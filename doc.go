@@ -16,9 +16,8 @@
 // added by the code generator; see internal/cmd/gen.
 //
 // Cross-cutting transport concerns (retry, caching, tracing, rate-limit
-// handling) compose as http.RoundTripper middleware via WithTransport, mirroring
-// google/go-github. The optional flashdutyretry subpackage provides a
-// safe-by-default retrying transport.
+// handling) compose as http.RoundTripper middleware via WithTransport. The
+// optional retry subpackage provides a safe-by-default retrying transport.
 //
 //go:generate go run ./internal/cmd/gen
 package flashduty

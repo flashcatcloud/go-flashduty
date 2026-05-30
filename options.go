@@ -43,7 +43,7 @@ func WithHTTPClient(hc *http.Client) Option {
 
 // WithTransport sets a custom http.RoundTripper on the underlying client — the
 // idiomatic seam for retry, caching, tracing, or rate-limit middleware (see the
-// flashdutyretry subpackage). Nil is ignored.
+// retry subpackage). Nil is ignored.
 func WithTransport(rt http.RoundTripper) Option {
 	return func(c *Client) {
 		if rt != nil {

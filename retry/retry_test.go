@@ -1,4 +1,4 @@
-package flashdutyretry
+package retry
 
 import (
 	"context"

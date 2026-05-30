@@ -1,8 +1,10 @@
 # go-flashduty
 
-The official Go client for the [Flashduty](https://flashcat.cloud) Open API — a thin, typed wrapper in the style of [google/go-github](https://github.com/google/go-github).
+The official Go client for the [Flashduty](https://flashcat.cloud) Open API — a thin, typed SDK covering every Flashduty REST endpoint.
 
-> **Status: `v0.1.0` — first public release.** All 224 Open API endpoints (21 services) are generated from the Flashduty OpenAPI specification and covered by tests. The API surface targets stabilization at `v1.0.0` after validation against the live API.
+📖 **API reference:** <https://docs.flashcat.cloud/en/openapi/introduction>
+
+> **Status:** All 224 Open API endpoints across 21 services are generated from the Flashduty OpenAPI specification, covered by unit tests, and validated end-to-end against the live API.
 
 ## Install
 
@@ -49,7 +51,7 @@ func main() {
 
 - **Thin and typed.** Every method maps to exactly one HTTP call and returns `(*T, *Response, error)`. No hidden cross-endpoint enrichment.
 - **Service-grouped.** Endpoints are organized into services on the client (`client.Incidents`, `client.Alerts`, …), generated from the OpenAPI specification.
-- **Composable transport.** Cross-cutting concerns (retry, caching, tracing, rate-limit handling) compose as `http.RoundTripper` middleware via `WithTransport`, mirroring go-github.
+- **Composable transport.** Cross-cutting concerns (retry, caching, tracing, rate-limit handling) compose as `http.RoundTripper` middleware via `WithTransport`.
 
 ### Options
 
@@ -97,17 +99,17 @@ case flashduty.ErrorCodeAccessDenied, flashduty.ErrorCodeUnauthorized:
 ### Retries
 
 Automatic retries are **not** built into the core. Compose them at the transport
-layer with the optional `flashdutyretry` subpackage — a safe-by-default retrying
+layer with the optional `retry` subpackage — a safe-by-default retrying
 `http.RoundTripper` (retries 429 and 5xx, honors `Retry-After`, deterministic
 exponential backoff, and only replays requests whose body is replayable, which
 all SDK requests are):
 
 ```go
-import flashdutyretry "github.com/flashcatcloud/go-flashduty/flashdutyretry"
+import "github.com/flashcatcloud/go-flashduty/retry"
 
 client, err := flashduty.NewClient("YOUR_APP_KEY",
-	flashduty.WithTransport(flashdutyretry.New(
-		flashdutyretry.WithMaxRetries(3),
+	flashduty.WithTransport(retry.New(
+		retry.WithMaxRetries(3),
 	)),
 )
 ```

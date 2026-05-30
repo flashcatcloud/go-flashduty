@@ -9,7 +9,7 @@ import (
 	"time"
 
 	flashduty "github.com/flashcatcloud/go-flashduty"
-	flashdutyretry "github.com/flashcatcloud/go-flashduty/flashdutyretry"
+	"github.com/flashcatcloud/go-flashduty/retry"
 )
 
 // ExampleNewClient shows how to construct a client with a couple of options.
@@ -117,9 +117,9 @@ func ExampleClient_errorHandling() {
 
 // ExampleWithTransport_retry composes the retry helper as the client transport.
 func ExampleWithTransport_retry() {
-	// flashdutyretry.New returns an http.RoundTripper that transparently
+	// retry.New returns an http.RoundTripper that transparently
 	// retries safe requests on 429 and 5xx responses with backoff.
-	var rt http.RoundTripper = flashdutyretry.New()
+	var rt http.RoundTripper = retry.New()
 
 	client, err := flashduty.NewClient(
 		"YOUR_APP_KEY",

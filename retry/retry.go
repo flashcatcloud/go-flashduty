@@ -1,10 +1,10 @@
-// Package flashdutyretry provides a safe-by-default retrying http.RoundTripper
+// Package retry provides a safe-by-default retrying http.RoundTripper
 // for the Flashduty SDK, in the spirit of go-github's transport middleware.
 //
 // It plugs into the client as a composable transport layer:
 //
 //	client, err := flashduty.NewClient(appKey,
-//		flashduty.WithTransport(flashdutyretry.New()),
+//		flashduty.WithTransport(retry.New()),
 //	)
 //
 // The Transport is pure net/http and deliberately does NOT import the parent
@@ -36,7 +36,7 @@
 //
 // Context cancellation is honored while waiting between attempts: if the
 // request's context is done, RoundTrip returns the context error.
-package flashdutyretry
+package retry
 
 import (
 	"io"
@@ -62,8 +62,8 @@ const (
 // errors), using deterministic exponential backoff.
 //
 // All fields are optional: the zero value is usable and sensible defaults are
-// applied inside RoundTrip, so both flashdutyretry.New() and
-// &flashdutyretry.Transport{} produce a working transport.
+// applied inside RoundTrip, so both retry.New() and
+// &retry.Transport{} produce a working transport.
 type Transport struct {
 	// Base is the underlying RoundTripper used to execute requests.
 	// Defaults to http.DefaultTransport when nil.
