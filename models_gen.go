@@ -172,6 +172,7 @@ type AffectedStatusPageComponentItem struct {
 
 // AlertEventGlobalListRequest is generated from the Flashduty OpenAPI schema.
 type AlertEventGlobalListRequest struct {
+	ListOptions
 	// Sort ascending when `true`.
 	Asc bool `json:"asc,omitempty"`
 	// Filter by channel IDs. Max 100.
@@ -182,14 +183,8 @@ type AlertEventGlobalListRequest struct {
 	IntegrationIDs []int64 `json:"integration_ids,omitempty"`
 	// Filter by integration types (plugin keys).
 	IntegrationTypes []string `json:"integration_types,omitempty"`
-	// Page size, max 100, default 20.
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field (ES field name).
 	Orderby string `json:"orderby,omitempty"`
-	// Page number, starting at 1. Used when `search_after_ctx` is not provided.
-	P int64 `json:"p,omitempty"`
-	// Opaque cursor for the next page.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty"`
 	// Comma-separated severity filter, e.g. `Critical,Warning`.
 	Severities string `json:"severities,omitempty"`
 	// Start of search window, Unix epoch seconds.
@@ -259,14 +254,11 @@ type AlertEventListResponse struct {
 
 // AlertFeedRequest is generated from the Flashduty OpenAPI schema.
 type AlertFeedRequest struct {
+	ListOptions
 	// Alert ID.
 	AlertID string `json:"alert_id,omitempty"`
 	// Sort ascending.
 	Asc bool `json:"asc,omitempty"`
-	// Page size, max 100, default 20.
-	Limit int64 `json:"limit,omitempty"`
-	// Page number, starting at 1.
-	P int64 `json:"p,omitempty"`
 	// Filter by feed types.
 	Types []string `json:"types,omitempty"`
 }
@@ -439,6 +431,7 @@ type AlertListByIDsRequest struct {
 
 // AlertListRequest is generated from the Flashduty OpenAPI schema.
 type AlertListRequest struct {
+	ListOptions
 	// Filter to specific alert IDs (ObjectID hex strings).
 	AlertIDs []string `json:"alert_ids,omitempty"`
 	// Filter by alert deduplication keys.
@@ -459,14 +452,8 @@ type AlertListRequest struct {
 	IntegrationIDs []int64 `json:"integration_ids,omitempty"`
 	// Filter by active (`true`) or resolved (`false`) status.
 	IsActive bool `json:"is_active,omitempty"`
-	// Page size. Max 100, default 20.
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number, starting at 1. Used when `search_after_ctx` is not provided.
-	P int64 `json:"p,omitempty"`
-	// Opaque cursor from the previous response for the next page.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty"`
 	// Start of the search window, Unix epoch seconds.
 	StartTime int64 `json:"start_time,omitempty"`
 }
@@ -2665,6 +2652,7 @@ type InsightIncidentExportRequest struct{}
 
 // InsightIncidentListRequest is generated from the Flashduty OpenAPI schema.
 type InsightIncidentListRequest struct {
+	ListOptions
 	// Sort ascending when `true`, descending otherwise.
 	Asc bool `json:"asc,omitempty"`
 	// Filter by channel IDs. At most 100 entries.
@@ -2683,18 +2671,12 @@ type InsightIncidentListRequest struct {
 	IsMyTeam bool `json:"is_my_team,omitempty"`
 	// Label filters (exact match).
 	Labels map[string]string `json:"labels,omitempty"`
-	// Page size, between 1 and 100. Defaults to 20.
-	Limit int64 `json:"limit,omitempty"`
 	// Field to sort the underlying incident set by.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number, starting at 1. Defaults to 1.
-	P int64 `json:"p,omitempty"`
 	// Full-text query applied to incident title and description.
 	Query string `json:"query,omitempty"`
 	// Filter by responder person IDs. At most 100 entries.
 	ResponderIDs []int64 `json:"responder_ids,omitempty"`
-	// Cursor token returned by a previous page. Pass it back to fetch the next page.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty"`
 	// Lower bound (inclusive) on time-to-acknowledge, in seconds.
 	SecondsToAckFrom int64 `json:"seconds_to_ack_from,omitempty"`
 	// Upper bound (exclusive) on time-to-acknowledge, in seconds. Must be greater than `seconds_to_ack_from` when both are set.
@@ -2855,6 +2837,7 @@ type LinkItem struct {
 
 // ListChannelsRequest is generated from the Flashduty OpenAPI schema.
 type ListChannelsRequest struct {
+	ListOptions
 	// When true, sort ascending.
 	Asc bool `json:"asc,omitempty"`
 	// Filter by explicit channel IDs.
@@ -2869,12 +2852,8 @@ type ListChannelsRequest struct {
 	IsMyStarred bool `json:"is_my_starred,omitempty"`
 	// When true, return channels owned by the caller's teams. Mutually exclusive with `is_my_starred`.
 	IsMyTeam bool `json:"is_my_team,omitempty"`
-	// Page size. Defaults to 100 when omitted.
-	Limit int64 `json:"limit,omitempty"`
 	// Field used to order results.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number (1-based).
-	P int64 `json:"p,omitempty"`
 	// Free-text query against channel name/description.
 	Query string `json:"query,omitempty"`
 	// Filter by team IDs.
@@ -2902,16 +2881,13 @@ type ListEscalationRulesResponse struct {
 
 // ListIncidentAlertsRequest is generated from the Flashduty OpenAPI schema.
 type ListIncidentAlertsRequest struct {
+	ListOptions
 	// Incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty"`
 	// When true, include raw alert events in each alert item.
 	IncludeEvents bool `json:"include_events,omitempty"`
 	// When true return only active alerts (Critical/Warning/Info); when false return only recovered alerts (Ok). Omit to include all.
 	IsActive bool `json:"is_active,omitempty"`
-	// Page size, at most 1000.
-	Limit int64 `json:"limit,omitempty"`
-	// Page number starting at 1.
-	P int64 `json:"p,omitempty"`
 }
 
 // ListIncidentAlertsResponse is generated from the Flashduty OpenAPI schema.
@@ -2924,14 +2900,11 @@ type ListIncidentAlertsResponse struct {
 
 // ListIncidentFeedRequest is generated from the Flashduty OpenAPI schema.
 type ListIncidentFeedRequest struct {
+	ListOptions
 	// Ascending chronological order when true.
 	Asc bool `json:"asc,omitempty"`
 	// Incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty"`
-	// Page size, at most 100.
-	Limit int64 `json:"limit,omitempty"`
-	// Page number starting at 1.
-	P int64 `json:"p,omitempty"`
 	// Optional filter restricting the returned entries to specific types.
 	Types []IncidentFeedType `json:"types,omitempty"`
 }
@@ -2952,6 +2925,7 @@ type ListIncidentsByIDsRequest struct {
 
 // ListIncidentsRequest is generated from the Flashduty OpenAPI schema.
 type ListIncidentsRequest struct {
+	ListOptions
 	// Acknowledger member IDs.
 	AckerIDs []int64 `json:"acker_ids,omitempty"`
 	// Ascending order when true.
@@ -2978,20 +2952,14 @@ type ListIncidentsRequest struct {
 	IsRare bool `json:"is_rare,omitempty"`
 	// When true, include only snoozed incidents.
 	IsSnoozed bool `json:"is_snoozed,omitempty"`
-	// Page size, at most 100.
-	Limit int64 `json:"limit,omitempty"`
 	// Restrict to the given short display identifiers.
 	Nums []string `json:"nums,omitempty"`
-	// Page number starting at 1.
-	P int64 `json:"p,omitempty"`
 	// Comma-separated list of progress states to match (e.g. `Triggered,Processing`).
 	Progress string `json:"progress,omitempty"`
 	// Full-text search query.
 	Query string `json:"query,omitempty"`
 	// Responder member IDs.
 	ResponderIDs []int64 `json:"responder_ids,omitempty"`
-	// Cursor from a previous response for forward pagination.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty"`
 	// Window start, Unix seconds.
 	StartTime int64 `json:"start_time,omitempty"`
 	// Team IDs; resolved to channels via channel ownership.
@@ -3019,6 +2987,7 @@ type ListPastIncidentsResponse struct {
 
 // ListPostMortemsRequest is generated from the Flashduty OpenAPI schema.
 type ListPostMortemsRequest struct {
+	ListOptions
 	// Ascending order when true.
 	Asc bool `json:"asc,omitempty"`
 	// Channel IDs to restrict the query to.
@@ -3027,14 +2996,8 @@ type ListPostMortemsRequest struct {
 	CreatedAtEndSeconds int64 `json:"created_at_end_seconds,omitempty"`
 	// Filter by creation time: lower bound in seconds.
 	CreatedAtStartSeconds int64 `json:"created_at_start_seconds,omitempty"`
-	// Page size, at most 100.
-	Limit int64 `json:"limit,omitempty"`
 	// Field used to order results.
 	OrderBy string `json:"order_by,omitempty"`
-	// Page number starting at 1.
-	P int64 `json:"p,omitempty"`
-	// Cursor from a previous response for forward pagination.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty"`
 	// Report status. Defaults to `published` on the server when omitted.
 	Status string `json:"status,omitempty"`
 	// Team IDs to restrict the query to.
@@ -3235,20 +3198,15 @@ type MappingDataItem struct {
 
 // MappingDataListRequest is generated from the Flashduty OpenAPI schema.
 type MappingDataListRequest struct {
+	ListOptions
 	// Sort ascending when `true`.
 	Asc bool `json:"asc,omitempty"`
-	// Page size (1–100, default 20).
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number (1-based). Used for offset-based pagination.
-	P int64 `json:"p,omitempty"`
 	// Exact-match filter on source label values. All source labels must be provided if any are specified.
 	Query map[string]string `json:"query,omitempty"`
 	// Mapping schema ID (MongoDB ObjectID hex).
 	SchemaID string `json:"schema_id,omitempty"`
-	// Opaque cursor token for cursor-based pagination.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty"`
 }
 
 // MappingDataListResponse is generated from the Flashduty OpenAPI schema.
@@ -3481,14 +3439,11 @@ type MemberItem struct {
 
 // MemberListRequest is generated from the Flashduty OpenAPI schema.
 type MemberListRequest struct {
+	ListOptions
 	// Ascending order
 	Asc bool `json:"asc,omitempty"`
-	// Page size
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field
 	Orderby string `json:"orderby,omitempty"`
-	// Page number
-	P int64 `json:"p,omitempty"`
 	// Search keyword
 	Query string `json:"query,omitempty"`
 	// Filter by role ID
@@ -3497,12 +3452,9 @@ type MemberListRequest struct {
 
 // MemberListResponse is generated from the Flashduty OpenAPI schema.
 type MemberListResponse struct {
+	ListOptions
 	// Member items
 	Items []MemberItem `json:"items,omitempty"`
-	// Page size
-	Limit int64 `json:"limit,omitempty"`
-	// Current page
-	P int64 `json:"p,omitempty"`
 	// Total count
 	Total int64 `json:"total,omitempty"`
 }
@@ -4353,16 +4305,13 @@ type RUMApplicationItem struct {
 
 // RUMApplicationListRequest is generated from the Flashduty OpenAPI schema.
 type RUMApplicationListRequest struct {
+	ListOptions
 	// Sort ascending if `true`.
 	Asc bool `json:"asc,omitempty"`
 	// If `true`, return only applications belonging to the current user's teams.
 	IsMyTeam bool `json:"is_my_team,omitempty"`
-	// Page size. Range: 1–100. Default: 20.
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number (1-based). Default: 1.
-	P int64 `json:"p,omitempty"`
 	// Search query to filter by application name.
 	Query string `json:"query,omitempty"`
 	// Filter by team ID.
@@ -4440,6 +4389,7 @@ type RUMIssueItem struct {
 
 // RUMIssueListRequest is generated from the Flashduty OpenAPI schema.
 type RUMIssueListRequest struct {
+	ListOptions
 	// Filter by application IDs.
 	ApplicationIDs []string `json:"application_ids,omitempty"`
 	Asc            bool     `json:"asc,omitempty"`
@@ -4449,12 +4399,8 @@ type RUMIssueListRequest struct {
 	// End of time range, millisecond timestamp. Maximum range: 183 days.
 	EndTime int64 `json:"end_time,omitempty"`
 	// If `true`, only return issues with at least one associated error event.
-	ErrorRequired bool `json:"error_required,omitempty"`
-	// Page size. Range: 1–100. Default: 20.
-	Limit   int64  `json:"limit,omitempty"`
-	Orderby string `json:"orderby,omitempty"`
-	// Page number. Default: 1.
-	P int64 `json:"p,omitempty"`
+	ErrorRequired bool   `json:"error_required,omitempty"`
+	Orderby       string `json:"orderby,omitempty"`
 	// SQL-style query for advanced filtering. Cannot be used with `dql`.
 	Sql string `json:"sql,omitempty"`
 	// Start of time range, millisecond timestamp.
@@ -4724,16 +4670,13 @@ type ScheduleLayer struct {
 
 // ScheduleListRequest is generated from the Flashduty OpenAPI schema.
 type ScheduleListRequest struct {
+	ListOptions
 	// Window end timestamp (Unix seconds).
 	End int64 `json:"end,omitempty"`
 	// Only return schedules created by the current user within their teams.
 	IsMyManage bool `json:"is_my_manage,omitempty"`
 	// Only return schedules whose owning team the current user belongs to.
 	IsMyTeam bool `json:"is_my_team,omitempty"`
-	// Page size. Default 10, max 100.
-	Limit int64 `json:"limit,omitempty"`
-	// Page number (1-indexed).
-	P int64 `json:"p,omitempty"`
 	// Search keyword matched against schedule names.
 	Query string `json:"query,omitempty"`
 	// When set together with end, computed layer schedules are returned. Span must be less than 45 days.
@@ -4898,18 +4841,15 @@ type SourcemapItem struct {
 
 // SourcemapListRequest is generated from the Flashduty OpenAPI schema.
 type SourcemapListRequest struct {
+	ListOptions
 	// Sort ascending. Default false (descending).
 	Asc bool `json:"asc,omitempty"`
 	// Android only. Filter by Gradle plugin build identifier. Max 200 characters.
 	BuildID string `json:"build_id,omitempty"`
 	// End of upload time range, Unix epoch milliseconds. Maximum window: 365 days.
 	EndTime int64 `json:"end_time,omitempty"`
-	// Page size. Maximum 100. Default 20.
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number, starting at 1.
-	P int64 `json:"p,omitempty"`
 	// Substring match on the minified URL (browser) or build ID (android). Max 200 characters.
 	Query string `json:"query,omitempty"`
 	// Filter by service names. Up to 100 values.
@@ -5230,14 +5170,11 @@ type TeamItem struct {
 
 // TeamListRequest is generated from the Flashduty OpenAPI schema.
 type TeamListRequest struct {
+	ListOptions
 	// Ascending sort order.
 	Asc bool `json:"asc,omitempty"`
-	// Page size. Max: 100. Default: 20.
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number. Default: 1.
-	P int64 `json:"p,omitempty"`
 	// Filter by member ID — return only teams this person belongs to.
 	PersonID uint64 `json:"person_id,omitempty"`
 	// Substring match on team name.
@@ -5246,11 +5183,8 @@ type TeamListRequest struct {
 
 // TeamListResponse is generated from the Flashduty OpenAPI schema.
 type TeamListResponse struct {
+	ListOptions
 	Items []TeamItem `json:"items,omitempty"`
-	// Page size used.
-	Limit int64 `json:"limit,omitempty"`
-	// Current page number.
-	P int64 `json:"p,omitempty"`
 	// Total number of teams matching the filter.
 	Total int64 `json:"total,omitempty"`
 }
@@ -5393,18 +5327,15 @@ type TemplateItem struct {
 
 // TemplateListRequest is generated from the Flashduty OpenAPI schema.
 type TemplateListRequest struct {
+	ListOptions
 	// Ascending sort order.
 	Asc bool `json:"asc,omitempty"`
 	// Filter by creator member ID.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// When true, only return templates scoped to teams the caller belongs to.
 	IsMyTeam bool `json:"is_my_team,omitempty"`
-	// Page size. Capped at 100.
-	Limit int64 `json:"limit,omitempty"`
 	// Sort field.
 	Orderby string `json:"orderby,omitempty"`
-	// Page number, starting at 1.
-	P int64 `json:"p,omitempty"`
 	// Regex or substring match on template_name.
 	Query string `json:"query,omitempty"`
 	// Filter by specific team IDs.

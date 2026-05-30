@@ -478,14 +478,32 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		b.WriteString(fmt.Sprintf("type %s struct{}\n\n", name))
 		return b.String()
 	}
+	// Collapse the pagination input trio (p + limit [+ search_after_ctx]) into an
+	// embedded ListOptions, the shared go-github-style pagination type. Only
+	// applies to JSON body structs; GET query structs keep inline url-tagged
+	// fields (emitGetRequests). Detection requires both p and limit as integers.
+	paginated := isIntProp(props["p"]) && isIntProp(props["limit"])
+	skipPagination := map[string]bool{}
+	if paginated {
+		skipPagination["p"] = true
+		skipPagination["limit"] = true
+		skipPagination["search_after_ctx"] = true
+	}
+
 	keys := make([]string, 0, len(props))
 	for k := range props {
+		if skipPagination[k] {
+			continue
+		}
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
 	b.WriteString(fmt.Sprintf("type %s struct {\n", name))
 	usedField := map[string]bool{}
+	if paginated {
+		b.WriteString("\tListOptions\n")
+	}
 	for _, k := range keys {
 		pv := asMap(props[k])
 		field := goName(k)
@@ -672,6 +690,12 @@ func isEmptyObject(s map[string]any) bool {
 func typeStr(s map[string]any) string {
 	t, _ := s["type"].(string)
 	return t
+}
+
+// isIntProp reports whether a property schema is a plain integer (used to detect
+// the pagination input trio).
+func isIntProp(v any) bool {
+	return typeStr(asMap(v)) == "integer"
 }
 
 func asMap(v any) map[string]any {
