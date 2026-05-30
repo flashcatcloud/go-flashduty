@@ -1,0 +1,53 @@
+name: Sync OpenAPI Spec
+
+# The vendored OpenAPI under openapi/ is a synced copy of the single source of
+# truth in the public flashduty-docs repo. Rather than diffing against upstream
+# on every push (which would redden unrelated PRs the moment docs lands a new
+# endpoint), this job runs on a schedule: it pulls the latest spec, regenerates
+# the typed layer, and opens a PR only when something actually changed.
+on:
+  schedule:
+    - cron: '17 1 * * *' # daily 01:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Sync from flashduty-docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          cache: true
+
+      - name: Sync vendored spec from flashduty-docs
+        run: make sync-spec
+
+      - name: Regenerate typed layer
+        run: make generate
+
+      - name: Open PR on drift
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/sync-openapi-spec
+          base: main
+          title: 'chore: sync OpenAPI spec from flashduty-docs'
+          commit-message: 'chore: sync OpenAPI spec from flashduty-docs + regenerate'
+          body: |
+            Automated sync of the vendored OpenAPI spec from the public
+            **flashduty-docs** source of truth, followed by `go generate`.
+
+            - `openapi/openapi.{en,zh}.json` refreshed from `main`.
+            - Generated `.go` re-emitted to match.
+
+            Review the diff (new/changed endpoints + regenerated types) before
+            merging. No PR is opened when upstream has not drifted.
+          delete-branch: true

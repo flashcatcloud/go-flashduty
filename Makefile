@@ -13,6 +13,11 @@ GOCMD := go
 GOFMT := gofmt
 MODULE := $(shell $(GOCMD) list -m)
 
+# The vendored OpenAPI under openapi/ is a synced copy of the single source of
+# truth in the public flashduty-docs repo. Override to sync from a branch or a
+# local checkout (e.g. DOCS_SPEC_BASE=file:///abs/path/to/flashduty-docs/api-reference).
+DOCS_SPEC_BASE ?= https://raw.githubusercontent.com/flashcatcloud/flashduty-docs/main/api-reference
+
 # Source roots to format (whole module; gci skips generated files itself).
 FMT_DIRS := .
 
@@ -30,6 +35,12 @@ build: ## Compile all packages
 .PHONY: generate
 generate: ## Regenerate the typed service layer from the OpenAPI spec
 	$(GOCMD) generate ./...
+
+.PHONY: sync-spec
+sync-spec: ## Refresh vendored OpenAPI from flashduty-docs (run 'make generate' after)
+	curl -sSfL "$(DOCS_SPEC_BASE)/openapi.en.json" -o openapi/openapi.en.json
+	curl -sSfL "$(DOCS_SPEC_BASE)/openapi.zh.json" -o openapi/openapi.zh.json
+	@echo "Synced openapi/ from $(DOCS_SPEC_BASE). Run 'make generate' to regenerate."
 
 .PHONY: test
 test: ## Run unit tests with the race detector
