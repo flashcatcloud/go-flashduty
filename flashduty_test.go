@@ -140,6 +140,21 @@ func TestDoTreatsOKCodeAsSuccess(t *testing.T) {
 	}
 }
 
+func TestDoExposesNonJSONBodyAsRaw(t *testing.T) {
+	const csv = "id,title\n1,boom\n2,bam\n"
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/octet-stream")
+		_, _ = io.WriteString(w, csv)
+	})
+	resp, err := c.do(context.Background(), "/insight/incident/export", map[string]any{}, nil)
+	if err != nil {
+		t.Fatalf("non-JSON success body must not error, got %v", err)
+	}
+	if string(resp.Raw) != csv {
+		t.Fatalf("Response.Raw = %q, want the CSV body", resp.Raw)
+	}
+}
+
 func TestDoReturnsRateLimitErrorOn429(t *testing.T) {
 	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Retry-After", "30")

@@ -390,6 +390,11 @@ func (g *Gen) emitModels() string {
 		case typeStr(s) == "array":
 			elem := g.goTypeOf(asMap(s["items"]), goName(name)+"Item")
 			enumsAndAliases.WriteString(fmt.Sprintf("// %s is a list response payload.\ntype %s []%s\n\n", goName(name), goName(name), elem))
+		case typeStr(s) == "object" && len(asMap(s["properties"])) == 0 && isObjectMap(s):
+			// A bare object with additionalProperties (and no fixed properties) is
+			// a map payload (e.g. name -> count), not a struct.
+			v := g.goTypeOf(asMap(s["additionalProperties"]), goName(name)+"Value")
+			enumsAndAliases.WriteString(fmt.Sprintf("// %s is a map response payload.\ntype %s map[string]%s\n\n", goName(name), goName(name), v))
 		case typeStr(s) == "string", typeStr(s) == "integer", typeStr(s) == "number", typeStr(s) == "boolean":
 			enumsAndAliases.WriteString(fmt.Sprintf("type %s %s\n\n", goName(name), g.goTypeOf(s, goName(name))))
 		default:
@@ -515,7 +520,7 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		pv := asMap(props[k])
 		field := goName(k)
 		if field == "" || field == name {
-			field = field + "Field"
+			field += "Field"
 		}
 		for usedField[field] {
 			field += "_"
@@ -753,6 +758,16 @@ func typeStr(s map[string]any) string {
 // the pagination input trio).
 func isIntProp(v any) bool {
 	return typeStr(asMap(v)) == "integer"
+}
+
+// isObjectMap reports whether a schema models a string-keyed map, i.e. it has an
+// object-valued additionalProperties (as opposed to additionalProperties: true).
+func isObjectMap(s map[string]any) bool {
+	ap, ok := s["additionalProperties"]
+	if !ok || ap == nil {
+		return false
+	}
+	return asMap(ap) != nil
 }
 
 func asMap(v any) map[string]any {

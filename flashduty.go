@@ -72,6 +72,11 @@ type Response struct {
 	HasNextPage    bool
 	SearchAfterCtx string
 	RateLimit      RateLimit
+
+	// Raw holds the response body for endpoints that return a non-JSON payload
+	// on success (e.g. CSV/file downloads from the *export endpoints). It is nil
+	// for normal JSON responses; the typed return value is then the zero value.
+	Raw []byte
 }
 
 // envelope is the universal {request_id, error, data} response wrapper.
@@ -184,6 +189,13 @@ func (c *Client) doMethod(ctx context.Context, method, path string, body, out an
 	var env envelope
 	if len(bytes.TrimSpace(raw)) > 0 {
 		if err := json.Unmarshal(raw, &env); err != nil {
+			// Some success endpoints return a non-JSON body (e.g. CSV/file
+			// downloads from the *export endpoints, despite the spec declaring
+			// JSON). Surface those bytes on Response.Raw instead of erroring.
+			if httpResp.StatusCode/100 == 2 {
+				resp.Raw = raw
+				return resp, nil
+			}
 			return resp, fmt.Errorf("flashduty: malformed response (http %d, request_id %s): %w", httpResp.StatusCode, resp.RequestID, err)
 		}
 	}

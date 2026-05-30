@@ -109,6 +109,12 @@ type RuleAuditListResponse []AlertRuleAudit
 // RuleBasicListResponse is a list response payload.
 type RuleBasicListResponse []AlertRuleBasic
 
+// RuleCounterChannelResponse is a map response payload.
+type RuleCounterChannelResponse map[string]int64
+
+// RuleCounterNodeResponse is a map response payload.
+type RuleCounterNodeResponse map[string]int64
+
 // RuleCounterTotalResponse is a list response payload.
 type RuleCounterTotalResponse []AlertRuleCounter
 
@@ -4139,12 +4145,6 @@ type RuleConfigs struct {
 	// Optional auxiliary queries whose results are attached to alert events as context. Each entry must have a unique `name` (not duplicating any query name) and a non-empty `expr`.
 	RelateQueries []RuleConfigsRelateQueriesItem `json:"relate_queries,omitempty"`
 }
-
-// RuleCounterChannelResponse is generated from the Flashduty OpenAPI schema.
-type RuleCounterChannelResponse struct{}
-
-// RuleCounterNodeResponse is generated from the Flashduty OpenAPI schema.
-type RuleCounterNodeResponse struct{}
 
 // RuleCreateResponse is generated from the Flashduty OpenAPI schema.
 type RuleCreateResponse struct {
