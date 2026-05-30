@@ -191,7 +191,7 @@ func (c *Client) doMethod(ctx context.Context, method, path string, body, out an
 		resp.RequestID = env.RequestID
 	}
 
-	if env.Error != nil && env.Error.Code != "" && env.Error.Code != "0" {
+	if env.Error != nil && isFailureCode(env.Error.Code) {
 		apiErr := &ErrorResponse{Response: httpResp, Code: env.Error.Code, Message: env.Error.Message, RequestID: resp.RequestID}
 		return resp, asAPIError(apiErr, resp.RateLimit)
 	}
@@ -212,6 +212,19 @@ func (c *Client) doMethod(ctx context.Context, method, path string, body, out an
 		}
 	}
 	return resp, nil
+}
+
+// isFailureCode reports whether an envelope error.code denotes a real failure.
+// Empty, "0", and "OK" (the ErrorCodeOK success sentinel) are not failures.
+func isFailureCode(code string) bool {
+	switch {
+	case code == "", code == "0":
+		return false
+	case strings.EqualFold(code, string(ErrorCodeOK)):
+		return false
+	default:
+		return true
+	}
 }
 
 // asAPIError promotes a 429 ErrorResponse to a *RateLimitError so callers can

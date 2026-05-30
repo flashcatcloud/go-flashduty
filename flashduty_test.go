@@ -121,6 +121,25 @@ func TestDoEmptyBodySuccess(t *testing.T) {
 	}
 }
 
+func TestDoTreatsOKCodeAsSuccess(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		// Some success envelopes carry error.code "OK" rather than a null error.
+		_, _ = io.WriteString(w, `{"request_id":"RID","error":{"code":"OK","message":""},"data":{"items":[{"incident_id":"i1"}]}}`)
+	})
+	var out struct {
+		Items []struct {
+			IncidentID string `json:"incident_id"`
+		} `json:"items"`
+	}
+	resp, err := c.do(context.Background(), "/incident/list", map[string]any{}, &out)
+	if err != nil {
+		t.Fatalf("OK code must be treated as success, got %v", err)
+	}
+	if len(out.Items) != 1 || out.Items[0].IncidentID != "i1" || resp.RequestID != "RID" {
+		t.Fatalf("data not decoded on OK envelope: out=%+v resp=%+v", out, resp)
+	}
+}
+
 func TestDoReturnsRateLimitErrorOn429(t *testing.T) {
 	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Retry-After", "30")
