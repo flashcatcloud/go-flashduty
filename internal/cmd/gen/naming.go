@@ -146,7 +146,7 @@ func methodNames(opIDs []string) map[string]string {
 			if used[full] == 0 {
 				name = full
 			} else {
-				name = name + itoa(c)
+				name += itoa(c)
 			}
 		}
 		used[name]++

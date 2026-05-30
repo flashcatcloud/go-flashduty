@@ -52,23 +52,15 @@ jobs:
           go-version: 'stable'
           cache: true
 
-      - name: gofmt
-        run: |
-          unformatted="$(gofmt -l .)"
-          if [ -n "$unformatted" ]; then
-            echo "The following files are not gofmt-formatted:"
-            echo "$unformatted"
-            echo "Run 'gofmt -w .' and commit the result."
-            exit 1
-          fi
+      # golangci-lint v2 subsumes gofmt, gci, staticcheck, govet and the rest;
+      # config in .golangci.yml. Generated files are auto-excluded by header.
+      - name: Install golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v2.2.1
 
-      - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
-
-      - name: staticcheck
+      - name: golangci-lint
         run: |
           export PATH="$(go env GOPATH)/bin:$PATH"
-          staticcheck ./...
+          golangci-lint run
 
   generate-drift:
     name: Generate Drift

@@ -1,3 +1,4 @@
 /dist/
+/bin/
 *.out
 .DS_Store
