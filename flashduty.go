@@ -31,9 +31,11 @@ type Client struct {
 	requestHook    func(*http.Request)
 	optionErr      error
 
-	// The service layer (service/common/genServices/initServices) and the
-	// service fields are introduced alongside the generator as permanent
-	// generated additions.
+	common service // shared backref reused by every service (one allocation)
+
+	// genServices (generated in services_gen.go) embeds the typed service
+	// handles — c.Incidents, c.Alerts, … — wired by initServices.
+	genServices
 }
 
 // NewClient returns a Flashduty client authenticated with the given app key.
@@ -55,6 +57,7 @@ func NewClient(appKey string, opts ...Option) (*Client, error) {
 	if c.optionErr != nil {
 		return nil, c.optionErr
 	}
+	c.initServices()
 	return c, nil
 }
 
@@ -85,9 +88,10 @@ type pageMeta struct {
 	SearchAfterCtx string `json:"search_after_ctx"`
 }
 
-// newRequest builds a POST to path (all Flashduty endpoints are POST actions),
-// injecting the app_key query parameter and JSON-encoding body when non-nil.
-func (c *Client) newRequest(ctx context.Context, path string, body any) (*http.Request, error) {
+// newRequest builds an HTTP request to path, injecting the app_key query
+// parameter and JSON-encoding body when non-nil. Most Flashduty endpoints are
+// POST actions; a handful are GET with query parameters.
+func (c *Client) newRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
 	rel, err := url.Parse(strings.TrimPrefix(path, "/"))
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: invalid path %q: %w", path, err)
@@ -107,7 +111,7 @@ func (c *Client) newRequest(ctx context.Context, path string, body any) (*http.R
 		buf = bytes.NewReader(rawBody)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), buf)
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), buf)
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: building request: %w", err)
 	}
@@ -128,18 +132,34 @@ func (c *Client) newRequest(ctx context.Context, path string, body any) (*http.R
 	}
 
 	c.logger.Info("flashduty request",
-		"method", http.MethodPost,
+		"method", method,
 		"url", sanitizeURL(u),
 		"body", truncateBody(sanitizeBody(string(rawBody))),
 	)
 	return req, nil
 }
 
-// do performs the request, unwraps the envelope, decodes data into out (when
-// non-nil), and returns a Response. A non-nil envelope error or a non-2xx
-// status yields an *ErrorResponse (or *RateLimitError on 429).
+// do performs a POST to path with a JSON body. Most generated endpoints are
+// POST actions and call this.
 func (c *Client) do(ctx context.Context, path string, body, out any) (*Response, error) {
-	req, err := c.newRequest(ctx, path, body)
+	return c.doMethod(ctx, http.MethodPost, path, body, out)
+}
+
+// doGet performs a GET to path, encoding opt's `url`-tagged fields as query
+// parameters. The handful of GET endpoints call this.
+func (c *Client) doGet(ctx context.Context, path string, opt, out any) (*Response, error) {
+	full, err := addQueryParams(path, opt)
+	if err != nil {
+		return nil, fmt.Errorf("flashduty: encoding query for %s: %w", path, err)
+	}
+	return c.doMethod(ctx, http.MethodGet, full, nil, out)
+}
+
+// doMethod performs the request, unwraps the envelope, decodes data into out
+// (when non-nil), and returns a Response. A non-nil envelope error or a non-2xx
+// status yields an *ErrorResponse (or *RateLimitError on 429).
+func (c *Client) doMethod(ctx context.Context, method, path string, body, out any) (*Response, error) {
+	req, err := c.newRequest(ctx, method, path, body)
 	if err != nil {
 		return nil, err
 	}

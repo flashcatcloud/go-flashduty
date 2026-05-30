@@ -32,7 +32,7 @@ func newTestClient(t *testing.T, handler http.HandlerFunc) *Client {
 
 func TestNewRequestBuildsPostWithAppKeyAndJSON(t *testing.T) {
 	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
-	req, err := c.newRequest(context.Background(), "/incident/list", map[string]any{"p": 1})
+	req, err := c.newRequest(context.Background(), http.MethodPost, "/incident/list", map[string]any{"p": 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestNewRequestAppliesHookAndHeaders(t *testing.T) {
 		WithRequestHook(func(r *http.Request) { r.Header.Set("X-Hook", "h") }),
 		WithLogger(noopLogger{}),
 	)
-	req, _ := c.newRequest(context.Background(), "/x", nil)
+	req, _ := c.newRequest(context.Background(), http.MethodPost, "/x", nil)
 	if req.Header.Get("X-Static") != "s" || req.Header.Get("X-Hook") != "h" {
 		t.Fatalf("headers not applied: %+v", req.Header)
 	}
