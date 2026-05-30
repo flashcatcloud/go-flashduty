@@ -117,6 +117,9 @@ func run() error {
 			return err
 		}
 	}
+	if err := writeGo(filepath.Join(root, "roundtrip_gen_test.go"), g.emitRoundtrip(services)); err != nil {
+		return err
+	}
 
 	fmt.Printf("gen: %d services, %d operations, %d schemas, %d loose fields\n",
 		len(services), countOps(services), len(g.schemas), g.looseCount)
@@ -378,6 +381,10 @@ func (g *Gen) emitModels() string {
 		}
 		s := asMap(g.schemas[name])
 		switch {
+		case refName(s) != "":
+			// A schema that is purely {$ref: Other} is a name alias for Other.
+			target := goName(refName(s))
+			enumsAndAliases.WriteString(fmt.Sprintf("// %s is an alias for %s.\ntype %s = %s\n\n", goName(name), target, goName(name), target))
 		case s["enum"] != nil && typeStr(s) == "string":
 			enumsAndAliases.WriteString(g.emitEnum(goName(name), s))
 		case typeStr(s) == "array":
@@ -541,6 +548,12 @@ func (g *Gen) goTypeOf(s map[string]any, hint string) string {
 		}
 		return goName(ref)
 	}
+	// A oneOf/anyOf is a polymorphic value (e.g. bool | string | string[]); its
+	// only safe Go type is any. Returning map[string]any here would be wrong for
+	// non-object members.
+	if len(asSlice(s["oneOf"])) > 0 || len(asSlice(s["anyOf"])) > 0 {
+		return "any"
+	}
 	if len(asSlice(s["allOf"])) > 0 {
 		return g.queue(hint, g.mergeAllOf(s))
 	}
@@ -625,6 +638,38 @@ func methodSig(svc string, o op) (string, string) {
 	}
 }
 
+// emitRoundtrip generates a decoder registry keyed by "METHOD /path" that
+// unmarshals an endpoint's response `data` payload into its generated Go type.
+// The hand-written roundtrip_test.go drives every spec example through it,
+// validating the generated type layer against real-shaped payloads.
+func (g *Gen) emitRoundtrip(services []service) string {
+	type entry struct{ key, typ string }
+	var entries []entry
+	for _, s := range services {
+		for _, o := range s.Ops {
+			if o.DataGo == "" {
+				continue // endpoint returns no typed data
+			}
+			entries = append(entries, entry{o.HTTP + " " + o.Path, o.DataGo})
+		}
+	}
+	sort.Slice(entries, func(i, j int) bool { return entries[i].key < entries[j].key })
+
+	var b strings.Builder
+	b.WriteString(genHeader)
+	b.WriteString("package flashduty\n\n")
+	b.WriteString("import \"encoding/json\"\n\n")
+	b.WriteString("// exampleDataDecoders maps \"METHOD /path\" to a function that unmarshals an\n")
+	b.WriteString("// endpoint's response data payload into its generated Go type. It drives the\n")
+	b.WriteString("// spec-example round-trip test (roundtrip_test.go).\n")
+	b.WriteString("var exampleDataDecoders = map[string]func(json.RawMessage) error{\n")
+	for _, e := range entries {
+		b.WriteString(fmt.Sprintf("\t%q: func(d json.RawMessage) error { var v %s; return json.Unmarshal(d, &v) },\n", e.key, e.typ))
+	}
+	b.WriteString("}\n")
+	return b.String()
+}
+
 // ---- wiring emission ------------------------------------------------------
 
 func (g *Gen) emitWiring(services []service) string {
@@ -686,9 +731,22 @@ func isEmptyObject(s map[string]any) bool {
 	return true
 }
 
+// typeStr returns a schema's effective JSON type. It handles the nullable union
+// form `type: ["integer", "null"]` (JSON Schema / OpenAPI 3.1) by reporting the
+// non-null member, so nullable fields map to their underlying Go type rather
+// than falling back to a loose object.
 func typeStr(s map[string]any) string {
-	t, _ := s["type"].(string)
-	return t
+	switch t := s["type"].(type) {
+	case string:
+		return t
+	case []any:
+		for _, v := range t {
+			if name, ok := v.(string); ok && name != "null" {
+				return name
+			}
+		}
+	}
+	return ""
 }
 
 // isIntProp reports whether a property schema is a plain integer (used to detect

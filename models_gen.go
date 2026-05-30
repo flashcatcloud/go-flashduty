@@ -55,6 +55,9 @@ const (
 	FeedSeverityInfo     FeedSeverity = "Info"
 )
 
+// FilterGroup is an alias for OrFilterGroup.
+type FilterGroup = OrFilterGroup
+
 // IncidentFeedType Incident timeline entry type. Each value identifies one lifecycle event; the matching `detail` payload shape is determined by this field. Incident types are prefixed with `i_`.
 type IncidentFeedType string
 
@@ -87,6 +90,9 @@ const (
 	IncidentFeedTypeIAutoRefresh IncidentFeedType = "i_auto_refresh"
 	IncidentFeedTypeAMerge       IncidentFeedType = "a_merge"
 )
+
+// InsightIncidentExportRequest is an alias for InsightFilter.
+type InsightIncidentExportRequest = InsightFilter
 
 // OrFilterGroup is a list response payload.
 type OrFilterGroup [][]FilterCondition
@@ -495,7 +501,7 @@ type AlertPipeline struct {
 	// - `severity_reset`: `{ "severity": "Critical"|"Warning"|"Info" }`
 	// - `alert_drop`: `{}` (empty object)
 	// - `alert_inhibit`: `{ "equals": ["<label_key>", ...], "source_filters": <OrFilterGroup> }`
-	Settings map[string]any `json:"settings,omitempty"`
+	Settings any `json:"settings,omitempty"`
 }
 
 // AlertPipelineInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -1219,7 +1225,7 @@ type CreateEscalationRuleRequest struct {
 // CreateFieldRequest is generated from the Flashduty OpenAPI schema.
 type CreateFieldRequest struct {
 	// Optional default value. Type must match `field_type`: `bool` for checkbox; one of `options` for single_select; subset of `options` for multi_select; string ≤3000 chars for text.
-	DefaultValue map[string]any `json:"default_value,omitempty"`
+	DefaultValue any `json:"default_value,omitempty"`
 	// Optional free-text description.
 	Description string `json:"description,omitempty"`
 	// Human-readable name. Must be unique within the account.
@@ -1762,7 +1768,7 @@ type EnrichRule struct {
 	// Rule type. `extraction` extracts a label via regex or GJson. `composition` builds a label from a template. `mapping` looks up values from a schema or API. `drop` removes labels.
 	Kind string `json:"kind,omitempty"`
 	// Rule-kind–specific settings. The shape depends on `kind`.
-	Settings map[string]any `json:"settings,omitempty"`
+	Settings any `json:"settings,omitempty"`
 }
 
 // EnrichmentInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -2181,7 +2187,7 @@ type FeedItem struct {
 	// Member ID of the creator. 0 for system-generated entries.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Type-specific payload. The concrete shape is determined by `type`.
-	Detail map[string]any `json:"detail,omitempty"`
+	Detail any `json:"detail,omitempty"`
 	// ObjectID of the alert this entry references.
 	RefID string        `json:"ref_id,omitempty"`
 	Type  AlertFeedType `json:"type,omitempty"`
@@ -2204,7 +2210,7 @@ type FieldItem struct {
 	// Creator member ID.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Default value. Type depends on `field_type`: `bool` for checkbox; `string` for single_select/text; `string[]` for multi_select; may be `null` if no default.
-	DefaultValue map[string]any `json:"default_value,omitempty"`
+	DefaultValue any `json:"default_value,omitempty"`
 	// Deletion timestamp, Unix seconds. Only present for soft-deleted fields.
 	DeletedAt int64 `json:"deleted_at,omitempty"`
 	// Optional free-text description.
@@ -2218,7 +2224,7 @@ type FieldItem struct {
 	// Field input type.
 	FieldType string `json:"field_type,omitempty"`
 	// Allowed choices for `single_select`/`multi_select` (non-empty unique string array). `null` or empty for `checkbox`/`text`.
-	Options map[string]any `json:"options,omitempty"`
+	Options []string `json:"options,omitempty"`
 	// Field status (e.g. `enabled`, `deleted`).
 	Status string `json:"status,omitempty"`
 	// Last update timestamp, Unix seconds.
@@ -2234,7 +2240,7 @@ type FieldListRequest struct {
 	// Sort ascending when `true`; descending otherwise.
 	Asc bool `json:"asc,omitempty"`
 	// Filter by creator member ID. Omit or send `null` to skip.
-	CreatorID map[string]any `json:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id,omitempty"`
 	// Sort key. Defaults to backend ordering when omitted.
 	Orderby string `json:"orderby,omitempty"`
 	// Regex filter against `field_name` and `display_name`. Invalid regex is auto-escaped to literal substring match.
@@ -2256,9 +2262,6 @@ type FilterCondition struct {
 	// List of values to match against. Each entry is a plain string or a `/regex/` pattern.
 	Vals []string `json:"vals,omitempty"`
 }
-
-// FilterGroup is generated from the Flashduty OpenAPI schema.
-type FilterGroup struct{}
 
 // Flapping is generated from the Flashduty OpenAPI schema.
 type Flapping struct {
@@ -2371,7 +2374,7 @@ type IncidentFeedItem struct {
 	// Soft-delete timestamp (ms). Zero if not deleted.
 	DeletedAt int64 `json:"deleted_at,omitempty"`
 	// Type-specific payload. The concrete shape is determined by `type`.
-	Detail map[string]any `json:"detail,omitempty"`
+	Detail any `json:"detail,omitempty"`
 	// ObjectID of the source alert or incident this entry references.
 	RefID string           `json:"ref_id,omitempty"`
 	Type  IncidentFeedType `json:"type,omitempty"`
@@ -2646,9 +2649,6 @@ type InsightFilter struct {
 	// IANA time zone name used to interpret the time range (e.g. `Asia/Shanghai`). Defaults to the account time zone.
 	TimeZone string `json:"time_zone,omitempty"`
 }
-
-// InsightIncidentExportRequest is generated from the Flashduty OpenAPI schema.
-type InsightIncidentExportRequest struct{}
 
 // InsightIncidentListRequest is generated from the Flashduty OpenAPI schema.
 type InsightIncidentListRequest struct {
@@ -4570,9 +4570,9 @@ type ScheduleItem struct {
 	// Current on-call group, or null when nobody is on-call.
 	CurOncall ScheduleOncallGroup `json:"cur_oncall,omitempty"`
 	// Schedule description. null when returned from /schedule/preview.
-	Description map[string]any `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
 	// Disabled flag (0 = enabled, 1 = disabled). Deprecated. null when returned from /schedule/preview.
-	Disabled map[string]any `json:"disabled,omitempty"`
+	Disabled int64 `json:"disabled,omitempty"`
 	// Window end (Unix seconds).
 	End int64 `json:"end,omitempty"`
 	// Field name used by the legacy update-field endpoint.
@@ -4580,15 +4580,15 @@ type ScheduleItem struct {
 	// Collapsed final schedule across all layers.
 	FinalSchedule ScheduleCalculatedLayer `json:"final_schedule,omitempty"`
 	// Legacy team/group ID. null when returned from /schedule/preview.
-	GroupID map[string]any `json:"group_id,omitempty"`
+	GroupID int64 `json:"group_id,omitempty"`
 	// Schedule ID. null when returned from /schedule/preview.
-	ID map[string]any `json:"id,omitempty"`
+	ID int64 `json:"id,omitempty"`
 	// Alias of schedule_layers returned for compatibility.
 	LayerSchedules []ScheduleCalculatedLayer `json:"layer_schedules,omitempty"`
 	// Rotation layers defined on the schedule.
 	Layers []ScheduleLayer `json:"layers,omitempty"`
 	// Schedule name (legacy field; mirrors schedule_name). null when returned from /schedule/preview.
-	Name map[string]any `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
 	// Next on-call group, or null when unknown.
 	NextOncall ScheduleOncallGroup `json:"next_oncall,omitempty"`
 	Notify     ScheduleNotify      `json:"notify,omitempty"`
@@ -4597,13 +4597,13 @@ type ScheduleItem struct {
 	// Computed layers for the requested window.
 	ScheduleLayers []ScheduleCalculatedLayer `json:"schedule_layers,omitempty"`
 	// Schedule display name. null when returned from /schedule/preview.
-	ScheduleName map[string]any `json:"schedule_name,omitempty"`
+	ScheduleName string `json:"schedule_name,omitempty"`
 	// Window start (Unix seconds).
 	Start int64 `json:"start,omitempty"`
 	// Legacy status flag. Deprecated. null when returned from /schedule/preview.
-	Status map[string]any `json:"status,omitempty"`
+	Status int64 `json:"status,omitempty"`
 	// Owning team ID. null when returned from /schedule/preview.
-	TeamID map[string]any `json:"team_id,omitempty"`
+	TeamID int64 `json:"team_id,omitempty"`
 	// Last update timestamp (Unix seconds).
 	UpdateAt int64 `json:"update_at,omitempty"`
 	// Last updater person ID.
@@ -4633,7 +4633,7 @@ type ScheduleLayer struct {
 	// Whether the layer is hidden in the UI (0 = no, 1 = yes).
 	Hidden int64 `json:"hidden,omitempty"`
 	// Layer end timestamp (Unix seconds). null means open-ended.
-	LayerEnd map[string]any `json:"layer_end,omitempty"`
+	LayerEnd int64 `json:"layer_end,omitempty"`
 	// User-facing layer name.
 	LayerName string `json:"layer_name,omitempty"`
 	// Layer start timestamp (Unix seconds).
@@ -5546,7 +5546,7 @@ type UpdateEscalationRuleRequest struct {
 // UpdateFieldRequest is generated from the Flashduty OpenAPI schema.
 type UpdateFieldRequest struct {
 	// Replacement default value. Type must match the field's existing `field_type`.
-	DefaultValue map[string]any `json:"default_value,omitempty"`
+	DefaultValue any `json:"default_value,omitempty"`
 	// New description.
 	Description string `json:"description,omitempty"`
 	// New display name. Must remain unique within the account.
