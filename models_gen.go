@@ -163,7 +163,7 @@ type AddIncidentResponderRequest struct {
 // AffectedStatusPageComponentItem is generated from the Flashduty OpenAPI schema.
 type AffectedStatusPageComponentItem struct {
 	// Timestamp when the component was first available, in unix seconds.
-	AvailableSinceSeconds int64 `json:"available_since_seconds,omitempty"`
+	AvailableSinceSeconds Timestamp `json:"available_since_seconds,omitempty"`
 	// Component ID.
 	ComponentID string `json:"component_id,omitempty"`
 	// Component description.
@@ -222,11 +222,11 @@ type AlertEventItem struct {
 	// Channel ID the event is routed to.
 	ChannelID int64 `json:"channel_id,omitempty"`
 	// Record creation time, Unix epoch seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Deprecated. Use `integration_id` instead.
 	DataSourceID int64 `json:"data_source_id,omitempty"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Event description.
 	Description string `json:"description,omitempty"`
 	// Event ID (MongoDB ObjectID).
@@ -236,7 +236,7 @@ type AlertEventItem struct {
 	// Status of this event.
 	EventStatus string `json:"event_status,omitempty"`
 	// Event timestamp, Unix epoch seconds.
-	EventTime int64 `json:"event_time,omitempty"`
+	EventTime Timestamp `json:"event_time,omitempty"`
 	// Images attached to the event.
 	Images []AlertImage `json:"images,omitempty"`
 	// Integration that produced this event.
@@ -250,7 +250,7 @@ type AlertEventItem struct {
 	// Title template used to derive `title` from labels.
 	TitleRule string `json:"title_rule,omitempty"`
 	// Record update time, Unix epoch seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // AlertEventListRequest is generated from the Flashduty OpenAPI schema.
@@ -310,7 +310,7 @@ type AlertInfo struct {
 	// Channel status.
 	ChannelStatus string `json:"channel_status,omitempty"`
 	// Creation timestamp (seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Deprecated. Use `integration_id` instead.
 	DataSourceID int64 `json:"data_source_id,omitempty"`
 	// Deprecated. Use `integration_name`.
@@ -320,11 +320,11 @@ type AlertInfo struct {
 	// Deprecated. Use `integration_type`.
 	DataSourceType string `json:"data_source_type,omitempty"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Alert description.
 	Description string `json:"description,omitempty"`
 	// Unix timestamp (seconds) when the alert recovered. 0 if still active.
-	EndTime int64 `json:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time,omitempty"`
 	// Total number of raw events merged into this alert.
 	EventCnt int64 `json:"event_cnt,omitempty"`
 	// Raw alert events, populated when the caller opts in.
@@ -346,19 +346,19 @@ type AlertInfo struct {
 	// Alert labels.
 	Labels map[string]string `json:"labels,omitempty"`
 	// Unix timestamp (seconds) of the most recent event.
-	LastTime int64 `json:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time,omitempty"`
 	// Primary responder email, if any.
 	ResponderEmail string `json:"responder_email,omitempty"`
 	// Primary responder name, if any.
 	ResponderName string `json:"responder_name,omitempty"`
 	// Unix timestamp (seconds) when the alert first fired.
-	StartTime int64 `json:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time,omitempty"`
 	// Alert title.
 	Title string `json:"title,omitempty"`
 	// Title rendering rule.
 	TitleRule string `json:"title_rule,omitempty"`
 	// Last update timestamp (seconds).
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // AlertInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -386,7 +386,7 @@ type AlertItem struct {
 	// Status of the channel (e.g. `enabled`, `disabled`).
 	ChannelStatus string `json:"channel_status,omitempty"`
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Deprecated. Use `integration_id` instead. Deprecated: use `integration_id` instead.
 	DataSourceID int64 `json:"data_source_id,omitempty"`
 	// Deprecated. Use `integration_name` instead.
@@ -398,7 +398,7 @@ type AlertItem struct {
 	// Alert description.
 	Description string `json:"description,omitempty"`
 	// Resolution time, Unix epoch seconds. 0 if still active.
-	EndTime int64 `json:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time,omitempty"`
 	// Total number of raw events received by this alert.
 	EventCnt int64 `json:"event_cnt,omitempty"`
 	// Recent raw events attached to this alert. Populated only by some endpoints.
@@ -420,19 +420,19 @@ type AlertItem struct {
 	// Label key-value pairs.
 	Labels map[string]string `json:"labels,omitempty"`
 	// Last-event time, Unix epoch seconds.
-	LastTime int64 `json:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time,omitempty"`
 	// Email of the current responder (from the associated incident).
 	ResponderEmail string `json:"responder_email,omitempty"`
 	// Display name of the current responder (from the associated incident).
 	ResponderName string `json:"responder_name,omitempty"`
 	// First-seen time, Unix epoch seconds.
-	StartTime int64 `json:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time,omitempty"`
 	// Alert title.
 	Title string `json:"title,omitempty"`
 	// Title template used to derive `title` from the event labels (e.g. `$service::$cluster`).
 	TitleRule string `json:"title_rule,omitempty"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // AlertListByIDsRequest is generated from the Flashduty OpenAPI schema.
@@ -519,7 +519,7 @@ type AlertPipelineInfoRequest struct {
 // AlertPipelineItem is generated from the Flashduty OpenAPI schema.
 type AlertPipelineItem struct {
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Member ID who created the pipeline.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Integration ID this pipeline applies to.
@@ -529,7 +529,7 @@ type AlertPipelineItem struct {
 	// Pipeline status. Possible values: `enabled`, `disabled`.
 	Status string `json:"status,omitempty"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Member ID who last updated the pipeline.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 }
@@ -646,8 +646,8 @@ type AlertRuleBasic struct {
 type AlertRuleCounter struct {
 	AccountID uint64 `json:"account_id,omitempty"`
 	// Sample timestamp, Unix epoch seconds.
-	Clock int64  `json:"clock,omitempty"`
-	ID    uint64 `json:"id,omitempty"`
+	Clock Timestamp `json:"clock,omitempty"`
+	ID    uint64    `json:"id,omitempty"`
 	// Rule count at the sample time.
 	Num int64 `json:"num,omitempty"`
 }
@@ -788,7 +788,7 @@ type AuditLog struct {
 	// JSON-encoded request body (may be truncated at 10 KB).
 	Body string `json:"body,omitempty"`
 	// Timestamp of the operation in Unix epoch milliseconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at,omitempty"`
 	// Client IP address of the caller.
 	IP string `json:"ip,omitempty"`
 	// True if this is flagged as a high-risk operation.
@@ -872,7 +872,7 @@ type CalEventItem struct {
 	// Calendar ID. For public events this is a locale key such as zh-cn.china.official.
 	CalID string `json:"cal_id,omitempty"`
 	// Creation timestamp (Unix seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator person ID. Only present for private events.
 	CreatorID uint64 `json:"creator_id,omitempty"`
 	// Event description.
@@ -888,7 +888,7 @@ type CalEventItem struct {
 	// Event summary.
 	Summary string `json:"summary,omitempty"`
 	// Last update timestamp (Unix seconds).
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // CalEventListRequest is generated from the Flashduty OpenAPI schema.
@@ -981,7 +981,7 @@ type CalendarItem struct {
 	// Calendar display name.
 	CalName string `json:"cal_name,omitempty"`
 	// Creation timestamp (Unix seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator person ID.
 	CreatorID uint64 `json:"creator_id,omitempty"`
 	// Calendar description.
@@ -997,7 +997,7 @@ type CalendarItem struct {
 	// IANA timezone.
 	Timezone string `json:"timezone,omitempty"`
 	// Last update timestamp (Unix seconds).
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Last updater person ID.
 	UpdatedBy uint64 `json:"updated_by,omitempty"`
 	// Workday numbers (0 = Sunday, 6 = Saturday).
@@ -1092,11 +1092,11 @@ type ChannelItem struct {
 	// Channel name.
 	ChannelName string `json:"channel_name,omitempty"`
 	// Creation timestamp (unix seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Member ID who created the channel.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Deletion timestamp (unix seconds). Non-zero only for soft-deleted channels.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Free-form description.
 	Description string `json:"description,omitempty"`
 	// When true, automatic incident closing is disabled.
@@ -1114,7 +1114,7 @@ type ChannelItem struct {
 	// Whether the current user has starred this channel.
 	IsStarred bool `json:"is_starred,omitempty"`
 	// Timestamp of the most recent incident (unix seconds).
-	LastIncidentAt int64 `json:"last_incident_at,omitempty"`
+	LastIncidentAt Timestamp `json:"last_incident_at,omitempty"`
 	// Additional teams that can manage the channel.
 	ManagingTeamIDs        []int64         `json:"managing_team_ids,omitempty"`
 	ProgressToIncidentCnts IncProgressCnts `json:"progress_to_incident_cnts,omitempty"`
@@ -1123,7 +1123,7 @@ type ChannelItem struct {
 	// Owning team ID.
 	TeamID int64 `json:"team_id,omitempty"`
 	// Last update timestamp (unix seconds).
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // ChannelRuleIDRequest is generated from the Flashduty OpenAPI schema.
@@ -1581,7 +1581,7 @@ type DataSourceItem struct {
 	// Datasource type identifier. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.
 	TypeIdent string `json:"type_ident,omitempty"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // DataSourceListRequest is generated from the Flashduty OpenAPI schema.
@@ -1710,7 +1710,7 @@ type DimensionInsightItem struct {
 	TotalSecondsToAck               int64   `json:"total_seconds_to_ack,omitempty"`
 	TotalSecondsToClose             int64   `json:"total_seconds_to_close,omitempty"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
-	TS int64 `json:"ts,omitempty"`
+	TS Timestamp `json:"ts,omitempty"`
 }
 
 // DimensionInsightResponse is generated from the Flashduty OpenAPI schema.
@@ -1786,7 +1786,7 @@ type EnrichmentInfoRequest struct {
 // EnrichmentItem is generated from the Flashduty OpenAPI schema.
 type EnrichmentItem struct {
 	// Creation timestamp, Unix seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator member ID.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Integration ID.
@@ -1796,7 +1796,7 @@ type EnrichmentItem struct {
 	// Rule set status.
 	Status string `json:"status,omitempty"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 }
@@ -1889,9 +1889,9 @@ type EscalateRuleItem struct {
 	// Channel name, populated for cross-channel listing responses.
 	ChannelName string `json:"channel_name,omitempty"`
 	// Creation timestamp (unix seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Deletion timestamp (unix seconds). Emitted only for soft-deleted rules.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Rule description.
 	Description string      `json:"description,omitempty"`
 	Filters     FilterGroup `json:"filters,omitempty"`
@@ -1910,7 +1910,7 @@ type EscalateRuleItem struct {
 	// Recurring time windows during which the rule applies.
 	TimeFilters []TimeFilter `json:"time_filters,omitempty"`
 	// Last update timestamp (unix seconds).
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Member ID that last updated the rule.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 }
@@ -1983,7 +1983,7 @@ type FeedDetailIncidentAddRspd struct {
 // FeedDetailIncidentAssign is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentAssign struct {
 	// Unix timestamp (seconds) when the assignment was made.
-	AssignedAt int64 `json:"assigned_at,omitempty"`
+	AssignedAt Timestamp `json:"assigned_at,omitempty"`
 	// Email recipients, used by integrations such as ServiceNow.
 	Emails []string `json:"emails,omitempty"`
 	// Escalation rule ID (MongoDB ObjectID) to drive assignment.
@@ -2151,7 +2151,7 @@ type FeedDetailIncidentUnack struct {
 // FeedDetailIncidentWake is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentWake struct {
 	// Unix timestamp at which the prior snooze was scheduled to end.
-	SnoozedBefore int64 `json:"snoozedBefore,omitempty"`
+	SnoozedBefore Timestamp `json:"snoozedBefore,omitempty"`
 }
 
 // FeedDetailIncidentWarRoomCreate is generated from the Flashduty OpenAPI schema.
@@ -2189,7 +2189,7 @@ type FeedItem struct {
 	// Account ID.
 	AccountID int64 `json:"account_id,omitempty"`
 	// Creation timestamp in Unix epoch milliseconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at,omitempty"`
 	// Member ID of the creator. 0 for system-generated entries.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Type-specific payload. The concrete shape is determined by `type`.
@@ -2198,7 +2198,7 @@ type FeedItem struct {
 	RefID string        `json:"ref_id,omitempty"`
 	Type  AlertFeedType `json:"type,omitempty"`
 	// Last update timestamp in Unix epoch milliseconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt TimestampMilli `json:"updated_at,omitempty"`
 }
 
 // FieldInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -2212,13 +2212,13 @@ type FieldItem struct {
 	// Owning account ID.
 	AccountID int64 `json:"account_id,omitempty"`
 	// Creation timestamp, Unix seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator member ID.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Default value. Type depends on `field_type`: `bool` for checkbox; `string` for single_select/text; `string[]` for multi_select; may be `null` if no default.
 	DefaultValue any `json:"default_value,omitempty"`
 	// Deletion timestamp, Unix seconds. Only present for soft-deleted fields.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Optional free-text description.
 	Description string `json:"description,omitempty"`
 	// Human-readable name shown in the UI.
@@ -2234,7 +2234,7 @@ type FieldItem struct {
 	// Field status (e.g. `enabled`, `deleted`).
 	Status string `json:"status,omitempty"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// Stored value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`.
@@ -2374,18 +2374,18 @@ type IncidentFeedItem struct {
 	// Account ID.
 	AccountID int64 `json:"account_id,omitempty"`
 	// Creation timestamp in milliseconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at,omitempty"`
 	// User ID of the actor. `0` means system-generated.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Soft-delete timestamp (ms). Zero if not deleted.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Type-specific payload. The concrete shape is determined by `type`.
 	Detail any `json:"detail,omitempty"`
 	// ObjectID of the source alert or incident this entry references.
 	RefID string           `json:"ref_id,omitempty"`
 	Type  IncidentFeedType `json:"type,omitempty"`
 	// Last update timestamp in milliseconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt TimestampMilli `json:"updated_at,omitempty"`
 }
 
 // IncidentInfo is generated from the Flashduty OpenAPI schema.
@@ -2399,7 +2399,7 @@ type IncidentInfo struct {
 	// Account time zone.
 	AccountTimeZone string `json:"account_time_zone,omitempty"`
 	// Unix timestamp (seconds) when the incident was first acknowledged. 0 if unacknowledged.
-	AckTime int64 `json:"ack_time,omitempty"`
+	AckTime Timestamp `json:"ack_time,omitempty"`
 	// Count of alerts currently in Critical/Warning/Info state.
 	ActiveAlertCnt int64 `json:"active_alert_cnt,omitempty"`
 	// AI-generated summary of the incident.
@@ -2419,13 +2419,13 @@ type IncidentInfo struct {
 	// Channel status.
 	ChannelStatus string `json:"channel_status,omitempty"`
 	// Unix timestamp (seconds) when the incident was closed. 0 if still open.
-	CloseTime int64 `json:"close_time,omitempty"`
+	CloseTime Timestamp `json:"close_time,omitempty"`
 	// Closer member info.
 	Closer PersonShort `json:"closer,omitempty"`
 	// Member ID that closed the incident. 0 if auto-closed.
 	CloserID int64 `json:"closer_id,omitempty"`
 	// Creation timestamp (seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator member info.
 	Creator PersonShort `json:"creator,omitempty"`
 	// Member ID that created the incident. 0 if auto-created by the system.
@@ -2441,13 +2441,13 @@ type IncidentInfo struct {
 	// Deduplication key used to coalesce alerts.
 	DedupKey string `json:"dedup_key,omitempty"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Incident description.
 	Description string `json:"description,omitempty"`
 	// Web console URL for the incident.
 	DetailURL string `json:"detail_url,omitempty"`
 	// Unix timestamp (seconds) when the incident ended. 0 if still active.
-	EndTime int64 `json:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time,omitempty"`
 	// MD5 hash used for content-equality checks.
 	EqualsMD5 string `json:"equals_md5,omitempty"`
 	// Whether the incident has ever been silenced.
@@ -2479,7 +2479,7 @@ type IncidentInfo struct {
 	// Labels propagated from alerts.
 	Labels map[string]string `json:"labels,omitempty"`
 	// Unix timestamp (seconds) of the most recent update.
-	LastTime int64 `json:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time,omitempty"`
 	// Channel-level link integrations rendered for this incident.
 	Links []LinkItem `json:"links,omitempty"`
 	// Fields that were manually overridden after auto-population.
@@ -2505,13 +2505,13 @@ type IncidentInfo struct {
 	// Quick-silence URL for this incident.
 	SilenceURL string `json:"silence_url,omitempty"`
 	// Unix timestamp (seconds) until which notifications are snoozed. 0 if not snoozed.
-	SnoozedBefore int64 `json:"snoozed_before,omitempty"`
+	SnoozedBefore Timestamp `json:"snoozed_before,omitempty"`
 	// Unix timestamp (seconds) when the incident started.
-	StartTime int64 `json:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time,omitempty"`
 	// Incident title.
 	Title string `json:"title,omitempty"`
 	// Last update timestamp (seconds).
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // IncidentInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -3127,7 +3127,7 @@ type MappingAPIItem struct {
 	// API name.
 	APIName string `json:"api_name,omitempty"`
 	// Creation timestamp, Unix seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator member ID.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Description.
@@ -3145,7 +3145,7 @@ type MappingAPIItem struct {
 	// Request timeout in seconds.
 	Timeout int64 `json:"timeout,omitempty"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// Endpoint URL.
@@ -3193,13 +3193,13 @@ type MappingDataDeleteRequest struct {
 // MappingDataItem is generated from the Flashduty OpenAPI schema.
 type MappingDataItem struct {
 	// Creation timestamp, Unix seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// All label key-value pairs for this row.
 	Fields map[string]string `json:"fields,omitempty"`
 	// Composite key derived from source label values.
 	Key string `json:"key,omitempty"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // MappingDataListRequest is generated from the Flashduty OpenAPI schema.
@@ -3280,7 +3280,7 @@ type MappingSchemaIDRequest struct {
 // MappingSchemaItem is generated from the Flashduty OpenAPI schema.
 type MappingSchemaItem struct {
 	// Creation timestamp, Unix seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator member ID.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Schema description.
@@ -3298,7 +3298,7 @@ type MappingSchemaItem struct {
 	// Owning team ID.
 	TeamID int64 `json:"team_id,omitempty"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 }
@@ -3416,7 +3416,7 @@ type MemberItem struct {
 	// Phone country code
 	CountryCode string `json:"country_code,omitempty"`
 	// Creation timestamp (Unix seconds)
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Email address
 	Email string `json:"email,omitempty"`
 	// Email verified
@@ -3440,7 +3440,7 @@ type MemberItem struct {
 	// Time zone
 	TimeZone string `json:"time_zone,omitempty"`
 	// Update timestamp (Unix seconds)
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // MemberListRequest is generated from the Flashduty OpenAPI schema.
@@ -3537,7 +3537,7 @@ type MetricsBase struct {
 	TeamID        int64  `json:"team_id,omitempty"`
 	TeamName      string `json:"team_name,omitempty"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
-	TS int64 `json:"ts,omitempty"`
+	TS Timestamp `json:"ts,omitempty"`
 }
 
 // MigrateStatusPageEmailSubscribersRequest is generated from the Flashduty OpenAPI schema.
@@ -3623,7 +3623,7 @@ type PastIncidentItem struct {
 	// Account time zone.
 	AccountTimeZone string `json:"account_time_zone,omitempty"`
 	// Unix timestamp (seconds) when the incident was first acknowledged. 0 if unacknowledged.
-	AckTime int64 `json:"ack_time,omitempty"`
+	AckTime Timestamp `json:"ack_time,omitempty"`
 	// Count of alerts currently in Critical/Warning/Info state.
 	ActiveAlertCnt int64 `json:"active_alert_cnt,omitempty"`
 	// AI-generated summary of the incident.
@@ -3643,13 +3643,13 @@ type PastIncidentItem struct {
 	// Channel status.
 	ChannelStatus string `json:"channel_status,omitempty"`
 	// Unix timestamp (seconds) when the incident was closed. 0 if still open.
-	CloseTime int64 `json:"close_time,omitempty"`
+	CloseTime Timestamp `json:"close_time,omitempty"`
 	// Closer member info.
 	Closer PersonShort `json:"closer,omitempty"`
 	// Member ID that closed the incident. 0 if auto-closed.
 	CloserID int64 `json:"closer_id,omitempty"`
 	// Creation timestamp (seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator member info.
 	Creator PersonShort `json:"creator,omitempty"`
 	// Member ID that created the incident. 0 if auto-created by the system.
@@ -3665,13 +3665,13 @@ type PastIncidentItem struct {
 	// Deduplication key used to coalesce alerts.
 	DedupKey string `json:"dedup_key,omitempty"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Incident description.
 	Description string `json:"description,omitempty"`
 	// Web console URL for the incident.
 	DetailURL string `json:"detail_url,omitempty"`
 	// Unix timestamp (seconds) when the incident ended. 0 if still active.
-	EndTime int64 `json:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time,omitempty"`
 	// MD5 hash used for content-equality checks.
 	EqualsMD5 string `json:"equals_md5,omitempty"`
 	// Whether the incident has ever been silenced.
@@ -3703,7 +3703,7 @@ type PastIncidentItem struct {
 	// Labels propagated from alerts.
 	Labels map[string]string `json:"labels,omitempty"`
 	// Unix timestamp (seconds) of the most recent update.
-	LastTime int64 `json:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time,omitempty"`
 	// Channel-level link integrations rendered for this incident.
 	Links []LinkItem `json:"links,omitempty"`
 	// Fields that were manually overridden after auto-population.
@@ -3731,13 +3731,13 @@ type PastIncidentItem struct {
 	// Quick-silence URL for this incident.
 	SilenceURL string `json:"silence_url,omitempty"`
 	// Unix timestamp (seconds) until which notifications are snoozed. 0 if not snoozed.
-	SnoozedBefore int64 `json:"snoozed_before,omitempty"`
+	SnoozedBefore Timestamp `json:"snoozed_before,omitempty"`
 	// Unix timestamp (seconds) when the incident started.
-	StartTime int64 `json:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time,omitempty"`
 	// Incident title.
 	Title string `json:"title,omitempty"`
 	// Last update timestamp (seconds).
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // PermissionFactorItem is generated from the Flashduty OpenAPI schema.
@@ -3849,7 +3849,7 @@ type PostMortemMeta struct {
 	// Channel name, filled by the server.
 	ChannelName string `json:"channel_name,omitempty"`
 	// Creation timestamp (seconds).
-	CreatedAtSeconds int64 `json:"created_at_seconds,omitempty"`
+	CreatedAtSeconds Timestamp `json:"created_at_seconds,omitempty"`
 	// Linked incident IDs.
 	IncidentIDs []string `json:"incident_ids,omitempty"`
 	// When true, only team members and admins can view.
@@ -3867,7 +3867,7 @@ type PostMortemMeta struct {
 	// Report title.
 	Title string `json:"title,omitempty"`
 	// Last update timestamp (seconds).
-	UpdatedAtSeconds int64 `json:"updated_at_seconds,omitempty"`
+	UpdatedAtSeconds Timestamp `json:"updated_at_seconds,omitempty"`
 }
 
 // QueryRow is generated from the Flashduty OpenAPI schema.
@@ -3931,11 +3931,11 @@ type ResolveIncidentRequest struct {
 // Responder is generated from the Flashduty OpenAPI schema.
 type Responder struct {
 	// Unix timestamp (seconds) when the member acknowledged. 0 if not yet acknowledged.
-	AcknowledgedAt int64 `json:"acknowledged_at,omitempty"`
+	AcknowledgedAt Timestamp `json:"acknowledged_at,omitempty"`
 	// Role label of this responder.
 	As string `json:"as,omitempty"`
 	// Unix timestamp (seconds) when the member was assigned.
-	AssignedAt int64 `json:"assigned_at,omitempty"`
+	AssignedAt Timestamp `json:"assigned_at,omitempty"`
 	// Member email, filled by the server.
 	Email string `json:"email,omitempty"`
 	// Responder member ID.
@@ -3968,7 +3968,7 @@ type ResponderInsightItem struct {
 	TotalNotifications              int64   `json:"total_notifications,omitempty"`
 	TotalSecondsToAck               int64   `json:"total_seconds_to_ack,omitempty"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
-	TS int64 `json:"ts,omitempty"`
+	TS Timestamp `json:"ts,omitempty"`
 }
 
 // ResponderInsightResponse is generated from the Flashduty OpenAPI schema.
@@ -3999,7 +3999,7 @@ type RoleInfoRequest struct {
 // RoleItem is generated from the Flashduty OpenAPI schema.
 type RoleItem struct {
 	// Unix epoch seconds the role was created.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Role description.
 	Description string `json:"description,omitempty"`
 	// False for built-in roles which cannot be modified.
@@ -4013,7 +4013,7 @@ type RoleItem struct {
 	// Role status.
 	Status string `json:"status,omitempty"`
 	// Unix epoch seconds the role was last updated.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // RoleListRequest is generated from the Flashduty OpenAPI schema.
@@ -4095,12 +4095,12 @@ type RouteItem struct {
 	// Ordered list of case branches.
 	Cases []RouteCase `json:"cases,omitempty"`
 	// Creation time, Unix timestamp in seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// ID of the person who created the rule.
 	CreatorID int64        `json:"creator_id,omitempty"`
 	Default   RouteDefault `json:"default,omitempty"`
 	// Soft-delete timestamp, Unix seconds. Omitted when the rule is active.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Integration the rule belongs to.
 	IntegrationID int64 `json:"integration_id,omitempty"`
 	// Optional sections that visually group cases.
@@ -4108,7 +4108,7 @@ type RouteItem struct {
 	// Rule status.
 	Status string `json:"status,omitempty"`
 	// Last update time, Unix timestamp in seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// ID of the person who performed the last update.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// Monotonic version number, incremented on each update. Use it for optimistic concurrency control.
@@ -4281,7 +4281,7 @@ type RUMApplicationItem struct {
 	// Token used to initialize the RUM SDK.
 	ClientToken string `json:"client_token,omitempty"`
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Creator member ID.
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// If `true`, the application is only accessible to team members.
@@ -4298,7 +4298,7 @@ type RUMApplicationItem struct {
 	// Application type.
 	Type string `json:"type,omitempty"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 }
@@ -4469,12 +4469,12 @@ type ScheduleCalculatedLayer struct {
 // ScheduleCalculatedSchedule is generated from the Flashduty OpenAPI schema.
 type ScheduleCalculatedSchedule struct {
 	// Shift end timestamp (Unix seconds).
-	End   int64         `json:"end,omitempty"`
+	End   Timestamp     `json:"end,omitempty"`
 	Group ScheduleGroup `json:"group,omitempty"`
 	// Index inside the rotation.
 	Index int64 `json:"index,omitempty"`
 	// Shift start timestamp (Unix seconds).
-	Start int64 `json:"start,omitempty"`
+	Start Timestamp `json:"start,omitempty"`
 }
 
 // ScheduleDayMask is generated from the Flashduty OpenAPI schema.
@@ -4564,7 +4564,7 @@ type ScheduleItem struct {
 	// Account ID.
 	AccountID int64 `json:"account_id,omitempty"`
 	// Creation timestamp (Unix seconds).
-	CreateAt int64 `json:"create_at,omitempty"`
+	CreateAt Timestamp `json:"create_at,omitempty"`
 	// Creator person ID.
 	CreateBy int64 `json:"create_by,omitempty"`
 	// Current on-call group, or null when nobody is on-call.
@@ -4574,7 +4574,7 @@ type ScheduleItem struct {
 	// Disabled flag (0 = enabled, 1 = disabled). Deprecated. null when returned from /schedule/preview.
 	Disabled int64 `json:"disabled,omitempty"`
 	// Window end (Unix seconds).
-	End int64 `json:"end,omitempty"`
+	End Timestamp `json:"end,omitempty"`
 	// Field name used by the legacy update-field endpoint.
 	Field string `json:"field,omitempty"`
 	// Collapsed final schedule across all layers.
@@ -4599,13 +4599,13 @@ type ScheduleItem struct {
 	// Schedule display name. null when returned from /schedule/preview.
 	ScheduleName string `json:"schedule_name,omitempty"`
 	// Window start (Unix seconds).
-	Start int64 `json:"start,omitempty"`
+	Start Timestamp `json:"start,omitempty"`
 	// Legacy status flag. Deprecated. null when returned from /schedule/preview.
 	Status int64 `json:"status,omitempty"`
 	// Owning team ID. null when returned from /schedule/preview.
 	TeamID int64 `json:"team_id,omitempty"`
 	// Last update timestamp (Unix seconds).
-	UpdateAt int64 `json:"update_at,omitempty"`
+	UpdateAt Timestamp `json:"update_at,omitempty"`
 	// Last updater person ID.
 	UpdateBy int64 `json:"update_by,omitempty"`
 }
@@ -4724,14 +4724,14 @@ type ScheduleNotifyBy struct {
 // ScheduleOncallGroup is generated from the Flashduty OpenAPI schema.
 type ScheduleOncallGroup struct {
 	// Shift end timestamp (Unix seconds).
-	End   int64         `json:"end,omitempty"`
+	End   Timestamp     `json:"end,omitempty"`
 	Group ScheduleGroup `json:"group,omitempty"`
 	// Index inside the rotation.
 	Index int64 `json:"index,omitempty"`
 	// Shift start timestamp (Unix seconds).
-	Start int64 `json:"start,omitempty"`
+	Start Timestamp `json:"start,omitempty"`
 	// Update timestamp (Unix seconds).
-	UpdateAt int64 `json:"update_at,omitempty"`
+	UpdateAt Timestamp `json:"update_at,omitempty"`
 	// Layer weight the shift comes from.
 	Weight int64 `json:"weight,omitempty"`
 }
@@ -4818,7 +4818,7 @@ type SnoozeIncidentRequest struct {
 // SourcemapItem is generated from the Flashduty OpenAPI schema.
 type SourcemapItem struct {
 	// Upload timestamp, Unix epoch seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Git commit SHA for this build.
 	GitCommitSHA string `json:"git_commit_sha,omitempty"`
 	// Git repository URL associated with this build.
@@ -4834,7 +4834,7 @@ type SourcemapItem struct {
 	// Platform type: `browser`, `android`, or `ios`.
 	Type string `json:"type,omitempty"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Application version string.
 	Version string `json:"version,omitempty"`
 }
@@ -4888,7 +4888,7 @@ type StatusPageChangeItem struct {
 	// Event ID.
 	ChangeID int64 `json:"change_id,omitempty"`
 	// Scheduled close time in unix seconds. Set for retrospective and maintenance events.
-	CloseAtSeconds int64 `json:"close_at_seconds,omitempty"`
+	CloseAtSeconds Timestamp `json:"close_at_seconds,omitempty"`
 	// Event description (Markdown).
 	Description string `json:"description,omitempty"`
 	// Whether this event is a retrospective (historical) one.
@@ -4902,7 +4902,7 @@ type StatusPageChangeItem struct {
 	// Member IDs responsible for this event.
 	ResponderIDs []int64 `json:"responder_ids,omitempty"`
 	// Event start time in unix seconds.
-	StartAtSeconds int64 `json:"start_at_seconds,omitempty"`
+	StartAtSeconds Timestamp `json:"start_at_seconds,omitempty"`
 	// Current event status. Incident statuses: `investigating`/`identified`/`monitoring`/`resolved`. Maintenance statuses: `scheduled`/`ongoing`/`completed`.
 	Status string `json:"status,omitempty"`
 	// Event title.
@@ -4927,7 +4927,7 @@ type StatusPageChangeTimelineCreateResponse struct {
 // StatusPageChangeUpdateItem is generated from the Flashduty OpenAPI schema.
 type StatusPageChangeUpdateItem struct {
 	// Update timestamp in unix seconds.
-	AtSeconds int64 `json:"at_seconds,omitempty"`
+	AtSeconds Timestamp `json:"at_seconds,omitempty"`
 	// Component status transitions applied by this update.
 	ComponentChanges []StatusPageComponentChangeItem `json:"component_changes,omitempty"`
 	// Update description (Markdown).
@@ -4951,7 +4951,7 @@ type StatusPageComponentChangeItem struct {
 // StatusPageComponentItem is generated from the Flashduty OpenAPI schema.
 type StatusPageComponentItem struct {
 	// Timestamp when the component was first available, in unix seconds.
-	AvailableSinceSeconds int64 `json:"available_since_seconds,omitempty"`
+	AvailableSinceSeconds Timestamp `json:"available_since_seconds,omitempty"`
 	// Component ID.
 	ComponentID string `json:"component_id,omitempty"`
 	// Component description.
@@ -4973,7 +4973,7 @@ type StatusPageMigrationJob struct {
 	// Owner account ID.
 	AccountID int64 `json:"account_id,omitempty"`
 	// Job creation time, unix seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Terminal error message when `status` is `failed`.
 	Error string `json:"error,omitempty"`
 	// Migration job ID.
@@ -4989,7 +4989,7 @@ type StatusPageMigrationJob struct {
 	// Flashduty target status page ID. Set once the job produces one, or supplied up front for subscriber migration.
 	TargetPageID int64 `json:"target_page_id,omitempty"`
 	// Last status update time, unix seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // StatusPageMigrationProgress is generated from the Flashduty OpenAPI schema.
@@ -5028,7 +5028,7 @@ type StatusPageSubscriberListResponse struct {
 // StoreRulesetItem is generated from the Flashduty OpenAPI schema.
 type StoreRulesetItem struct {
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Account ID of the creator.
 	CreatorAccountID uint64 `json:"creator_account_id,omitempty"`
 	// Member ID of the creator.
@@ -5046,7 +5046,7 @@ type StoreRulesetItem struct {
 	// Datasource type identifier this ruleset applies to.
 	TypeIdent string `json:"type_ident,omitempty"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // StoreRulesetListRequest is generated from the Flashduty OpenAPI schema.
@@ -5143,7 +5143,7 @@ type TeamItem struct {
 	// Owning account ID.
 	AccountID uint64 `json:"account_id,omitempty"`
 	// Unix epoch seconds the team was created.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Member ID of the creator.
 	CreatorID uint64 `json:"creator_id,omitempty"`
 	// Display name of the creator.
@@ -5161,7 +5161,7 @@ type TeamItem struct {
 	// Team display name. 1–39 characters, unique per account.
 	TeamName string `json:"team_name,omitempty"`
 	// Unix epoch seconds the team was last updated.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Member ID of the last editor.
 	UpdatedBy uint64 `json:"updated_by,omitempty"`
 	// Display name of the last editor.
@@ -5276,11 +5276,11 @@ type TemplateItem struct {
 	// ID of the owning account.
 	AccountID int64 `json:"account_id,omitempty"`
 	// Unix epoch seconds the template was created.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Member ID of the creator.
 	CreatorID int64 `json:"creator_id,omitempty"`
 	// Unix epoch seconds the template was soft-deleted. Absent (omitempty) when the template is live.
-	DeletedAt int64 `json:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
 	// Free-form description.
 	Description string `json:"description,omitempty"`
 	// DingTalk robot message template source.
@@ -5312,7 +5312,7 @@ type TemplateItem struct {
 	// Unique template name within the account.
 	TemplateName string `json:"template_name,omitempty"`
 	// Unix epoch seconds the template was last updated.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 	// Member ID of the last editor.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// Voice call script template source.
@@ -5681,7 +5681,7 @@ type WarRoomItem struct {
 	// Chat/group ID on the IM side.
 	ChatID string `json:"chat_id,omitempty"`
 	// Creation timestamp (seconds).
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
 	// Member ID that created the war room.
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// Associated incident ID (MongoDB ObjectID).
@@ -6082,7 +6082,7 @@ type EscalateTargetWebhooksItem struct {
 // IncidentRawItemAssignedTo is generated from the Flashduty OpenAPI schema.
 type IncidentRawItemAssignedTo struct {
 	// Unix timestamp (seconds) when this assignment was made.
-	AssignedAt int64 `json:"assigned_at,omitempty"`
+	AssignedAt Timestamp `json:"assigned_at,omitempty"`
 	// Escalation rule ID (MongoDB ObjectID) driving the assignment.
 	EscalateRuleID string `json:"escalate_rule_id,omitempty"`
 	// Display name of the escalation rule.
@@ -6192,11 +6192,11 @@ type RUMIssueItemLastSeen struct {
 // RUMIssueItemRegression is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemRegression struct {
 	// Timestamp when the regression was detected.
-	RegressedAt int64 `json:"regressed_at,omitempty"`
+	RegressedAt Timestamp `json:"regressed_at,omitempty"`
 	// Application version in which the regression was observed.
 	RegressedAtVersion string `json:"regressed_at_version,omitempty"`
 	// Timestamp of the previous resolution before the regression.
-	ResolvedAt int64 `json:"resolved_at,omitempty"`
+	ResolvedAt Timestamp `json:"resolved_at,omitempty"`
 }
 
 // RUMIssueItemSuspectedCause is generated from the Flashduty OpenAPI schema.
@@ -6220,7 +6220,7 @@ type TargetsListResponseItemsItem struct {
 	// Target identifier; the list is sorted by this field ascending.
 	TargetLocator string `json:"target_locator,omitempty"`
 	// Last route-projection upsert time, Unix seconds. Treat as 'most recently observed', not a live-online indicator.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
 }
 
 // ToolCatalogResponseError is generated from the Flashduty OpenAPI schema.

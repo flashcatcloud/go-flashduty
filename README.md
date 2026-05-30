@@ -52,6 +52,7 @@ func main() {
 - **Thin and typed.** Every method maps to exactly one HTTP call and returns `(*T, *Response, error)`. No hidden cross-endpoint enrichment.
 - **Service-grouped.** Endpoints are organized into services on the client (`client.Incidents`, `client.Alerts`, …), generated from the OpenAPI specification.
 - **Composable transport.** Cross-cutting concerns (retry, caching, tracing, rate-limit handling) compose as `http.RoundTripper` middleware via `WithTransport`.
+- **Human-readable timestamps.** Response time fields are typed `Timestamp` (Unix seconds) or `TimestampMilli` (milliseconds) instead of bare integers, so JSON, logs, and LLM-facing output read as RFC3339 — while the raw epoch is one call away. Request fields stay plain `int64`.
 
 ### Options
 
@@ -95,6 +96,26 @@ case flashduty.ErrorCodeAccessDenied, flashduty.ErrorCodeUnauthorized:
 	// handle auth failures
 }
 ```
+
+### Timestamps
+
+Time fields on responses are `Timestamp` (Unix seconds) or `TimestampMilli`
+(milliseconds). They marshal to an RFC3339 string in the local timezone and
+unmarshal from either a numeric epoch or an RFC3339 string, so a value round-trips
+cleanly. The zero value stays the numeric `0` sentinel (never a 1970 date) and is
+dropped by `omitempty`.
+
+```go
+inc := list.Items[0]
+fmt.Println(inc.StartTime)          // 2026-05-30T14:37:11+08:00  (String / fmt / TOON)
+b, _ := json.Marshal(inc.StartTime) // "2026-05-30T14:37:11+08:00"
+epoch := inc.StartTime.Unix()       // 1779514631  (raw wire value)
+t := inc.StartTime.Time()           // time.Time
+```
+
+Request time fields stay plain `int64` — the API expects a numeric epoch on the
+wire (note: most endpoints take **seconds**, but RUM and webhook-history
+endpoints take **milliseconds**).
 
 ### Retries
 

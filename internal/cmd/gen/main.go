@@ -12,6 +12,7 @@ import (
 	"go/format"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -38,6 +39,10 @@ type Gen struct {
 	synth       map[string]any  // synthesized nested schemas (name -> schema map)
 
 	getRequests []getRequest // synthesized GET query-param request structs
+
+	reqGoNames map[string]bool // Go names of request-reachable schemas
+	reqSynth   map[string]bool // synth Go names discovered in request context
+	reqCtx     bool            // true while resolving/emitting a request-side type
 
 	looseCount int // count of loose object/any fallbacks (R6 tracking)
 }
@@ -91,8 +96,10 @@ func run() error {
 		skip:       map[string]bool{"SuccessEnvelope": true, "ErrorResponse": true, "DutyError": true},
 		queued:     map[string]bool{},
 		synth:      map[string]any{},
+		reqSynth:   map[string]bool{},
 	}
 	g.detectEmpty()
+	g.reqGoNames = g.computeRequestReachable(asMap(spec["paths"]))
 
 	services := g.collectServices(asMap(spec["paths"]))
 
@@ -205,6 +212,9 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 // getRequestType synthesizes a request struct from a GET op's query parameters
 // and records it for emission. Returns "" when the op has no query parameters.
 func (g *Gen) getRequestType(o map[string]any, hint string) string {
+	prev := g.reqCtx
+	g.reqCtx = true
+	defer func() { g.reqCtx = prev }()
 	var params []queryParam
 	used := map[string]bool{}
 	for _, raw := range asSlice(o["parameters"]) {
@@ -260,9 +270,85 @@ func (g *Gen) opDoc(o map[string]any, method, path string) []string {
 	return lines
 }
 
+// computeRequestReachable returns the Go names of every schema reachable from an
+// operation request body (transitively via $ref). Timestamp-described integer
+// fields in these schemas stay int64: a request marshals to the wire, where the
+// API expects a numeric epoch — not the RFC3339 string the Timestamp types emit.
+func (g *Gen) computeRequestReachable(paths map[string]any) map[string]bool {
+	seen := map[string]bool{}
+	var visit func(name string)
+	visit = func(name string) {
+		if name == "" || seen[name] {
+			return
+		}
+		seen[name] = true
+		collectRefs(g.schemas[name], visit)
+	}
+	for _, item := range paths {
+		for _, raw := range asMap(item) {
+			body := asMap(asMap(raw)["requestBody"])
+			for _, ct := range asMap(body["content"]) {
+				visit(refName(asMap(asMap(ct)["schema"])))
+			}
+		}
+	}
+	out := make(map[string]bool, len(seen))
+	for n := range seen {
+		out[goName(n)] = true
+	}
+	return out
+}
+
+// collectRefs invokes visit with the schema name of every $ref found anywhere in
+// v (recursively through maps and slices).
+func collectRefs(v any, visit func(string)) {
+	switch t := v.(type) {
+	case map[string]any:
+		for k, vv := range t {
+			if k == "$ref" {
+				if s, ok := vv.(string); ok {
+					visit(s[strings.LastIndex(s, "/")+1:])
+				}
+				continue
+			}
+			collectRefs(vv, visit)
+		}
+	case []any:
+		for _, vv := range t {
+			collectRefs(vv, visit)
+		}
+	}
+}
+
+var (
+	tsWordRe     = regexp.MustCompile(`(?i)\b(unix|epoch|timestamp)\b`)
+	tsMilliRe    = regexp.MustCompile(`(?i)\bmilli`)
+	tsDurationRe = regexp.MustCompile(`(?i)\b(duration|interval|offset|elapsed)\b`)
+)
+
+// timestampType classifies an integer field's description as an absolute epoch
+// instant and returns the Go type to use ("Timestamp" for seconds,
+// "TimestampMilli" for milliseconds), or "" when it is not a timestamp (no
+// unix/epoch/timestamp wording) or is a duration/offset that only looks like one.
+// Detection is description-driven because field names are an unreliable proxy:
+// durations are named like instants (handoff_time, advance_in_time) and vice
+// versa. Applied to response fields only (see computeRequestReachable).
+func timestampType(desc string) string {
+	if desc == "" || !tsWordRe.MatchString(desc) || tsDurationRe.MatchString(desc) {
+		return ""
+	}
+	if tsMilliRe.MatchString(desc) {
+		return "TimestampMilli"
+	}
+	return "Timestamp"
+}
+
 // requestType resolves the request body Go type. Returns "" when the body is
 // absent or an empty object (method takes no body parameter).
 func (g *Gen) requestType(o map[string]any, hint string) string {
+	prev := g.reqCtx
+	g.reqCtx = true
+	defer func() { g.reqCtx = prev }()
 	sch := schemaOf(asMap(o["requestBody"]))
 	if sch == nil {
 		return ""
@@ -456,6 +542,9 @@ func (g *Gen) queue(name string, schema map[string]any) string {
 	if g.queued[name] {
 		return name
 	}
+	if g.reqCtx {
+		g.reqSynth[name] = true
+	}
 	g.queued[name] = true
 	g.synth[name] = schema
 	g.structQueue = append(g.structQueue, name)
@@ -511,6 +600,11 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 	}
 	sort.Strings(keys)
 
+	// A request-reachable struct keeps int64 timestamps (it marshals to the wire);
+	// only response-side structs render timestamps as Timestamp/TimestampMilli.
+	inReq := g.reqGoNames[name] || g.reqSynth[name]
+	g.reqCtx = inReq
+
 	fmt.Fprintf(&b, "type %s struct {\n", name)
 	usedField := map[string]bool{}
 	if paginated {
@@ -530,8 +624,14 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		if gt == "map[string]any" || gt == "any" {
 			g.looseCount++
 		}
-		if d := str(pv, "description"); d != "" {
-			for _, l := range wrapText(d) {
+		desc := str(pv, "description")
+		if !inReq && gt == "int64" {
+			if ts := timestampType(desc); ts != "" {
+				gt = ts
+			}
+		}
+		if desc != "" {
+			for _, l := range wrapText(desc) {
 				b.WriteString("\t// " + l + "\n")
 			}
 		}
