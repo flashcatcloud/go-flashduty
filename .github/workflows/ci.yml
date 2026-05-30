@@ -50,17 +50,15 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: 'stable'
-          cache: true
 
       # golangci-lint v2 subsumes gofmt, gci, staticcheck, govet and the rest;
       # config in .golangci.yml. Generated files are auto-excluded by header.
-      - name: Install golangci-lint
-        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v2.2.1
-
+      # The official action ships a golangci-lint binary whose type-checker
+      # matches the Go toolchain, avoiding stdlib version skew.
       - name: golangci-lint
-        run: |
-          export PATH="$(go env GOPATH)/bin:$PATH"
-          golangci-lint run
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.11
 
   generate-drift:
     name: Generate Drift

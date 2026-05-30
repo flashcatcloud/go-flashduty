@@ -384,19 +384,19 @@ func (g *Gen) emitModels() string {
 		case refName(s) != "":
 			// A schema that is purely {$ref: Other} is a name alias for Other.
 			target := goName(refName(s))
-			enumsAndAliases.WriteString(fmt.Sprintf("// %s is an alias for %s.\ntype %s = %s\n\n", goName(name), target, goName(name), target))
+			fmt.Fprintf(&enumsAndAliases, "// %s is an alias for %s.\ntype %s = %s\n\n", goName(name), target, goName(name), target)
 		case s["enum"] != nil && typeStr(s) == "string":
 			enumsAndAliases.WriteString(g.emitEnum(goName(name), s))
 		case typeStr(s) == "array":
 			elem := g.goTypeOf(asMap(s["items"]), goName(name)+"Item")
-			enumsAndAliases.WriteString(fmt.Sprintf("// %s is a list response payload.\ntype %s []%s\n\n", goName(name), goName(name), elem))
+			fmt.Fprintf(&enumsAndAliases, "// %s is a list response payload.\ntype %s []%s\n\n", goName(name), goName(name), elem)
 		case typeStr(s) == "object" && len(asMap(s["properties"])) == 0 && isObjectMap(s):
 			// A bare object with additionalProperties (and no fixed properties) is
 			// a map payload (e.g. name -> count), not a struct.
 			v := g.goTypeOf(asMap(s["additionalProperties"]), goName(name)+"Value")
-			enumsAndAliases.WriteString(fmt.Sprintf("// %s is a map response payload.\ntype %s map[string]%s\n\n", goName(name), goName(name), v))
+			fmt.Fprintf(&enumsAndAliases, "// %s is a map response payload.\ntype %s map[string]%s\n\n", goName(name), goName(name), v)
 		case typeStr(s) == "string", typeStr(s) == "integer", typeStr(s) == "number", typeStr(s) == "boolean":
-			enumsAndAliases.WriteString(fmt.Sprintf("type %s %s\n\n", goName(name), g.goTypeOf(s, goName(name))))
+			fmt.Fprintf(&enumsAndAliases, "type %s %s\n\n", goName(name), g.goTypeOf(s, goName(name)))
 		default:
 			g.queue(goName(name), g.mergeAllOf(s))
 		}
@@ -430,11 +430,11 @@ func (g *Gen) emitGetRequests() string {
 	var b strings.Builder
 	for _, r := range reqs {
 		if r.Doc != "" {
-			b.WriteString(fmt.Sprintf("// %s holds the query parameters for %s.\n", r.Name, strings.TrimSuffix(r.Doc, ".")))
+			fmt.Fprintf(&b, "// %s holds the query parameters for %s.\n", r.Name, strings.TrimSuffix(r.Doc, "."))
 		} else {
-			b.WriteString(fmt.Sprintf("// %s holds the query parameters for the request.\n", r.Name))
+			fmt.Fprintf(&b, "// %s holds the query parameters for the request.\n", r.Name)
 		}
-		b.WriteString(fmt.Sprintf("type %s struct {\n", r.Name))
+		fmt.Fprintf(&b, "type %s struct {\n", r.Name)
 		for _, p := range r.Params {
 			if p.Doc != "" {
 				for _, l := range wrapText(p.Doc) {
@@ -445,7 +445,7 @@ func (g *Gen) emitGetRequests() string {
 			if !p.Required {
 				tag += ",omitempty"
 			}
-			b.WriteString(fmt.Sprintf("\t%s %s `url:%q`\n", p.GoField, p.GoType, tag))
+			fmt.Fprintf(&b, "\t%s %s `url:%q`\n", p.GoField, p.GoType, tag)
 		}
 		b.WriteString("}\n\n")
 	}
@@ -470,13 +470,13 @@ func (g *Gen) emitEnum(name string, s map[string]any) string {
 			break
 		}
 	}
-	b.WriteString(fmt.Sprintf("type %s string\n\nconst (\n", name))
+	fmt.Fprintf(&b, "type %s string\n\nconst (\n", name)
 	for _, v := range asSlice(s["enum"]) {
 		val, _ := v.(string)
 		if val == "" {
 			continue
 		}
-		b.WriteString(fmt.Sprintf("\t%s%s %s = %q\n", name, goName(val), name, val))
+		fmt.Fprintf(&b, "\t%s%s %s = %q\n", name, goName(val), name, val)
 	}
 	b.WriteString(")\n\n")
 	return b.String()
@@ -484,10 +484,10 @@ func (g *Gen) emitEnum(name string, s map[string]any) string {
 
 func (g *Gen) emitStruct(name string, s map[string]any) string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("// %s is generated from the Flashduty OpenAPI schema.\n", name))
+	fmt.Fprintf(&b, "// %s is generated from the Flashduty OpenAPI schema.\n", name)
 	props := asMap(s["properties"])
 	if len(props) == 0 {
-		b.WriteString(fmt.Sprintf("type %s struct{}\n\n", name))
+		fmt.Fprintf(&b, "type %s struct{}\n\n", name)
 		return b.String()
 	}
 	// Collapse the pagination input trio (p + limit [+ search_after_ctx]) into an
@@ -511,7 +511,7 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 	}
 	sort.Strings(keys)
 
-	b.WriteString(fmt.Sprintf("type %s struct {\n", name))
+	fmt.Fprintf(&b, "type %s struct {\n", name)
 	usedField := map[string]bool{}
 	if paginated {
 		b.WriteString("\tListOptions\n")
@@ -535,7 +535,7 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 				b.WriteString("\t// " + l + "\n")
 			}
 		}
-		b.WriteString(fmt.Sprintf("\t%s %s `json:%q`\n", field, gt, k+",omitempty"))
+		fmt.Fprintf(&b, "\t%s %s `json:%q`\n", field, gt, k+",omitempty")
 	}
 	b.WriteString("}\n\n")
 	return b.String()
@@ -600,7 +600,7 @@ func (g *Gen) emitService(s service) string {
 	b.WriteString(genHeader)
 	b.WriteString("package flashduty\n\n")
 	b.WriteString("import \"context\"\n\n")
-	b.WriteString(fmt.Sprintf("// %sService handles the %q API resource.\ntype %sService service\n\n", s.Name, s.Tag, s.Name))
+	fmt.Fprintf(&b, "// %sService handles the %q API resource.\ntype %sService service\n\n", s.Name, s.Tag, s.Name)
 
 	for _, o := range s.Ops {
 		for _, l := range o.Doc {
@@ -669,7 +669,7 @@ func (g *Gen) emitRoundtrip(services []service) string {
 	b.WriteString("// spec-example round-trip test (roundtrip_test.go).\n")
 	b.WriteString("var exampleDataDecoders = map[string]func(json.RawMessage) error{\n")
 	for _, e := range entries {
-		b.WriteString(fmt.Sprintf("\t%q: func(d json.RawMessage) error { var v %s; return json.Unmarshal(d, &v) },\n", e.key, e.typ))
+		fmt.Fprintf(&b, "\t%q: func(d json.RawMessage) error { var v %s; return json.Unmarshal(d, &v) },\n", e.key, e.typ)
 	}
 	b.WriteString("}\n")
 	return b.String()
@@ -684,12 +684,12 @@ func (g *Gen) emitWiring(services []service) string {
 	b.WriteString("// service is the shared backing for every typed service; all services view\n// the same Client through it (one allocation), mirroring google/go-github.\ntype service struct{ client *Client }\n\n")
 	b.WriteString("// genServices is embedded in Client to expose the generated service handles.\ntype genServices struct {\n")
 	for _, s := range services {
-		b.WriteString(fmt.Sprintf("\t%s *%sService\n", s.Name, s.Name))
+		fmt.Fprintf(&b, "\t%s *%sService\n", s.Name, s.Name)
 	}
 	b.WriteString("}\n\n")
 	b.WriteString("// initServices wires every service to the shared backref. Called by NewClient.\nfunc (c *Client) initServices() {\n\tc.common.client = c\n")
 	for _, s := range services {
-		b.WriteString(fmt.Sprintf("\tc.%s = (*%sService)(&c.common)\n", s.Name, s.Name))
+		fmt.Fprintf(&b, "\tc.%s = (*%sService)(&c.common)\n", s.Name, s.Name)
 	}
 	b.WriteString("}\n")
 	return b.String()
