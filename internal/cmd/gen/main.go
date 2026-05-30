@@ -563,9 +563,8 @@ func (g *Gen) goTypeOf(s map[string]any, hint string) string {
 			if apm := asMap(ap); apm != nil {
 				return "map[string]" + g.goTypeOf(apm, hint+"Value")
 			}
-			if b, ok := ap.(bool); ok && !b {
-				// additionalProperties:false with no properties => empty
-			}
+			// additionalProperties:false (a bool) falls through to the
+			// properties / map[string]any handling below.
 		}
 		if len(asMap(s["properties"])) > 0 {
 			return g.queue(hint, s)

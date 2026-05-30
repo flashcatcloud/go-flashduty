@@ -2,7 +2,7 @@
 
 The official Go client for the [Flashduty](https://flashcat.cloud) Open API — a thin, typed wrapper in the style of [google/go-github](https://github.com/google/go-github).
 
-> **Status: under active development toward `v1.0.0`.** The transport core is in place; typed services for all API resources are generated from the Flashduty OpenAPI specification and are being rolled out.
+> **Status: release candidate for `v1.0.0`.** The transport core is in place and all 224 Open API endpoints (21 services) are generated from the Flashduty OpenAPI specification.
 
 ## Install
 
@@ -31,7 +31,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	list, resp, err := client.Incidents.List(context.Background(), &flashduty.IncidentListRequest{
+	list, resp, err := client.Incidents.List(context.Background(), &flashduty.ListIncidentsRequest{
 		Progress:    "Triggered",
 		ListOptions: flashduty.ListOptions{Limit: 20},
 	})
@@ -69,7 +69,7 @@ client, err := flashduty.NewClient("YOUR_APP_KEY",
 ### Errors and rate limits
 
 ```go
-_, _, err := client.Incidents.Get(ctx, &flashduty.IncidentInfoRequest{IncidentID: "does-not-exist"})
+_, _, err := client.Incidents.Info(ctx, &flashduty.IncidentInfoRequest{IncidentID: "does-not-exist"})
 
 var apiErr *flashduty.ErrorResponse
 if errors.As(err, &apiErr) {
@@ -82,7 +82,35 @@ if errors.As(err, &rl) {
 }
 ```
 
-Automatic retries are **not** built into the core. Compose them at the transport layer (the optional `flashdutyretry` helper provides a safe-by-default retrying `http.RoundTripper`).
+Typed predicates save you the string comparison and see through wrapped errors
+(`errors.As` under the hood):
+
+```go
+if flashduty.IsNotFound(err) { /* ... */ }
+if flashduty.IsRateLimited(err) { /* ... */ }
+switch flashduty.ErrorCodeOf(err) {
+case flashduty.ErrorCodeAccessDenied, flashduty.ErrorCodeUnauthorized:
+	// handle auth failures
+}
+```
+
+### Retries
+
+Automatic retries are **not** built into the core. Compose them at the transport
+layer with the optional `flashdutyretry` subpackage — a safe-by-default retrying
+`http.RoundTripper` (retries 429 and 5xx, honors `Retry-After`, deterministic
+exponential backoff, and only replays requests whose body is replayable, which
+all SDK requests are):
+
+```go
+import flashdutyretry "github.com/flashcatcloud/go-flashduty/flashdutyretry"
+
+client, err := flashduty.NewClient("YOUR_APP_KEY",
+	flashduty.WithTransport(flashdutyretry.New(
+		flashdutyretry.WithMaxRetries(3),
+	)),
+)
+```
 
 ## License
 
