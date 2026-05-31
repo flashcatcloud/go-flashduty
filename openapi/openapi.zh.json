@@ -12273,6 +12273,126 @@
         ]
       }
     },
+    "/status-page/change/active/list": {
+      "get": {
+        "operationId": "statusPageChangeActiveList",
+        "summary": "查询状态页活跃事件列表",
+        "description": "查询状态页指定类型的进行中（非终态）事件列表。",
+        "tags": [
+          "On-call/状态页"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |",
+          "href": "/zh/api-reference/on-call/status-pages/status-page-change-active-list",
+          "metadata": {
+            "sidebarTitle": "查询状态页活跃事件列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/StatusPageChangeListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "change_id": 5821693893131,
+                        "page_id": 5750613685214,
+                        "type": "incident",
+                        "title": "Web Console Degraded Performance",
+                        "description": "We are currently investigating an issue affecting some services.",
+                        "status": "investigating",
+                        "affected_components": [
+                          {
+                            "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                            "section_id": "01KC3FKKX5TSVG6Z3X1QNGF6V2",
+                            "name": "Web Console",
+                            "available_since_seconds": 1765349358,
+                            "order_id": 1,
+                            "status": "degraded"
+                          }
+                        ],
+                        "start_at_seconds": 1766736878,
+                        "updates": [
+                          {
+                            "update_id": "01KDCVJQ88SZPHWPTDV2Z2AZW8",
+                            "at_seconds": 1766736876,
+                            "status": "investigating",
+                            "description": "We are currently investigating an issue affecting some services.",
+                            "component_changes": [
+                              {
+                                "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                                "component_name": "Web Console",
+                                "status": "degraded"
+                              }
+                            ]
+                          }
+                        ],
+                        "notify_subscribers": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "状态页 ID。"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "maintenance"
+              ]
+            },
+            "description": "事件类型筛选，必填。仅返回进行中（非终态）事件：incident 含 investigating/identified/monitoring，maintenance 含 scheduled/ongoing。"
+          }
+        ]
+      }
+    },
     "/status-page/change/create": {
       "post": {
         "operationId": "statusPageChangeCreate",

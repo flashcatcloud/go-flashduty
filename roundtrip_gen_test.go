@@ -9,6 +9,7 @@ import "encoding/json"
 // spec-example round-trip test (roundtrip_test.go).
 var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"GET /incident/post-mortem/info":            func(d json.RawMessage) error { var v PostMortemItem; return json.Unmarshal(d, &v) },
+	"GET /status-page/change/active/list":       func(d json.RawMessage) error { var v StatusPageChangeListResponse; return json.Unmarshal(d, &v) },
 	"GET /status-page/change/info":              func(d json.RawMessage) error { var v StatusPageChangeItem; return json.Unmarshal(d, &v) },
 	"GET /status-page/change/list":              func(d json.RawMessage) error { var v StatusPageChangeListResponse; return json.Unmarshal(d, &v) },
 	"GET /status-page/list":                     func(d json.RawMessage) error { var v ListStatusPageResponse; return json.Unmarshal(d, &v) },

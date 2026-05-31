@@ -7156,6 +7156,14 @@ type IncidentsPostMortemInfoRequest struct {
 	PostMortemID string `url:"post_mortem_id"`
 }
 
+// StatusPagesChangeActiveListRequest holds the query parameters for List active status page events.
+type StatusPagesChangeActiveListRequest struct {
+	// Status page ID.
+	PageID int64 `url:"page_id"`
+	// Event type filter. Required. Returns only in-progress (non-terminal) events — `investigating`/`identified`/`monitoring` for `incident`, `scheduled`/`ongoing` for `maintenance`.
+	Type string `url:"type"`
+}
+
 // StatusPagesChangeInfoRequest holds the query parameters for Get status page event detail.
 type StatusPagesChangeInfoRequest struct {
 	// Status page ID.

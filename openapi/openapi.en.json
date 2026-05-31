@@ -12281,6 +12281,126 @@
         ]
       }
     },
+    "/status-page/change/active/list": {
+      "get": {
+        "operationId": "statusPageChangeActiveList",
+        "summary": "List active status page events",
+        "description": "List in-progress (non-terminal) events of a given type for a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-change-active-list",
+          "metadata": {
+            "sidebarTitle": "List active status page events"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/StatusPageChangeListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "change_id": 5821693893131,
+                        "page_id": 5750613685214,
+                        "type": "incident",
+                        "title": "Web Console Degraded Performance",
+                        "description": "We are currently investigating an issue affecting some services.",
+                        "status": "investigating",
+                        "affected_components": [
+                          {
+                            "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                            "section_id": "01KC3FKKX5TSVG6Z3X1QNGF6V2",
+                            "name": "Web Console",
+                            "available_since_seconds": 1765349358,
+                            "order_id": 1,
+                            "status": "degraded"
+                          }
+                        ],
+                        "start_at_seconds": 1766736878,
+                        "updates": [
+                          {
+                            "update_id": "01KDCVJQ88SZPHWPTDV2Z2AZW8",
+                            "at_seconds": 1766736876,
+                            "status": "investigating",
+                            "description": "We are currently investigating an issue affecting some services.",
+                            "component_changes": [
+                              {
+                                "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                                "component_name": "Web Console",
+                                "status": "degraded"
+                              }
+                            ]
+                          }
+                        ],
+                        "notify_subscribers": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Status page ID."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "maintenance"
+              ]
+            },
+            "description": "Event type filter. Required. Returns only in-progress (non-terminal) events — `investigating`/`identified`/`monitoring` for `incident`, `scheduled`/`ongoing` for `maintenance`."
+          }
+        ]
+      }
+    },
     "/status-page/change/create": {
       "post": {
         "operationId": "statusPageChangeCreate",
