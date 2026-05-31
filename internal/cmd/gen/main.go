@@ -630,6 +630,15 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 				gt = ts
 			}
 		}
+		// A nullable scalar in a request struct becomes a pointer so the zero
+		// value (false/0/"") can be sent on the wire; a bare value type with
+		// `,omitempty` would drop the zero value, silently no-op'ing a tri-state
+		// filter or a partial-update "set to zero". The backend models these as
+		// pointers and api-review marks them `type: [T, "null"]`. Response
+		// structs keep value types (decoding null yields the zero value).
+		if inReq && isNullable(pv) && pointerizableScalar(gt) {
+			gt = "*" + gt
+		}
 		if desc != "" {
 			for _, l := range wrapText(desc) {
 				b.WriteString("\t// " + l + "\n")
@@ -852,6 +861,34 @@ func typeStr(s map[string]any) string {
 		}
 	}
 	return ""
+}
+
+// isNullable reports whether a property schema uses the OpenAPI 3.1 nullable
+// union form `type: ["T", "null"]`. A nullable request scalar is emitted as a
+// Go pointer so the zero value can be sent on the wire (see the field loop).
+func isNullable(s map[string]any) bool {
+	t, ok := s["type"].([]any)
+	if !ok {
+		return false
+	}
+	for _, v := range t {
+		if name, ok := v.(string); ok && name == "null" {
+			return true
+		}
+	}
+	return false
+}
+
+// pointerizableScalar reports whether gt is a scalar Go type that should be
+// pointer-wrapped when nullable. Slices/maps/structs are already nil-able and
+// carry no omitempty-drops-zero hazard, so they are left as-is.
+func pointerizableScalar(gt string) bool {
+	switch gt {
+	case "bool", "int", "int64", "uint64", "float64", "string":
+		return true
+	default:
+		return false
+	}
 }
 
 // isIntProp reports whether a property schema is a plain integer (used to detect

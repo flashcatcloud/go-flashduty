@@ -2486,7 +2486,7 @@ type FieldListRequest struct {
 	// Sort ascending when `true`; descending otherwise.
 	Asc bool `json:"asc,omitempty"`
 	// Filter by creator member ID. Omit or send `null` to skip.
-	CreatorID int64 `json:"creator_id,omitempty"`
+	CreatorID *int64 `json:"creator_id,omitempty"`
 	// Sort key. Defaults to backend ordering when omitted.
 	Orderby string `json:"orderby,omitempty"`
 	// Regex filter against `field_name` and `display_name`. Invalid regex is auto-escaped to literal substring match.
@@ -5126,7 +5126,7 @@ type ScheduleLayer struct {
 	// Whether the layer is hidden in the UI (0 = no, 1 = yes).
 	Hidden int64 `json:"hidden,omitempty"`
 	// Layer end timestamp (Unix seconds). null means open-ended.
-	LayerEnd int64 `json:"layer_end,omitempty"`
+	LayerEnd *int64 `json:"layer_end,omitempty"`
 	// User-facing layer name.
 	LayerName string `json:"layer_name,omitempty"`
 	// Layer start timestamp (Unix seconds).
