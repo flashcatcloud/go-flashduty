@@ -21,6 +21,20 @@ func (s *StatusPagesService) ReadPageList(ctx context.Context) (*ListStatusPageR
 	return out, resp, nil
 }
 
+// List active status page events.
+//
+// List in-progress (non-terminal) events of a given type for a status page.
+//
+// API: GET /status-page/change/active/list (statusPageChangeActiveList).
+func (s *StatusPagesService) ChangeActiveList(ctx context.Context, req *StatusPagesChangeActiveListRequest) (*StatusPageChangeListResponse, *Response, error) {
+	out := new(StatusPageChangeListResponse)
+	resp, err := s.client.doGet(ctx, "/status-page/change/active/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Create status page event.
 //
 // Create a new incident or maintenance event on a status page.
