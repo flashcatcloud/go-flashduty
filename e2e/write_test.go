@@ -98,9 +98,9 @@ func TestCalendarLifecycle(t *testing.T) {
 	const updatedDesc = "go-flashduty e2e test calendar (updated)"
 	if _, err := c.Calendars.CalendarUpdate(ctx, &flashduty.CalendarUpdateRequest{
 		CalID:       id,
-		CalName:     name,
-		Timezone:    "Asia/Shanghai",
-		Description: updatedDesc,
+		CalName:     flashduty.String(name),
+		Timezone:    flashduty.String("Asia/Shanghai"),
+		Description: flashduty.String(updatedDesc),
 	}); err != nil {
 		t.Fatalf("update calendar: %v", err)
 	}

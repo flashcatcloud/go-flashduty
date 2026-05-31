@@ -629,11 +629,11 @@ type AlertListRequest struct {
 	// End of the search window, Unix epoch seconds. Max span 31 days.
 	EndTime int64 `json:"end_time,omitempty"`
 	// Filter by whether the alert has ever been silenced.
-	EverMuted bool `json:"ever_muted,omitempty"`
+	EverMuted *bool `json:"ever_muted,omitempty"`
 	// Filter by integration IDs.
 	IntegrationIDs []int64 `json:"integration_ids,omitempty"`
 	// Filter by active (`true`) or resolved (`false`) status.
-	IsActive bool `json:"is_active,omitempty"`
+	IsActive *bool `json:"is_active,omitempty"`
 	// Sort field.
 	Orderby string `json:"orderby,omitempty"`
 	// Start of the search window, Unix epoch seconds.
@@ -1000,9 +1000,9 @@ type AuditSearchRequest struct {
 	// End of the search window, Unix epoch seconds. Must be after `start_time`. Maximum span 90 days.
 	EndTime int64 `json:"end_time,omitempty"`
 	// When true, return only high-risk (dangerous) operations.
-	IsDangerous bool `json:"is_dangerous,omitempty"`
+	IsDangerous *bool `json:"is_dangerous,omitempty"`
 	// When true, return only write operations; when false, return only read operations.
-	IsWrite bool `json:"is_write,omitempty"`
+	IsWrite *bool `json:"is_write,omitempty"`
 	// Page size. Minimum 0, maximum 99.
 	Limit int64 `json:"limit,omitempty"`
 	// Filter to specific operation names. Use `POST /audit/operation/list` to get the valid set.
@@ -1092,7 +1092,7 @@ type CalEventUpsertRequest struct {
 	// Event ID. Omit when creating.
 	EventID string `json:"event_id,omitempty"`
 	// Whether the event marks a non-working day. true = day off, false = working day override.
-	IsOff bool `json:"is_off,omitempty"`
+	IsOff *bool `json:"is_off,omitempty"`
 	// Event start date in YYYY-MM-DD.
 	StartAt string `json:"start_at,omitempty"`
 	// Event summary.
@@ -1195,15 +1195,15 @@ type CalendarUpdateRequest struct {
 	// Calendar ID.
 	CalID string `json:"cal_id,omitempty"`
 	// New calendar name.
-	CalName string `json:"cal_name,omitempty"`
+	CalName *string `json:"cal_name,omitempty"`
 	// New description.
-	Description string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty"`
 	// Additional public-holiday calendar IDs to inherit events from.
 	ExtraCalIDs []string `json:"extra_cal_ids,omitempty"`
 	// New owning team ID.
-	TeamID int64 `json:"team_id,omitempty"`
+	TeamID *int64 `json:"team_id,omitempty"`
 	// New IANA timezone.
-	Timezone string `json:"timezone,omitempty"`
+	Timezone *string `json:"timezone,omitempty"`
 	// Workday numbers (0 = Sunday, 6 = Saturday).
 	Workdays []int64 `json:"workdays,omitempty"`
 }
@@ -1459,7 +1459,7 @@ type CreateEscalationRuleRequest struct {
 	// Escalation levels in order. At least one level is required.
 	Layers []CreateEscalationRuleRequestLayersItem `json:"layers,omitempty"`
 	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty"`
+	Priority *int64 `json:"priority,omitempty"`
 	// Rule name, 1 to 39 characters.
 	RuleName string `json:"rule_name,omitempty"`
 	// Notification template ID (MongoDB ObjectID).
@@ -3176,7 +3176,7 @@ type ListIncidentAlertsRequest struct {
 	// When true, include raw alert events in each alert item.
 	IncludeEvents bool `json:"include_events,omitempty"`
 	// When true return only active alerts (Critical/Warning/Info); when false return only recovered alerts (Ok). Omit to include all.
-	IsActive bool `json:"is_active,omitempty"`
+	IsActive *bool `json:"is_active,omitempty"`
 }
 
 // ListIncidentAlertsResponse is generated from the Flashduty OpenAPI schema.
@@ -3265,7 +3265,7 @@ type ListPastIncidentsRequest struct {
 	// Reference incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty"`
 	// Maximum number of similar incidents to return.
-	Limit int64 `json:"limit,omitempty"`
+	Limit *int64 `json:"limit,omitempty"`
 }
 
 // ListPastIncidentsResponse is generated from the Flashduty OpenAPI schema.
@@ -3629,21 +3629,21 @@ type MappingAPIUpdateRequest struct {
 	// Mapping API ID (MongoDB ObjectID hex).
 	APIID string `json:"api_id,omitempty"`
 	// New API name (max 199 chars).
-	APIName string `json:"api_name,omitempty"`
+	APIName *string `json:"api_name,omitempty"`
 	// New description.
-	Description string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty"`
 	// New headers map (replaces existing).
 	Headers map[string]string `json:"headers,omitempty"`
 	// New TLS skip-verify setting.
-	InsecureSkipVerify bool `json:"insecure_skip_verify,omitempty"`
+	InsecureSkipVerify *bool `json:"insecure_skip_verify,omitempty"`
 	// New retry count.
-	RetryCount int64 `json:"retry_count,omitempty"`
+	RetryCount *int64 `json:"retry_count,omitempty"`
 	// New owning team ID.
-	TeamID int64 `json:"team_id,omitempty"`
+	TeamID *int64 `json:"team_id,omitempty"`
 	// New timeout in seconds.
-	Timeout int64 `json:"timeout,omitempty"`
+	Timeout *int64 `json:"timeout,omitempty"`
 	// New endpoint URL (max 500 chars).
-	URL string `json:"url,omitempty"`
+	URL *string `json:"url,omitempty"`
 }
 
 // MappingDataDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -3778,13 +3778,13 @@ type MappingSchemaListResponse struct {
 // MappingSchemaUpdateRequest is generated from the Flashduty OpenAPI schema.
 type MappingSchemaUpdateRequest struct {
 	// New description (max 500 chars).
-	Description string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty"`
 	// Schema ID (MongoDB ObjectID hex).
 	SchemaID string `json:"schema_id,omitempty"`
 	// New schema name (max 39 chars).
-	SchemaName string `json:"schema_name,omitempty"`
+	SchemaName *string `json:"schema_name,omitempty"`
 	// New owning team ID. `0` removes the team association.
-	TeamID int64 `json:"team_id,omitempty"`
+	TeamID *int64 `json:"team_id,omitempty"`
 }
 
 // MemberDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -3932,21 +3932,21 @@ type MemberListResponse struct {
 // MemberResetInfoRequest is generated from the Flashduty OpenAPI schema.
 type MemberResetInfoRequest struct {
 	// Avatar URL
-	Avatar string `json:"avatar,omitempty"`
+	Avatar *string `json:"avatar,omitempty"`
 	// Country code
-	CountryCode string `json:"country_code,omitempty"`
+	CountryCode *string `json:"country_code,omitempty"`
 	// Email address
-	Email string `json:"email,omitempty"`
+	Email *string `json:"email,omitempty"`
 	// Locale
-	Locale string `json:"locale,omitempty"`
+	Locale *string `json:"locale,omitempty"`
 	// Member ID of the member to update
 	MemberID uint64 `json:"member_id,omitempty"`
 	// Display name
-	MemberName string `json:"member_name,omitempty"`
+	MemberName *string `json:"member_name,omitempty"`
 	// Phone number
-	Phone string `json:"phone,omitempty"`
+	Phone *string `json:"phone,omitempty"`
 	// Time zone
-	TimeZone string `json:"time_zone,omitempty"`
+	TimeZone *string `json:"time_zone,omitempty"`
 }
 
 // MemberRoleGrantRequest is generated from the Flashduty OpenAPI schema.
@@ -4020,6 +4020,8 @@ type MigrateStatusPageStructureRequest struct {
 	APIKey string `json:"api_key,omitempty"`
 	// Atlassian Statuspage source page ID.
 	SourcePageID string `json:"source_page_id,omitempty"`
+	// Target URL name for the migrated status page. When omitted, the source page's URL name is reused.
+	URLName *string `json:"url_name,omitempty"`
 }
 
 // NameMessage is generated from the Flashduty OpenAPI schema.
@@ -4407,9 +4409,9 @@ type ResolveIncidentRequest struct {
 	// Incident IDs to resolve. At most 100 per call.
 	IncidentIDs []string `json:"incident_ids,omitempty"`
 	// Optional resolution note applied to every resolved incident.
-	Resolution string `json:"resolution,omitempty"`
+	Resolution *string `json:"resolution,omitempty"`
 	// Optional root cause note applied to every resolved incident.
-	RootCause string `json:"root_cause,omitempty"`
+	RootCause *string `json:"root_cause,omitempty"`
 }
 
 // Responder is generated from the Flashduty OpenAPI schema.
@@ -4834,13 +4836,13 @@ type RUMApplicationUpdateRequest struct {
 	// Application ID to update.
 	ApplicationID string `json:"application_id,omitempty"`
 	// New application name.
-	ApplicationName string                `json:"application_name,omitempty"`
-	IsPrivate       bool                  `json:"is_private,omitempty"`
-	NoGeo           bool                  `json:"no_geo,omitempty"`
-	NoIP            bool                  `json:"no_ip,omitempty"`
-	TeamID          int64                 `json:"team_id,omitempty"`
+	ApplicationName *string               `json:"application_name,omitempty"`
+	IsPrivate       *bool                 `json:"is_private,omitempty"`
+	NoGeo           *bool                 `json:"no_geo,omitempty"`
+	NoIP            *bool                 `json:"no_ip,omitempty"`
+	TeamID          *int64                `json:"team_id,omitempty"`
 	Tracing         RUMApplicationTracing `json:"tracing,omitempty"`
-	Type            string                `json:"type,omitempty"`
+	Type            *string               `json:"type,omitempty"`
 }
 
 // RUMIssueIDRequest is generated from the Flashduty OpenAPI schema.
@@ -5254,22 +5256,22 @@ type ScheduleSelfResponse struct {
 // ScheduleUpsertRequest is generated from the Flashduty OpenAPI schema.
 type ScheduleUpsertRequest struct {
 	// Schedule description. Max 500 characters.
-	Description string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty"`
 	// Preview window end (Unix seconds, 10 digits). Required for /schedule/preview. Max 45 days after start.
 	End int64 `json:"end,omitempty"`
 	// Rotation layers.
 	Layers []ScheduleLayer `json:"layers,omitempty"`
 	// Legacy schedule name field. Used when schedule_name is empty.
-	Name   string         `json:"name,omitempty"`
+	Name   *string        `json:"name,omitempty"`
 	Notify ScheduleNotify `json:"notify,omitempty"`
 	// Schedule ID. Required on update.
-	ScheduleID int64 `json:"schedule_id,omitempty"`
+	ScheduleID *int64 `json:"schedule_id,omitempty"`
 	// Schedule display name. Max 40 characters.
-	ScheduleName string `json:"schedule_name,omitempty"`
+	ScheduleName *string `json:"schedule_name,omitempty"`
 	// Preview window start (Unix seconds, 10 digits). Required for /schedule/preview.
 	Start int64 `json:"start,omitempty"`
 	// Owning team ID.
-	TeamID int64 `json:"team_id,omitempty"`
+	TeamID *int64 `json:"team_id,omitempty"`
 }
 
 // SilenceRuleItem is generated from the Flashduty OpenAPI schema.
@@ -5990,7 +5992,7 @@ type TemplateListRequest struct {
 	// Ascending sort order.
 	Asc bool `json:"asc,omitempty"`
 	// Filter by creator member ID.
-	CreatorID int64 `json:"creator_id,omitempty"`
+	CreatorID *int64 `json:"creator_id,omitempty"`
 	// When true, only return templates scoped to teams the caller belongs to.
 	IsMyTeam bool `json:"is_my_team,omitempty"`
 	// Sort field.
@@ -6135,27 +6137,27 @@ type UpdateChannelRequest struct {
 	// Auto-resolve timer reset mode.
 	AutoResolveMode string `json:"auto_resolve_mode,omitempty"`
 	// Auto-resolve timeout in seconds. 0 disables auto-resolve. Max 30 days.
-	AutoResolveTimeout int64 `json:"auto_resolve_timeout,omitempty"`
+	AutoResolveTimeout *int64 `json:"auto_resolve_timeout,omitempty"`
 	// Channel ID to update.
 	ChannelID int64 `json:"channel_id,omitempty"`
 	// New channel name. 1 to 59 characters.
-	ChannelName string `json:"channel_name,omitempty"`
+	ChannelName *string `json:"channel_name,omitempty"`
 	// New description. Up to 500 characters.
-	Description string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty"`
 	// Disable automatic incident closing.
-	DisableAutoClose bool `json:"disable_auto_close,omitempty"`
+	DisableAutoClose *bool `json:"disable_auto_close,omitempty"`
 	// Disable outlier incident detection.
-	DisableOutlierDetection bool     `json:"disable_outlier_detection,omitempty"`
+	DisableOutlierDetection *bool    `json:"disable_outlier_detection,omitempty"`
 	Flapping                Flapping `json:"flapping,omitempty"`
 	Group                   Group    `json:"group,omitempty"`
 	// Allow external reporters to file incidents into this channel.
-	IsExternalReportEnabled bool `json:"is_external_report_enabled,omitempty"`
+	IsExternalReportEnabled *bool `json:"is_external_report_enabled,omitempty"`
 	// When true, the channel is visible only to its managing teams.
-	IsPrivate bool `json:"is_private,omitempty"`
+	IsPrivate *bool `json:"is_private,omitempty"`
 	// Additional teams that can manage the channel. Up to 3 entries.
 	ManagingTeamIDs []int64 `json:"managing_team_ids,omitempty"`
 	// New owning team ID.
-	TeamID int64 `json:"team_id,omitempty"`
+	TeamID *int64 `json:"team_id,omitempty"`
 }
 
 // UpdateChannelResponse is generated from the Flashduty OpenAPI schema.
@@ -6191,7 +6193,7 @@ type UpdateEscalationRuleRequest struct {
 	// Escalation levels in order. At least one level is required.
 	Layers []EscalateLayer `json:"layers,omitempty"`
 	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty"`
+	Priority *int64 `json:"priority,omitempty"`
 	// Escalation rule ID (MongoDB ObjectID).
 	RuleID string `json:"rule_id,omitempty"`
 	// Rule name, 1 to 39 characters.
@@ -6287,7 +6289,7 @@ type UpdateStatusPageChangeRequest struct {
 	// Member IDs responsible for this event. Pass the full replacement list.
 	Responders []int64 `json:"responders,omitempty"`
 	// New event title, up to 255 characters. Omit to keep the existing value.
-	Title string `json:"title,omitempty"`
+	Title *string `json:"title,omitempty"`
 }
 
 // UpdateStatusPageChangeTimelineRequest is generated from the Flashduty OpenAPI schema.

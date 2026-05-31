@@ -24027,7 +24027,10 @@
             "description": "true 时返回每条告警下的原始事件。"
           },
           "is_active": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "true 时只返回活跃告警（Critical/Warning/Info），false 时只返回已恢复告警（Ok），不传则返回全部。"
           },
           "limit": {
@@ -24854,7 +24857,10 @@
             "description": "基准故障 ID（MongoDB ObjectID）。"
           },
           "limit": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "minimum": 0,
             "maximum": 100,
@@ -24955,12 +24961,18 @@
             "minItems": 1
           },
           "root_cause": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 1024,
             "description": "可选，应用到所有故障的根因说明。"
           },
           "resolution": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 1024,
             "description": "可选，应用到所有故障的解决方案说明。"
           }
@@ -26123,7 +26135,10 @@
             "description": "所属协作空间 ID。"
           },
           "priority": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 0,
             "maximum": 200,
             "description": "匹配优先级,数值越小越优先。"
@@ -27586,7 +27601,10 @@
             "description": "要更新的协作空间 ID。"
           },
           "team_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "新的所属团队 ID。"
           },
@@ -27600,18 +27618,27 @@
             "description": "可管理该协作空间的其他团队 ID，最多 3 个。"
           },
           "channel_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "minLength": 1,
             "maxLength": 59,
             "description": "新的协作空间名称，1 到 59 个字符。"
           },
           "description": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 500,
             "description": "新的描述信息，最多 500 个字符。"
           },
           "auto_resolve_timeout": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "minimum": 0,
             "maximum": 2592000,
@@ -27626,7 +27653,10 @@
             "description": "自动恢复计时重置方式。"
           },
           "is_private": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "为 true 时仅管理团队可见。"
           },
           "group": {
@@ -27636,15 +27666,24 @@
             "$ref": "#/components/schemas/Flapping"
           },
           "disable_outlier_detection": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "禁用新奇故障检测。"
           },
           "disable_auto_close": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "禁用故障自动关闭。"
           },
           "is_external_report_enabled": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "允许外部上报人向该协作空间上报故障。"
           }
         }
@@ -27876,7 +27915,10 @@
             "description": "分派策略 ID（MongoDB ObjectID）。"
           },
           "priority": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "description": "匹配优先级，数值越小越优先。"
           },
           "aggr_window": {
@@ -28344,11 +28386,17 @@
             "description": "上次响应返回的不透明游标，用于获取下一页。"
           },
           "is_active": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "过滤活跃（true）或已恢复（false）状态告警。"
           },
           "ever_muted": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "按告警是否曾被静默过滤。"
           },
           "alert_severity": {
@@ -30240,27 +30288,42 @@
         "description": "值班表创建/更新/预览共用的请求体，结构与值班表详情一致，此处仅列出常用字段。更新时需要 schedule_id；预览时 start、end 必填。",
         "properties": {
           "schedule_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "值班表 ID，更新时必填。"
           },
           "schedule_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "值班表显示名称，最长 40 字符。",
             "maxLength": 40
           },
           "name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "旧版名称字段，当 schedule_name 为空时使用。",
             "maxLength": 40
           },
           "description": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "值班表描述，最长 500 字符。",
             "maxLength": 500
           },
           "team_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "所属团队 ID。"
           },
@@ -30452,22 +30515,34 @@
             "description": "日历 ID。"
           },
           "cal_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "新的日历名称。",
             "minLength": 1,
             "maxLength": 39
           },
           "description": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "新的描述。",
             "maxLength": 499
           },
           "timezone": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "新的 IANA 时区。"
           },
           "team_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "新的所属团队 ID。"
           },
@@ -30680,7 +30755,10 @@
             "description": "事件结束日期（不含），格式 YYYY-MM-DD。"
           },
           "is_off": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "是否为非工作日。true = 休息日，false = 工作日覆盖。"
           }
         }
@@ -31048,7 +31126,10 @@
             "description": "按团队 ID 列表过滤。"
           },
           "creator_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "按创建人成员 ID 过滤。"
           },
@@ -31669,17 +31750,26 @@
             "description": "映射规则 ID（MongoDB ObjectID 十六进制）。"
           },
           "schema_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 39,
             "description": "新的映射规则名称（最多 39 个字符）。"
           },
           "description": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 500,
             "description": "新的描述（最多 500 个字符）。"
           },
           "team_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "新的所属团队 ID，`0` 表示移除团队关联。"
           }
@@ -32042,22 +32132,34 @@
             "description": "映射 API ID（MongoDB ObjectID 十六进制）。"
           },
           "api_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 199,
             "description": "新 API 名称（最多 199 个字符）。"
           },
           "description": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "新描述。"
           },
           "url": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uri",
             "maxLength": 500,
             "description": "新端点 URL（最多 500 个字符）。"
           },
           "insecure_skip_verify": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "新 TLS 跳过验证设置。"
           },
           "headers": {
@@ -32068,15 +32170,24 @@
             "description": "新请求头映射（覆盖原有值）。"
           },
           "timeout": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "description": "新超时秒数。"
           },
           "retry_count": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "description": "新重试次数。"
           },
           "team_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "新所属团队 ID。"
           }
@@ -33148,7 +33259,10 @@
             "description": "目标事件 ID。"
           },
           "title": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 255,
             "description": "新的事件标题，最多 255 个字符。留空表示保持原值。"
           },
@@ -33477,6 +33591,13 @@
           "source_page_id": {
             "type": "string",
             "description": "Atlassian Statuspage 源状态页 ID。"
+          },
+          "url_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "迁移后状态页的目标 URL 名称。省略时沿用源状态页的 URL 名称。"
           }
         }
       },
@@ -35946,11 +36067,17 @@
             "description": "要更新的应用 ID。"
           },
           "application_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "新的应用名称。"
           },
           "type": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "browser",
               "ios",
@@ -35963,17 +36090,29 @@
             ]
           },
           "team_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64"
           },
           "is_private": {
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "no_ip": {
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "no_geo": {
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "alerting": {
             "$ref": "#/components/schemas/RumApplicationAlerting"
@@ -36944,29 +37083,47 @@
             "description": "要更新的成员 ID"
           },
           "member_name": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "minLength": 2,
             "maxLength": 39,
             "description": "显示名称"
           },
           "email": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "邮箱地址"
           },
           "phone": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "手机号"
           },
           "country_code": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "国家区号"
           },
           "avatar": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "头像 URL"
           },
           "locale": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "enum": [
               "zh-CN",
               "en-US"
@@ -36974,7 +37131,10 @@
             "description": "语言"
           },
           "time_zone": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "时区"
           }
         }
@@ -37795,11 +37955,17 @@
             "description": "按操作人成员 ID 过滤。"
           },
           "is_dangerous": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "为 true 时只返回高危操作。"
           },
           "is_write": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "为 true 时只返回写操作；为 false 时只返回读操作。"
           }
         }
