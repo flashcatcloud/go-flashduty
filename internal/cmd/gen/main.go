@@ -482,7 +482,11 @@ func (g *Gen) emitModels() string {
 			v := g.goTypeOf(asMap(s["additionalProperties"]), goName(name)+"Value")
 			fmt.Fprintf(&enumsAndAliases, "// %s is a map response payload.\ntype %s map[string]%s\n\n", goName(name), goName(name), v)
 		case typeStr(s) == "string", typeStr(s) == "integer", typeStr(s) == "number", typeStr(s) == "boolean":
-			fmt.Fprintf(&enumsAndAliases, "type %s %s\n\n", goName(name), g.goTypeOf(s, goName(name)))
+			gt := g.goTypeOf(s, goName(name))
+			fmt.Fprintf(&enumsAndAliases, "type %s %s\n\n", goName(name), gt)
+			if gt == "string" {
+				enumsAndAliases.WriteString(stringerMethod(goName(name)))
+			}
 		default:
 			g.queue(goName(name), g.mergeAllOf(s))
 		}
@@ -568,7 +572,19 @@ func (g *Gen) emitEnum(name string, s map[string]any) string {
 		fmt.Fprintf(&b, "\t%s%s %s = %q\n", name, goName(val), name, val)
 	}
 	b.WriteString(")\n\n")
+	b.WriteString(stringerMethod(name))
 	return b.String()
+}
+
+// stringerMethod emits a String() method for a named string type so the value
+// satisfies fmt.Stringer. encoding/json ignores Stringer (it renders the
+// underlying string directly), but reflection-based encoders that special-case
+// only the builtin `string` type — notably toon-go — cannot otherwise render a
+// named string type and fail with "unsupported value of type". Making every
+// generated named-string type a Stringer keeps TOON output working for enums
+// and string aliases alike.
+func stringerMethod(name string) string {
+	return fmt.Sprintf("// String returns the underlying string value, implementing fmt.Stringer.\nfunc (e %s) String() string { return string(e) }\n\n", name)
 }
 
 func (g *Gen) emitStruct(name string, s map[string]any) string {

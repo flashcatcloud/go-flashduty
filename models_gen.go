@@ -11,10 +11,16 @@ const (
 	AlertFeedTypeAClose AlertFeedType = "a_close"
 )
 
+// String returns the underlying string value, implementing fmt.Stringer.
+func (e AlertFeedType) String() string { return string(e) }
+
 // AlertRuleExportListResponse is a list response payload.
 type AlertRuleExportListResponse []AlertRuleExport
 
 type CSVFileResponse string
+
+// String returns the underlying string value, implementing fmt.Stringer.
+func (e CSVFileResponse) String() string { return string(e) }
 
 // DataSourceListResponse is a list response payload.
 type DataSourceListResponse []DataSourceItem
@@ -45,6 +51,9 @@ const (
 	ErrorCodeServiceUnavailable    ErrorCode = "ServiceUnavailable"
 )
 
+// String returns the underlying string value, implementing fmt.Stringer.
+func (e ErrorCode) String() string { return string(e) }
+
 // FeedSeverity Severity level.
 type FeedSeverity string
 
@@ -54,6 +63,9 @@ const (
 	FeedSeverityWarning  FeedSeverity = "Warning"
 	FeedSeverityInfo     FeedSeverity = "Info"
 )
+
+// String returns the underlying string value, implementing fmt.Stringer.
+func (e FeedSeverity) String() string { return string(e) }
 
 // FilterGroup is an alias for OrFilterGroup.
 type FilterGroup = OrFilterGroup
@@ -90,6 +102,9 @@ const (
 	IncidentFeedTypeIAutoRefresh IncidentFeedType = "i_auto_refresh"
 	IncidentFeedTypeAMerge       IncidentFeedType = "a_merge"
 )
+
+// String returns the underlying string value, implementing fmt.Stringer.
+func (e IncidentFeedType) String() string { return string(e) }
 
 // InsightIncidentExportRequest is an alias for InsightFilter.
 type InsightIncidentExportRequest = InsightFilter
@@ -140,6 +155,9 @@ type SLSLogstoresResponse []string
 type SLSProjectsResponse []string
 
 type StatusPageSubscriberExportResponse string
+
+// String returns the underlying string value, implementing fmt.Stringer.
+func (e StatusPageSubscriberExportResponse) String() string { return string(e) }
 
 // StoreRulesetListResponse is a list response payload.
 type StoreRulesetListResponse []StoreRulesetItem
