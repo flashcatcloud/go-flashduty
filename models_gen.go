@@ -2338,7 +2338,7 @@ type FeedDetailIncidentResetField struct {
 	// Name of the custom field that was updated.
 	FieldName string `json:"field_name,omitempty"`
 	// New value of the custom field. Type depends on the field definition.
-	To map[string]any `json:"to,omitempty"`
+	To any `json:"to,omitempty"`
 }
 
 // FeedDetailIncidentResetImpact is generated from the Flashduty OpenAPI schema.
@@ -3545,7 +3545,7 @@ type McpToolInfo struct {
 	// What the tool does.
 	Description string `json:"description,omitempty"`
 	// JSON schema of the tool's input arguments.
-	InputSchema map[string]any `json:"input_schema,omitempty"`
+	InputSchema any `json:"input_schema,omitempty"`
 	// Tool name as advertised by the server.
 	Name string `json:"name,omitempty"`
 }
@@ -4399,7 +4399,7 @@ type ResetIncidentFieldRequest struct {
 	// Custom field name; must match a field defined on the account.
 	FieldName string `json:"field_name,omitempty"`
 	// New field value. Type must match the field definition.
-	FieldValue map[string]any `json:"field_value,omitempty"`
+	FieldValue any `json:"field_value,omitempty"`
 	// Incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty"`
 }
@@ -4465,8 +4465,8 @@ type ResponderInsightResponse struct {
 // ResponseEnvelope is generated from the Flashduty OpenAPI schema.
 type ResponseEnvelope struct {
 	// Endpoint-specific payload. See each operation's 200 response schema.
-	Data  map[string]any `json:"data,omitempty"`
-	Error any            `json:"error,omitempty"`
+	Data  any `json:"data,omitempty"`
+	Error any `json:"error,omitempty"`
 	// Unique ID for this request. Mirrored in the Flashcat-Request-Id header. Include it when reporting issues.
 	RequestID string `json:"request_id,omitempty"`
 }

@@ -696,6 +696,15 @@ func (g *Gen) goTypeOf(s map[string]any, hint string) string {
 		if len(asMap(s["properties"])) > 0 {
 			return g.queue(hint, s)
 		}
+		// A typeless schema (no `type`, no $ref/allOf/oneOf/properties/
+		// additionalProperties — those are handled above) is "any JSON value":
+		// the backend accepts an arbitrary scalar/object/array (e.g. a custom
+		// field_value). Emit `any`, not `map[string]any`, which would wrongly
+		// reject scalars. An explicit `type: object` with no other shape stays
+		// `map[string]any` (a JSON object).
+		if typeStr(s) == "" {
+			return "any"
+		}
 		return "map[string]any"
 	default:
 		return "any"
