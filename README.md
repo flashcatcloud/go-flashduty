@@ -4,7 +4,7 @@ The official Go client for the [Flashduty](https://flashcat.cloud) Open API — 
 
 📖 **API reference:** <https://docs.flashcat.cloud/en/openapi/introduction>
 
-> **Status:** All 224 Open API endpoints across 21 services are generated from the Flashduty OpenAPI specification, covered by unit tests, and validated end-to-end against the live API.
+> **Status:** All 253 Open API endpoints across 27 services are generated from the Flashduty OpenAPI specification, covered by unit tests, and validated end-to-end against the live API.
 
 ## Install
 

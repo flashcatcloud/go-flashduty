@@ -35,6 +35,20 @@ func (s *NotificationTemplatesService) ReadList(ctx context.Context, req *Templa
 	return out, resp, nil
 }
 
+// Preview template.
+//
+// Render a notification template against incident data or mock data and return the output.
+//
+// API: POST /template/preview (template-read-preview).
+func (s *NotificationTemplatesService) ReadPreview(ctx context.Context, req *PreviewTemplateRequest) (*PreviewTemplateResponse, *Response, error) {
+	out := new(PreviewTemplateResponse)
+	resp, err := s.client.do(ctx, "/template/preview", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Create a template.
 //
 // Create a new notification template.

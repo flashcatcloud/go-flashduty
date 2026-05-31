@@ -7,6 +7,20 @@ import "context"
 // StatusPagesService handles the "On-call/Status pages" API resource.
 type StatusPagesService service
 
+// List status pages.
+//
+// List all status pages owned by the account, including their components and sections.
+//
+// API: GET /status-page/list (status-page-read-page-list).
+func (s *StatusPagesService) ReadPageList(ctx context.Context) (*ListStatusPageResponse, *Response, error) {
+	out := new(ListStatusPageResponse)
+	resp, err := s.client.doGet(ctx, "/status-page/list", nil, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Create status page event.
 //
 // Create a new incident or maintenance event on a status page.

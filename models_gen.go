@@ -144,6 +144,166 @@ type StatusPageSubscriberExportResponse string
 // StoreRulesetListResponse is a list response payload.
 type StoreRulesetListResponse []StoreRulesetItem
 
+// A2aAgentCreateRequest is generated from the Flashduty OpenAPI schema.
+type A2aAgentCreateRequest struct {
+	// Display name of the agent.
+	AgentName string `json:"agent_name,omitempty"`
+	// Authentication parameters keyed by name.
+	AuthConfig map[string]string `json:"auth_config,omitempty"`
+	// Credential model; defaults to shared.
+	AuthMode string `json:"auth_mode,omitempty"`
+	// Authentication scheme used when calling the agent.
+	AuthType string `json:"auth_type,omitempty"`
+	// URL of the agent's published A2A agent card.
+	CardURL string `json:"card_url,omitempty"`
+	// What this agent does and when to delegate to it.
+	Description string `json:"description,omitempty"`
+	// OAuth metadata JSON; reserved for OAuth-based auth.
+	OauthMetadata string `json:"oauth_metadata,omitempty"`
+	// JSON schema of the per-user secret; required when auth_mode is per_user_secret.
+	SecretSchema string `json:"secret_schema,omitempty"`
+	// Whether the agent supports streaming responses.
+	Streaming bool `json:"streaming,omitempty"`
+	// Owning team for the new agent; 0 for account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+}
+
+// A2aAgentCreateResponse is generated from the Flashduty OpenAPI schema.
+type A2aAgentCreateResponse struct {
+	// Identifier of the created agent.
+	AgentID string `json:"agent_id,omitempty"`
+}
+
+// A2aAgentIDRequest is generated from the Flashduty OpenAPI schema.
+type A2aAgentIDRequest struct {
+	// Identifier of the target agent.
+	AgentID string `json:"agent_id,omitempty"`
+}
+
+// A2aAgentItem is generated from the Flashduty OpenAPI schema.
+type A2aAgentItem struct {
+	// Owning account.
+	AccountID int64 `json:"account_id,omitempty"`
+	// Name resolved from the fetched agent card.
+	AgentCardName string `json:"agent_card_name,omitempty"`
+	// Skills advertised on the fetched agent card.
+	AgentCardSkills []string `json:"agent_card_skills,omitempty"`
+	// Unique identifier of the A2A agent.
+	AgentID string `json:"agent_id,omitempty"`
+	// Display name of the agent.
+	AgentName string `json:"agent_name,omitempty"`
+	// Authentication parameters keyed by name.
+	AuthConfig map[string]string `json:"auth_config,omitempty"`
+	// Credential model: shared, per_user_secret, or per_user_oauth.
+	AuthMode string `json:"auth_mode,omitempty"`
+	// Authentication scheme used when calling the agent.
+	AuthType string `json:"auth_type,omitempty"`
+	// Whether the calling member may edit or delete this resource.
+	CanEdit bool `json:"can_edit,omitempty"`
+	// Timeout for fetching the agent card, in seconds.
+	CardResolveTimeout int64 `json:"card_resolve_timeout,omitempty"`
+	// URL of the agent's published A2A agent card.
+	CardURL string `json:"card_url,omitempty"`
+	// Creation time as a Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at,omitempty"`
+	// Member who created this resource.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// What this agent does and when to delegate to it.
+	Description string `json:"description,omitempty"`
+	// OAuth metadata JSON.
+	OauthMetadata string `json:"oauth_metadata,omitempty"`
+	// JSON schema of the per-user secret.
+	SecretSchema string `json:"secret_schema,omitempty"`
+	// Whether the agent is active and reachable.
+	Status string `json:"status,omitempty"`
+	// Whether the agent supports streaming responses.
+	Streaming bool `json:"streaming,omitempty"`
+	// Timeout for a single delegated task, in seconds.
+	TaskTimeout int64 `json:"task_timeout,omitempty"`
+	// Owning team; 0 means account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+	// Last-update time as a Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
+}
+
+// A2aAgentListRequest is generated from the Flashduty OpenAPI schema.
+type A2aAgentListRequest struct {
+	// Include account-scoped rows alongside team-scoped ones; defaults to true.
+	IncludeAccount bool `json:"include_account,omitempty"`
+	// Maximum number of rows to return; defaults to 20.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of rows to skip for pagination.
+	Offset int64 `json:"offset,omitempty"`
+	// Restrict results to resources owned by these teams; intersected with the caller's visible set.
+	TeamIDs []int64 `json:"team_ids,omitempty"`
+}
+
+// A2aAgentListResponse is generated from the Flashduty OpenAPI schema.
+type A2aAgentListResponse struct {
+	// A2A agents on the current page.
+	Items []A2aAgentItem `json:"items,omitempty"`
+	// Total number of agents matching the filters.
+	Total int64 `json:"total,omitempty"`
+}
+
+// A2aAgentUpdateRequest is generated from the Flashduty OpenAPI schema.
+type A2aAgentUpdateRequest struct {
+	// Identifier of the agent to update.
+	AgentID string `json:"agent_id,omitempty"`
+	// New display name.
+	AgentName string `json:"agent_name,omitempty"`
+	// New authentication parameters.
+	AuthConfig map[string]string `json:"auth_config,omitempty"`
+	// New credential model.
+	AuthMode string `json:"auth_mode,omitempty"`
+	// New authentication scheme.
+	AuthType string `json:"auth_type,omitempty"`
+	// New agent card URL.
+	CardURL string `json:"card_url,omitempty"`
+	// New description.
+	Description string `json:"description,omitempty"`
+	// New OAuth metadata JSON.
+	OauthMetadata string `json:"oauth_metadata,omitempty"`
+	// New per-user secret JSON schema.
+	SecretSchema string `json:"secret_schema,omitempty"`
+	// Toggle streaming-response support.
+	Streaming bool `json:"streaming,omitempty"`
+	// Reassign the agent to this team; omit to leave unchanged, 0 for account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+}
+
+// AccountInfo is generated from the Flashduty OpenAPI schema.
+type AccountInfo struct {
+	// Account identifier.
+	AccountID int64 `json:"account_id,omitempty"`
+	// Account name.
+	AccountName string `json:"account_name,omitempty"`
+	// Account avatar URL.
+	Avatar string `json:"avatar,omitempty"`
+	// Calling country code for the contact phone.
+	CountryCode string `json:"country_code,omitempty"`
+	// Account creation time, Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at,omitempty"`
+	// Primary account domain (login subdomain).
+	Domain string `json:"domain,omitempty"`
+	// Account contact email.
+	Email string `json:"email,omitempty"`
+	// Additional account domains.
+	ExtraDomains []string `json:"extra_domains,omitempty"`
+	// Account language preference (e.g. zh-CN, en-US).
+	Locale string `json:"locale,omitempty"`
+	// Account identifier on the cloud marketplace platform (present only for marketplace accounts).
+	MpAccountID string `json:"mp_account_id,omitempty"`
+	// Cloud marketplace platform the account was provisioned from (present only for marketplace accounts).
+	MpPlat string `json:"mp_plat,omitempty"`
+	// Account contact phone, masked for privacy.
+	Phone string `json:"phone,omitempty"`
+	// Account access restrictions (present only when configured).
+	Restrictions AccountInfoRestrictions `json:"restrictions,omitempty"`
+	// Account default timezone (IANA name, e.g. Asia/Shanghai).
+	TimeZone string `json:"time_zone,omitempty"`
+}
+
 // AckIncidentRequest is generated from the Flashduty OpenAPI schema.
 type AckIncidentRequest struct {
 	// Incident IDs to acknowledge. At most 100 per call.
@@ -158,6 +318,16 @@ type AddIncidentResponderRequest struct {
 	Notify AddIncidentResponderRequestNotify `json:"notify,omitempty"`
 	// Member IDs to add as responders.
 	PersonIDs []int64 `json:"person_ids,omitempty"`
+}
+
+// AddWarRoomMemberRequest is generated from the Flashduty OpenAPI schema.
+type AddWarRoomMemberRequest struct {
+	// Chat ID of the war room within the IM platform.
+	ChatID string `json:"chat_id,omitempty"`
+	// IM integration that hosts the war room.
+	IntegrationID int64 `json:"integration_id,omitempty"`
+	// Person IDs to add to the war room.
+	MemberIDs []int64 `json:"member_ids,omitempty"`
 }
 
 // AffectedStatusPageComponentItem is generated from the Flashduty OpenAPI schema.
@@ -1042,6 +1212,76 @@ type CalendarUpdateRequest struct {
 type CancelStatusPageMigrationRequest struct {
 	// Migration job ID.
 	JobID string `json:"job_id,omitempty"`
+}
+
+// ChangeEventItem is generated from the Flashduty OpenAPI schema.
+type ChangeEventItem struct {
+	// Account this change event belongs to.
+	AccountID int64 `json:"account_id,omitempty"`
+	// Stable key that groups events belonging to the same change.
+	ChangeKey string `json:"change_key,omitempty"`
+	// Lifecycle status of the change event.
+	ChangeStatus string `json:"change_status,omitempty"`
+	// Collaboration channel this change event is routed to.
+	ChannelID int64 `json:"channel_id,omitempty"`
+	// Unix timestamp in seconds when the change event was created.
+	CreatedAt Timestamp `json:"created_at,omitempty"`
+	// Unix timestamp in seconds when the change event was deleted.
+	DeletedAt Timestamp `json:"deleted_at,omitempty"`
+	// Change event description.
+	Description string `json:"description,omitempty"`
+	// Change event ID, a MongoDB ObjectID hex string.
+	EventID string `json:"event_id,omitempty"`
+	// Unix timestamp in seconds when the change event occurred.
+	EventTime Timestamp `json:"event_time,omitempty"`
+	// Integration that reported this change event.
+	IntegrationID int64 `json:"integration_id,omitempty"`
+	// Key-value labels attached to the change event.
+	Labels map[string]string `json:"labels,omitempty"`
+	// External link to the source change record.
+	Link string `json:"link,omitempty"`
+	// Change event title.
+	Title string `json:"title,omitempty"`
+	// Unix timestamp in seconds when the change event was last updated.
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
+}
+
+// ChangeItem is generated from the Flashduty OpenAPI schema.
+type ChangeItem struct {
+	// Account this change belongs to.
+	AccountID int64 `json:"account_id,omitempty"`
+	// Change ID, a MongoDB ObjectID hex string.
+	ChangeID string `json:"change_id,omitempty"`
+	// Stable key that groups events belonging to the same change.
+	ChangeKey string `json:"change_key,omitempty"`
+	// Current lifecycle status of the change.
+	ChangeStatus string `json:"change_status,omitempty"`
+	// Collaboration channel this change is routed to.
+	ChannelID int64 `json:"channel_id,omitempty"`
+	// Name of the collaboration channel.
+	ChannelName string `json:"channel_name,omitempty"`
+	// Status of the collaboration channel.
+	ChannelStatus string `json:"channel_status,omitempty"`
+	// Change description.
+	Description string `json:"description,omitempty"`
+	// Unix timestamp in seconds when the change ended.
+	EndTime Timestamp `json:"end_time,omitempty"`
+	// Underlying change events, returned only when include_events is true.
+	Events []ChangeEventItem `json:"events,omitempty"`
+	// Integration that reported this change.
+	IntegrationID int64 `json:"integration_id,omitempty"`
+	// Name of the reporting integration.
+	IntegrationName string `json:"integration_name,omitempty"`
+	// Key-value labels attached to the change.
+	Labels map[string]string `json:"labels,omitempty"`
+	// Unix timestamp in seconds of the most recent change activity.
+	LastTime Timestamp `json:"last_time,omitempty"`
+	// External link to the source change record.
+	Link string `json:"link,omitempty"`
+	// Unix timestamp in seconds when the change started.
+	StartTime Timestamp `json:"start_time,omitempty"`
+	// Change title.
+	Title string `json:"title,omitempty"`
 }
 
 // ChannelCreateResponse is generated from the Flashduty OpenAPI schema.
@@ -2281,6 +2521,18 @@ type Flapping struct {
 	MuteMins int64 `json:"mute_mins,omitempty"`
 }
 
+// GetWarRoomDefaultObserversRequest is generated from the Flashduty OpenAPI schema.
+type GetWarRoomDefaultObserversRequest struct {
+	// Incident ID, a MongoDB ObjectID hex string.
+	IncidentID string `json:"incident_id,omitempty"`
+}
+
+// GetWarRoomDefaultObserversResponse is generated from the Flashduty OpenAPI schema.
+type GetWarRoomDefaultObserversResponse struct {
+	// Historical responders suggested as default war-room observers.
+	Observers []WarRoomPersonItem `json:"observers,omitempty"`
+}
+
 // GetWarRoomDetailRequest is generated from the Flashduty OpenAPI schema.
 type GetWarRoomDetailRequest struct {
 	// Chat/group ID on the IM side.
@@ -2841,6 +3093,37 @@ type LinkItem struct {
 	OpenType string `json:"open_type,omitempty"`
 }
 
+// ListChangeRequest is generated from the Flashduty OpenAPI schema.
+type ListChangeRequest struct {
+	ListOptions
+	// Sort in ascending order when true.
+	Asc bool `json:"asc,omitempty"`
+	// Filter by collaboration channel IDs.
+	ChannelIDs []int64 `json:"channel_ids,omitempty"`
+	// Unix timestamp in seconds for the end of the query window.
+	EndTime int64 `json:"end_time,omitempty"`
+	// Include the underlying change events for each change when true.
+	IncludeEvents bool `json:"include_events,omitempty"`
+	// Filter by reporting integration IDs.
+	IntegrationIDs []int64 `json:"integration_ids,omitempty"`
+	// Field to sort the result by.
+	Orderby string `json:"orderby,omitempty"`
+	// Free-text or regular-expression search over change fields.
+	Query string `json:"query,omitempty"`
+	// Unix timestamp in seconds for the start of the query window.
+	StartTime int64 `json:"start_time,omitempty"`
+}
+
+// ListChangeResponse is generated from the Flashduty OpenAPI schema.
+type ListChangeResponse struct {
+	// Whether more pages are available after this one.
+	HasNextPage bool `json:"has_next_page,omitempty"`
+	// Changes on the current page.
+	Items []ChangeItem `json:"items,omitempty"`
+	// Total number of matching changes.
+	Total int64 `json:"total,omitempty"`
+}
+
 // ListChannelsRequest is generated from the Flashduty OpenAPI schema.
 type ListChannelsRequest struct {
 	ListOptions
@@ -3039,6 +3322,18 @@ type ListSilenceRulesResponse struct {
 	Items []SilenceRuleItem `json:"items,omitempty"`
 }
 
+// ListStatusPageResponse is generated from the Flashduty OpenAPI schema.
+type ListStatusPageResponse struct {
+	// Status pages owned by the account.
+	Items []StatusPageItem `json:"items,omitempty"`
+}
+
+// ListWarRoomEnabledResponse is generated from the Flashduty OpenAPI schema.
+type ListWarRoomEnabledResponse struct {
+	// IM integrations with the war-room feature enabled.
+	Items []WarRoomDataSourceItem `json:"items,omitempty"`
+}
+
 // ListWarRoomsRequest is generated from the Flashduty OpenAPI schema.
 type ListWarRoomsRequest struct {
 	// Incident ID (MongoDB ObjectID).
@@ -3084,6 +3379,175 @@ type ListWebhookHistoryResponse struct {
 	SearchAfterCtx string `json:"search_after_ctx,omitempty"`
 	// Total number of matching records.
 	Total int64 `json:"total,omitempty"`
+}
+
+// McpServerCreateRequest is generated from the Flashduty OpenAPI schema.
+type McpServerCreateRequest struct {
+	// Command-line arguments for the stdio executable.
+	Args []string `json:"args,omitempty"`
+	// Credential model; defaults to shared.
+	AuthMode string `json:"auth_mode,omitempty"`
+	// Per-call timeout in seconds.
+	CallTimeout int64 `json:"call_timeout,omitempty"`
+	// Executable to launch for stdio transport.
+	Command string `json:"command,omitempty"`
+	// Connection timeout in seconds.
+	ConnectTimeout int64 `json:"connect_timeout,omitempty"`
+	// What this MCP server provides.
+	Description string `json:"description,omitempty"`
+	// Environment variables for the stdio process.
+	Env map[string]string `json:"env,omitempty"`
+	// HTTP headers sent to the remote endpoint.
+	Headers map[string]string `json:"headers,omitempty"`
+	// OAuth metadata JSON; reserved for OAuth-based auth.
+	OauthMetadata string `json:"oauth_metadata,omitempty"`
+	// JSON schema of the per-user secret; required when auth_mode is per_user_secret.
+	SecretSchema string `json:"secret_schema,omitempty"`
+	// Display name of the server.
+	ServerName string `json:"server_name,omitempty"`
+	// Initial lifecycle state of the server.
+	Status string `json:"status,omitempty"`
+	// Owning team for the new server; 0 for account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+	// Transport used to reach the server.
+	Transport string `json:"transport,omitempty"`
+	// Endpoint URL for sse or streamable-http transport.
+	URL string `json:"url,omitempty"`
+}
+
+// McpServerDeleteRequest is generated from the Flashduty OpenAPI schema.
+type McpServerDeleteRequest struct {
+	// Identifier of the server to delete.
+	ServerID string `json:"server_id,omitempty"`
+}
+
+// McpServerGetRequest is generated from the Flashduty OpenAPI schema.
+type McpServerGetRequest struct {
+	// Identifier of the server to fetch.
+	ServerID string `json:"server_id,omitempty"`
+}
+
+// McpServerItem is generated from the Flashduty OpenAPI schema.
+type McpServerItem struct {
+	// Owning account.
+	AccountID int64 `json:"account_id,omitempty"`
+	// LLM-generated description, preferred over description when present.
+	AIDescription string `json:"ai_description,omitempty"`
+	// Command-line arguments for the stdio executable.
+	Args []string `json:"args,omitempty"`
+	// Credential model: shared, per_user_secret, or per_user_oauth.
+	AuthMode string `json:"auth_mode,omitempty"`
+	// Per-call timeout in seconds.
+	CallTimeout int64 `json:"call_timeout,omitempty"`
+	// Whether the calling member may edit or delete this resource.
+	CanEdit bool `json:"can_edit,omitempty"`
+	// Executable launched for stdio transport.
+	Command string `json:"command,omitempty"`
+	// Connection timeout in seconds.
+	ConnectTimeout int64 `json:"connect_timeout,omitempty"`
+	// Creation time as a Unix timestamp in milliseconds.
+	CreatedAt TimestampMilli `json:"created_at,omitempty"`
+	// Member who created this resource.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// What this MCP server provides.
+	Description string `json:"description,omitempty"`
+	// Environment variables passed to the stdio process.
+	Env map[string]string `json:"env,omitempty"`
+	// HTTP headers sent to the remote endpoint; secret values are masked.
+	Headers map[string]string `json:"headers,omitempty"`
+	// Tool-probe failure message; present when the live probe failed.
+	ListError string `json:"list_error,omitempty"`
+	// OAuth metadata JSON.
+	OauthMetadata string `json:"oauth_metadata,omitempty"`
+	// Outbound proxy URL used to reach the server.
+	ProxyURL string `json:"proxy_url,omitempty"`
+	// JSON schema of the per-user secret.
+	SecretSchema string `json:"secret_schema,omitempty"`
+	// Unique identifier of the MCP server.
+	ServerID string `json:"server_id,omitempty"`
+	// Display name of the MCP server.
+	ServerName string `json:"server_name,omitempty"`
+	// Whether the server is active and usable by agents.
+	Status string `json:"status,omitempty"`
+	// Owning team; 0 means account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+	// Number of tools discovered on the server.
+	ToolCount int64 `json:"tool_count,omitempty"`
+	// Live tool catalogue; populated only by get and test.
+	Tools []McpToolInfo `json:"tools,omitempty"`
+	// Transport used to reach the server.
+	Transport string `json:"transport,omitempty"`
+	// Last-update time as a Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at,omitempty"`
+	// Endpoint URL for sse or streamable-http transport.
+	URL string `json:"url,omitempty"`
+}
+
+// McpServerListRequest is generated from the Flashduty OpenAPI schema.
+type McpServerListRequest struct {
+	ListOptions
+	// Include account-scoped rows alongside team-scoped ones; defaults to true.
+	IncludeAccount bool `json:"include_account,omitempty"`
+	// Restrict results to resources owned by these teams; intersected with the caller's visible set.
+	TeamIDs []int64 `json:"team_ids,omitempty"`
+}
+
+// McpServerListResponse is generated from the Flashduty OpenAPI schema.
+type McpServerListResponse struct {
+	// MCP servers on the current page.
+	Servers []McpServerItem `json:"servers,omitempty"`
+	// Total number of servers matching the filters.
+	Total int64 `json:"total,omitempty"`
+}
+
+// McpServerStatusRequest is generated from the Flashduty OpenAPI schema.
+type McpServerStatusRequest struct {
+	// Identifier of the target server.
+	ServerID string `json:"server_id,omitempty"`
+}
+
+// McpServerUpdateRequest is generated from the Flashduty OpenAPI schema.
+type McpServerUpdateRequest struct {
+	// New stdio arguments.
+	Args []string `json:"args,omitempty"`
+	// New credential model.
+	AuthMode string `json:"auth_mode,omitempty"`
+	// New per-call timeout in seconds.
+	CallTimeout int64 `json:"call_timeout,omitempty"`
+	// New stdio executable.
+	Command string `json:"command,omitempty"`
+	// New connection timeout in seconds.
+	ConnectTimeout int64 `json:"connect_timeout,omitempty"`
+	// New description.
+	Description string `json:"description,omitempty"`
+	// New stdio environment variables.
+	Env map[string]string `json:"env,omitempty"`
+	// New HTTP headers for the remote endpoint.
+	Headers map[string]string `json:"headers,omitempty"`
+	// New OAuth metadata JSON.
+	OauthMetadata string `json:"oauth_metadata,omitempty"`
+	// New per-user secret JSON schema.
+	SecretSchema string `json:"secret_schema,omitempty"`
+	// Identifier of the server to update.
+	ServerID string `json:"server_id,omitempty"`
+	// New display name.
+	ServerName string `json:"server_name,omitempty"`
+	// Reassign the server to this team; omit to leave unchanged, 0 for account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+	// New transport for the server.
+	Transport string `json:"transport,omitempty"`
+	// New endpoint URL for remote transports.
+	URL string `json:"url,omitempty"`
+}
+
+// McpToolInfo is generated from the Flashduty OpenAPI schema.
+type McpToolInfo struct {
+	// What the tool does.
+	Description string `json:"description,omitempty"`
+	// JSON schema of the tool's input arguments.
+	InputSchema map[string]any `json:"input_schema,omitempty"`
+	// Tool name as advertised by the server.
+	Name string `json:"name,omitempty"`
 }
 
 // MappingAPICreateRequest is generated from the Flashduty OpenAPI schema.
@@ -3870,6 +4334,26 @@ type PostMortemMeta struct {
 	UpdatedAtSeconds Timestamp `json:"updated_at_seconds,omitempty"`
 }
 
+// PreviewTemplateRequest is generated from the Flashduty OpenAPI schema.
+type PreviewTemplateRequest struct {
+	// Template content to render.
+	Content string `json:"content,omitempty"`
+	// Incident ID whose data is used to render the template; mock data is used when omitted. A MongoDB ObjectID hex string.
+	IncidentID string `json:"incident_id,omitempty"`
+	// Template channel type that selects the rendering engine.
+	Type string `json:"type,omitempty"`
+}
+
+// PreviewTemplateResponse is generated from the Flashduty OpenAPI schema.
+type PreviewTemplateResponse struct {
+	// Rendered template output, present when success is true.
+	Content string `json:"content,omitempty"`
+	// Error message describing why rendering failed, present when success is false.
+	Message string `json:"message,omitempty"`
+	// Whether the template rendered without errors.
+	Success bool `json:"success,omitempty"`
+}
+
 // QueryRow is generated from the Flashduty OpenAPI schema.
 type QueryRow struct {
 	// String-valued fields (labels, log fields, SQL columns).
@@ -3974,6 +4458,15 @@ type ResponderInsightItem struct {
 // ResponderInsightResponse is generated from the Flashduty OpenAPI schema.
 type ResponderInsightResponse struct {
 	Items []ResponderInsightItem `json:"items,omitempty"`
+}
+
+// ResponseEnvelope is generated from the Flashduty OpenAPI schema.
+type ResponseEnvelope struct {
+	// Endpoint-specific payload. See each operation's 200 response schema.
+	Data  map[string]any `json:"data,omitempty"`
+	Error any            `json:"error,omitempty"`
+	// Unique ID for this request. Mirrored in the Flashcat-Request-Id header. Include it when reporting issues.
+	RequestID string `json:"request_id,omitempty"`
 }
 
 // RoleGrantRequest is generated from the Flashduty OpenAPI schema.
@@ -4807,6 +5300,107 @@ type SilenceRuleItem struct {
 	UpdatedBy   int64        `json:"updated_by,omitempty"`
 }
 
+// SkillDeleteRequest is generated from the Flashduty OpenAPI schema.
+type SkillDeleteRequest struct {
+	// Identifier of the skill to delete.
+	SkillID string `json:"skill_id,omitempty"`
+}
+
+// SkillDownloadRequest is generated from the Flashduty OpenAPI schema.
+type SkillDownloadRequest struct {
+	// Identifier of the skill to download.
+	SkillID string `json:"skill_id,omitempty"`
+}
+
+// SkillGetRequest is generated from the Flashduty OpenAPI schema.
+type SkillGetRequest struct {
+	// Identifier of the skill to fetch.
+	SkillID string `json:"skill_id,omitempty"`
+}
+
+// SkillItem is generated from the Flashduty OpenAPI schema.
+type SkillItem struct {
+	// Owning account.
+	AccountID int64 `json:"account_id,omitempty"`
+	// Author declared in the skill frontmatter.
+	Author string `json:"author,omitempty"`
+	// Whether the calling member may edit or delete this resource.
+	CanEdit bool `json:"can_edit,omitempty"`
+	// SHA-256 checksum of the skill's zip package.
+	Checksum string `json:"checksum,omitempty"`
+	// Full SKILL.md body; omitted in list responses.
+	Content string `json:"content,omitempty"`
+	// Install response only: true for a fresh install, false for an in-place upsert.
+	Created bool `json:"created,omitempty"`
+	// Creation time as a Unix timestamp in milliseconds.
+	CreatedAt TimestampMilli `json:"created_at,omitempty"`
+	// Member who created this resource.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// What the skill does and when the agent should use it.
+	Description string `json:"description,omitempty"`
+	// A marketplace-sourced skill has been edited locally; auto-update skips it.
+	IsModified bool `json:"is_modified,omitempty"`
+	// License declared in the skill frontmatter.
+	License string `json:"license,omitempty"`
+	// Object-storage key of the skill's zip package.
+	S3Key string `json:"s3_key,omitempty"`
+	// Unique identifier of the skill.
+	SkillID string `json:"skill_id,omitempty"`
+	// Name of the skill, parsed from its SKILL.md frontmatter.
+	SkillName string `json:"skill_name,omitempty"`
+	// Marketplace template this skill was installed from, if any.
+	SourceTemplateName string `json:"source_template_name,omitempty"`
+	// Marketplace template version captured at install time.
+	SourceTemplateVersion string `json:"source_template_version,omitempty"`
+	// Whether the skill is active and loadable by agents.
+	Status string `json:"status,omitempty"`
+	// Tags declared in the skill frontmatter.
+	Tags []string `json:"tags,omitempty"`
+	// Owning team; 0 means account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+	// Tools the skill requires, declared in its frontmatter.
+	Tools []string `json:"tools,omitempty"`
+	// A newer marketplace template version exists for this skill.
+	UpdateAvailable bool `json:"update_available,omitempty"`
+	// Last-update time as a Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at,omitempty"`
+	// Skill version string from its frontmatter.
+	Version string `json:"version,omitempty"`
+}
+
+// SkillListRequest is generated from the Flashduty OpenAPI schema.
+type SkillListRequest struct {
+	ListOptions
+	// Include account-scoped rows alongside team-scoped ones; defaults to true.
+	IncludeAccount bool `json:"include_account,omitempty"`
+	// Restrict results to resources owned by these teams; intersected with the caller's visible set.
+	TeamIDs []int64 `json:"team_ids,omitempty"`
+}
+
+// SkillListResponse is generated from the Flashduty OpenAPI schema.
+type SkillListResponse struct {
+	// Skills on the current page.
+	Skills []SkillItem `json:"skills,omitempty"`
+	// Total number of skills matching the filters.
+	Total int64 `json:"total,omitempty"`
+}
+
+// SkillStatusRequest is generated from the Flashduty OpenAPI schema.
+type SkillStatusRequest struct {
+	// Identifier of the target skill.
+	SkillID string `json:"skill_id,omitempty"`
+}
+
+// SkillUpdateRequest is generated from the Flashduty OpenAPI schema.
+type SkillUpdateRequest struct {
+	// New description for the skill.
+	Description string `json:"description,omitempty"`
+	// Identifier of the skill to update.
+	SkillID string `json:"skill_id,omitempty"`
+	// Reassign the skill to this team; omit to leave unchanged, 0 for account scope.
+	TeamID int64 `json:"team_id,omitempty"`
+}
+
 // SnoozeIncidentRequest is generated from the Flashduty OpenAPI schema.
 type SnoozeIncidentRequest struct {
 	// Incident IDs to snooze. At most 100 per call.
@@ -4968,6 +5562,47 @@ type StatusPageComponentItem struct {
 	SectionID string `json:"section_id,omitempty"`
 }
 
+// StatusPageItem is generated from the Flashduty OpenAPI schema.
+type StatusPageItem struct {
+	// Components tracked on the status page.
+	Components []StatusPageComponentItem `json:"components,omitempty"`
+	// Get-in-touch contact, a mailto or website URL.
+	ContactInfo string `json:"contact_info,omitempty"`
+	// Custom domain pointing to the status page.
+	CustomDomain string `json:"custom_domain,omitempty"`
+	// Custom navigation links shown on the status page.
+	CustomLinks []map[string]string `json:"custom_links,omitempty"`
+	// Dark-mode logo image of the status page.
+	DarkLogo string `json:"dark_logo,omitempty"`
+	// How the timeline is displayed.
+	DateView string `json:"date_view,omitempty"`
+	// How uptime is displayed.
+	DisplayUptimeMode string `json:"display_uptime_mode,omitempty"`
+	// Favicon of the status page.
+	Favicon string `json:"favicon,omitempty"`
+	// Logo image of the status page.
+	Logo string `json:"logo,omitempty"`
+	// URL opened when the logo is clicked.
+	LogoURL string `json:"logo_url,omitempty"`
+	// Display name of the status page.
+	Name string `json:"name,omitempty"`
+	// Footer content of the status page.
+	PageFooter string `json:"page_footer,omitempty"`
+	// Header content of the status page.
+	PageHeader string `json:"page_header,omitempty"`
+	// Status page ID.
+	PageID int64 `json:"page_id,omitempty"`
+	// Sections grouping the components.
+	Sections     []StatusPageSectionItem    `json:"sections,omitempty"`
+	Subscription StatusPageSubscriptionItem `json:"subscription,omitempty"`
+	// Preferred change-event template type.
+	TemplatePreference string `json:"template_preference,omitempty"`
+	// Visibility type of the status page.
+	Type string `json:"type,omitempty"`
+	// URL-safe slug, unique per account.
+	URLName string `json:"url_name,omitempty"`
+}
+
 // StatusPageMigrationJob is generated from the Flashduty OpenAPI schema.
 type StatusPageMigrationJob struct {
 	// Owner account ID.
@@ -5016,6 +5651,22 @@ type StatusPageMigrationStartResponse struct {
 	JobID string `json:"job_id,omitempty"`
 }
 
+// StatusPageSectionItem is generated from the Flashduty OpenAPI schema.
+type StatusPageSectionItem struct {
+	// Section description.
+	Description string `json:"description,omitempty"`
+	// Whether the section and its components are hidden from summary endpoints.
+	HideAll bool `json:"hide_all,omitempty"`
+	// Whether uptime data is hidden from summary responses.
+	HideUptime bool `json:"hide_uptime,omitempty"`
+	// Section name.
+	Name string `json:"name,omitempty"`
+	// Display order of the section.
+	OrderID int64 `json:"order_id,omitempty"`
+	// Section ID.
+	SectionID string `json:"section_id,omitempty"`
+}
+
 // StatusPageSubscriberListResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageSubscriberListResponse struct {
 	// Whether there is at least one more page after the current one.
@@ -5023,6 +5674,14 @@ type StatusPageSubscriberListResponse struct {
 	Items       []ExportedStatusPageSubscriberItem `json:"items,omitempty"`
 	// Total matching subscribers.
 	Total int64 `json:"total,omitempty"`
+}
+
+// StatusPageSubscriptionItem is generated from the Flashduty OpenAPI schema.
+type StatusPageSubscriptionItem struct {
+	// Whether email subscription is enabled.
+	Email bool `json:"email,omitempty"`
+	// Whether IM subscription is enabled.
+	Im bool `json:"im,omitempty"`
 }
 
 // StoreRulesetItem is generated from the Flashduty OpenAPI schema.
@@ -5674,6 +6333,52 @@ type WarRoom struct {
 	ShareLink string `json:"share_link,omitempty"`
 }
 
+// WarRoomDataSourceItem is generated from the Flashduty OpenAPI schema.
+type WarRoomDataSourceItem struct {
+	// Account this integration belongs to.
+	AccountID int64 `json:"account_id,omitempty"`
+	// Category of the integration plugin.
+	Category string `json:"category,omitempty"`
+	// Unix timestamp in seconds when the integration was created.
+	CreatedAt Timestamp `json:"created_at,omitempty"`
+	// Person who created the integration.
+	CreatorID int64 `json:"creator_id,omitempty"`
+	// Integration ID.
+	DataSourceID int64 `json:"data_source_id,omitempty"`
+	// Integration description.
+	Description string `json:"description,omitempty"`
+	// Exclusive integration ID associated with this integration.
+	ExclusiveDataSourceID int64 `json:"exclusive_data_source_id,omitempty"`
+	// Integration ID, alias of data_source_id.
+	IntegrationID int64 `json:"integration_id,omitempty"`
+	// Push key used by alert sources to send to this integration.
+	IntegrationKey string `json:"integration_key,omitempty"`
+	// Unix timestamp in seconds of the most recent activity on the integration.
+	LastTime Timestamp `json:"last_time,omitempty"`
+	// Integration name.
+	Name string `json:"name,omitempty"`
+	// Whether the integration is read-only.
+	NoEditable bool `json:"no_editable,omitempty"`
+	// Plugin ID backing this integration.
+	PluginID int64 `json:"plugin_id,omitempty"`
+	// Type identifier of the integration plugin.
+	PluginType string `json:"plugin_type,omitempty"`
+	// Localized display name of the integration plugin type.
+	PluginTypeName string `json:"plugin_type_name,omitempty"`
+	// External reference ID of the integration.
+	RefID string `json:"ref_id,omitempty"`
+	// Plugin-specific configuration of the integration.
+	Settings map[string]any `json:"settings,omitempty"`
+	// Current status of the integration.
+	Status string `json:"status,omitempty"`
+	// Team that owns this integration.
+	TeamID int64 `json:"team_id,omitempty"`
+	// Unix timestamp in seconds when the integration was last updated.
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
+	// Person who last updated the integration.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
+}
+
 // WarRoomItem is generated from the Flashduty OpenAPI schema.
 type WarRoomItem struct {
 	// Account ID.
@@ -5692,6 +6397,30 @@ type WarRoomItem struct {
 	PluginType string `json:"plugin_type,omitempty"`
 	// War room status.
 	Status string `json:"status,omitempty"`
+}
+
+// WarRoomPersonItem is generated from the Flashduty OpenAPI schema.
+type WarRoomPersonItem struct {
+	// Account this person belongs to.
+	AccountID int64 `json:"account_id,omitempty"`
+	// Role the person holds in the related context.
+	As string `json:"as,omitempty"`
+	// URL of the person's avatar image.
+	Avatar string `json:"avatar,omitempty"`
+	// Email address of the person.
+	Email string `json:"email,omitempty"`
+	// Preferred language locale of the person.
+	Locale string `json:"locale,omitempty"`
+	// Person ID.
+	PersonID int64 `json:"person_id,omitempty"`
+	// Display name of the person.
+	PersonName string `json:"person_name,omitempty"`
+	// Phone number of the person.
+	Phone string `json:"phone,omitempty"`
+	// Current status of the person.
+	Status string `json:"status,omitempty"`
+	// Time zone of the person.
+	TimeZone string `json:"time_zone,omitempty"`
 }
 
 // WebhookHistoryDetail is generated from the Flashduty OpenAPI schema.
@@ -5772,6 +6501,16 @@ type WebhookHistoryItem struct {
 	StatusCode int64 `json:"status_code,omitempty"`
 	// Source object kind. `incident` or `alert`.
 	WebhookType string `json:"webhook_type,omitempty"`
+}
+
+// AccountInfoRestrictions is generated from the Flashduty OpenAPI schema.
+type AccountInfoRestrictions struct {
+	// Whether subdomains of the allowed email domains are also accepted.
+	AllowSubdomain bool `json:"allow_subdomain,omitempty"`
+	// Allowed login email domains.
+	EmailDomains []string `json:"email_domains,omitempty"`
+	// Allowed source IP/CIDR whitelist.
+	Ips []string `json:"ips,omitempty"`
 }
 
 // AddIncidentResponderRequestNotify is generated from the Flashduty OpenAPI schema.

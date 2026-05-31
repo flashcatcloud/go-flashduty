@@ -8,6 +8,9 @@ type service struct{ client *Client }
 
 // genServices is embedded in Client to expose the generated service handles.
 type genServices struct {
+	A2aAgents             *A2aAgentsService
+	McpServers            *McpServersService
+	Skills                *SkillsService
 	AlertRules            *AlertRulesService
 	DataSources           *DataSourcesService
 	Diagnostics           *DiagnosticsService
@@ -16,12 +19,15 @@ type genServices struct {
 	Alerts                *AlertsService
 	Analytics             *AnalyticsService
 	Calendars             *CalendarsService
+	Changes               *ChangesService
 	Channels              *ChannelsService
+	ImIntegrations        *ImIntegrationsService
 	Incidents             *IncidentsService
 	Integrations          *IntegrationsService
 	NotificationTemplates *NotificationTemplatesService
 	Schedules             *SchedulesService
 	StatusPages           *StatusPagesService
+	Account               *AccountService
 	AuditLogs             *AuditLogsService
 	Members               *MembersService
 	RolesPermissions      *RolesPermissionsService
@@ -34,6 +40,9 @@ type genServices struct {
 // initServices wires every service to the shared backref. Called by NewClient.
 func (c *Client) initServices() {
 	c.common.client = c
+	c.A2aAgents = (*A2aAgentsService)(&c.common)
+	c.McpServers = (*McpServersService)(&c.common)
+	c.Skills = (*SkillsService)(&c.common)
 	c.AlertRules = (*AlertRulesService)(&c.common)
 	c.DataSources = (*DataSourcesService)(&c.common)
 	c.Diagnostics = (*DiagnosticsService)(&c.common)
@@ -42,12 +51,15 @@ func (c *Client) initServices() {
 	c.Alerts = (*AlertsService)(&c.common)
 	c.Analytics = (*AnalyticsService)(&c.common)
 	c.Calendars = (*CalendarsService)(&c.common)
+	c.Changes = (*ChangesService)(&c.common)
 	c.Channels = (*ChannelsService)(&c.common)
+	c.ImIntegrations = (*ImIntegrationsService)(&c.common)
 	c.Incidents = (*IncidentsService)(&c.common)
 	c.Integrations = (*IntegrationsService)(&c.common)
 	c.NotificationTemplates = (*NotificationTemplatesService)(&c.common)
 	c.Schedules = (*SchedulesService)(&c.common)
 	c.StatusPages = (*StatusPagesService)(&c.common)
+	c.Account = (*AccountService)(&c.common)
 	c.AuditLogs = (*AuditLogsService)(&c.common)
 	c.Members = (*MembersService)(&c.common)
 	c.RolesPermissions = (*RolesPermissionsService)(&c.common)

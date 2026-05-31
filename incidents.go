@@ -7,6 +7,34 @@ import "context"
 // IncidentsService handles the "On-call/Incidents" API resource.
 type IncidentsService service
 
+// Get war-room default observers.
+//
+// Return historical responders suggested as default observers when opening a war room.
+//
+// API: POST /incident/war-room/default-observers (incident-read-get-war-room-default-observers).
+func (s *IncidentsService) ReadGetWarRoomDefaultObservers(ctx context.Context, req *GetWarRoomDefaultObserversRequest) (*GetWarRoomDefaultObserversResponse, *Response, error) {
+	out := new(GetWarRoomDefaultObserversResponse)
+	resp, err := s.client.do(ctx, "/incident/war-room/default-observers", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Add war-room member.
+//
+// Add one or more members to the IM war room bound to an incident integration.
+//
+// API: POST /incident/war-room/add-member (incident-write-add-war-room-member).
+func (s *IncidentsService) WriteAddWarRoomMember(ctx context.Context, req *AddWarRoomMemberRequest) (*string, *Response, error) {
+	out := new(string)
+	resp, err := s.client.do(ctx, "/incident/war-room/add-member", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Acknowledge incident.
 //
 // Acknowledge an incident to indicate you are actively working on it.
