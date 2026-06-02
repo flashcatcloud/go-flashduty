@@ -2349,7 +2349,7 @@
       "get": {
         "operationId": "incidentPostMortemInfo",
         "summary": "获取复盘报告",
-        "description": "获取指定故障的复盘报告。",
+        "description": "通过 `post_mortem_id` 获取复盘报告。先用 `/incident/post-mortem/list` 列出报告（每行标明所属故障），再用其 id 在此获取完整报告。",
         "tags": [
           "On-call/故障管理"
         ],
@@ -14502,7 +14502,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RuleIDRequest"
+                "$ref": "#/components/schemas/AuditRecordIDRequest"
               },
               "example": {
                 "id": 9001
@@ -23113,7 +23113,7 @@
           },
           "progress": {
             "type": "string",
-            "description": "故障处理进度（如 `Processing`、`Resolved`）。"
+            "description": "故障处理进度——`Triggered`、`Processing`、`Closed` 之一。"
           }
         }
       },
@@ -32418,7 +32418,38 @@
           "export_fields": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "incident_id",
+                "title",
+                "severity",
+                "progress",
+                "channel_id",
+                "channel_name",
+                "team_id",
+                "team_name",
+                "created_at",
+                "seconds_to_ack",
+                "seconds_to_close",
+                "closed_by",
+                "engaged_seconds",
+                "hours",
+                "notifications",
+                "interruptions",
+                "acknowledgements",
+                "assignments",
+                "reassignments",
+                "escalations",
+                "manual_escalations",
+                "timeout_escalations",
+                "assigned_to",
+                "responders",
+                "description",
+                "labels",
+                "fields",
+                "creator_id",
+                "creator_name"
+              ]
             },
             "description": "导出 CSV 时要包含的列键子集，至多 50 项。仅导出接口会读取。"
           },
@@ -32781,7 +32812,7 @@
           },
           "progress": {
             "type": "string",
-            "description": "故障进度状态（如 `Triggered`、`Acknowledged`、`Closed`）。"
+            "description": "故障处理进度——`Triggered`、`Processing`、`Closed` 之一。"
           },
           "severity": {
             "type": "string",
@@ -34478,6 +34509,19 @@
             "type": "integer",
             "format": "uint64",
             "description": "规则 ID。"
+          }
+        }
+      },
+      "AuditRecordIDRequest": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "uint64",
+            "description": "审计记录 ID——来自 `POST /monit/rule/audits` 返回行的 `id`，不是规则 ID。传规则 ID 会返回 HTTP 400。"
           }
         }
       },

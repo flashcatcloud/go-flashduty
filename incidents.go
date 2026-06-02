@@ -212,7 +212,7 @@ func (s *IncidentsService) PostMortemDelete(ctx context.Context, req *DeletePost
 
 // Get post-mortem.
 //
-// Retrieve the post-mortem report for a specific incident.
+// Retrieve a post-mortem report by its `post_mortem_id`. List reports via `/incident/post-mortem/list` first — each row carries the incident it covers — then fetch the full report here by that id.
 //
 // API: GET /incident/post-mortem/info (incidentPostMortemInfo).
 func (s *IncidentsService) PostMortemInfo(ctx context.Context, req *IncidentsPostMortemInfoRequest) (*PostMortemItem, *Response, error) {

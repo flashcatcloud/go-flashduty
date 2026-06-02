@@ -660,7 +660,14 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 				b.WriteString("\t// " + l + "\n")
 			}
 		}
-		fmt.Fprintf(&b, "\t%s %s `json:%q`\n", field, gt, k+",omitempty")
+		// Mirror the json wire-name into a `toon` tag. toon-go reads ONLY the
+		// `toon` struct tag (internal/codec/structmeta.go) and falls back to the
+		// Go field NAME (PascalCase) when it is absent — it does NOT read `json`.
+		// So without this, `--output-format toon` renders PascalCase keys
+		// (AccountID) while `--json` and the spec-derived help use snake_case
+		// (account_id); an agent that reads field names off a toon dump and pipes
+		// them into `--json | jq '.account_id'` hits all-null. Keep both tags.
+		fmt.Fprintf(&b, "\t%s %s `json:%q toon:%q`\n", field, gt, k+",omitempty", k+",omitempty")
 	}
 	b.WriteString("}\n\n")
 	return b.String()

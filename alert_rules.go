@@ -12,7 +12,7 @@ type AlertRulesService service
 // Return the audit record (including the `content` field, a JSON string of the rule snapshot at that point in time).
 //
 // API: POST /monit/rule/audit/detail (monit-rule-read-audit-detail).
-func (s *AlertRulesService) ReadAuditDetail(ctx context.Context, req *RuleIDRequest) (*AlertRuleAudit, *Response, error) {
+func (s *AlertRulesService) ReadAuditDetail(ctx context.Context, req *AuditRecordIDRequest) (*AlertRuleAudit, *Response, error) {
 	out := new(AlertRuleAudit)
 	resp, err := s.client.do(ctx, "/monit/rule/audit/detail", req, out)
 	if err != nil {
