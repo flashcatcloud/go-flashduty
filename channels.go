@@ -232,60 +232,6 @@ func (s *ChannelsService) ChannelList(ctx context.Context, req *ListChannelsRequ
 	return out, resp, nil
 }
 
-// Create channel notification rule.
-//
-// Create a notification rule for a channel.
-//
-// API: POST /channel/notify/rule/create (channelNotifyRuleCreate).
-func (s *ChannelsService) ChannelNotifyRuleCreate(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/channel/notify/rule/create", nil, nil)
-}
-
-// Delete channel notification rule.
-//
-// Delete a channel notification rule.
-//
-// API: POST /channel/notify/rule/delete (channelNotifyRuleDelete).
-func (s *ChannelsService) ChannelNotifyRuleDelete(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/channel/notify/rule/delete", nil, nil)
-}
-
-// Disable channel notification rule.
-//
-// Disable a channel notification rule without deleting it.
-//
-// API: POST /channel/notify/rule/disable (channelNotifyRuleDisable).
-func (s *ChannelsService) ChannelNotifyRuleDisable(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/channel/notify/rule/disable", nil, nil)
-}
-
-// Enable channel notification rule.
-//
-// Enable a disabled channel notification rule.
-//
-// API: POST /channel/notify/rule/enable (channelNotifyRuleEnable).
-func (s *ChannelsService) ChannelNotifyRuleEnable(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/channel/notify/rule/enable", nil, nil)
-}
-
-// List channel notification rules.
-//
-// List all notification rules configured for a channel.
-//
-// API: POST /channel/notify/rule/list (channelNotifyRuleList).
-func (s *ChannelsService) ChannelNotifyRuleList(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/channel/notify/rule/list", nil, nil)
-}
-
-// Update channel notification rule.
-//
-// Update an existing channel notification rule.
-//
-// API: POST /channel/notify/rule/update (channelNotifyRuleUpdate).
-func (s *ChannelsService) ChannelNotifyRuleUpdate(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/channel/notify/rule/update", nil, nil)
-}
-
 // Create silence rule.
 //
 // Create a silence rule to suppress notifications matching specified conditions.
