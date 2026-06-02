@@ -1424,6 +1424,20 @@ type CommentIncidentRequest struct {
 	MuteReply bool `json:"mute_reply,omitempty" toon:"mute_reply,omitempty"`
 }
 
+// ContextResolvedItem is generated from the Flashduty OpenAPI schema.
+type ContextResolvedItem struct {
+	// Resolved account-scoped pack id.
+	AccountPackID string `json:"account_pack_id" toon:"account_pack_id"`
+	// Bound incident id, when war-room originated.
+	IncidentID string `json:"incident_id" toon:"incident_id"`
+	// Unix timestamp in milliseconds when the packs were resolved.
+	ResolvedAtMs TimestampMilli `json:"resolved_at_ms" toon:"resolved_at_ms"`
+	// Resolved team-scoped pack id.
+	TeamPackID string `json:"team_pack_id" toon:"team_pack_id"`
+	// Per-pack resolved version map.
+	Versions map[string]int64 `json:"versions" toon:"versions"`
+}
+
 // CreateChannelRequest is generated from the Flashduty OpenAPI schema.
 type CreateChannelRequest struct {
 	// Auto-resolve timer reset mode.
@@ -2085,6 +2099,18 @@ type EnrichmentUpsertRequest struct {
 	Rules []EnrichRule `json:"rules,omitempty" toon:"rules,omitempty"`
 }
 
+// EnvironmentBinding is generated from the Flashduty OpenAPI schema.
+type EnvironmentBinding struct {
+	// Environment identifier.
+	ID string `json:"id" toon:"id"`
+	// Environment kind (e.g. runner, sandbox).
+	Kind string `json:"kind" toon:"kind"`
+	// Human-readable environment name.
+	Name string `json:"name" toon:"name"`
+	// Binding status.
+	Status string `json:"status" toon:"status"`
+}
+
 // ErsComposition is generated from the Flashduty OpenAPI schema.
 type ErsComposition struct {
 	// When `true`, overwrite the label if it already exists. Defaults to `false`.
@@ -2195,12 +2221,103 @@ type EscalateTarget struct {
 	Webhooks []EscalateTargetWebhooksItem `json:"webhooks,omitempty" toon:"webhooks,omitempty"`
 }
 
+// EventItem is generated from the Flashduty OpenAPI schema.
+type EventItem struct {
+	// ADK actions envelope (state deltas, transfers, escalation).
+	Actions map[string]any `json:"actions" toon:"actions"`
+	// Event author (e.g. user, the agent name).
+	Author string `json:"author" toon:"author"`
+	// ADK branch path for nested agents.
+	Branch string `json:"branch" toon:"branch"`
+	// ADK content envelope {role, parts:[...]}.
+	Content map[string]any `json:"content" toon:"content"`
+	// Unix timestamp in milliseconds when the event was written.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Error code when the event represents a failure.
+	ErrorCode string `json:"error_code" toon:"error_code"`
+	// Human-readable error message, when present.
+	ErrorMessage string `json:"error_message" toon:"error_message"`
+	// Event identifier.
+	EventID string `json:"event_id" toon:"event_id"`
+	// ADK invocation id grouping a turn.
+	InvocationID string `json:"invocation_id" toon:"invocation_id"`
+	// True for a streaming partial chunk.
+	Partial bool `json:"partial" toon:"partial"`
+	// Owning session id.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Event status.
+	Status string `json:"status" toon:"status"`
+	// True on the terminal event of a turn.
+	TurnComplete bool `json:"turn_complete" toon:"turn_complete"`
+	// Per-turn token usage metadata.
+	UsageMetadata map[string]any `json:"usage_metadata" toon:"usage_metadata"`
+}
+
+// ExportLine is generated from the Flashduty OpenAPI schema.
+type ExportLine struct {
+	// Account id (on session_meta).
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Dispatched subagent name (on subagent_dispatch).
+	AgentName string `json:"agent_name" toon:"agent_name"`
+	// Agent app (on session_meta).
+	AppName string `json:"app_name" toon:"app_name"`
+	// Child session id created by the dispatch (on subagent_dispatch).
+	ChildSessionID string `json:"child_session_id" toon:"child_session_id"`
+	// Text content of the line (messages, answers, errors).
+	Content string `json:"content" toon:"content"`
+	// Call duration in milliseconds.
+	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
+	// RFC3339 end timestamp; stamped on llm_call/tool_call/session_meta.
+	EndedAt string `json:"ended_at" toon:"ended_at"`
+	// Error detail when a call failed.
+	Error string `json:"error" toon:"error"`
+	// Tool call input arguments (on tool_call).
+	Input map[string]any `json:"input" toon:"input"`
+	// Byte size of the tool input.
+	InputBytes int64 `json:"input_bytes" toon:"input_bytes"`
+	// Chat model provider key; on session_meta and llm_call.
+	Model string `json:"model" toon:"model"`
+	// Tool name (on tool_call).
+	Name string `json:"name" toon:"name"`
+	// Tool call output (on tool_call response side).
+	Output string `json:"output" toon:"output"`
+	// Byte size of the tool output.
+	OutputBytes int64 `json:"output_bytes" toon:"output_bytes"`
+	// Parent session id for child sessions (on session_meta).
+	ParentSessionID string `json:"parent_session_id" toon:"parent_session_id"`
+	// 1-based monotonic sequence within the session (absent on session_meta).
+	Seq int64 `json:"seq" toon:"seq"`
+	// Session id (on session_meta).
+	SessionID string `json:"session_id" toon:"session_id"`
+	// RFC3339 start timestamp (session_meta uses session.created_at).
+	StartedAt string `json:"started_at" toon:"started_at"`
+	// Tool result status, e.g. ok or error.
+	Status string `json:"status" toon:"status"`
+	// RFC3339 timestamp of the event.
+	TS string `json:"ts" toon:"ts"`
+	// Line discriminator.
+	Type  string      `json:"type" toon:"type"`
+	Usage ExportUsage `json:"usage" toon:"usage"`
+}
+
 // ExportStatusPageSubscribersRequest is generated from the Flashduty OpenAPI schema.
 type ExportStatusPageSubscribersRequest struct {
 	// Optional component IDs to filter subscribers by.
 	ComponentIDs []string `json:"component_ids,omitempty" toon:"component_ids,omitempty"`
 	// Status page ID.
 	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+}
+
+// ExportUsage is generated from the Flashduty OpenAPI schema.
+type ExportUsage struct {
+	// Tokens written to the prompt cache.
+	CacheCreation int64 `json:"cache_creation" toon:"cache_creation"`
+	// Tokens served from the prompt cache.
+	CacheRead int64 `json:"cache_read" toon:"cache_read"`
+	// Prompt (input) tokens for the call.
+	InputTokens int64 `json:"input_tokens" toon:"input_tokens"`
+	// Generated (output) tokens for the call.
+	OutputTokens int64 `json:"output_tokens" toon:"output_tokens"`
 }
 
 // ExportedStatusPageSubscriberItem is generated from the Flashduty OpenAPI schema.
@@ -5296,6 +5413,133 @@ type ScheduleUpsertRequest struct {
 	Start int64 `json:"start,omitempty" toon:"start,omitempty"`
 	// Owning team ID.
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// SessionExportRequest is generated from the Flashduty OpenAPI schema.
+type SessionExportRequest struct {
+	// When true, each subagent_dispatch line is followed by the child session's full event stream, bracketed by its own session_meta. Defaults to false.
+	IncludeSubagents bool `json:"include_subagents,omitempty" toon:"include_subagents,omitempty"`
+	// Session identifier to export.
+	SessionID string `json:"session_id,omitempty" toon:"session_id,omitempty"`
+}
+
+// SessionGetRequest is generated from the Flashduty OpenAPI schema.
+type SessionGetRequest struct {
+	// Alias for num_recent_events; takes precedence when both are set.
+	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
+	// Number of most-recent events to return; 0 uses the server default.
+	NumRecentEvents int64 `json:"num_recent_events,omitempty" toon:"num_recent_events,omitempty"`
+	// Opaque keyset cursor from a previous response's search_after_ctx, to page backward through older events.
+	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	// Session identifier.
+	SessionID string `json:"session_id,omitempty" toon:"session_id,omitempty"`
+}
+
+// SessionGetResponse is generated from the Flashduty OpenAPI schema.
+type SessionGetResponse struct {
+	// Recent events, ascending by (created_at, event_id).
+	Events []EventItem `json:"events" toon:"events"`
+	// True when older events remain beyond this page.
+	HasMoreOlder bool `json:"has_more_older" toon:"has_more_older"`
+	// Opaque keyset cursor; pass back as search_after_ctx to fetch the next older page. Omitted when has_more_older is false.
+	SearchAfterCtx string      `json:"search_after_ctx" toon:"search_after_ctx"`
+	Session        SessionItem `json:"session" toon:"session"`
+}
+
+// SessionItem is generated from the Flashduty OpenAPI schema.
+type SessionItem struct {
+	// Agent app that owns the session.
+	AppName string `json:"app_name" toon:"app_name"`
+	// Unix timestamp in milliseconds when archived; 0 means not archived.
+	ArchivedAt       TimestampMilli     `json:"archived_at" toon:"archived_at"`
+	BoundEnvironment EnvironmentBinding `json:"bound_environment" toon:"bound_environment"`
+	// True when the caller may rename/archive/delete the session.
+	CanManage       bool                `json:"can_manage" toon:"can_manage"`
+	ContextResolved ContextResolvedItem `json:"context_resolved" toon:"context_resolved"`
+	// The bound model's max context size in tokens. 0 means unknown.
+	ContextWindow int64 `json:"context_window" toon:"context_window"`
+	// Unix timestamp in milliseconds when the session was created.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Size in tokens of the LLM context window as of the most recent turn. 0 means no turn has completed.
+	CurrentContextTokens int64 `json:"current_context_tokens" toon:"current_context_tokens"`
+	// Surface that created the session.
+	EntryKind string `json:"entry_kind" toon:"entry_kind"`
+	// True when there is assistant output the caller has not yet viewed.
+	HasUnread bool `json:"has_unread" toon:"has_unread"`
+	// True for incognito (non-persisted-memory) sessions.
+	Incognito bool `json:"incognito" toon:"incognito"`
+	// True when the caller created this session.
+	IsMine bool `json:"is_mine" toon:"is_mine"`
+	// True when an agent turn is currently in flight for this session.
+	IsRunning bool `json:"is_running" toon:"is_running"`
+	// Unix timestamp in milliseconds of the most recent assistant-side event.
+	LastEventAt TimestampMilli `json:"last_event_at" toon:"last_event_at"`
+	// Parent session id for subagent (child) sessions; empty otherwise.
+	ParentSessionID string `json:"parent_session_id" toon:"parent_session_id"`
+	// Creator person id.
+	PersonID string `json:"person_id" toon:"person_id"`
+	// Caller's per-user pin timestamp in milliseconds; 0 means not pinned.
+	PinnedAt TimestampMilli `json:"pinned_at" toon:"pinned_at"`
+	// Session identifier.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Session title; may be empty for untitled sessions.
+	SessionName string `json:"session_name" toon:"session_name"`
+	// Raw session-state bag (session-scoped keys). Omitted when empty.
+	State map[string]any `json:"state" toon:"state"`
+	// Lifecycle status.
+	Status string `json:"status" toon:"status"`
+	// Owning team id; 0 means no team is bound. Immutable after create.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Resolved team name; empty for unbound rows or deleted teams.
+	TeamName string `json:"team_name" toon:"team_name"`
+	// Current save→validate round id (template-assistant only); empty otherwise.
+	TemplateStagingRoundID string            `json:"template_staging_round_id" toon:"template_staging_round_id"`
+	TokenUsage             SessionTokenUsage `json:"token_usage" toon:"token_usage"`
+	// Unix timestamp in milliseconds of the last session update.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
+// SessionListRequest is generated from the Flashduty OpenAPI schema.
+type SessionListRequest struct {
+	ListOptions
+	// Agent app whose sessions to list.
+	AppName string `json:"app_name,omitempty" toon:"app_name,omitempty"`
+	// Ascending sort when true; defaults to false (descending). Only honored when orderby is set.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Restrict to sessions produced by these entry surfaces. Empty returns every kind.
+	EntryKinds []string `json:"entry_kinds,omitempty" toon:"entry_kinds,omitempty"`
+	// Include subagent (child) sessions in the result; defaults to false.
+	IncludeSubagentSessions bool `json:"include_subagent_sessions,omitempty" toon:"include_subagent_sessions,omitempty"`
+	// Case-insensitive substring match against session name.
+	Keyword string `json:"keyword,omitempty" toon:"keyword,omitempty"`
+	// Sort column.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+	// Visibility scope: all (own + member-of-team rows, the default), personal (own only), or team (member teams only).
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// Archive bucket: active (default, not archived), archived, or all.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	// Optional explicit team filter; intersected with the caller's visible set / scope.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
+}
+
+// SessionListResponse is generated from the Flashduty OpenAPI schema.
+type SessionListResponse struct {
+	// The page of sessions.
+	Sessions []SessionItem `json:"sessions" toon:"sessions"`
+	// Total number of sessions matching the filter (ignoring pagination).
+	Total int64 `json:"total" toon:"total"`
+}
+
+// SessionTokenUsage is generated from the Flashduty OpenAPI schema.
+type SessionTokenUsage struct {
+	// Portion of input_tokens served from the prompt cache.
+	CachedTokens int64 `json:"cached_tokens" toon:"cached_tokens"`
+	// Total prompt (input) tokens, including the cached portion.
+	InputTokens int64 `json:"input_tokens" toon:"input_tokens"`
+	// Total generated (output) tokens.
+	OutputTokens int64 `json:"output_tokens" toon:"output_tokens"`
+	// Total reasoning/thinking tokens.
+	ReasoningTokens int64 `json:"reasoning_tokens" toon:"reasoning_tokens"`
 }
 
 // SilenceRuleItem is generated from the Flashduty OpenAPI schema.

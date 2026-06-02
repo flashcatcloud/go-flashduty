@@ -143,6 +143,8 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /safari/mcp/server/get":               func(d json.RawMessage) error { var v McpServerItem; return json.Unmarshal(d, &v) },
 	"POST /safari/mcp/server/list":              func(d json.RawMessage) error { var v McpServerListResponse; return json.Unmarshal(d, &v) },
 	"POST /safari/mcp/server/update":            func(d json.RawMessage) error { var v McpServerItem; return json.Unmarshal(d, &v) },
+	"POST /safari/session/get":                  func(d json.RawMessage) error { var v SessionGetResponse; return json.Unmarshal(d, &v) },
+	"POST /safari/session/list":                 func(d json.RawMessage) error { var v SessionListResponse; return json.Unmarshal(d, &v) },
 	"POST /safari/skill/delete":                 func(d json.RawMessage) error { var v any; return json.Unmarshal(d, &v) },
 	"POST /safari/skill/disable":                func(d json.RawMessage) error { var v any; return json.Unmarshal(d, &v) },
 	"POST /safari/skill/download":               func(d json.RawMessage) error { var v string; return json.Unmarshal(d, &v) },

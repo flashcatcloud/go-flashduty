@@ -162,6 +162,13 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 			if len(tags) == 0 {
 				continue
 			}
+			// Skip streaming endpoints: their 200 response is not application/json
+			// (e.g. application/x-ndjson). The typed do/doGet path reads the whole
+			// body and JSON-decodes one envelope, which is wrong for a line-delimited
+			// stream. These get a hand-written method instead (see sessions_export.go).
+			if isStreamingOp(o) {
+				continue
+			}
 			tag, _ := tags[0].(string)
 			byTag[tag] = append(byTag[tag], opEntry{p, m, o})
 		}
@@ -207,6 +214,21 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 		services = append(services, svc)
 	}
 	return services
+}
+
+// isStreamingOp reports whether an operation's 200 response is a non-JSON
+// streaming body (its 200 content has no "application/json" key). Such endpoints
+// — e.g. session/export returning application/x-ndjson — cannot be modeled by the
+// typed do/doGet path (which buffers the body and decodes one JSON envelope) and
+// are excluded from generation in favor of a hand-written streaming method.
+func isStreamingOp(o map[string]any) bool {
+	resp := asMap(asMap(o["responses"])["200"])
+	content := asMap(resp["content"])
+	if len(content) == 0 {
+		return false // no body at all is not a streaming response
+	}
+	_, hasJSON := content["application/json"]
+	return !hasJSON
 }
 
 // getRequestType synthesizes a request struct from a GET op's query parameters
