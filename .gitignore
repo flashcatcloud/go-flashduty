@@ -2,3 +2,6 @@
 /bin/
 *.out
 .DS_Store
+
+# stray binary from `go build ./internal/cmd/gen` at repo root
+/gen
