@@ -124,6 +124,10 @@
     {
       "name": "AI SRE/Skills",
       "description": "AI SRE agent skill management."
+    },
+    {
+      "name": "AI SRE/Sessions",
+      "description": "AI SRE agent session history — list, inspect, and export transcripts."
     }
   ],
   "paths": {
@@ -22147,6 +22151,316 @@
           }
         }
       }
+    },
+    "/safari/session/list": {
+      "post": {
+        "operationId": "session-read-list",
+        "summary": "List sessions",
+        "description": "List agent sessions visible to the caller within the resolved account, filtered by app, entry surface, archive status, and team scope, with pagination. Reads are scoped to the person the app_key resolves to.",
+        "tags": [
+          "AI SRE/Sessions"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "href": "/en/api-reference/ai-sre/sessions/session-read-list",
+          "metadata": {
+            "sidebarTitle": "List sessions"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionListRequest"
+              },
+              "example": {
+                "app_name": "ai-sre",
+                "limit": 2,
+                "orderby": "updated_at",
+                "scope": "all"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessionListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "total": 988,
+                    "sessions": [
+                      {
+                        "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                        "session_name": "Investigate cloud-assistant first heartbeat",
+                        "app_name": "ai-sre",
+                        "entry_kind": "web",
+                        "person_id": "3790925372131",
+                        "team_id": 0,
+                        "is_mine": false,
+                        "can_manage": true,
+                        "status": "enabled",
+                        "incognito": false,
+                        "created_at": 1780367971228,
+                        "updated_at": 1780367993457,
+                        "token_usage": {
+                          "input_tokens": 14948,
+                          "cached_tokens": 11520,
+                          "output_tokens": 888,
+                          "reasoning_tokens": 351
+                        },
+                        "current_context_tokens": 14948,
+                        "context_window": 0,
+                        "archived_at": 0,
+                        "pinned_at": 0,
+                        "last_event_at": 1780367992649,
+                        "is_running": false,
+                        "has_unread": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/session/get": {
+      "post": {
+        "operationId": "session-read-info",
+        "summary": "Get session detail",
+        "description": "Fetch one session plus a backward-paged window of its most recent events. Use search_after_ctx to page through older history.",
+        "tags": [
+          "AI SRE/Sessions"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "href": "/en/api-reference/ai-sre/sessions/session-read-info",
+          "metadata": {
+            "sidebarTitle": "Get session detail"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionGetRequest"
+              },
+              "example": {
+                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                "num_recent_events": 50
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessionGetResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "session": {
+                      "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                      "session_name": "Investigate cloud-assistant first heartbeat",
+                      "app_name": "ai-sre",
+                      "entry_kind": "web",
+                      "person_id": "3790925372131",
+                      "team_id": 0,
+                      "is_mine": false,
+                      "can_manage": true,
+                      "status": "enabled",
+                      "incognito": false,
+                      "created_at": 1780367971228,
+                      "updated_at": 1780367993457,
+                      "token_usage": {
+                        "input_tokens": 14948,
+                        "cached_tokens": 11520,
+                        "output_tokens": 888,
+                        "reasoning_tokens": 351
+                      },
+                      "current_context_tokens": 14948,
+                      "context_window": 0,
+                      "archived_at": 0,
+                      "pinned_at": 0,
+                      "last_event_at": 1780367992649,
+                      "is_running": false,
+                      "has_unread": true
+                    },
+                    "events": [
+                      {
+                        "event_id": "evt_3aZQ9p",
+                        "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                        "author": "user",
+                        "partial": false,
+                        "turn_complete": false,
+                        "status": "normal",
+                        "created_at": 1780367971241
+                      },
+                      {
+                        "event_id": "evt_7bWk2r",
+                        "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                        "author": "ai-sre",
+                        "content": {
+                          "role": "model",
+                          "parts": [
+                            {
+                              "text": "..."
+                            }
+                          ]
+                        },
+                        "partial": false,
+                        "turn_complete": true,
+                        "status": "normal",
+                        "created_at": 1780367992649
+                      }
+                    ],
+                    "has_more_older": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/session/export": {
+      "post": {
+        "operationId": "session-read-export",
+        "summary": "Export session transcript",
+        "description": "Stream a session's full event transcript as NDJSON (application/x-ndjson), one JSON object per line. The first line is always a session_meta envelope; subsequent lines are session events (see the ExportLine schema). Parse the body line-by-line and write to a file — do NOT buffer the entire transcript into memory. When include_subagents is true, each subagent_dispatch line is followed by the child session's own stream.",
+        "tags": [
+          "AI SRE/Sessions"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "href": "/en/api-reference/ai-sre/sessions/session-read-export",
+          "metadata": {
+            "sidebarTitle": "Export session transcript"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionExportRequest"
+              },
+              "example": {
+                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                "include_subagents": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Streaming NDJSON (application/x-ndjson). One JSON object per line, terminated by a newline. The first line is always a `session_meta` envelope; subsequent lines are session events (see ExportLine).",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string",
+                  "description": "Newline-delimited JSON stream. Parse line-by-line; do not buffer the whole body. Each line decodes to an ExportLine object — see #/components/schemas/ExportLine."
+                },
+                "example": "{\"type\":\"session_meta\",\"session_id\":\"sess_f8oDvqiG64uur6sBNsTc4u\",\"account_id\":2451002751131,\"app_name\":\"ai-sre\",\"started_at\":\"2026-06-02T02:39:31.228Z\",\"ended_at\":\"2026-06-02T02:39:53.457Z\",\"model\":\"deepseek-v4-pro\"}\n{\"type\":\"user_message\",\"seq\":1,\"ts\":\"2026-06-02T02:39:31.241Z\"}\n{\"type\":\"user_message\",\"seq\":2,\"ts\":\"2026-06-02T02:39:31.245Z\",\"content\":\"<attached_context> ... </attached_context>\"}\n{\"type\":\"final_answer\",\"seq\":3,\"ts\":\"2026-06-02T02:39:53.457Z\",\"content\":\"## Conclusion: noise alert, not a real incident ...\"}\n"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -40450,6 +40764,593 @@
           "hide_all": {
             "type": "boolean",
             "description": "Whether the section and its components are hidden from summary endpoints."
+          }
+        }
+      },
+      "SessionListRequest": {
+        "type": "object",
+        "description": "Filters for listing agent sessions. Reads are scoped to the account the app_key resolves to and to the resolved person's visible teams.",
+        "properties": {
+          "app_name": {
+            "type": "string",
+            "description": "Agent app whose sessions to list.",
+            "enum": [
+              "ask-ai",
+              "support",
+              "support-website",
+              "support-flashcat",
+              "ai-sre",
+              "template-assistant"
+            ]
+          },
+          "p": {
+            "type": "integer",
+            "description": "1-based page number; defaults to 1."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Page size, 1..100; defaults to 20.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "orderby": {
+            "type": "string",
+            "description": "Sort column.",
+            "enum": [
+              "created_at",
+              "updated_at"
+            ]
+          },
+          "asc": {
+            "type": "boolean",
+            "description": "Ascending sort when true; defaults to false (descending). Only honored when orderby is set."
+          },
+          "include_subagent_sessions": {
+            "type": "boolean",
+            "description": "Include subagent (child) sessions in the result; defaults to false."
+          },
+          "keyword": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Case-insensitive substring match against session name."
+          },
+          "scope": {
+            "type": "string",
+            "description": "Visibility scope: all (own + member-of-team rows, the default), personal (own only), or team (member teams only).",
+            "enum": [
+              "all",
+              "personal",
+              "team"
+            ]
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Optional explicit team filter; intersected with the caller's visible set / scope."
+          },
+          "entry_kinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "web",
+                "im",
+                "api",
+                "scheduled"
+              ]
+            },
+            "description": "Restrict to sessions produced by these entry surfaces. Empty returns every kind."
+          },
+          "status": {
+            "type": "string",
+            "description": "Archive bucket: active (default, not archived), archived, or all.",
+            "enum": [
+              "active",
+              "archived",
+              "all"
+            ]
+          }
+        },
+        "required": [
+          "app_name"
+        ]
+      },
+      "SessionTokenUsage": {
+        "type": "object",
+        "description": "Cumulative session-level token rollup across all turns. The account-billing source of truth.",
+        "properties": {
+          "input_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total prompt (input) tokens, including the cached portion."
+          },
+          "cached_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Portion of input_tokens served from the prompt cache."
+          },
+          "output_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total generated (output) tokens."
+          },
+          "reasoning_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total reasoning/thinking tokens."
+          }
+        }
+      },
+      "EnvironmentBinding": {
+        "type": "object",
+        "description": "The runner or cloud sandbox the session is bound to. Null until the first message.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "Environment kind (e.g. runner, sandbox)."
+          },
+          "id": {
+            "type": "string",
+            "description": "Environment identifier."
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable environment name."
+          },
+          "status": {
+            "type": "string",
+            "description": "Binding status."
+          }
+        }
+      },
+      "ContextResolvedItem": {
+        "type": "object",
+        "description": "Snapshot of the three-tier knowledge-pack resolution for this session.",
+        "properties": {
+          "account_pack_id": {
+            "type": "string",
+            "description": "Resolved account-scoped pack id."
+          },
+          "team_pack_id": {
+            "type": "string",
+            "description": "Resolved team-scoped pack id."
+          },
+          "incident_id": {
+            "type": "string",
+            "description": "Bound incident id, when war-room originated."
+          },
+          "resolved_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds when the packs were resolved."
+          },
+          "versions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Per-pack resolved version map."
+          }
+        }
+      },
+      "SessionItem": {
+        "type": "object",
+        "description": "One agent session row.",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Session identifier."
+          },
+          "parent_session_id": {
+            "type": "string",
+            "description": "Parent session id for subagent (child) sessions; empty otherwise."
+          },
+          "session_name": {
+            "type": "string",
+            "description": "Session title; may be empty for untitled sessions."
+          },
+          "app_name": {
+            "type": "string",
+            "description": "Agent app that owns the session."
+          },
+          "entry_kind": {
+            "type": "string",
+            "description": "Surface that created the session.",
+            "enum": [
+              "web",
+              "im",
+              "api",
+              "scheduled",
+              "subagent"
+            ]
+          },
+          "person_id": {
+            "type": "string",
+            "description": "Creator person id."
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Owning team id; 0 means no team is bound. Immutable after create."
+          },
+          "team_name": {
+            "type": "string",
+            "description": "Resolved team name; empty for unbound rows or deleted teams."
+          },
+          "is_mine": {
+            "type": "boolean",
+            "description": "True when the caller created this session."
+          },
+          "can_manage": {
+            "type": "boolean",
+            "description": "True when the caller may rename/archive/delete the session."
+          },
+          "status": {
+            "type": "string",
+            "description": "Lifecycle status.",
+            "enum": [
+              "enabled",
+              "deleted"
+            ]
+          },
+          "incognito": {
+            "type": "boolean",
+            "description": "True for incognito (non-persisted-memory) sessions."
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds when the session was created."
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds of the last session update."
+          },
+          "template_staging_round_id": {
+            "type": "string",
+            "description": "Current save→validate round id (template-assistant only); empty otherwise."
+          },
+          "state": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Raw session-state bag (session-scoped keys). Omitted when empty."
+          },
+          "bound_environment": {
+            "$ref": "#/components/schemas/EnvironmentBinding"
+          },
+          "context_resolved": {
+            "$ref": "#/components/schemas/ContextResolvedItem"
+          },
+          "token_usage": {
+            "$ref": "#/components/schemas/SessionTokenUsage"
+          },
+          "current_context_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size in tokens of the LLM context window as of the most recent turn. 0 means no turn has completed."
+          },
+          "context_window": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The bound model's max context size in tokens. 0 means unknown."
+          },
+          "archived_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds when archived; 0 means not archived."
+          },
+          "pinned_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Caller's per-user pin timestamp in milliseconds; 0 means not pinned."
+          },
+          "last_event_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds of the most recent assistant-side event."
+          },
+          "is_running": {
+            "type": "boolean",
+            "description": "True when an agent turn is currently in flight for this session."
+          },
+          "has_unread": {
+            "type": "boolean",
+            "description": "True when there is assistant output the caller has not yet viewed."
+          }
+        }
+      },
+      "SessionListResponse": {
+        "type": "object",
+        "description": "A page of agent sessions.",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of sessions matching the filter (ignoring pagination)."
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionItem"
+            },
+            "description": "The page of sessions."
+          }
+        }
+      },
+      "SessionGetRequest": {
+        "type": "object",
+        "description": "Fetch one session plus a recent page of its events.",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Session identifier."
+          },
+          "num_recent_events": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Number of most-recent events to return; 0 uses the server default."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Alias for num_recent_events; takes precedence when both are set."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "Opaque keyset cursor from a previous response's search_after_ctx, to page backward through older events."
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      },
+      "EventItem": {
+        "type": "object",
+        "description": "One persisted session event. content/actions/usage_metadata carry the raw ADK envelope; treat them as opaque structured payloads.",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "description": "Event identifier."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Owning session id."
+          },
+          "invocation_id": {
+            "type": "string",
+            "description": "ADK invocation id grouping a turn."
+          },
+          "author": {
+            "type": "string",
+            "description": "Event author (e.g. user, the agent name)."
+          },
+          "branch": {
+            "type": "string",
+            "description": "ADK branch path for nested agents."
+          },
+          "content": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "ADK content envelope {role, parts:[...]}."
+          },
+          "actions": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "ADK actions envelope (state deltas, transfers, escalation)."
+          },
+          "usage_metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Per-turn token usage metadata."
+          },
+          "partial": {
+            "type": "boolean",
+            "description": "True for a streaming partial chunk."
+          },
+          "turn_complete": {
+            "type": "boolean",
+            "description": "True on the terminal event of a turn."
+          },
+          "error_code": {
+            "type": "string",
+            "description": "Error code when the event represents a failure."
+          },
+          "error_message": {
+            "type": "string",
+            "description": "Human-readable error message, when present."
+          },
+          "status": {
+            "type": "string",
+            "description": "Event status.",
+            "enum": [
+              "normal",
+              "compressed"
+            ]
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds when the event was written."
+          }
+        }
+      },
+      "SessionGetResponse": {
+        "type": "object",
+        "description": "A session plus a backward-paged window of its events.",
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/SessionItem"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventItem"
+            },
+            "description": "Recent events, ascending by (created_at, event_id)."
+          },
+          "has_more_older": {
+            "type": "boolean",
+            "description": "True when older events remain beyond this page."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Opaque keyset cursor; pass back as search_after_ctx to fetch the next older page. Omitted when has_more_older is false."
+          }
+        }
+      },
+      "SessionExportRequest": {
+        "type": "object",
+        "description": "Export the full event transcript of one session as a streaming NDJSON body.",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Session identifier to export."
+          },
+          "include_subagents": {
+            "type": "boolean",
+            "description": "When true, each subagent_dispatch line is followed by the child session's full event stream, bracketed by its own session_meta. Defaults to false."
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      },
+      "ExportUsage": {
+        "type": "object",
+        "description": "Per-LLM-call token counts on an export line. Absent fields are 0.",
+        "properties": {
+          "input_tokens": {
+            "type": "integer",
+            "description": "Prompt (input) tokens for the call."
+          },
+          "output_tokens": {
+            "type": "integer",
+            "description": "Generated (output) tokens for the call."
+          },
+          "cache_read": {
+            "type": "integer",
+            "description": "Tokens served from the prompt cache."
+          },
+          "cache_creation": {
+            "type": "integer",
+            "description": "Tokens written to the prompt cache."
+          }
+        }
+      },
+      "ExportLine": {
+        "type": "object",
+        "description": "One line of the NDJSON export stream. The `type` field discriminates the line: session_meta (always first), user_message, llm_call, tool_call, subagent_dispatch, final_answer, agent_text, or error (emitted only if the stream is truncated mid-export). Fields are sparse — only those relevant to the line type are present.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Line discriminator.",
+            "enum": [
+              "session_meta",
+              "user_message",
+              "llm_call",
+              "tool_call",
+              "subagent_dispatch",
+              "final_answer",
+              "agent_text",
+              "error"
+            ]
+          },
+          "seq": {
+            "type": "integer",
+            "description": "1-based monotonic sequence within the session (absent on session_meta)."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Session id (on session_meta)."
+          },
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Account id (on session_meta)."
+          },
+          "app_name": {
+            "type": "string",
+            "description": "Agent app (on session_meta)."
+          },
+          "parent_session_id": {
+            "type": "string",
+            "description": "Parent session id for child sessions (on session_meta)."
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC3339 start timestamp (session_meta uses session.created_at)."
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC3339 end timestamp; stamped on llm_call/tool_call/session_meta."
+          },
+          "model": {
+            "type": "string",
+            "description": "Chat model provider key; on session_meta and llm_call."
+          },
+          "content": {
+            "type": "string",
+            "description": "Text content of the line (messages, answers, errors)."
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC3339 timestamp of the event."
+          },
+          "usage": {
+            "$ref": "#/components/schemas/ExportUsage"
+          },
+          "name": {
+            "type": "string",
+            "description": "Tool name (on tool_call)."
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Tool call input arguments (on tool_call)."
+          },
+          "output": {
+            "type": "string",
+            "description": "Tool call output (on tool_call response side)."
+          },
+          "status": {
+            "type": "string",
+            "description": "Tool result status, e.g. ok or error."
+          },
+          "duration_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Call duration in milliseconds."
+          },
+          "input_bytes": {
+            "type": "integer",
+            "description": "Byte size of the tool input."
+          },
+          "output_bytes": {
+            "type": "integer",
+            "description": "Byte size of the tool output."
+          },
+          "error": {
+            "type": "string",
+            "description": "Error detail when a call failed."
+          },
+          "agent_name": {
+            "type": "string",
+            "description": "Dispatched subagent name (on subagent_dispatch)."
+          },
+          "child_session_id": {
+            "type": "string",
+            "description": "Child session id created by the dispatch (on subagent_dispatch)."
           }
         }
       }
