@@ -189,7 +189,7 @@ type A2aAgentCreateRequest struct {
 // A2aAgentCreateResponse is generated from the Flashduty OpenAPI schema.
 type A2aAgentCreateResponse struct {
 	// Identifier of the created agent.
-	AgentID string `json:"agent_id,omitempty" toon:"agent_id,omitempty"`
+	AgentID string `json:"agent_id" toon:"agent_id"`
 }
 
 // A2aAgentIDRequest is generated from the Flashduty OpenAPI schema.
@@ -201,47 +201,47 @@ type A2aAgentIDRequest struct {
 // A2aAgentItem is generated from the Flashduty OpenAPI schema.
 type A2aAgentItem struct {
 	// Owning account.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Name resolved from the fetched agent card.
-	AgentCardName string `json:"agent_card_name,omitempty" toon:"agent_card_name,omitempty"`
+	AgentCardName string `json:"agent_card_name" toon:"agent_card_name"`
 	// Skills advertised on the fetched agent card.
-	AgentCardSkills []string `json:"agent_card_skills,omitempty" toon:"agent_card_skills,omitempty"`
+	AgentCardSkills []string `json:"agent_card_skills" toon:"agent_card_skills"`
 	// Unique identifier of the A2A agent.
-	AgentID string `json:"agent_id,omitempty" toon:"agent_id,omitempty"`
+	AgentID string `json:"agent_id" toon:"agent_id"`
 	// Display name of the agent.
-	AgentName string `json:"agent_name,omitempty" toon:"agent_name,omitempty"`
+	AgentName string `json:"agent_name" toon:"agent_name"`
 	// Authentication parameters keyed by name.
-	AuthConfig map[string]string `json:"auth_config,omitempty" toon:"auth_config,omitempty"`
+	AuthConfig map[string]string `json:"auth_config" toon:"auth_config"`
 	// Credential model: shared, per_user_secret, or per_user_oauth.
-	AuthMode string `json:"auth_mode,omitempty" toon:"auth_mode,omitempty"`
+	AuthMode string `json:"auth_mode" toon:"auth_mode"`
 	// Authentication scheme used when calling the agent.
-	AuthType string `json:"auth_type,omitempty" toon:"auth_type,omitempty"`
+	AuthType string `json:"auth_type" toon:"auth_type"`
 	// Whether the calling member may edit or delete this resource.
-	CanEdit bool `json:"can_edit,omitempty" toon:"can_edit,omitempty"`
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
 	// Timeout for fetching the agent card, in seconds.
-	CardResolveTimeout int64 `json:"card_resolve_timeout,omitempty" toon:"card_resolve_timeout,omitempty"`
+	CardResolveTimeout int64 `json:"card_resolve_timeout" toon:"card_resolve_timeout"`
 	// URL of the agent's published A2A agent card.
-	CardURL string `json:"card_url,omitempty" toon:"card_url,omitempty"`
+	CardURL string `json:"card_url" toon:"card_url"`
 	// Creation time as a Unix timestamp in seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Member who created this resource.
-	CreatedBy int64 `json:"created_by,omitempty" toon:"created_by,omitempty"`
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
 	// What this agent does and when to delegate to it.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// OAuth metadata JSON.
-	OauthMetadata string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
+	OauthMetadata string `json:"oauth_metadata" toon:"oauth_metadata"`
 	// JSON schema of the per-user secret.
-	SecretSchema string `json:"secret_schema,omitempty" toon:"secret_schema,omitempty"`
+	SecretSchema string `json:"secret_schema" toon:"secret_schema"`
 	// Whether the agent is active and reachable.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Whether the agent supports streaming responses.
-	Streaming bool `json:"streaming,omitempty" toon:"streaming,omitempty"`
+	Streaming bool `json:"streaming" toon:"streaming"`
 	// Timeout for a single delegated task, in seconds.
-	TaskTimeout int64 `json:"task_timeout,omitempty" toon:"task_timeout,omitempty"`
+	TaskTimeout int64 `json:"task_timeout" toon:"task_timeout"`
 	// Owning team; 0 means account scope.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Last-update time as a Unix timestamp in seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // A2aAgentListRequest is generated from the Flashduty OpenAPI schema.
@@ -259,9 +259,9 @@ type A2aAgentListRequest struct {
 // A2aAgentListResponse is generated from the Flashduty OpenAPI schema.
 type A2aAgentListResponse struct {
 	// A2A agents on the current page.
-	Items []A2aAgentItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []A2aAgentItem `json:"items" toon:"items"`
 	// Total number of agents matching the filters.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // A2aAgentUpdateRequest is generated from the Flashduty OpenAPI schema.
@@ -293,33 +293,33 @@ type A2aAgentUpdateRequest struct {
 // AccountInfo is generated from the Flashduty OpenAPI schema.
 type AccountInfo struct {
 	// Account identifier.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Account name.
-	AccountName string `json:"account_name,omitempty" toon:"account_name,omitempty"`
+	AccountName string `json:"account_name" toon:"account_name"`
 	// Account avatar URL.
-	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
+	Avatar string `json:"avatar" toon:"avatar"`
 	// Calling country code for the contact phone.
-	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
+	CountryCode string `json:"country_code" toon:"country_code"`
 	// Account creation time, Unix timestamp in seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Primary account domain (login subdomain).
-	Domain string `json:"domain,omitempty" toon:"domain,omitempty"`
+	Domain string `json:"domain" toon:"domain"`
 	// Account contact email.
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Additional account domains.
-	ExtraDomains []string `json:"extra_domains,omitempty" toon:"extra_domains,omitempty"`
+	ExtraDomains []string `json:"extra_domains" toon:"extra_domains"`
 	// Account language preference (e.g. zh-CN, en-US).
-	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	Locale string `json:"locale" toon:"locale"`
 	// Account identifier on the cloud marketplace platform (present only for marketplace accounts).
-	MpAccountID string `json:"mp_account_id,omitempty" toon:"mp_account_id,omitempty"`
+	MpAccountID string `json:"mp_account_id" toon:"mp_account_id"`
 	// Cloud marketplace platform the account was provisioned from (present only for marketplace accounts).
-	MpPlat string `json:"mp_plat,omitempty" toon:"mp_plat,omitempty"`
+	MpPlat string `json:"mp_plat" toon:"mp_plat"`
 	// Account contact phone, masked for privacy.
-	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	Phone string `json:"phone" toon:"phone"`
 	// Account access restrictions (present only when configured).
-	Restrictions AccountInfoRestrictions `json:"restrictions,omitempty" toon:"restrictions,omitempty"`
+	Restrictions AccountInfoRestrictions `json:"restrictions" toon:"restrictions"`
 	// Account default timezone (IANA name, e.g. Asia/Shanghai).
-	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+	TimeZone string `json:"time_zone" toon:"time_zone"`
 }
 
 // AckIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -351,23 +351,23 @@ type AddWarRoomMemberRequest struct {
 // AffectedStatusPageComponentItem is generated from the Flashduty OpenAPI schema.
 type AffectedStatusPageComponentItem struct {
 	// Timestamp when the component was first available, in unix seconds.
-	AvailableSinceSeconds Timestamp `json:"available_since_seconds,omitempty" toon:"available_since_seconds,omitempty"`
+	AvailableSinceSeconds Timestamp `json:"available_since_seconds" toon:"available_since_seconds"`
 	// Component ID.
-	ComponentID string `json:"component_id,omitempty" toon:"component_id,omitempty"`
+	ComponentID string `json:"component_id" toon:"component_id"`
 	// Component description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// When true, the component is hidden entirely from summary endpoints.
-	HideAll bool `json:"hide_all,omitempty" toon:"hide_all,omitempty"`
+	HideAll bool `json:"hide_all" toon:"hide_all"`
 	// When true, uptime data is hidden from summary responses.
-	HideUptime bool `json:"hide_uptime,omitempty" toon:"hide_uptime,omitempty"`
+	HideUptime bool `json:"hide_uptime" toon:"hide_uptime"`
 	// Component display name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Display order within its section.
-	OrderID int64 `json:"order_id,omitempty" toon:"order_id,omitempty"`
+	OrderID int64 `json:"order_id" toon:"order_id"`
 	// Parent section ID.
-	SectionID string `json:"section_id,omitempty" toon:"section_id,omitempty"`
+	SectionID string `json:"section_id" toon:"section_id"`
 	// Current component status resulting from the event.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 }
 
 // AlertEventGlobalListRequest is generated from the Flashduty OpenAPI schema.
@@ -393,52 +393,52 @@ type AlertEventGlobalListRequest struct {
 
 // AlertEventGlobalListResponse is generated from the Flashduty OpenAPI schema.
 type AlertEventGlobalListResponse struct {
-	HasNextPage    bool             `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items          []AlertEventItem `json:"items,omitempty" toon:"items,omitempty"`
-	SearchAfterCtx string           `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
-	Total          int64            `json:"total,omitempty" toon:"total,omitempty"`
+	HasNextPage    bool             `json:"has_next_page" toon:"has_next_page"`
+	Items          []AlertEventItem `json:"items" toon:"items"`
+	SearchAfterCtx string           `json:"search_after_ctx" toon:"search_after_ctx"`
+	Total          int64            `json:"total" toon:"total"`
 }
 
 // AlertEventItem is generated from the Flashduty OpenAPI schema.
 type AlertEventItem struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Parent alert ID (MongoDB ObjectID).
-	AlertID string `json:"alert_id,omitempty" toon:"alert_id,omitempty"`
+	AlertID string `json:"alert_id" toon:"alert_id"`
 	// Deduplication key used to merge events into an alert.
-	AlertKey string `json:"alert_key,omitempty" toon:"alert_key,omitempty"`
+	AlertKey string `json:"alert_key" toon:"alert_key"`
 	// Channel ID the event is routed to.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Record creation time, Unix epoch seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Deprecated. Use `integration_id` instead.
-	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Event description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Event ID (MongoDB ObjectID).
-	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	EventID string `json:"event_id" toon:"event_id"`
 	// Severity of this event.
-	EventSeverity string `json:"event_severity,omitempty" toon:"event_severity,omitempty"`
+	EventSeverity string `json:"event_severity" toon:"event_severity"`
 	// Status of this event.
-	EventStatus string `json:"event_status,omitempty" toon:"event_status,omitempty"`
+	EventStatus string `json:"event_status" toon:"event_status"`
 	// Event timestamp, Unix epoch seconds.
-	EventTime Timestamp `json:"event_time,omitempty" toon:"event_time,omitempty"`
+	EventTime Timestamp `json:"event_time" toon:"event_time"`
 	// Images attached to the event.
-	Images []AlertImage `json:"images,omitempty" toon:"images,omitempty"`
+	Images []AlertImage `json:"images" toon:"images"`
 	// Integration that produced this event.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Type/plugin key of the integration that produced this event.
-	IntegrationType string `json:"integration_type,omitempty" toon:"integration_type,omitempty"`
+	IntegrationType string `json:"integration_type" toon:"integration_type"`
 	// Label key-value pairs.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Event title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Title template used to derive `title` from labels.
-	TitleRule string `json:"title_rule,omitempty" toon:"title_rule,omitempty"`
+	TitleRule string `json:"title_rule" toon:"title_rule"`
 	// Record update time, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // AlertEventListRequest is generated from the Flashduty OpenAPI schema.
@@ -449,7 +449,7 @@ type AlertEventListRequest struct {
 
 // AlertEventListResponse is generated from the Flashduty OpenAPI schema.
 type AlertEventListResponse struct {
-	Items []AlertEventItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []AlertEventItem `json:"items" toon:"items"`
 }
 
 // AlertFeedRequest is generated from the Flashduty OpenAPI schema.
@@ -465,88 +465,88 @@ type AlertFeedRequest struct {
 
 // AlertFeedResponse is generated from the Flashduty OpenAPI schema.
 type AlertFeedResponse struct {
-	HasNextPage bool       `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []FeedItem `json:"items,omitempty" toon:"items,omitempty"`
+	HasNextPage bool       `json:"has_next_page" toon:"has_next_page"`
+	Items       []FeedItem `json:"items" toon:"items"`
 }
 
 // AlertImage is generated from the Flashduty OpenAPI schema.
 type AlertImage struct {
 	// Alt text.
-	Alt string `json:"alt,omitempty" toon:"alt,omitempty"`
+	Alt string `json:"alt" toon:"alt"`
 	// Optional link URL when the image is clicked.
-	Href string `json:"href,omitempty" toon:"href,omitempty"`
+	Href string `json:"href" toon:"href"`
 	// Image source URL or internal image reference (starts with `img_` or `http`).
-	Src string `json:"src,omitempty" toon:"src,omitempty"`
+	Src string `json:"src" toon:"src"`
 }
 
 // AlertInfo is generated from the Flashduty OpenAPI schema.
 type AlertInfo struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Alert ID (MongoDB ObjectID).
-	AlertID string `json:"alert_id,omitempty" toon:"alert_id,omitempty"`
+	AlertID string `json:"alert_id" toon:"alert_id"`
 	// Deduplication key used to merge events into the alert.
-	AlertKey string `json:"alert_key,omitempty" toon:"alert_key,omitempty"`
+	AlertKey string `json:"alert_key" toon:"alert_key"`
 	// Current severity.
-	AlertSeverity string `json:"alert_severity,omitempty" toon:"alert_severity,omitempty"`
+	AlertSeverity string `json:"alert_severity" toon:"alert_severity"`
 	// Current status.
-	AlertStatus string `json:"alert_status,omitempty" toon:"alert_status,omitempty"`
+	AlertStatus string `json:"alert_status" toon:"alert_status"`
 	// Channel ID.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel display name.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Channel status.
-	ChannelStatus string `json:"channel_status,omitempty" toon:"channel_status,omitempty"`
+	ChannelStatus string `json:"channel_status" toon:"channel_status"`
 	// Creation timestamp (seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Deprecated. Use `integration_id` instead.
-	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
 	// Deprecated. Use `integration_name`.
-	DataSourceName string `json:"data_source_name,omitempty" toon:"data_source_name,omitempty"`
+	DataSourceName string `json:"data_source_name" toon:"data_source_name"`
 	// Deprecated. Use `integration_ref_id`.
-	DataSourceRefID string `json:"data_source_ref_id,omitempty" toon:"data_source_ref_id,omitempty"`
+	DataSourceRefID string `json:"data_source_ref_id" toon:"data_source_ref_id"`
 	// Deprecated. Use `integration_type`.
-	DataSourceType string `json:"data_source_type,omitempty" toon:"data_source_type,omitempty"`
+	DataSourceType string `json:"data_source_type" toon:"data_source_type"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Alert description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Unix timestamp (seconds) when the alert recovered. 0 if still active.
-	EndTime Timestamp `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time" toon:"end_time"`
 	// Total number of raw events merged into this alert.
-	EventCnt int64 `json:"event_cnt,omitempty" toon:"event_cnt,omitempty"`
+	EventCnt int64 `json:"event_cnt" toon:"event_cnt"`
 	// Raw alert events, populated when the caller opts in.
-	Events []AlertEventItem `json:"events,omitempty" toon:"events,omitempty"`
+	Events []AlertEventItem `json:"events" toon:"events"`
 	// Whether this alert has ever been silenced.
-	EverMuted bool `json:"ever_muted,omitempty" toon:"ever_muted,omitempty"`
+	EverMuted bool `json:"ever_muted" toon:"ever_muted"`
 	// Attached images.
-	Images []Image `json:"images,omitempty" toon:"images,omitempty"`
+	Images []Image `json:"images" toon:"images"`
 	// Parent incident reference, if the alert has been merged into one.
-	Incident IncidentShort `json:"incident,omitempty" toon:"incident,omitempty"`
+	Incident IncidentShort `json:"incident" toon:"incident"`
 	// Integration ID that produced the alert.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Integration display name.
-	IntegrationName string `json:"integration_name,omitempty" toon:"integration_name,omitempty"`
+	IntegrationName string `json:"integration_name" toon:"integration_name"`
 	// Integration reference ID.
-	IntegrationRefID string `json:"integration_ref_id,omitempty" toon:"integration_ref_id,omitempty"`
+	IntegrationRefID string `json:"integration_ref_id" toon:"integration_ref_id"`
 	// Integration type string.
-	IntegrationType string `json:"integration_type,omitempty" toon:"integration_type,omitempty"`
+	IntegrationType string `json:"integration_type" toon:"integration_type"`
 	// Alert labels.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Unix timestamp (seconds) of the most recent event.
-	LastTime Timestamp `json:"last_time,omitempty" toon:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// Primary responder email, if any.
-	ResponderEmail string `json:"responder_email,omitempty" toon:"responder_email,omitempty"`
+	ResponderEmail string `json:"responder_email" toon:"responder_email"`
 	// Primary responder name, if any.
-	ResponderName string `json:"responder_name,omitempty" toon:"responder_name,omitempty"`
+	ResponderName string `json:"responder_name" toon:"responder_name"`
 	// Unix timestamp (seconds) when the alert first fired.
-	StartTime Timestamp `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time" toon:"start_time"`
 	// Alert title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Title rendering rule.
-	TitleRule string `json:"title_rule,omitempty" toon:"title_rule,omitempty"`
+	TitleRule string `json:"title_rule" toon:"title_rule"`
 	// Last update timestamp (seconds).
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // AlertInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -558,69 +558,69 @@ type AlertInfoRequest struct {
 // AlertItem is generated from the Flashduty OpenAPI schema.
 type AlertItem struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Unique alert ID (ObjectID hex string).
-	AlertID string `json:"alert_id,omitempty" toon:"alert_id,omitempty"`
+	AlertID string `json:"alert_id" toon:"alert_id"`
 	// Deduplication key.
-	AlertKey string `json:"alert_key,omitempty" toon:"alert_key,omitempty"`
+	AlertKey string `json:"alert_key" toon:"alert_key"`
 	// Current severity.
-	AlertSeverity string `json:"alert_severity,omitempty" toon:"alert_severity,omitempty"`
+	AlertSeverity string `json:"alert_severity" toon:"alert_severity"`
 	// Current status.
-	AlertStatus string `json:"alert_status,omitempty" toon:"alert_status,omitempty"`
+	AlertStatus string `json:"alert_status" toon:"alert_status"`
 	// ID of the channel the alert belongs to.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Display name of the channel.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Status of the channel (e.g. `enabled`, `disabled`).
-	ChannelStatus string `json:"channel_status,omitempty" toon:"channel_status,omitempty"`
+	ChannelStatus string `json:"channel_status" toon:"channel_status"`
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Deprecated. Use `integration_id` instead. Deprecated: use `integration_id` instead.
-	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
 	// Deprecated. Use `integration_name` instead.
-	DataSourceName string `json:"data_source_name,omitempty" toon:"data_source_name,omitempty"`
+	DataSourceName string `json:"data_source_name" toon:"data_source_name"`
 	// Deprecated. Use `integration_ref_id` instead.
-	DataSourceRefID string `json:"data_source_ref_id,omitempty" toon:"data_source_ref_id,omitempty"`
+	DataSourceRefID string `json:"data_source_ref_id" toon:"data_source_ref_id"`
 	// Deprecated. Use `integration_type` instead.
-	DataSourceType string `json:"data_source_type,omitempty" toon:"data_source_type,omitempty"`
+	DataSourceType string `json:"data_source_type" toon:"data_source_type"`
 	// Alert description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Resolution time, Unix epoch seconds. 0 if still active.
-	EndTime Timestamp `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time" toon:"end_time"`
 	// Total number of raw events received by this alert.
-	EventCnt int64 `json:"event_cnt,omitempty" toon:"event_cnt,omitempty"`
+	EventCnt int64 `json:"event_cnt" toon:"event_cnt"`
 	// Recent raw events attached to this alert. Populated only by some endpoints.
-	Events []AlertEventItem `json:"events,omitempty" toon:"events,omitempty"`
+	Events []AlertEventItem `json:"events" toon:"events"`
 	// True if this alert has ever been silenced.
-	EverMuted bool `json:"ever_muted,omitempty" toon:"ever_muted,omitempty"`
+	EverMuted bool `json:"ever_muted" toon:"ever_muted"`
 	// Images attached to the alert.
-	Images []AlertImage `json:"images,omitempty" toon:"images,omitempty"`
+	Images []AlertImage `json:"images" toon:"images"`
 	// Associated incident, if any.
-	Incident IncidentShort `json:"incident,omitempty" toon:"incident,omitempty"`
+	Incident IncidentShort `json:"incident" toon:"incident"`
 	// ID of the integration that produced this alert.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Display name of the integration.
-	IntegrationName string `json:"integration_name,omitempty" toon:"integration_name,omitempty"`
+	IntegrationName string `json:"integration_name" toon:"integration_name"`
 	// External reference ID of the integration.
-	IntegrationRefID string `json:"integration_ref_id,omitempty" toon:"integration_ref_id,omitempty"`
+	IntegrationRefID string `json:"integration_ref_id" toon:"integration_ref_id"`
 	// Type/plugin key of the integration.
-	IntegrationType string `json:"integration_type,omitempty" toon:"integration_type,omitempty"`
+	IntegrationType string `json:"integration_type" toon:"integration_type"`
 	// Label key-value pairs.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Last-event time, Unix epoch seconds.
-	LastTime Timestamp `json:"last_time,omitempty" toon:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// Email of the current responder (from the associated incident).
-	ResponderEmail string `json:"responder_email,omitempty" toon:"responder_email,omitempty"`
+	ResponderEmail string `json:"responder_email" toon:"responder_email"`
 	// Display name of the current responder (from the associated incident).
-	ResponderName string `json:"responder_name,omitempty" toon:"responder_name,omitempty"`
+	ResponderName string `json:"responder_name" toon:"responder_name"`
 	// First-seen time, Unix epoch seconds.
-	StartTime Timestamp `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time" toon:"start_time"`
 	// Alert title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Title template used to derive `title` from the event labels (e.g. `$service::$cluster`).
-	TitleRule string `json:"title_rule,omitempty" toon:"title_rule,omitempty"`
+	TitleRule string `json:"title_rule" toon:"title_rule"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // AlertListByIDsRequest is generated from the Flashduty OpenAPI schema.
@@ -661,12 +661,12 @@ type AlertListRequest struct {
 // AlertListResponse is generated from the Flashduty OpenAPI schema.
 type AlertListResponse struct {
 	// True if more pages are available.
-	HasNextPage bool        `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []AlertItem `json:"items,omitempty" toon:"items,omitempty"`
+	HasNextPage bool        `json:"has_next_page" toon:"has_next_page"`
+	Items       []AlertItem `json:"items" toon:"items"`
 	// Cursor for the next page.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching alerts.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // AlertMergeRequest is generated from the Flashduty OpenAPI schema.
@@ -707,19 +707,19 @@ type AlertPipelineInfoRequest struct {
 // AlertPipelineItem is generated from the Flashduty OpenAPI schema.
 type AlertPipelineItem struct {
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Member ID who created the pipeline.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Integration ID this pipeline applies to.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Ordered list of processing rules.
-	Rules []AlertPipeline `json:"rules,omitempty" toon:"rules,omitempty"`
+	Rules []AlertPipeline `json:"rules" toon:"rules"`
 	// Pipeline status. Possible values: `enabled`, `disabled`.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Member ID who last updated the pipeline.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // AlertPipelineListRequest is generated from the Flashduty OpenAPI schema.
@@ -730,7 +730,7 @@ type AlertPipelineListRequest struct {
 
 // AlertPipelineListResponse is generated from the Flashduty OpenAPI schema.
 type AlertPipelineListResponse struct {
-	Items []AlertPipelineItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []AlertPipelineItem `json:"items" toon:"items"`
 }
 
 // AlertPipelineUpsertRequest is generated from the Flashduty OpenAPI schema.
@@ -784,131 +784,131 @@ type AlertRule struct {
 
 // AlertRuleAudit is generated from the Flashduty OpenAPI schema.
 type AlertRuleAudit struct {
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Action performed, e.g. `create`, `update`.
-	Action string `json:"action,omitempty" toon:"action,omitempty"`
+	Action string `json:"action" toon:"action"`
 	// ID of the alert rule this record belongs to.
-	AlertRuleID uint64 `json:"alert_rule_id,omitempty" toon:"alert_rule_id,omitempty"`
+	AlertRuleID uint64 `json:"alert_rule_id" toon:"alert_rule_id"`
 	// JSON string of the full rule snapshot at audit time. Populated on `/monit/rule/audit/detail`, omitted on list responses.
-	Content     string `json:"content,omitempty" toon:"content,omitempty"`
-	CreatedAt   int64  `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	CreatorID   uint64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
-	CreatorName string `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
+	Content     string `json:"content" toon:"content"`
+	CreatedAt   int64  `json:"created_at" toon:"created_at"`
+	CreatorID   uint64 `json:"creator_id" toon:"creator_id"`
+	CreatorName string `json:"creator_name" toon:"creator_name"`
 	// Audit record ID.
-	ID uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	ID uint64 `json:"id" toon:"id"`
 }
 
 // AlertRuleBasic is generated from the Flashduty OpenAPI schema.
 type AlertRuleBasic struct {
 	// Account ID.
-	AccountID   uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	CreatedAt   int64  `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	CreatorID   uint64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
-	CreatorName string `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
+	AccountID   uint64 `json:"account_id" toon:"account_id"`
+	CreatedAt   int64  `json:"created_at" toon:"created_at"`
+	CreatorID   uint64 `json:"creator_id" toon:"creator_id"`
+	CreatorName string `json:"creator_name" toon:"creator_name"`
 	// 5-field cron schedule, e.g. `* * * * *`.
-	CronPattern string `json:"cron_pattern,omitempty" toon:"cron_pattern,omitempty"`
+	CronPattern string `json:"cron_pattern" toon:"cron_pattern"`
 	// Whether debug logging is enabled.
-	DebugLogEnabled bool `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
+	DebugLogEnabled bool `json:"debug_log_enabled" toon:"debug_log_enabled"`
 	// Evaluation delay in seconds.
-	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
+	DelaySeconds int64 `json:"delay_seconds" toon:"delay_seconds"`
 	// Data source type, e.g. `prometheus`.
-	DsType string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
+	DsType string `json:"ds_type" toon:"ds_type"`
 	// Whether the rule is enabled.
-	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	Enabled bool `json:"enabled" toon:"enabled"`
 	// Folder ID.
-	FolderID uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
 	// Unique rule ID.
-	ID uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	ID uint64 `json:"id" toon:"id"`
 	// Custom labels.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Rule name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// True if the rule currently has active alerts.
-	Triggered   bool   `json:"triggered,omitempty" toon:"triggered,omitempty"`
-	UpdatedAt   int64  `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
-	UpdaterID   uint64 `json:"updater_id,omitempty" toon:"updater_id,omitempty"`
-	UpdaterName string `json:"updater_name,omitempty" toon:"updater_name,omitempty"`
+	Triggered   bool   `json:"triggered" toon:"triggered"`
+	UpdatedAt   int64  `json:"updated_at" toon:"updated_at"`
+	UpdaterID   uint64 `json:"updater_id" toon:"updater_id"`
+	UpdaterName string `json:"updater_name" toon:"updater_name"`
 }
 
 // AlertRuleCounter is generated from the Flashduty OpenAPI schema.
 type AlertRuleCounter struct {
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Sample timestamp, Unix epoch seconds.
-	Clock Timestamp `json:"clock,omitempty" toon:"clock,omitempty"`
-	ID    uint64    `json:"id,omitempty" toon:"id,omitempty"`
+	Clock Timestamp `json:"clock" toon:"clock"`
+	ID    uint64    `json:"id" toon:"id"`
 	// Rule count at the sample time.
-	Num int64 `json:"num,omitempty" toon:"num,omitempty"`
+	Num int64 `json:"num" toon:"num"`
 }
 
 // AlertRuleExport is generated from the Flashduty OpenAPI schema.
 type AlertRuleExport struct {
-	Annotations     map[string]string `json:"annotations,omitempty" toon:"annotations,omitempty"`
-	CronPattern     string            `json:"cron_pattern,omitempty" toon:"cron_pattern,omitempty"`
-	DebugLogEnabled bool              `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
-	DelaySeconds    int64             `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
-	Description     string            `json:"description,omitempty" toon:"description,omitempty"`
-	DescriptionType string            `json:"description_type,omitempty" toon:"description_type,omitempty"`
-	DsIDs           []uint64          `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
-	DsList          []string          `json:"ds_list,omitempty" toon:"ds_list,omitempty"`
-	DsType          string            `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
-	Enabled         bool              `json:"enabled,omitempty" toon:"enabled,omitempty"`
-	EnabledTimes    []EnabledTime     `json:"enabled_times,omitempty" toon:"enabled_times,omitempty"`
-	Labels          map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
-	Name            string            `json:"name,omitempty" toon:"name,omitempty"`
-	RepeatInterval  int64             `json:"repeat_interval,omitempty" toon:"repeat_interval,omitempty"`
-	RepeatTotal     int64             `json:"repeat_total,omitempty" toon:"repeat_total,omitempty"`
-	RuleConfigs     RuleConfigs       `json:"rule_configs,omitempty" toon:"rule_configs,omitempty"`
+	Annotations     map[string]string `json:"annotations" toon:"annotations"`
+	CronPattern     string            `json:"cron_pattern" toon:"cron_pattern"`
+	DebugLogEnabled bool              `json:"debug_log_enabled" toon:"debug_log_enabled"`
+	DelaySeconds    int64             `json:"delay_seconds" toon:"delay_seconds"`
+	Description     string            `json:"description" toon:"description"`
+	DescriptionType string            `json:"description_type" toon:"description_type"`
+	DsIDs           []uint64          `json:"ds_ids" toon:"ds_ids"`
+	DsList          []string          `json:"ds_list" toon:"ds_list"`
+	DsType          string            `json:"ds_type" toon:"ds_type"`
+	Enabled         bool              `json:"enabled" toon:"enabled"`
+	EnabledTimes    []EnabledTime     `json:"enabled_times" toon:"enabled_times"`
+	Labels          map[string]string `json:"labels" toon:"labels"`
+	Name            string            `json:"name" toon:"name"`
+	RepeatInterval  int64             `json:"repeat_interval" toon:"repeat_interval"`
+	RepeatTotal     int64             `json:"repeat_total" toon:"repeat_total"`
+	RuleConfigs     RuleConfigs       `json:"rule_configs" toon:"rule_configs"`
 }
 
 // AlertRuleInfoResponse is generated from the Flashduty OpenAPI schema.
 type AlertRuleInfoResponse struct {
-	AccountID   uint64            `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty" toon:"annotations,omitempty"`
+	AccountID   uint64            `json:"account_id" toon:"account_id"`
+	Annotations map[string]string `json:"annotations" toon:"annotations"`
 	// Channel IDs to send alerts to.
-	ChannelIDs  []uint64 `json:"channel_ids,omitempty" toon:"channel_ids,omitempty"`
-	CreatedAt   int64    `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	CreatorID   uint64   `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
-	CreatorName string   `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
+	ChannelIDs  []uint64 `json:"channel_ids" toon:"channel_ids"`
+	CreatedAt   int64    `json:"created_at" toon:"created_at"`
+	CreatorID   uint64   `json:"creator_id" toon:"creator_id"`
+	CreatorName string   `json:"creator_name" toon:"creator_name"`
 	// 5-field cron schedule.
-	CronPattern     string `json:"cron_pattern,omitempty" toon:"cron_pattern,omitempty"`
-	DebugLogEnabled bool   `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
-	DelaySeconds    int64  `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
-	Description     string `json:"description,omitempty" toon:"description,omitempty"`
-	DescriptionType string `json:"description_type,omitempty" toon:"description_type,omitempty"`
+	CronPattern     string `json:"cron_pattern" toon:"cron_pattern"`
+	DebugLogEnabled bool   `json:"debug_log_enabled" toon:"debug_log_enabled"`
+	DelaySeconds    int64  `json:"delay_seconds" toon:"delay_seconds"`
+	Description     string `json:"description" toon:"description"`
+	DescriptionType string `json:"description_type" toon:"description_type"`
 	// Specific data source IDs.
-	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
+	DsIDs []uint64 `json:"ds_ids" toon:"ds_ids"`
 	// Data source name patterns (supports wildcards).
-	DsList []string `json:"ds_list,omitempty" toon:"ds_list,omitempty"`
+	DsList []string `json:"ds_list" toon:"ds_list"`
 	// Data source type.
-	DsType  string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
-	Enabled bool   `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	DsType  string `json:"ds_type" toon:"ds_type"`
+	Enabled bool   `json:"enabled" toon:"enabled"`
 	// Time windows when the rule is active.
-	EnabledTimes []AlertRuleInfoResponseEnabledTimesItem `json:"enabled_times,omitempty" toon:"enabled_times,omitempty"`
+	EnabledTimes []AlertRuleInfoResponseEnabledTimesItem `json:"enabled_times" toon:"enabled_times"`
 	// Folder the rule belongs to.
-	FolderID uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
-	ID       uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	ID       uint64 `json:"id" toon:"id"`
 	// Custom labels.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Rule name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Notification repeat interval in seconds.
-	RepeatInterval int64 `json:"repeat_interval,omitempty" toon:"repeat_interval,omitempty"`
+	RepeatInterval int64 `json:"repeat_interval" toon:"repeat_interval"`
 	// Max number of repeat notifications.
-	RepeatTotal int64       `json:"repeat_total,omitempty" toon:"repeat_total,omitempty"`
-	RuleConfigs RuleConfigs `json:"rule_configs,omitempty" toon:"rule_configs,omitempty"`
-	UpdatedAt   int64       `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
-	UpdaterID   uint64      `json:"updater_id,omitempty" toon:"updater_id,omitempty"`
-	UpdaterName string      `json:"updater_name,omitempty" toon:"updater_name,omitempty"`
+	RepeatTotal int64       `json:"repeat_total" toon:"repeat_total"`
+	RuleConfigs RuleConfigs `json:"rule_configs" toon:"rule_configs"`
+	UpdatedAt   int64       `json:"updated_at" toon:"updated_at"`
+	UpdaterID   uint64      `json:"updater_id" toon:"updater_id"`
+	UpdaterName string      `json:"updater_name" toon:"updater_name"`
 }
 
 // AlertRuleStatus is generated from the Flashduty OpenAPI schema.
 type AlertRuleStatus struct {
-	FolderID   uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
-	FolderName string `json:"folder_name,omitempty" toon:"folder_name,omitempty"`
+	FolderID   uint64 `json:"folder_id" toon:"folder_id"`
+	FolderName string `json:"folder_name" toon:"folder_name"`
 	// Total rules in the folder family.
-	RuleTotal int64 `json:"rule_total,omitempty" toon:"rule_total,omitempty"`
+	RuleTotal int64 `json:"rule_total" toon:"rule_total"`
 	// Rules with active alerts.
-	TriggeredRuleCount int64 `json:"triggered_rule_count,omitempty" toon:"triggered_rule_count,omitempty"`
+	TriggeredRuleCount int64 `json:"triggered_rule_count" toon:"triggered_rule_count"`
 }
 
 // ApAlertDrop is generated from the Flashduty OpenAPI schema.
@@ -972,29 +972,29 @@ type AssignedTo struct {
 // AuditLog is generated from the Flashduty OpenAPI schema.
 type AuditLog struct {
 	// ID of the account.
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// JSON-encoded request body (may be truncated at 10 KB).
-	Body string `json:"body,omitempty" toon:"body,omitempty"`
+	Body string `json:"body" toon:"body"`
 	// Timestamp of the operation in Unix epoch milliseconds.
-	CreatedAt TimestampMilli `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Client IP address of the caller.
-	IP string `json:"ip,omitempty" toon:"ip,omitempty"`
+	IP string `json:"ip" toon:"ip"`
 	// True if this is flagged as a high-risk operation.
-	IsDangerous bool `json:"is_dangerous,omitempty" toon:"is_dangerous,omitempty"`
+	IsDangerous bool `json:"is_dangerous" toon:"is_dangerous"`
 	// True for mutating operations; false for read-only ones.
-	IsWrite bool `json:"is_write,omitempty" toon:"is_write,omitempty"`
+	IsWrite bool `json:"is_write" toon:"is_write"`
 	// ID of the member who performed the action.
-	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
+	MemberID uint64 `json:"member_id" toon:"member_id"`
 	// Display name of the member.
-	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	MemberName string `json:"member_name" toon:"member_name"`
 	// Stable machine-readable operation name, e.g. `template:write:create`.
-	Operation string `json:"operation,omitempty" toon:"operation,omitempty"`
+	Operation string `json:"operation" toon:"operation"`
 	// Human-readable operation label in the account's locale.
-	OperationName string `json:"operation_name,omitempty" toon:"operation_name,omitempty"`
+	OperationName string `json:"operation_name" toon:"operation_name"`
 	// URL path parameters as an array of key-value pairs, or an empty array when none.
-	Params []AuditLogParamsItem `json:"params,omitempty" toon:"params,omitempty"`
+	Params []AuditLogParamsItem `json:"params" toon:"params"`
 	// Unique request ID for correlation.
-	RequestID string `json:"request_id,omitempty" toon:"request_id,omitempty"`
+	RequestID string `json:"request_id" toon:"request_id"`
 }
 
 // AuditOperationListRequest is generated from the Flashduty OpenAPI schema.
@@ -1002,15 +1002,15 @@ type AuditOperationListRequest struct{}
 
 // AuditOperationListResponse is generated from the Flashduty OpenAPI schema.
 type AuditOperationListResponse struct {
-	Items []AuditOperationTypeItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []AuditOperationTypeItem `json:"items" toon:"items"`
 }
 
 // AuditOperationTypeItem is generated from the Flashduty OpenAPI schema.
 type AuditOperationTypeItem struct {
 	// Stable machine-readable operation name for use as a filter.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Human-readable Chinese label shown in the console.
-	NameCn string `json:"name_cn,omitempty" toon:"name_cn,omitempty"`
+	NameCn string `json:"name_cn" toon:"name_cn"`
 }
 
 // AuditRecordIDRequest is generated from the Flashduty OpenAPI schema.
@@ -1044,11 +1044,11 @@ type AuditSearchRequest struct {
 // AuditSearchResponse is generated from the Flashduty OpenAPI schema.
 type AuditSearchResponse struct {
 	// Audit log entries for this page.
-	Docs []AuditLog `json:"docs,omitempty" toon:"docs,omitempty"`
+	Docs []AuditLog `json:"docs" toon:"docs"`
 	// Opaque cursor for the next page. Empty string when there are no more results.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching entries in the search window.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // CalEventIDRequest is generated from the Flashduty OpenAPI schema.
@@ -1062,27 +1062,27 @@ type CalEventIDRequest struct {
 // CalEventItem is generated from the Flashduty OpenAPI schema.
 type CalEventItem struct {
 	// Account ID. Only present for private events.
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Calendar ID. For public events this is a locale key such as zh-cn.china.official.
-	CalID string `json:"cal_id,omitempty" toon:"cal_id,omitempty"`
+	CalID string `json:"cal_id" toon:"cal_id"`
 	// Creation timestamp (Unix seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator person ID. Only present for private events.
-	CreatorID uint64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
 	// Event description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Event end date (YYYY-MM-DD, exclusive).
-	EndAt string `json:"end_at,omitempty" toon:"end_at,omitempty"`
+	EndAt string `json:"end_at" toon:"end_at"`
 	// Event ID.
-	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	EventID string `json:"event_id" toon:"event_id"`
 	// Whether the event marks a non-working day.
-	IsOff bool `json:"is_off,omitempty" toon:"is_off,omitempty"`
+	IsOff bool `json:"is_off" toon:"is_off"`
 	// Event start date (YYYY-MM-DD).
-	StartAt string `json:"start_at,omitempty" toon:"start_at,omitempty"`
+	StartAt string `json:"start_at" toon:"start_at"`
 	// Event summary.
-	Summary string `json:"summary,omitempty" toon:"summary,omitempty"`
+	Summary string `json:"summary" toon:"summary"`
 	// Last update timestamp (Unix seconds).
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // CalEventListRequest is generated from the Flashduty OpenAPI schema.
@@ -1100,9 +1100,9 @@ type CalEventListRequest struct {
 // CalEventListResponse is generated from the Flashduty OpenAPI schema.
 type CalEventListResponse struct {
 	// Calendar events sorted by start_at.
-	Items []CalEventItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []CalEventItem `json:"items" toon:"items"`
 	// Total number of events returned.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // CalEventUpsertRequest is generated from the Flashduty OpenAPI schema.
@@ -1126,11 +1126,11 @@ type CalEventUpsertRequest struct {
 // CalEventUpsertResponse is generated from the Flashduty OpenAPI schema.
 type CalEventUpsertResponse struct {
 	// Calendar ID.
-	CalID string `json:"cal_id,omitempty" toon:"cal_id,omitempty"`
+	CalID string `json:"cal_id" toon:"cal_id"`
 	// Event ID (existing or newly generated).
-	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	EventID string `json:"event_id" toon:"event_id"`
 	// Event summary.
-	Summary string `json:"summary,omitempty" toon:"summary,omitempty"`
+	Summary string `json:"summary" toon:"summary"`
 }
 
 // CalendarCreateRequest is generated from the Flashduty OpenAPI schema.
@@ -1152,9 +1152,9 @@ type CalendarCreateRequest struct {
 // CalendarCreateResponse is generated from the Flashduty OpenAPI schema.
 type CalendarCreateResponse struct {
 	// ID of the newly created calendar (format cal.<uuid>).
-	CalID string `json:"cal_id,omitempty" toon:"cal_id,omitempty"`
+	CalID string `json:"cal_id" toon:"cal_id"`
 	// Calendar display name.
-	CalName string `json:"cal_name,omitempty" toon:"cal_name,omitempty"`
+	CalName string `json:"cal_name" toon:"cal_name"`
 }
 
 // CalendarEmptyObject is generated from the Flashduty OpenAPI schema.
@@ -1169,33 +1169,33 @@ type CalendarIDRequest struct {
 // CalendarItem is generated from the Flashduty OpenAPI schema.
 type CalendarItem struct {
 	// Account ID.
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Calendar ID.
-	CalID string `json:"cal_id,omitempty" toon:"cal_id,omitempty"`
+	CalID string `json:"cal_id" toon:"cal_id"`
 	// Calendar display name.
-	CalName string `json:"cal_name,omitempty" toon:"cal_name,omitempty"`
+	CalName string `json:"cal_name" toon:"cal_name"`
 	// Creation timestamp (Unix seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator person ID.
-	CreatorID uint64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
 	// Calendar description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Inherited public-holiday calendar IDs.
-	ExtraCalIDs []string `json:"extra_cal_ids,omitempty" toon:"extra_cal_ids,omitempty"`
+	ExtraCalIDs []string `json:"extra_cal_ids" toon:"extra_cal_ids"`
 	// Calendar kind.
-	Kind string `json:"kind,omitempty" toon:"kind,omitempty"`
+	Kind string `json:"kind" toon:"kind"`
 	// Calendar status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Owning team ID (0 when not assigned).
-	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID uint64 `json:"team_id" toon:"team_id"`
 	// IANA timezone.
-	Timezone string `json:"timezone,omitempty" toon:"timezone,omitempty"`
+	Timezone string `json:"timezone" toon:"timezone"`
 	// Last update timestamp (Unix seconds).
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater person ID.
-	UpdatedBy uint64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy uint64 `json:"updated_by" toon:"updated_by"`
 	// Workday numbers (0 = Sunday, 6 = Saturday).
-	Workdays []int64 `json:"workdays,omitempty" toon:"workdays,omitempty"`
+	Workdays []int64 `json:"workdays" toon:"workdays"`
 }
 
 // CalendarListRequest is generated from the Flashduty OpenAPI schema.
@@ -1209,9 +1209,9 @@ type CalendarListRequest struct {
 // CalendarListResponse is generated from the Flashduty OpenAPI schema.
 type CalendarListResponse struct {
 	// Calendar items.
-	Items []CalendarItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []CalendarItem `json:"items" toon:"items"`
 	// Total number of calendars returned.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // CalendarUpdateRequest is generated from the Flashduty OpenAPI schema.
@@ -1241,81 +1241,81 @@ type CancelStatusPageMigrationRequest struct {
 // ChangeEventItem is generated from the Flashduty OpenAPI schema.
 type ChangeEventItem struct {
 	// Account this change event belongs to.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Stable key that groups events belonging to the same change.
-	ChangeKey string `json:"change_key,omitempty" toon:"change_key,omitempty"`
+	ChangeKey string `json:"change_key" toon:"change_key"`
 	// Lifecycle status of the change event.
-	ChangeStatus string `json:"change_status,omitempty" toon:"change_status,omitempty"`
+	ChangeStatus string `json:"change_status" toon:"change_status"`
 	// Collaboration channel this change event is routed to.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Unix timestamp in seconds when the change event was created.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Unix timestamp in seconds when the change event was deleted.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Change event description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Change event ID, a MongoDB ObjectID hex string.
-	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	EventID string `json:"event_id" toon:"event_id"`
 	// Unix timestamp in seconds when the change event occurred.
-	EventTime Timestamp `json:"event_time,omitempty" toon:"event_time,omitempty"`
+	EventTime Timestamp `json:"event_time" toon:"event_time"`
 	// Integration that reported this change event.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Key-value labels attached to the change event.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// External link to the source change record.
-	Link string `json:"link,omitempty" toon:"link,omitempty"`
+	Link string `json:"link" toon:"link"`
 	// Change event title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Unix timestamp in seconds when the change event was last updated.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // ChangeItem is generated from the Flashduty OpenAPI schema.
 type ChangeItem struct {
 	// Account this change belongs to.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Change ID, a MongoDB ObjectID hex string.
-	ChangeID string `json:"change_id,omitempty" toon:"change_id,omitempty"`
+	ChangeID string `json:"change_id" toon:"change_id"`
 	// Stable key that groups events belonging to the same change.
-	ChangeKey string `json:"change_key,omitempty" toon:"change_key,omitempty"`
+	ChangeKey string `json:"change_key" toon:"change_key"`
 	// Current lifecycle status of the change.
-	ChangeStatus string `json:"change_status,omitempty" toon:"change_status,omitempty"`
+	ChangeStatus string `json:"change_status" toon:"change_status"`
 	// Collaboration channel this change is routed to.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Name of the collaboration channel.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Status of the collaboration channel.
-	ChannelStatus string `json:"channel_status,omitempty" toon:"channel_status,omitempty"`
+	ChannelStatus string `json:"channel_status" toon:"channel_status"`
 	// Change description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Unix timestamp in seconds when the change ended.
-	EndTime Timestamp `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time" toon:"end_time"`
 	// Underlying change events, returned only when include_events is true.
-	Events []ChangeEventItem `json:"events,omitempty" toon:"events,omitempty"`
+	Events []ChangeEventItem `json:"events" toon:"events"`
 	// Integration that reported this change.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Name of the reporting integration.
-	IntegrationName string `json:"integration_name,omitempty" toon:"integration_name,omitempty"`
+	IntegrationName string `json:"integration_name" toon:"integration_name"`
 	// Key-value labels attached to the change.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Unix timestamp in seconds of the most recent change activity.
-	LastTime Timestamp `json:"last_time,omitempty" toon:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// External link to the source change record.
-	Link string `json:"link,omitempty" toon:"link,omitempty"`
+	Link string `json:"link" toon:"link"`
 	// Unix timestamp in seconds when the change started.
-	StartTime Timestamp `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time" toon:"start_time"`
 	// Change title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 }
 
 // ChannelCreateResponse is generated from the Flashduty OpenAPI schema.
 type ChannelCreateResponse struct {
 	// Newly created channel ID.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel name echoed back from the request.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// External report token. Emitted only when external reporting is enabled.
-	ExternalReportToken string `json:"external_report_token,omitempty" toon:"external_report_token,omitempty"`
+	ExternalReportToken string `json:"external_report_token" toon:"external_report_token"`
 }
 
 // ChannelIDRequest is generated from the Flashduty OpenAPI schema.
@@ -1338,56 +1338,56 @@ type ChannelInfosRequest struct {
 
 // ChannelInfosResponse is generated from the Flashduty OpenAPI schema.
 type ChannelInfosResponse struct {
-	Items []ChannelShort `json:"items,omitempty" toon:"items,omitempty"`
+	Items []ChannelShort `json:"items" toon:"items"`
 }
 
 // ChannelItem is generated from the Flashduty OpenAPI schema.
 type ChannelItem struct {
 	// Owning account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Highest severity among active incidents in the channel.
-	ActiveIncidentHighestSeverity string `json:"active_incident_highest_severity,omitempty" toon:"active_incident_highest_severity,omitempty"`
+	ActiveIncidentHighestSeverity string `json:"active_incident_highest_severity" toon:"active_incident_highest_severity"`
 	// Auto-resolve timer reset mode.
-	AutoResolveMode string `json:"auto_resolve_mode,omitempty" toon:"auto_resolve_mode,omitempty"`
+	AutoResolveMode string `json:"auto_resolve_mode" toon:"auto_resolve_mode"`
 	// Auto-resolve timeout in seconds. 0 disables auto-resolve.
-	AutoResolveTimeout int64 `json:"auto_resolve_timeout,omitempty" toon:"auto_resolve_timeout,omitempty"`
+	AutoResolveTimeout int64 `json:"auto_resolve_timeout" toon:"auto_resolve_timeout"`
 	// Channel ID.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel name.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Creation timestamp (unix seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Member ID who created the channel.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Deletion timestamp (unix seconds). Non-zero only for soft-deleted channels.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Free-form description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// When true, automatic incident closing is disabled.
-	DisableAutoClose bool `json:"disable_auto_close,omitempty" toon:"disable_auto_close,omitempty"`
+	DisableAutoClose bool `json:"disable_auto_close" toon:"disable_auto_close"`
 	// When true, outlier incident detection is disabled.
-	DisableOutlierDetection bool `json:"disable_outlier_detection,omitempty" toon:"disable_outlier_detection,omitempty"`
+	DisableOutlierDetection bool `json:"disable_outlier_detection" toon:"disable_outlier_detection"`
 	// Token granted to external reporters when external reporting is enabled.
-	ExternalReportToken string   `json:"external_report_token,omitempty" toon:"external_report_token,omitempty"`
-	Flapping            Flapping `json:"flapping,omitempty" toon:"flapping,omitempty"`
-	Group               Group    `json:"group,omitempty" toon:"group,omitempty"`
+	ExternalReportToken string   `json:"external_report_token" toon:"external_report_token"`
+	Flapping            Flapping `json:"flapping" toon:"flapping"`
+	Group               Group    `json:"group" toon:"group"`
 	// Whether external reporters can file incidents into this channel.
-	IsExternalReportEnabled bool `json:"is_external_report_enabled,omitempty" toon:"is_external_report_enabled,omitempty"`
+	IsExternalReportEnabled bool `json:"is_external_report_enabled" toon:"is_external_report_enabled"`
 	// When true, the channel is visible only to its managing teams.
-	IsPrivate bool `json:"is_private,omitempty" toon:"is_private,omitempty"`
+	IsPrivate bool `json:"is_private" toon:"is_private"`
 	// Whether the current user has starred this channel.
-	IsStarred bool `json:"is_starred,omitempty" toon:"is_starred,omitempty"`
+	IsStarred bool `json:"is_starred" toon:"is_starred"`
 	// Timestamp of the most recent incident (unix seconds).
-	LastIncidentAt Timestamp `json:"last_incident_at,omitempty" toon:"last_incident_at,omitempty"`
+	LastIncidentAt Timestamp `json:"last_incident_at" toon:"last_incident_at"`
 	// Additional teams that can manage the channel.
-	ManagingTeamIDs        []int64         `json:"managing_team_ids,omitempty" toon:"managing_team_ids,omitempty"`
-	ProgressToIncidentCnts IncProgressCnts `json:"progress_to_incident_cnts,omitempty" toon:"progress_to_incident_cnts,omitempty"`
+	ManagingTeamIDs        []int64         `json:"managing_team_ids" toon:"managing_team_ids"`
+	ProgressToIncidentCnts IncProgressCnts `json:"progress_to_incident_cnts" toon:"progress_to_incident_cnts"`
 	// Channel status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Owning team ID.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Last update timestamp (unix seconds).
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // ChannelRuleIDRequest is generated from the Flashduty OpenAPI schema.
@@ -1407,11 +1407,11 @@ type ChannelScopedListRequest struct {
 // ChannelShort is generated from the Flashduty OpenAPI schema.
 type ChannelShort struct {
 	// Channel ID.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel name.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Channel status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 }
 
 // CommentIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -1513,9 +1513,9 @@ type CreateFieldRequest struct {
 // CreateFieldResponse is generated from the Flashduty OpenAPI schema.
 type CreateFieldResponse struct {
 	// Newly assigned field ID — 24-character hex ObjectID.
-	FieldID string `json:"field_id,omitempty" toon:"field_id,omitempty"`
+	FieldID string `json:"field_id" toon:"field_id"`
 	// Echo of the submitted `field_name`.
-	FieldName string `json:"field_name,omitempty" toon:"field_name,omitempty"`
+	FieldName string `json:"field_name" toon:"field_name"`
 }
 
 // CreateIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -1535,9 +1535,9 @@ type CreateIncidentRequest struct {
 // CreateIncidentResponse is generated from the Flashduty OpenAPI schema.
 type CreateIncidentResponse struct {
 	// Newly created incident ID (MongoDB ObjectID).
-	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	IncidentID string `json:"incident_id" toon:"incident_id"`
 	// Echoes the incident title from the request.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 }
 
 // CreateInhibitRuleRequest is generated from the Flashduty OpenAPI schema.
@@ -1798,14 +1798,14 @@ type DsslsConfig struct {
 // DsType is generated from the Flashduty OpenAPI schema.
 type DsType struct {
 	// Owning account ID. `0` for global types.
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	ID        uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
+	ID        uint64 `json:"id" toon:"id"`
 	// Identifier used as the `ds_type` of rules, e.g. `prometheus`.
-	Ident string `json:"ident,omitempty" toon:"ident,omitempty"`
+	Ident string `json:"ident" toon:"ident"`
 	// Display name, e.g. `Prometheus`.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Display order weight; higher appears first.
-	Weight int64 `json:"weight,omitempty" toon:"weight,omitempty"`
+	Weight int64 `json:"weight" toon:"weight"`
 }
 
 // DsVictoriaLogsConfig is generated from the Flashduty OpenAPI schema.
@@ -1828,24 +1828,24 @@ type DsVictoriaLogsConfig struct {
 // DataSourceItem is generated from the Flashduty OpenAPI schema.
 type DataSourceItem struct {
 	// Account ID.
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Connection address. For Prometheus/Loki/VictoriaLogs: HTTP URL. For MySQL/Oracle/Postgres/ClickHouse: `host:port`. For SLS: endpoint without http/https prefix.
-	Address string `json:"address,omitempty" toon:"address,omitempty"`
+	Address string `json:"address" toon:"address"`
 	// Monitors edge cluster name responsible for evaluating rules using this datasource.
-	EdgeClusterName string `json:"edge_cluster_name,omitempty" toon:"edge_cluster_name,omitempty"`
+	EdgeClusterName string `json:"edge_cluster_name" toon:"edge_cluster_name"`
 	// Whether the datasource is active.
-	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	Enabled bool `json:"enabled" toon:"enabled"`
 	// Unique datasource ID.
-	ID uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	ID uint64 `json:"id" toon:"id"`
 	// Datasource display name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Optional description.
-	Note    string    `json:"note,omitempty" toon:"note,omitempty"`
-	Payload DsPayload `json:"payload,omitempty" toon:"payload,omitempty"`
+	Note    string    `json:"note" toon:"note"`
+	Payload DsPayload `json:"payload" toon:"payload"`
 	// Datasource type identifier. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.
-	TypeIdent string `json:"type_ident,omitempty" toon:"type_ident,omitempty"`
+	TypeIdent string `json:"type_ident" toon:"type_ident"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // DataSourceListRequest is generated from the Flashduty OpenAPI schema.
@@ -1931,55 +1931,55 @@ type DiagnoseRequest struct {
 
 // DiagnoseResponse is generated from the Flashduty OpenAPI schema.
 type DiagnoseResponse struct {
-	DsName    string `json:"ds_name,omitempty" toon:"ds_name,omitempty"`
-	DsType    string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
-	Operation string `json:"operation,omitempty" toon:"operation,omitempty"`
+	DsName    string `json:"ds_name" toon:"ds_name"`
+	DsType    string `json:"ds_type" toon:"ds_type"`
+	Operation string `json:"operation" toon:"operation"`
 	// Query string echoed back from the request.
-	Query string `json:"query,omitempty" toon:"query,omitempty"`
+	Query string `json:"query" toon:"query"`
 	// One entry per `methods[]` in the request, in the same order.
-	Results []DiagnoseResponseResultsItem `json:"results,omitempty" toon:"results,omitempty"`
-	Window  DiagnoseResponseWindow        `json:"window,omitempty" toon:"window,omitempty"`
+	Results []DiagnoseResponseResultsItem `json:"results" toon:"results"`
+	Window  DiagnoseResponseWindow        `json:"window" toon:"window"`
 }
 
 // DimensionInsightItem is generated from the Flashduty OpenAPI schema.
 type DimensionInsightItem struct {
-	AccountID          int64   `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	AcknowledgementPct float64 `json:"acknowledgement_pct,omitempty" toon:"acknowledgement_pct,omitempty"`
-	ChannelID          int64   `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
-	ChannelName        string  `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	AccountID          int64   `json:"account_id" toon:"account_id"`
+	AcknowledgementPct float64 `json:"acknowledgement_pct" toon:"acknowledgement_pct"`
+	ChannelID          int64   `json:"channel_id" toon:"channel_id"`
+	ChannelName        string  `json:"channel_name" toon:"channel_name"`
 	// Hour bucket when `split_hours` is enabled.
-	Hours                           string  `json:"hours,omitempty" toon:"hours,omitempty"`
-	MeanSecondsToAck                float64 `json:"mean_seconds_to_ack,omitempty" toon:"mean_seconds_to_ack,omitempty"`
-	MeanSecondsToClose              float64 `json:"mean_seconds_to_close,omitempty" toon:"mean_seconds_to_close,omitempty"`
-	NoiseReductionPct               float64 `json:"noise_reduction_pct,omitempty" toon:"noise_reduction_pct,omitempty"`
-	ResponderID                     int64   `json:"responder_id,omitempty" toon:"responder_id,omitempty"`
-	ResponderName                   string  `json:"responder_name,omitempty" toon:"responder_name,omitempty"`
-	TeamID                          int64   `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	TeamName                        string  `json:"team_name,omitempty" toon:"team_name,omitempty"`
-	TotalAlertCnt                   int64   `json:"total_alert_cnt,omitempty" toon:"total_alert_cnt,omitempty"`
-	TotalAlertEventCnt              int64   `json:"total_alert_event_cnt,omitempty" toon:"total_alert_event_cnt,omitempty"`
-	TotalEngagedSeconds             int64   `json:"total_engaged_seconds,omitempty" toon:"total_engaged_seconds,omitempty"`
-	TotalIncidentCnt                int64   `json:"total_incident_cnt,omitempty" toon:"total_incident_cnt,omitempty"`
-	TotalIncidentsAcknowledged      int64   `json:"total_incidents_acknowledged,omitempty" toon:"total_incidents_acknowledged,omitempty"`
-	TotalIncidentsAutoClosed        int64   `json:"total_incidents_auto_closed,omitempty" toon:"total_incidents_auto_closed,omitempty"`
-	TotalIncidentsClosed            int64   `json:"total_incidents_closed,omitempty" toon:"total_incidents_closed,omitempty"`
-	TotalIncidentsEscalated         int64   `json:"total_incidents_escalated,omitempty" toon:"total_incidents_escalated,omitempty"`
-	TotalIncidentsManuallyClosed    int64   `json:"total_incidents_manually_closed,omitempty" toon:"total_incidents_manually_closed,omitempty"`
-	TotalIncidentsManuallyEscalated int64   `json:"total_incidents_manually_escalated,omitempty" toon:"total_incidents_manually_escalated,omitempty"`
-	TotalIncidentsReassigned        int64   `json:"total_incidents_reassigned,omitempty" toon:"total_incidents_reassigned,omitempty"`
-	TotalIncidentsTimeoutClosed     int64   `json:"total_incidents_timeout_closed,omitempty" toon:"total_incidents_timeout_closed,omitempty"`
-	TotalIncidentsTimeoutEscalated  int64   `json:"total_incidents_timeout_escalated,omitempty" toon:"total_incidents_timeout_escalated,omitempty"`
-	TotalInterruptions              int64   `json:"total_interruptions,omitempty" toon:"total_interruptions,omitempty"`
-	TotalNotifications              int64   `json:"total_notifications,omitempty" toon:"total_notifications,omitempty"`
-	TotalSecondsToAck               int64   `json:"total_seconds_to_ack,omitempty" toon:"total_seconds_to_ack,omitempty"`
-	TotalSecondsToClose             int64   `json:"total_seconds_to_close,omitempty" toon:"total_seconds_to_close,omitempty"`
+	Hours                           string  `json:"hours" toon:"hours"`
+	MeanSecondsToAck                float64 `json:"mean_seconds_to_ack" toon:"mean_seconds_to_ack"`
+	MeanSecondsToClose              float64 `json:"mean_seconds_to_close" toon:"mean_seconds_to_close"`
+	NoiseReductionPct               float64 `json:"noise_reduction_pct" toon:"noise_reduction_pct"`
+	ResponderID                     int64   `json:"responder_id" toon:"responder_id"`
+	ResponderName                   string  `json:"responder_name" toon:"responder_name"`
+	TeamID                          int64   `json:"team_id" toon:"team_id"`
+	TeamName                        string  `json:"team_name" toon:"team_name"`
+	TotalAlertCnt                   int64   `json:"total_alert_cnt" toon:"total_alert_cnt"`
+	TotalAlertEventCnt              int64   `json:"total_alert_event_cnt" toon:"total_alert_event_cnt"`
+	TotalEngagedSeconds             int64   `json:"total_engaged_seconds" toon:"total_engaged_seconds"`
+	TotalIncidentCnt                int64   `json:"total_incident_cnt" toon:"total_incident_cnt"`
+	TotalIncidentsAcknowledged      int64   `json:"total_incidents_acknowledged" toon:"total_incidents_acknowledged"`
+	TotalIncidentsAutoClosed        int64   `json:"total_incidents_auto_closed" toon:"total_incidents_auto_closed"`
+	TotalIncidentsClosed            int64   `json:"total_incidents_closed" toon:"total_incidents_closed"`
+	TotalIncidentsEscalated         int64   `json:"total_incidents_escalated" toon:"total_incidents_escalated"`
+	TotalIncidentsManuallyClosed    int64   `json:"total_incidents_manually_closed" toon:"total_incidents_manually_closed"`
+	TotalIncidentsManuallyEscalated int64   `json:"total_incidents_manually_escalated" toon:"total_incidents_manually_escalated"`
+	TotalIncidentsReassigned        int64   `json:"total_incidents_reassigned" toon:"total_incidents_reassigned"`
+	TotalIncidentsTimeoutClosed     int64   `json:"total_incidents_timeout_closed" toon:"total_incidents_timeout_closed"`
+	TotalIncidentsTimeoutEscalated  int64   `json:"total_incidents_timeout_escalated" toon:"total_incidents_timeout_escalated"`
+	TotalInterruptions              int64   `json:"total_interruptions" toon:"total_interruptions"`
+	TotalNotifications              int64   `json:"total_notifications" toon:"total_notifications"`
+	TotalSecondsToAck               int64   `json:"total_seconds_to_ack" toon:"total_seconds_to_ack"`
+	TotalSecondsToClose             int64   `json:"total_seconds_to_close" toon:"total_seconds_to_close"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
-	TS Timestamp `json:"ts,omitempty" toon:"ts,omitempty"`
+	TS Timestamp `json:"ts" toon:"ts"`
 }
 
 // DimensionInsightResponse is generated from the Flashduty OpenAPI schema.
 type DimensionInsightResponse struct {
-	Items []DimensionInsightItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []DimensionInsightItem `json:"items" toon:"items"`
 }
 
 // DisableIncidentMergeRequest is generated from the Flashduty OpenAPI schema.
@@ -1999,7 +1999,7 @@ type DoIncidentCustomActionRequest struct {
 // DoIncidentCustomActionResponse is generated from the Flashduty OpenAPI schema.
 type DoIncidentCustomActionResponse struct {
 	// Error message if the action's HTTP call failed; omitted on success.
-	Message string `json:"message,omitempty" toon:"message,omitempty"`
+	Message string `json:"message" toon:"message"`
 }
 
 // EmptyObject is generated from the Flashduty OpenAPI schema.
@@ -2050,19 +2050,19 @@ type EnrichmentInfoRequest struct {
 // EnrichmentItem is generated from the Flashduty OpenAPI schema.
 type EnrichmentItem struct {
 	// Creation timestamp, Unix seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator member ID.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Integration ID.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Ordered enrichment rules.
-	Rules []EnrichRule `json:"rules,omitempty" toon:"rules,omitempty"`
+	Rules []EnrichRule `json:"rules" toon:"rules"`
 	// Rule set status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // EnrichmentListRequest is generated from the Flashduty OpenAPI schema.
@@ -2074,7 +2074,7 @@ type EnrichmentListRequest struct {
 // EnrichmentListResponse is generated from the Flashduty OpenAPI schema.
 type EnrichmentListResponse struct {
 	// Enrichment rule sets.
-	Items []EnrichmentItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []EnrichmentItem `json:"items" toon:"items"`
 }
 
 // EnrichmentUpsertRequest is generated from the Flashduty OpenAPI schema.
@@ -2145,38 +2145,38 @@ type EscalateLayer struct {
 // EscalateRuleItem is generated from the Flashduty OpenAPI schema.
 type EscalateRuleItem struct {
 	// Owning account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Aggregation window in seconds.
-	AggrWindow int64 `json:"aggr_window,omitempty" toon:"aggr_window,omitempty"`
+	AggrWindow int64 `json:"aggr_window" toon:"aggr_window"`
 	// Channel the rule belongs to.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel name, populated for cross-channel listing responses.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Creation timestamp (unix seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Deletion timestamp (unix seconds). Emitted only for soft-deleted rules.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Rule description.
-	Description string      `json:"description,omitempty" toon:"description,omitempty"`
-	Filters     FilterGroup `json:"filters,omitempty" toon:"filters,omitempty"`
+	Description string      `json:"description" toon:"description"`
+	Filters     FilterGroup `json:"filters" toon:"filters"`
 	// Escalation levels in order.
-	Layers []EscalateLayer `json:"layers,omitempty" toon:"layers,omitempty"`
+	Layers []EscalateLayer `json:"layers" toon:"layers"`
 	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
+	Priority int64 `json:"priority" toon:"priority"`
 	// Escalation rule ID (MongoDB ObjectID).
-	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
+	RuleID string `json:"rule_id" toon:"rule_id"`
 	// Rule name.
-	RuleName string `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
+	RuleName string `json:"rule_name" toon:"rule_name"`
 	// Rule status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Notification template ID (MongoDB ObjectID).
-	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+	TemplateID string `json:"template_id" toon:"template_id"`
 	// Recurring time windows during which the rule applies.
-	TimeFilters []TimeFilter `json:"time_filters,omitempty" toon:"time_filters,omitempty"`
+	TimeFilters []TimeFilter `json:"time_filters" toon:"time_filters"`
 	// Last update timestamp (unix seconds).
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Member ID that last updated the rule.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // EscalateTarget is generated from the Flashduty OpenAPI schema.
@@ -2206,15 +2206,15 @@ type ExportStatusPageSubscribersRequest struct {
 // ExportedStatusPageSubscriberItem is generated from the Flashduty OpenAPI schema.
 type ExportedStatusPageSubscriberItem struct {
 	// Whether the subscriber is subscribed to all components.
-	All bool `json:"all,omitempty" toon:"all,omitempty"`
+	All bool `json:"all" toon:"all"`
 	// Components this subscriber has subscribed to.
-	Components []StatusPageComponentItem `json:"components,omitempty" toon:"components,omitempty"`
+	Components []StatusPageComponentItem `json:"components" toon:"components"`
 	// Preferred locale for notifications.
-	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	Locale string `json:"locale" toon:"locale"`
 	// Subscription delivery method.
-	Method string `json:"method,omitempty" toon:"method,omitempty"`
+	Method string `json:"method" toon:"method"`
 	// Subscriber recipient: email address for public pages, user ID for internal pages.
-	Recipient string `json:"recipient,omitempty" toon:"recipient,omitempty"`
+	Recipient string `json:"recipient" toon:"recipient"`
 }
 
 // FeedDetailAlertClose is generated from the Flashduty OpenAPI schema.
@@ -2223,47 +2223,47 @@ type FeedDetailAlertClose struct{}
 // FeedDetailAlertComment is generated from the Flashduty OpenAPI schema.
 type FeedDetailAlertComment struct {
 	// Comment body.
-	Comment string `json:"comment,omitempty" toon:"comment,omitempty"`
+	Comment string `json:"comment" toon:"comment"`
 }
 
 // FeedDetailAlertTrigger is generated from the Flashduty OpenAPI schema.
 type FeedDetailAlertTrigger struct {
-	Severity FeedSeverity `json:"severity,omitempty" toon:"severity,omitempty"`
-	Status   FeedSeverity `json:"status,omitempty" toon:"status,omitempty"`
+	Severity FeedSeverity `json:"severity" toon:"severity"`
+	Status   FeedSeverity `json:"status" toon:"status"`
 }
 
 // FeedDetailIncidentAck is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentAck struct {
 	// Progress note entered at acknowledgement.
-	Progress string `json:"progress,omitempty" toon:"progress,omitempty"`
+	Progress string `json:"progress" toon:"progress"`
 }
 
 // FeedDetailIncidentAddRspd is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentAddRspd struct {
 	// Member IDs added as responders.
-	To []int64 `json:"to,omitempty" toon:"to,omitempty"`
+	To []int64 `json:"to" toon:"to"`
 }
 
 // FeedDetailIncidentAssign is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentAssign struct {
 	// Unix timestamp (seconds) when the assignment was made.
-	AssignedAt Timestamp `json:"assigned_at,omitempty" toon:"assigned_at,omitempty"`
+	AssignedAt Timestamp `json:"assigned_at" toon:"assigned_at"`
 	// Email recipients, used by integrations such as ServiceNow.
-	Emails []string `json:"emails,omitempty" toon:"emails,omitempty"`
+	Emails []string `json:"emails" toon:"emails"`
 	// Escalation rule ID (MongoDB ObjectID) to drive assignment.
-	EscalateRuleID string `json:"escalate_rule_id,omitempty" toon:"escalate_rule_id,omitempty"`
+	EscalateRuleID string `json:"escalate_rule_id" toon:"escalate_rule_id"`
 	// Escalation rule display name, filled by the server.
-	EscalateRuleName string `json:"escalate_rule_name,omitempty" toon:"escalate_rule_name,omitempty"`
+	EscalateRuleName string `json:"escalate_rule_name" toon:"escalate_rule_name"`
 	// Opaque assignment ID generated by the server.
-	ID string `json:"id,omitempty" toon:"id,omitempty"`
+	ID string `json:"id" toon:"id"`
 	// Current level index within the escalation rule.
-	LayerIdx int64 `json:"layer_idx,omitempty" toon:"layer_idx,omitempty"`
+	LayerIdx int64 `json:"layer_idx" toon:"layer_idx"`
 	// Member IDs to assign directly.
-	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
+	PersonIDs []int64 `json:"person_ids" toon:"person_ids"`
 	// Member IDs that received the assignment.
-	To []int64 `json:"to,omitempty" toon:"to,omitempty"`
+	To []int64 `json:"to" toon:"to"`
 	// Assignment type: `assign` direct assignment, `reassign` reassignment, `escalate` escalation-rule driven, `reopen` automatic reassignment on reopen.
-	Type string `json:"type,omitempty" toon:"type,omitempty"`
+	Type string `json:"type" toon:"type"`
 }
 
 // FeedDetailIncidentAutoRefreshCard is generated from the Flashduty OpenAPI schema.
@@ -2272,44 +2272,44 @@ type FeedDetailIncidentAutoRefreshCard struct{}
 // FeedDetailIncidentComment is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentComment struct {
 	// Comment body.
-	Comment string `json:"comment,omitempty" toon:"comment,omitempty"`
+	Comment string `json:"comment" toon:"comment"`
 	// Whether replies to this comment are muted.
-	MuteReply bool `json:"mute_reply,omitempty" toon:"mute_reply,omitempty"`
+	MuteReply bool `json:"mute_reply" toon:"mute_reply"`
 }
 
 // FeedDetailIncidentCustomAction is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentCustomAction struct {
 	// Integration ID that executed the action.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Integration display name.
-	IntegrationName string `json:"integration_name,omitempty" toon:"integration_name,omitempty"`
+	IntegrationName string `json:"integration_name" toon:"integration_name"`
 }
 
 // FeedDetailIncidentMerge is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentMerge struct {
 	// Merge comment.
-	Comment string `json:"comment,omitempty" toon:"comment,omitempty"`
+	Comment string `json:"comment" toon:"comment"`
 	// Member ID that performed the merge.
-	OwnerID int64 `json:"owner_id,omitempty" toon:"owner_id,omitempty"`
+	OwnerID int64 `json:"owner_id" toon:"owner_id"`
 	// True if the source incidents were removed after merging.
-	RemoveSourceIncidents bool `json:"remove_source_incidents,omitempty" toon:"remove_source_incidents,omitempty"`
+	RemoveSourceIncidents bool `json:"remove_source_incidents" toon:"remove_source_incidents"`
 	// Source incidents that were merged.
-	SourceIncidents []IncidentShort `json:"source_incidents,omitempty" toon:"source_incidents,omitempty"`
+	SourceIncidents []IncidentShort `json:"source_incidents" toon:"source_incidents"`
 	// Responder member IDs carried over from the source incidents.
-	SourceResponders []int64       `json:"source_responders,omitempty" toon:"source_responders,omitempty"`
-	TargetIncident   IncidentShort `json:"target_incident,omitempty" toon:"target_incident,omitempty"`
+	SourceResponders []int64       `json:"source_responders" toon:"source_responders"`
+	TargetIncident   IncidentShort `json:"target_incident" toon:"target_incident"`
 	// Resulting incident title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 }
 
 // FeedDetailIncidentMuteByFlapping is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentMuteByFlapping struct {
 	// Window length in minutes.
-	InMins int64 `json:"in_mins,omitempty" toon:"in_mins,omitempty"`
+	InMins int64 `json:"in_mins" toon:"in_mins"`
 	// Maximum state changes allowed within the window.
-	MaxChanges int64 `json:"max_changes,omitempty" toon:"max_changes,omitempty"`
+	MaxChanges int64 `json:"max_changes" toon:"max_changes"`
 	// Mute duration in minutes once flapping is detected.
-	MuteMins int64 `json:"mute_mins,omitempty" toon:"mute_mins,omitempty"`
+	MuteMins int64 `json:"mute_mins" toon:"mute_mins"`
 }
 
 // FeedDetailIncidentMuteReply is generated from the Flashduty OpenAPI schema.
@@ -2318,40 +2318,40 @@ type FeedDetailIncidentMuteReply struct{}
 // FeedDetailIncidentNew is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentNew struct {
 	// Email of the reporter when the incident was created externally.
-	ReporterEmail string       `json:"reporter_email,omitempty" toon:"reporter_email,omitempty"`
-	Severity      FeedSeverity `json:"severity,omitempty" toon:"severity,omitempty"`
+	ReporterEmail string       `json:"reporter_email" toon:"reporter_email"`
+	Severity      FeedSeverity `json:"severity" toon:"severity"`
 	// Initial incident title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 }
 
 // FeedDetailIncidentNotify is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentNotify struct {
 	// Delivery channel or method label.
-	By string `json:"by,omitempty" toon:"by,omitempty"`
+	By string `json:"by" toon:"by"`
 	// Per-chat delivery records.
-	Chats []NotifyChat `json:"chats,omitempty" toon:"chats,omitempty"`
+	Chats []NotifyChat `json:"chats" toon:"chats"`
 	// Escalation rule ID (MongoDB ObjectID).
-	EscalateRuleID string `json:"escalate_rule_id,omitempty" toon:"escalate_rule_id,omitempty"`
+	EscalateRuleID string `json:"escalate_rule_id" toon:"escalate_rule_id"`
 	// Escalation rule display name.
-	EscalateRuleName string `json:"escalate_rule_name,omitempty" toon:"escalate_rule_name,omitempty"`
+	EscalateRuleName string `json:"escalate_rule_name" toon:"escalate_rule_name"`
 	// Whether this is the first fire or a refire.
-	FireType string `json:"fire_type,omitempty" toon:"fire_type,omitempty"`
+	FireType string `json:"fire_type" toon:"fire_type"`
 	// Escalation level index used for this notification.
-	LayerIdx int64 `json:"layer_idx,omitempty" toon:"layer_idx,omitempty"`
+	LayerIdx int64 `json:"layer_idx" toon:"layer_idx"`
 	// Upstream message ID returned by the delivery channel.
-	MsgID string `json:"msg_id,omitempty" toon:"msg_id,omitempty"`
+	MsgID string `json:"msg_id" toon:"msg_id"`
 	// Per-person delivery records.
-	Persons []NotifyPerson `json:"persons,omitempty" toon:"persons,omitempty"`
+	Persons []NotifyPerson `json:"persons" toon:"persons"`
 	// Notification record ID.
-	Rid string `json:"rid,omitempty" toon:"rid,omitempty"`
+	Rid string `json:"rid" toon:"rid"`
 	// Per-robot delivery records.
-	Robots []NotifyRobot `json:"robots,omitempty" toon:"robots,omitempty"`
+	Robots []NotifyRobot `json:"robots" toon:"robots"`
 }
 
 // FeedDetailIncidentReopen is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentReopen struct {
 	// Reason why the incident was reopened.
-	Reason string `json:"reason,omitempty" toon:"reason,omitempty"`
+	Reason string `json:"reason" toon:"reason"`
 }
 
 // FeedDetailIncidentResetDescription is generated from the Flashduty OpenAPI schema.
@@ -2360,9 +2360,9 @@ type FeedDetailIncidentResetDescription struct{}
 // FeedDetailIncidentResetField is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentResetField struct {
 	// Name of the custom field that was updated.
-	FieldName string `json:"field_name,omitempty" toon:"field_name,omitempty"`
+	FieldName string `json:"field_name" toon:"field_name"`
 	// New value of the custom field. Type depends on the field definition.
-	To any `json:"to,omitempty" toon:"to,omitempty"`
+	To any `json:"to" toon:"to"`
 }
 
 // FeedDetailIncidentResetImpact is generated from the Flashduty OpenAPI schema.
@@ -2376,93 +2376,93 @@ type FeedDetailIncidentResetRootCause struct{}
 
 // FeedDetailIncidentResetSeverity is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentResetSeverity struct {
-	From FeedSeverity `json:"from,omitempty" toon:"from,omitempty"`
-	To   FeedSeverity `json:"to,omitempty" toon:"to,omitempty"`
+	From FeedSeverity `json:"from" toon:"from"`
+	To   FeedSeverity `json:"to" toon:"to"`
 }
 
 // FeedDetailIncidentResetTitle is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentResetTitle struct {
 	// Previous title.
-	From string `json:"from,omitempty" toon:"from,omitempty"`
+	From string `json:"from" toon:"from"`
 	// New title.
-	To string `json:"to,omitempty" toon:"to,omitempty"`
+	To string `json:"to" toon:"to"`
 }
 
 // FeedDetailIncidentResolve is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentResolve struct {
 	// Source that triggered the resolve action.
-	From string `json:"from,omitempty" toon:"from,omitempty"`
+	From string `json:"from" toon:"from"`
 }
 
 // FeedDetailIncidentSnooze is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentSnooze struct {
 	// Snooze duration in minutes.
-	Minutes int64 `json:"minutes,omitempty" toon:"minutes,omitempty"`
+	Minutes int64 `json:"minutes" toon:"minutes"`
 }
 
 // FeedDetailIncidentStorm is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentStorm struct {
 	// Storm threshold that was reached.
-	Threshold int64 `json:"threshold,omitempty" toon:"threshold,omitempty"`
+	Threshold int64 `json:"threshold" toon:"threshold"`
 }
 
 // FeedDetailIncidentUnack is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentUnack struct {
 	// Progress note entered when acknowledgement was removed.
-	Progress string `json:"progress,omitempty" toon:"progress,omitempty"`
+	Progress string `json:"progress" toon:"progress"`
 }
 
 // FeedDetailIncidentWake is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentWake struct {
 	// Unix timestamp at which the prior snooze was scheduled to end.
-	SnoozedBefore Timestamp `json:"snoozedBefore,omitempty" toon:"snoozedBefore,omitempty"`
+	SnoozedBefore Timestamp `json:"snoozedBefore" toon:"snoozedBefore"`
 }
 
 // FeedDetailIncidentWarRoomCreate is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentWarRoomCreate struct {
 	// Chat group identifier.
-	ChatID string `json:"chat_id,omitempty" toon:"chat_id,omitempty"`
+	ChatID string `json:"chat_id" toon:"chat_id"`
 	// Chat group display name.
-	ChatName string `json:"chat_name,omitempty" toon:"chat_name,omitempty"`
+	ChatName string `json:"chat_name" toon:"chat_name"`
 	// Integration ID that hosts the war room chat group.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Integration display name.
-	IntegrationName string `json:"integration_name,omitempty" toon:"integration_name,omitempty"`
+	IntegrationName string `json:"integration_name" toon:"integration_name"`
 	// Chat integration plugin type.
-	PluginType string `json:"plugin_type,omitempty" toon:"plugin_type,omitempty"`
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
 	// Shareable join link for the war room.
-	ShareLink string `json:"share_link,omitempty" toon:"share_link,omitempty"`
+	ShareLink string `json:"share_link" toon:"share_link"`
 }
 
 // FeedDetailIncidentWarRoomDelete is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentWarRoomDelete struct {
 	// Chat group identifier.
-	ChatID string `json:"chat_id,omitempty" toon:"chat_id,omitempty"`
+	ChatID string `json:"chat_id" toon:"chat_id"`
 	// Chat group display name.
-	ChatName string `json:"chat_name,omitempty" toon:"chat_name,omitempty"`
+	ChatName string `json:"chat_name" toon:"chat_name"`
 	// Integration ID that hosted the war room chat group.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Integration display name.
-	IntegrationName string `json:"integration_name,omitempty" toon:"integration_name,omitempty"`
+	IntegrationName string `json:"integration_name" toon:"integration_name"`
 	// Chat integration plugin type.
-	PluginType string `json:"plugin_type,omitempty" toon:"plugin_type,omitempty"`
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
 }
 
 // FeedItem is generated from the Flashduty OpenAPI schema.
 type FeedItem struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Creation timestamp in Unix epoch milliseconds.
-	CreatedAt TimestampMilli `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Member ID of the creator. 0 for system-generated entries.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Type-specific payload. The concrete shape is determined by `type`.
-	Detail any `json:"detail,omitempty" toon:"detail,omitempty"`
+	Detail any `json:"detail" toon:"detail"`
 	// ObjectID of the alert this entry references.
-	RefID string        `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
-	Type  AlertFeedType `json:"type,omitempty" toon:"type,omitempty"`
+	RefID string        `json:"ref_id" toon:"ref_id"`
+	Type  AlertFeedType `json:"type" toon:"type"`
 	// Last update timestamp in Unix epoch milliseconds.
-	UpdatedAt TimestampMilli `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
 }
 
 // FieldInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -2474,35 +2474,35 @@ type FieldInfoRequest struct {
 // FieldItem is generated from the Flashduty OpenAPI schema.
 type FieldItem struct {
 	// Owning account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Creation timestamp, Unix seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator member ID.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Default value. Type depends on `field_type`: `bool` for checkbox; `string` for single_select/text; `string[]` for multi_select; may be `null` if no default.
-	DefaultValue any `json:"default_value,omitempty" toon:"default_value,omitempty"`
+	DefaultValue any `json:"default_value" toon:"default_value"`
 	// Deletion timestamp, Unix seconds. Only present for soft-deleted fields.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Optional free-text description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Human-readable name shown in the UI.
-	DisplayName string `json:"display_name,omitempty" toon:"display_name,omitempty"`
+	DisplayName string `json:"display_name" toon:"display_name"`
 	// Field ID — 24-character hex ObjectID.
-	FieldID string `json:"field_id,omitempty" toon:"field_id,omitempty"`
+	FieldID string `json:"field_id" toon:"field_id"`
 	// Machine name used in incident payloads under `fields.<field_name>`. Immutable.
-	FieldName string `json:"field_name,omitempty" toon:"field_name,omitempty"`
+	FieldName string `json:"field_name" toon:"field_name"`
 	// Field input type.
-	FieldType string `json:"field_type,omitempty" toon:"field_type,omitempty"`
+	FieldType string `json:"field_type" toon:"field_type"`
 	// Allowed choices for `single_select`/`multi_select` (non-empty unique string array). `null` or empty for `checkbox`/`text`.
-	Options []string `json:"options,omitempty" toon:"options,omitempty"`
+	Options []string `json:"options" toon:"options"`
 	// Field status (e.g. `enabled`, `deleted`).
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 	// Stored value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`.
-	ValueType string `json:"value_type,omitempty" toon:"value_type,omitempty"`
+	ValueType string `json:"value_type" toon:"value_type"`
 }
 
 // FieldListRequest is generated from the Flashduty OpenAPI schema.
@@ -2520,7 +2520,7 @@ type FieldListRequest struct {
 // FieldListResponse is generated from the Flashduty OpenAPI schema.
 type FieldListResponse struct {
 	// All non-deleted custom fields for the account. No pagination.
-	Items []FieldItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []FieldItem `json:"items" toon:"items"`
 }
 
 // FilterCondition is generated from the Flashduty OpenAPI schema.
@@ -2554,7 +2554,7 @@ type GetWarRoomDefaultObserversRequest struct {
 // GetWarRoomDefaultObserversResponse is generated from the Flashduty OpenAPI schema.
 type GetWarRoomDefaultObserversResponse struct {
 	// Historical responders suggested as default war-room observers.
-	Observers []WarRoomPersonItem `json:"observers,omitempty" toon:"observers,omitempty"`
+	Observers []WarRoomPersonItem `json:"observers" toon:"observers"`
 }
 
 // GetWarRoomDetailRequest is generated from the Flashduty OpenAPI schema.
@@ -2606,11 +2606,11 @@ type IDRequest struct {
 // Image is generated from the Flashduty OpenAPI schema.
 type Image struct {
 	// Alt text.
-	Alt string `json:"alt,omitempty" toon:"alt,omitempty"`
+	Alt string `json:"alt" toon:"alt"`
 	// Optional link the image points to.
-	Href string `json:"href,omitempty" toon:"href,omitempty"`
+	Href string `json:"href" toon:"href"`
 	// Image source. Either an `img_` upload token or an `http(s)` URL.
-	Src string `json:"src,omitempty" toon:"src,omitempty"`
+	Src string `json:"src" toon:"src"`
 }
 
 // ImportStatusPageSubscriberItem is generated from the Flashduty OpenAPI schema.
@@ -2640,154 +2640,154 @@ type ImportStatusPageSubscribersRequest struct {
 // IncProgressCnts is generated from the Flashduty OpenAPI schema.
 type IncProgressCnts struct {
 	// Count of processing incidents in the last 30 days.
-	Processing int64 `json:"Processing,omitempty" toon:"Processing,omitempty"`
+	Processing int64 `json:"Processing" toon:"Processing"`
 	// Count of triggered incidents in the last 30 days.
-	Triggered int64 `json:"Triggered,omitempty" toon:"Triggered,omitempty"`
+	Triggered int64 `json:"Triggered" toon:"Triggered"`
 }
 
 // IncidentFeedItem is generated from the Flashduty OpenAPI schema.
 type IncidentFeedItem struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Creation timestamp in milliseconds.
-	CreatedAt TimestampMilli `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// User ID of the actor. `0` means system-generated.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Soft-delete timestamp (ms). Zero if not deleted.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Type-specific payload. The concrete shape is determined by `type`.
-	Detail any `json:"detail,omitempty" toon:"detail,omitempty"`
+	Detail any `json:"detail" toon:"detail"`
 	// ObjectID of the source alert or incident this entry references.
-	RefID string           `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
-	Type  IncidentFeedType `json:"type,omitempty" toon:"type,omitempty"`
+	RefID string           `json:"ref_id" toon:"ref_id"`
+	Type  IncidentFeedType `json:"type" toon:"type"`
 	// Last update timestamp in milliseconds.
-	UpdatedAt TimestampMilli `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
 }
 
 // IncidentInfo is generated from the Flashduty OpenAPI schema.
 type IncidentInfo struct {
 	// Account ID that owns the incident.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Account locale.
-	AccountLocale string `json:"account_locale,omitempty" toon:"account_locale,omitempty"`
+	AccountLocale string `json:"account_locale" toon:"account_locale"`
 	// Account name.
-	AccountName string `json:"account_name,omitempty" toon:"account_name,omitempty"`
+	AccountName string `json:"account_name" toon:"account_name"`
 	// Account time zone.
-	AccountTimeZone string `json:"account_time_zone,omitempty" toon:"account_time_zone,omitempty"`
+	AccountTimeZone string `json:"account_time_zone" toon:"account_time_zone"`
 	// Unix timestamp (seconds) when the incident was first acknowledged. 0 if unacknowledged.
-	AckTime Timestamp `json:"ack_time,omitempty" toon:"ack_time,omitempty"`
+	AckTime Timestamp `json:"ack_time" toon:"ack_time"`
 	// Count of alerts currently in Critical/Warning/Info state.
-	ActiveAlertCnt int64 `json:"active_alert_cnt,omitempty" toon:"active_alert_cnt,omitempty"`
+	ActiveAlertCnt int64 `json:"active_alert_cnt" toon:"active_alert_cnt"`
 	// AI-generated summary of the incident.
-	AISummary string `json:"ai_summary,omitempty" toon:"ai_summary,omitempty"`
+	AISummary string `json:"ai_summary" toon:"ai_summary"`
 	// Total count of alerts merged into this incident.
-	AlertCnt int64 `json:"alert_cnt,omitempty" toon:"alert_cnt,omitempty"`
+	AlertCnt int64 `json:"alert_cnt" toon:"alert_cnt"`
 	// Total raw alert event count across all merged alerts.
-	AlertEventCnt int64 `json:"alert_event_cnt,omitempty" toon:"alert_event_cnt,omitempty"`
+	AlertEventCnt int64 `json:"alert_event_cnt" toon:"alert_event_cnt"`
 	// Embedded alerts, only populated for notification templates and custom actions.
-	Alerts []AlertInfo `json:"alerts,omitempty" toon:"alerts,omitempty"`
+	Alerts []AlertInfo `json:"alerts" toon:"alerts"`
 	// Current assignment target for the incident.
-	AssignedTo AssignedTo `json:"assigned_to,omitempty" toon:"assigned_to,omitempty"`
+	AssignedTo AssignedTo `json:"assigned_to" toon:"assigned_to"`
 	// Channel ID. 0 for standalone incidents.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel display name.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Channel status.
-	ChannelStatus string `json:"channel_status,omitempty" toon:"channel_status,omitempty"`
+	ChannelStatus string `json:"channel_status" toon:"channel_status"`
 	// Unix timestamp (seconds) when the incident was closed. 0 if still open.
-	CloseTime Timestamp `json:"close_time,omitempty" toon:"close_time,omitempty"`
+	CloseTime Timestamp `json:"close_time" toon:"close_time"`
 	// Closer member info.
-	Closer PersonShort `json:"closer,omitempty" toon:"closer,omitempty"`
+	Closer PersonShort `json:"closer" toon:"closer"`
 	// Member ID that closed the incident. 0 if auto-closed.
-	CloserID int64 `json:"closer_id,omitempty" toon:"closer_id,omitempty"`
+	CloserID int64 `json:"closer_id" toon:"closer_id"`
 	// Creation timestamp (seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator member info.
-	Creator PersonShort `json:"creator,omitempty" toon:"creator,omitempty"`
+	Creator PersonShort `json:"creator" toon:"creator"`
 	// Member ID that created the incident. 0 if auto-created by the system.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Deprecated. Use `integration_id` instead.
-	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
 	// Deprecated. Use `integration_ids` instead.
-	DataSourceIDs []int64 `json:"data_source_ids,omitempty" toon:"data_source_ids,omitempty"`
+	DataSourceIDs []int64 `json:"data_source_ids" toon:"data_source_ids"`
 	// Deprecated. Use `integration_type` instead.
-	DataSourceType string `json:"data_source_type,omitempty" toon:"data_source_type,omitempty"`
+	DataSourceType string `json:"data_source_type" toon:"data_source_type"`
 	// Deprecated. Use `integration_types` instead.
-	DataSourceTypes []string `json:"data_source_types,omitempty" toon:"data_source_types,omitempty"`
+	DataSourceTypes []string `json:"data_source_types" toon:"data_source_types"`
 	// Deduplication key used to coalesce alerts.
-	DedupKey string `json:"dedup_key,omitempty" toon:"dedup_key,omitempty"`
+	DedupKey string `json:"dedup_key" toon:"dedup_key"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Incident description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Web console URL for the incident.
-	DetailURL string `json:"detail_url,omitempty" toon:"detail_url,omitempty"`
+	DetailURL string `json:"detail_url" toon:"detail_url"`
 	// Unix timestamp (seconds) when the incident ended. 0 if still active.
-	EndTime Timestamp `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time" toon:"end_time"`
 	// MD5 hash used for content-equality checks.
-	EqualsMD5 string `json:"equals_md5,omitempty" toon:"equals_md5,omitempty"`
+	EqualsMD5 string `json:"equals_md5" toon:"equals_md5"`
 	// Whether the incident has ever been silenced.
-	EverMuted bool `json:"ever_muted,omitempty" toon:"ever_muted,omitempty"`
+	EverMuted bool `json:"ever_muted" toon:"ever_muted"`
 	// Custom field values keyed by field name.
-	Fields map[string]any `json:"fields,omitempty" toon:"fields,omitempty"`
+	Fields map[string]any `json:"fields" toon:"fields"`
 	// Frequency bucket for recurrence analysis: `frequent` or `rare`.
-	Frequency string `json:"frequency,omitempty" toon:"frequency,omitempty"`
+	Frequency string `json:"frequency" toon:"frequency"`
 	// Alert grouping method: `i` intelligent, `p` pattern, `n` none.
-	GroupMethod string `json:"group_method,omitempty" toon:"group_method,omitempty"`
+	GroupMethod string `json:"group_method" toon:"group_method"`
 	// Attached images.
-	Images []Image `json:"images,omitempty" toon:"images,omitempty"`
+	Images []Image `json:"images" toon:"images"`
 	// Impact description.
-	Impact string `json:"impact,omitempty" toon:"impact,omitempty"`
+	Impact string `json:"impact" toon:"impact"`
 	// Incident ID (MongoDB ObjectID).
-	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	IncidentID string `json:"incident_id" toon:"incident_id"`
 	// Configured incident severity.
-	IncidentSeverity string `json:"incident_severity,omitempty" toon:"incident_severity,omitempty"`
+	IncidentSeverity string `json:"incident_severity" toon:"incident_severity"`
 	// Current incident status, derived from alert statuses.
-	IncidentStatus string `json:"incident_status,omitempty" toon:"incident_status,omitempty"`
+	IncidentStatus string `json:"incident_status" toon:"incident_status"`
 	// First integration associated with the incident.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// All integration IDs contributing alerts to this incident.
-	IntegrationIDs []int64 `json:"integration_ids,omitempty" toon:"integration_ids,omitempty"`
+	IntegrationIDs []int64 `json:"integration_ids" toon:"integration_ids"`
 	// First alert's integration type string, used by the detail page for label mappings.
-	IntegrationType string `json:"integration_type,omitempty" toon:"integration_type,omitempty"`
+	IntegrationType string `json:"integration_type" toon:"integration_type"`
 	// Integration type strings for all contributing integrations.
-	IntegrationTypes []string `json:"integration_types,omitempty" toon:"integration_types,omitempty"`
+	IntegrationTypes []string `json:"integration_types" toon:"integration_types"`
 	// Labels propagated from alerts.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Unix timestamp (seconds) of the most recent update.
-	LastTime Timestamp `json:"last_time,omitempty" toon:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// Channel-level link integrations rendered for this incident.
-	Links []LinkItem `json:"links,omitempty" toon:"links,omitempty"`
+	Links []LinkItem `json:"links" toon:"links"`
 	// Fields that were manually overridden after auto-population.
-	ManualOverrides []string `json:"manual_overrides,omitempty" toon:"manual_overrides,omitempty"`
+	ManualOverrides []string `json:"manual_overrides" toon:"manual_overrides"`
 	// Short display identifier; not guaranteed unique.
-	Num string `json:"num,omitempty" toon:"num,omitempty"`
+	Num string `json:"num" toon:"num"`
 	// Owner member info. May be deprecated.
-	Owner PersonShort `json:"owner,omitempty" toon:"owner,omitempty"`
+	Owner PersonShort `json:"owner" toon:"owner"`
 	// Primary owner member ID. 0 if none.
-	OwnerID int64 `json:"owner_id,omitempty" toon:"owner_id,omitempty"`
+	OwnerID int64 `json:"owner_id" toon:"owner_id"`
 	// Associated post-mortem ID, if any. One incident can only link to a single post-mortem.
-	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
 	// Incident progress state.
-	Progress string `json:"progress,omitempty" toon:"progress,omitempty"`
+	Progress string `json:"progress" toon:"progress"`
 	// Reporter email for manually created incidents.
-	ReporterEmail string `json:"reporter_email,omitempty" toon:"reporter_email,omitempty"`
+	ReporterEmail string `json:"reporter_email" toon:"reporter_email"`
 	// Resolution notes.
-	Resolution string `json:"resolution,omitempty" toon:"resolution,omitempty"`
+	Resolution string `json:"resolution" toon:"resolution"`
 	// Current responders with assignment/acknowledgement state.
-	Responders []Responder `json:"responders,omitempty" toon:"responders,omitempty"`
+	Responders []Responder `json:"responders" toon:"responders"`
 	// Root cause analysis.
-	RootCause string `json:"root_cause,omitempty" toon:"root_cause,omitempty"`
+	RootCause string `json:"root_cause" toon:"root_cause"`
 	// Quick-silence URL for this incident.
-	SilenceURL string `json:"silence_url,omitempty" toon:"silence_url,omitempty"`
+	SilenceURL string `json:"silence_url" toon:"silence_url"`
 	// Unix timestamp (seconds) until which notifications are snoozed. 0 if not snoozed.
-	SnoozedBefore Timestamp `json:"snoozed_before,omitempty" toon:"snoozed_before,omitempty"`
+	SnoozedBefore Timestamp `json:"snoozed_before" toon:"snoozed_before"`
 	// Unix timestamp (seconds) when the incident started.
-	StartTime Timestamp `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time" toon:"start_time"`
 	// Incident title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Last update timestamp (seconds).
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // IncidentInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -2799,93 +2799,93 @@ type IncidentInfoRequest struct {
 // IncidentListResponse is generated from the Flashduty OpenAPI schema.
 type IncidentListResponse struct {
 	// True when more results are available beyond this page.
-	HasNextPage bool `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
 	// Incident list for the current page.
-	Items []IncidentInfo `json:"items,omitempty" toon:"items,omitempty"`
+	Items []IncidentInfo `json:"items" toon:"items"`
 	// Opaque cursor to pass as `search_after_ctx` on the next request.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total number of matching incidents.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // IncidentRawItem is generated from the Flashduty OpenAPI schema.
 type IncidentRawItem struct {
-	Acknowledgements int64 `json:"acknowledgements,omitempty" toon:"acknowledgements,omitempty"`
+	Acknowledgements int64 `json:"acknowledgements" toon:"acknowledgements"`
 	// Current assignment target for the incident.
-	AssignedTo        IncidentRawItemAssignedTo `json:"assigned_to,omitempty" toon:"assigned_to,omitempty"`
-	Assignments       int64                     `json:"assignments,omitempty" toon:"assignments,omitempty"`
-	ChannelID         int64                     `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
-	ChannelName       string                    `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
-	ClosedBy          string                    `json:"closed_by,omitempty" toon:"closed_by,omitempty"`
-	CreatedAt         int64                     `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	CreatorID         int64                     `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
-	CreatorName       string                    `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
-	Description       string                    `json:"description,omitempty" toon:"description,omitempty"`
-	EngagedSeconds    int64                     `json:"engaged_seconds,omitempty" toon:"engaged_seconds,omitempty"`
-	Escalations       int64                     `json:"escalations,omitempty" toon:"escalations,omitempty"`
-	Fields            map[string]any            `json:"fields,omitempty" toon:"fields,omitempty"`
-	Hours             string                    `json:"hours,omitempty" toon:"hours,omitempty"`
-	IncidentID        string                    `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
-	Interruptions     int64                     `json:"interruptions,omitempty" toon:"interruptions,omitempty"`
-	Labels            map[string]string         `json:"labels,omitempty" toon:"labels,omitempty"`
-	ManualEscalations int64                     `json:"manual_escalations,omitempty" toon:"manual_escalations,omitempty"`
-	Notifications     int64                     `json:"notifications,omitempty" toon:"notifications,omitempty"`
+	AssignedTo        IncidentRawItemAssignedTo `json:"assigned_to" toon:"assigned_to"`
+	Assignments       int64                     `json:"assignments" toon:"assignments"`
+	ChannelID         int64                     `json:"channel_id" toon:"channel_id"`
+	ChannelName       string                    `json:"channel_name" toon:"channel_name"`
+	ClosedBy          string                    `json:"closed_by" toon:"closed_by"`
+	CreatedAt         int64                     `json:"created_at" toon:"created_at"`
+	CreatorID         int64                     `json:"creator_id" toon:"creator_id"`
+	CreatorName       string                    `json:"creator_name" toon:"creator_name"`
+	Description       string                    `json:"description" toon:"description"`
+	EngagedSeconds    int64                     `json:"engaged_seconds" toon:"engaged_seconds"`
+	Escalations       int64                     `json:"escalations" toon:"escalations"`
+	Fields            map[string]any            `json:"fields" toon:"fields"`
+	Hours             string                    `json:"hours" toon:"hours"`
+	IncidentID        string                    `json:"incident_id" toon:"incident_id"`
+	Interruptions     int64                     `json:"interruptions" toon:"interruptions"`
+	Labels            map[string]string         `json:"labels" toon:"labels"`
+	ManualEscalations int64                     `json:"manual_escalations" toon:"manual_escalations"`
+	Notifications     int64                     `json:"notifications" toon:"notifications"`
 	// Incident progress state — one of `Triggered`, `Processing`, `Closed`.
-	Progress           string           `json:"progress,omitempty" toon:"progress,omitempty"`
-	Reassignments      int64            `json:"reassignments,omitempty" toon:"reassignments,omitempty"`
-	Responders         []map[string]any `json:"responders,omitempty" toon:"responders,omitempty"`
-	SecondsToAck       int64            `json:"seconds_to_ack,omitempty" toon:"seconds_to_ack,omitempty"`
-	SecondsToClose     int64            `json:"seconds_to_close,omitempty" toon:"seconds_to_close,omitempty"`
-	Severity           string           `json:"severity,omitempty" toon:"severity,omitempty"`
-	TeamID             int64            `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	TeamName           string           `json:"team_name,omitempty" toon:"team_name,omitempty"`
-	TimeoutEscalations int64            `json:"timeout_escalations,omitempty" toon:"timeout_escalations,omitempty"`
-	Title              string           `json:"title,omitempty" toon:"title,omitempty"`
+	Progress           string           `json:"progress" toon:"progress"`
+	Reassignments      int64            `json:"reassignments" toon:"reassignments"`
+	Responders         []map[string]any `json:"responders" toon:"responders"`
+	SecondsToAck       int64            `json:"seconds_to_ack" toon:"seconds_to_ack"`
+	SecondsToClose     int64            `json:"seconds_to_close" toon:"seconds_to_close"`
+	Severity           string           `json:"severity" toon:"severity"`
+	TeamID             int64            `json:"team_id" toon:"team_id"`
+	TeamName           string           `json:"team_name" toon:"team_name"`
+	TimeoutEscalations int64            `json:"timeout_escalations" toon:"timeout_escalations"`
+	Title              string           `json:"title" toon:"title"`
 }
 
 // IncidentShort is generated from the Flashduty OpenAPI schema.
 type IncidentShort struct {
 	// Incident ID (ObjectID hex string).
-	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	IncidentID string `json:"incident_id" toon:"incident_id"`
 	// Incident progress — one of `Triggered`, `Processing`, `Closed`.
-	Progress string `json:"progress,omitempty" toon:"progress,omitempty"`
+	Progress string `json:"progress" toon:"progress"`
 	// Incident title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 }
 
 // InhibitRuleItem is generated from the Flashduty OpenAPI schema.
 type InhibitRuleItem struct {
-	AccountID   int64  `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	ChannelID   int64  `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
-	CreatedAt   int64  `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	DeletedAt   int64  `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	AccountID   int64  `json:"account_id" toon:"account_id"`
+	ChannelID   int64  `json:"channel_id" toon:"channel_id"`
+	CreatedAt   int64  `json:"created_at" toon:"created_at"`
+	DeletedAt   int64  `json:"deleted_at" toon:"deleted_at"`
+	Description string `json:"description" toon:"description"`
 	// Label keys used to pair source and target alerts.
-	Equals            []string    `json:"equals,omitempty" toon:"equals,omitempty"`
-	IsDirectlyDiscard bool        `json:"is_directly_discard,omitempty" toon:"is_directly_discard,omitempty"`
-	Priority          int64       `json:"priority,omitempty" toon:"priority,omitempty"`
-	RuleID            string      `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
-	RuleName          string      `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
-	SourceFilters     FilterGroup `json:"source_filters,omitempty" toon:"source_filters,omitempty"`
-	Status            string      `json:"status,omitempty" toon:"status,omitempty"`
-	TargetFilters     FilterGroup `json:"target_filters,omitempty" toon:"target_filters,omitempty"`
-	UpdatedAt         int64       `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
-	UpdatedBy         int64       `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	Equals            []string    `json:"equals" toon:"equals"`
+	IsDirectlyDiscard bool        `json:"is_directly_discard" toon:"is_directly_discard"`
+	Priority          int64       `json:"priority" toon:"priority"`
+	RuleID            string      `json:"rule_id" toon:"rule_id"`
+	RuleName          string      `json:"rule_name" toon:"rule_name"`
+	SourceFilters     FilterGroup `json:"source_filters" toon:"source_filters"`
+	Status            string      `json:"status" toon:"status"`
+	TargetFilters     FilterGroup `json:"target_filters" toon:"target_filters"`
+	UpdatedAt         int64       `json:"updated_at" toon:"updated_at"`
+	UpdatedBy         int64       `json:"updated_by" toon:"updated_by"`
 }
 
 // InsightAlertByLabelItem is generated from the Flashduty OpenAPI schema.
 type InsightAlertByLabelItem struct {
 	// Hour bucket when `split_hours` is enabled.
-	Hours string `json:"hours,omitempty" toon:"hours,omitempty"`
+	Hours string `json:"hours" toon:"hours"`
 	// Aggregation key value (check name or resource identifier).
-	Label              string `json:"label,omitempty" toon:"label,omitempty"`
-	TotalAlertCnt      int64  `json:"total_alert_cnt,omitempty" toon:"total_alert_cnt,omitempty"`
-	TotalAlertEventCnt int64  `json:"total_alert_event_cnt,omitempty" toon:"total_alert_event_cnt,omitempty"`
+	Label              string `json:"label" toon:"label"`
+	TotalAlertCnt      int64  `json:"total_alert_cnt" toon:"total_alert_cnt"`
+	TotalAlertEventCnt int64  `json:"total_alert_event_cnt" toon:"total_alert_event_cnt"`
 }
 
 // InsightAlertByLabelResponse is generated from the Flashduty OpenAPI schema.
 type InsightAlertByLabelResponse struct {
-	Items []InsightAlertByLabelItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []InsightAlertByLabelItem `json:"items" toon:"items"`
 }
 
 // InsightFilter is generated from the Flashduty OpenAPI schema.
@@ -2979,12 +2979,12 @@ type InsightIncidentListRequest struct {
 
 // InsightIncidentListResponse is generated from the Flashduty OpenAPI schema.
 type InsightIncidentListResponse struct {
-	HasNextPage bool              `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []IncidentRawItem `json:"items,omitempty" toon:"items,omitempty"`
+	HasNextPage bool              `json:"has_next_page" toon:"has_next_page"`
+	Items       []IncidentRawItem `json:"items" toon:"items"`
 	// Cursor token to fetch the next page. Pass it back in the next request's `search_after_ctx`.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching incidents.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // InsightQueryRequest is generated from the Flashduty OpenAPI schema.
@@ -3110,11 +3110,11 @@ type InviteMemberItem struct {
 // LinkItem is generated from the Flashduty OpenAPI schema.
 type LinkItem struct {
 	// Rendered URL for the link.
-	Endpoint string `json:"endpoint,omitempty" toon:"endpoint,omitempty"`
+	Endpoint string `json:"endpoint" toon:"endpoint"`
 	// Display name of the link.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// How the link should be opened.
-	OpenType string `json:"open_type,omitempty" toon:"open_type,omitempty"`
+	OpenType string `json:"open_type" toon:"open_type"`
 }
 
 // ListChangeRequest is generated from the Flashduty OpenAPI schema.
@@ -3141,11 +3141,11 @@ type ListChangeRequest struct {
 // ListChangeResponse is generated from the Flashduty OpenAPI schema.
 type ListChangeResponse struct {
 	// Whether more pages are available after this one.
-	HasNextPage bool `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
 	// Changes on the current page.
-	Items []ChangeItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []ChangeItem `json:"items" toon:"items"`
 	// Total number of matching changes.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // ListChannelsRequest is generated from the Flashduty OpenAPI schema.
@@ -3176,20 +3176,20 @@ type ListChannelsRequest struct {
 // ListChannelsResponse is generated from the Flashduty OpenAPI schema.
 type ListChannelsResponse struct {
 	// Whether more pages are available.
-	HasNextPage bool          `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []ChannelItem `json:"items,omitempty" toon:"items,omitempty"`
+	HasNextPage bool          `json:"has_next_page" toon:"has_next_page"`
+	Items       []ChannelItem `json:"items" toon:"items"`
 	// Total matching channels.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // ListDropRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListDropRulesResponse struct {
-	Items []UnsubscribeRuleItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []UnsubscribeRuleItem `json:"items" toon:"items"`
 }
 
 // ListEscalationRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListEscalationRulesResponse struct {
-	Items []EscalateRuleItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []EscalateRuleItem `json:"items" toon:"items"`
 }
 
 // ListIncidentAlertsRequest is generated from the Flashduty OpenAPI schema.
@@ -3206,9 +3206,9 @@ type ListIncidentAlertsRequest struct {
 // ListIncidentAlertsResponse is generated from the Flashduty OpenAPI schema.
 type ListIncidentAlertsResponse struct {
 	// Alert list.
-	Items []AlertInfo `json:"items,omitempty" toon:"items,omitempty"`
+	Items []AlertInfo `json:"items" toon:"items"`
 	// Total matching alerts.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // ListIncidentFeedRequest is generated from the Flashduty OpenAPI schema.
@@ -3225,9 +3225,9 @@ type ListIncidentFeedRequest struct {
 // ListIncidentFeedResponse is generated from the Flashduty OpenAPI schema.
 type ListIncidentFeedResponse struct {
 	// True when more entries are available.
-	HasNextPage bool `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
 	// Timeline entries for the current page.
-	Items []IncidentFeedItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []IncidentFeedItem `json:"items" toon:"items"`
 }
 
 // ListIncidentsByIDsRequest is generated from the Flashduty OpenAPI schema.
@@ -3281,7 +3281,7 @@ type ListIncidentsRequest struct {
 
 // ListInhibitRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListInhibitRulesResponse struct {
-	Items []InhibitRuleItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []InhibitRuleItem `json:"items" toon:"items"`
 }
 
 // ListPastIncidentsRequest is generated from the Flashduty OpenAPI schema.
@@ -3295,7 +3295,7 @@ type ListPastIncidentsRequest struct {
 // ListPastIncidentsResponse is generated from the Flashduty OpenAPI schema.
 type ListPastIncidentsResponse struct {
 	// Similar past incidents with similarity scores.
-	Items []PastIncidentItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []PastIncidentItem `json:"items" toon:"items"`
 }
 
 // ListPostMortemsRequest is generated from the Flashduty OpenAPI schema.
@@ -3320,13 +3320,13 @@ type ListPostMortemsRequest struct {
 // ListPostMortemsResponse is generated from the Flashduty OpenAPI schema.
 type ListPostMortemsResponse struct {
 	// True when more results are available beyond this page.
-	HasNextPage bool `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
 	// Post-mortem metadata for the current page.
-	Items []PostMortemMeta `json:"items,omitempty" toon:"items,omitempty"`
+	Items []PostMortemMeta `json:"items" toon:"items"`
 	// Cursor for forward pagination.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching reports.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // ListRoutesRequest is generated from the Flashduty OpenAPI schema.
@@ -3338,24 +3338,24 @@ type ListRoutesRequest struct {
 // ListRoutesResponse is generated from the Flashduty OpenAPI schema.
 type ListRoutesResponse struct {
 	// Routing rules of the requested integrations. Integrations without a configured rule are omitted.
-	Items []RouteItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []RouteItem `json:"items" toon:"items"`
 }
 
 // ListSilenceRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListSilenceRulesResponse struct {
-	Items []SilenceRuleItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []SilenceRuleItem `json:"items" toon:"items"`
 }
 
 // ListStatusPageResponse is generated from the Flashduty OpenAPI schema.
 type ListStatusPageResponse struct {
 	// Status pages owned by the account.
-	Items []StatusPageItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []StatusPageItem `json:"items" toon:"items"`
 }
 
 // ListWarRoomEnabledResponse is generated from the Flashduty OpenAPI schema.
 type ListWarRoomEnabledResponse struct {
 	// IM integrations with the war-room feature enabled.
-	Items []WarRoomDataSourceItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []WarRoomDataSourceItem `json:"items" toon:"items"`
 }
 
 // ListWarRoomsRequest is generated from the Flashduty OpenAPI schema.
@@ -3369,7 +3369,7 @@ type ListWarRoomsRequest struct {
 // ListWarRoomsResponse is generated from the Flashduty OpenAPI schema.
 type ListWarRoomsResponse struct {
 	// War room records.
-	Items []WarRoomItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []WarRoomItem `json:"items" toon:"items"`
 }
 
 // ListWebhookHistoryRequest is generated from the Flashduty OpenAPI schema.
@@ -3398,11 +3398,11 @@ type ListWebhookHistoryRequest struct {
 
 // ListWebhookHistoryResponse is generated from the Flashduty OpenAPI schema.
 type ListWebhookHistoryResponse struct {
-	Items []WebhookHistoryItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []WebhookHistoryItem `json:"items" toon:"items"`
 	// Cursor to pass as `search_after_ctx` to fetch the next page. Empty when no further pages are available.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total number of matching records.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // McpServerCreateRequest is generated from the Flashduty OpenAPI schema.
@@ -3454,57 +3454,57 @@ type McpServerGetRequest struct {
 // McpServerItem is generated from the Flashduty OpenAPI schema.
 type McpServerItem struct {
 	// Owning account.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// LLM-generated description, preferred over description when present.
-	AIDescription string `json:"ai_description,omitempty" toon:"ai_description,omitempty"`
+	AIDescription string `json:"ai_description" toon:"ai_description"`
 	// Command-line arguments for the stdio executable.
-	Args []string `json:"args,omitempty" toon:"args,omitempty"`
+	Args []string `json:"args" toon:"args"`
 	// Credential model: shared, per_user_secret, or per_user_oauth.
-	AuthMode string `json:"auth_mode,omitempty" toon:"auth_mode,omitempty"`
+	AuthMode string `json:"auth_mode" toon:"auth_mode"`
 	// Per-call timeout in seconds.
-	CallTimeout int64 `json:"call_timeout,omitempty" toon:"call_timeout,omitempty"`
+	CallTimeout int64 `json:"call_timeout" toon:"call_timeout"`
 	// Whether the calling member may edit or delete this resource.
-	CanEdit bool `json:"can_edit,omitempty" toon:"can_edit,omitempty"`
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
 	// Executable launched for stdio transport.
-	Command string `json:"command,omitempty" toon:"command,omitempty"`
+	Command string `json:"command" toon:"command"`
 	// Connection timeout in seconds.
-	ConnectTimeout int64 `json:"connect_timeout,omitempty" toon:"connect_timeout,omitempty"`
+	ConnectTimeout int64 `json:"connect_timeout" toon:"connect_timeout"`
 	// Creation time as a Unix timestamp in milliseconds.
-	CreatedAt TimestampMilli `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Member who created this resource.
-	CreatedBy int64 `json:"created_by,omitempty" toon:"created_by,omitempty"`
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
 	// What this MCP server provides.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Environment variables passed to the stdio process.
-	Env map[string]string `json:"env,omitempty" toon:"env,omitempty"`
+	Env map[string]string `json:"env" toon:"env"`
 	// HTTP headers sent to the remote endpoint; secret values are masked.
-	Headers map[string]string `json:"headers,omitempty" toon:"headers,omitempty"`
+	Headers map[string]string `json:"headers" toon:"headers"`
 	// Tool-probe failure message; present when the live probe failed.
-	ListError string `json:"list_error,omitempty" toon:"list_error,omitempty"`
+	ListError string `json:"list_error" toon:"list_error"`
 	// OAuth metadata JSON.
-	OauthMetadata string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
+	OauthMetadata string `json:"oauth_metadata" toon:"oauth_metadata"`
 	// Outbound proxy URL used to reach the server.
-	ProxyURL string `json:"proxy_url,omitempty" toon:"proxy_url,omitempty"`
+	ProxyURL string `json:"proxy_url" toon:"proxy_url"`
 	// JSON schema of the per-user secret.
-	SecretSchema string `json:"secret_schema,omitempty" toon:"secret_schema,omitempty"`
+	SecretSchema string `json:"secret_schema" toon:"secret_schema"`
 	// Unique identifier of the MCP server.
-	ServerID string `json:"server_id,omitempty" toon:"server_id,omitempty"`
+	ServerID string `json:"server_id" toon:"server_id"`
 	// Display name of the MCP server.
-	ServerName string `json:"server_name,omitempty" toon:"server_name,omitempty"`
+	ServerName string `json:"server_name" toon:"server_name"`
 	// Whether the server is active and usable by agents.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Owning team; 0 means account scope.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Number of tools discovered on the server.
-	ToolCount int64 `json:"tool_count,omitempty" toon:"tool_count,omitempty"`
+	ToolCount int64 `json:"tool_count" toon:"tool_count"`
 	// Live tool catalogue; populated only by get and test.
-	Tools []McpToolInfo `json:"tools,omitempty" toon:"tools,omitempty"`
+	Tools []McpToolInfo `json:"tools" toon:"tools"`
 	// Transport used to reach the server.
-	Transport string `json:"transport,omitempty" toon:"transport,omitempty"`
+	Transport string `json:"transport" toon:"transport"`
 	// Last-update time as a Unix timestamp in milliseconds.
-	UpdatedAt TimestampMilli `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
 	// Endpoint URL for sse or streamable-http transport.
-	URL string `json:"url,omitempty" toon:"url,omitempty"`
+	URL string `json:"url" toon:"url"`
 }
 
 // McpServerListRequest is generated from the Flashduty OpenAPI schema.
@@ -3519,9 +3519,9 @@ type McpServerListRequest struct {
 // McpServerListResponse is generated from the Flashduty OpenAPI schema.
 type McpServerListResponse struct {
 	// MCP servers on the current page.
-	Servers []McpServerItem `json:"servers,omitempty" toon:"servers,omitempty"`
+	Servers []McpServerItem `json:"servers" toon:"servers"`
 	// Total number of servers matching the filters.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // McpServerStatusRequest is generated from the Flashduty OpenAPI schema.
@@ -3567,11 +3567,11 @@ type McpServerUpdateRequest struct {
 // McpToolInfo is generated from the Flashduty OpenAPI schema.
 type McpToolInfo struct {
 	// What the tool does.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// JSON schema of the tool's input arguments.
-	InputSchema any `json:"input_schema,omitempty" toon:"input_schema,omitempty"`
+	InputSchema any `json:"input_schema" toon:"input_schema"`
 	// Tool name as advertised by the server.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 }
 
 // MappingAPICreateRequest is generated from the Flashduty OpenAPI schema.
@@ -3597,9 +3597,9 @@ type MappingAPICreateRequest struct {
 // MappingAPICreateResponse is generated from the Flashduty OpenAPI schema.
 type MappingAPICreateResponse struct {
 	// Created API ID (MongoDB ObjectID hex).
-	APIID string `json:"api_id,omitempty" toon:"api_id,omitempty"`
+	APIID string `json:"api_id" toon:"api_id"`
 	// API name.
-	APIName string `json:"api_name,omitempty" toon:"api_name,omitempty"`
+	APIName string `json:"api_name" toon:"api_name"`
 }
 
 // MappingApiidRequest is generated from the Flashduty OpenAPI schema.
@@ -3611,41 +3611,41 @@ type MappingApiidRequest struct {
 // MappingAPIItem is generated from the Flashduty OpenAPI schema.
 type MappingAPIItem struct {
 	// API ID (MongoDB ObjectID hex).
-	APIID string `json:"api_id,omitempty" toon:"api_id,omitempty"`
+	APIID string `json:"api_id" toon:"api_id"`
 	// API name.
-	APIName string `json:"api_name,omitempty" toon:"api_name,omitempty"`
+	APIName string `json:"api_name" toon:"api_name"`
 	// Creation timestamp, Unix seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator member ID.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Custom request headers.
-	Headers map[string]string `json:"headers,omitempty" toon:"headers,omitempty"`
+	Headers map[string]string `json:"headers" toon:"headers"`
 	// Whether TLS verification is skipped.
-	InsecureSkipVerify bool `json:"insecure_skip_verify,omitempty" toon:"insecure_skip_verify,omitempty"`
+	InsecureSkipVerify bool `json:"insecure_skip_verify" toon:"insecure_skip_verify"`
 	// Retry count.
-	RetryCount int64 `json:"retry_count,omitempty" toon:"retry_count,omitempty"`
+	RetryCount int64 `json:"retry_count" toon:"retry_count"`
 	// API status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Owning team ID.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Request timeout in seconds.
-	Timeout int64 `json:"timeout,omitempty" toon:"timeout,omitempty"`
+	Timeout int64 `json:"timeout" toon:"timeout"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 	// Endpoint URL.
-	URL string `json:"url,omitempty" toon:"url,omitempty"`
+	URL string `json:"url" toon:"url"`
 }
 
 // MappingAPIListResponse is generated from the Flashduty OpenAPI schema.
 type MappingAPIListResponse struct {
 	// Mapping APIs.
-	Items []MappingAPIItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []MappingAPIItem `json:"items" toon:"items"`
 	// Total API count.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // MappingAPIUpdateRequest is generated from the Flashduty OpenAPI schema.
@@ -3681,13 +3681,13 @@ type MappingDataDeleteRequest struct {
 // MappingDataItem is generated from the Flashduty OpenAPI schema.
 type MappingDataItem struct {
 	// Creation timestamp, Unix seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// All label key-value pairs for this row.
-	Fields map[string]string `json:"fields,omitempty" toon:"fields,omitempty"`
+	Fields map[string]string `json:"fields" toon:"fields"`
 	// Composite key derived from source label values.
-	Key string `json:"key,omitempty" toon:"key,omitempty"`
+	Key string `json:"key" toon:"key"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // MappingDataListRequest is generated from the Flashduty OpenAPI schema.
@@ -3706,13 +3706,13 @@ type MappingDataListRequest struct {
 // MappingDataListResponse is generated from the Flashduty OpenAPI schema.
 type MappingDataListResponse struct {
 	// Whether more pages exist.
-	HasNextPage bool `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
 	// Data rows.
-	Items []MappingDataItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []MappingDataItem `json:"items" toon:"items"`
 	// Cursor token for the next page.
-	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching rows.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // MappingDataUploadRequest is generated from the Flashduty OpenAPI schema.
@@ -3734,7 +3734,7 @@ type MappingDataUpsertRequest struct {
 // MappingDataUpsertResponse is generated from the Flashduty OpenAPI schema.
 type MappingDataUpsertResponse struct {
 	// Composite keys of upserted rows.
-	Keys []string `json:"keys,omitempty" toon:"keys,omitempty"`
+	Keys []string `json:"keys" toon:"keys"`
 }
 
 // MappingSchemaCreateRequest is generated from the Flashduty OpenAPI schema.
@@ -3754,9 +3754,9 @@ type MappingSchemaCreateRequest struct {
 // MappingSchemaCreateResponse is generated from the Flashduty OpenAPI schema.
 type MappingSchemaCreateResponse struct {
 	// Created schema ID (MongoDB ObjectID hex).
-	SchemaID string `json:"schema_id,omitempty" toon:"schema_id,omitempty"`
+	SchemaID string `json:"schema_id" toon:"schema_id"`
 	// Schema name.
-	SchemaName string `json:"schema_name,omitempty" toon:"schema_name,omitempty"`
+	SchemaName string `json:"schema_name" toon:"schema_name"`
 }
 
 // MappingSchemaIDRequest is generated from the Flashduty OpenAPI schema.
@@ -3768,35 +3768,35 @@ type MappingSchemaIDRequest struct {
 // MappingSchemaItem is generated from the Flashduty OpenAPI schema.
 type MappingSchemaItem struct {
 	// Creation timestamp, Unix seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator member ID.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Schema description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Output label names.
-	ResultLabels []string `json:"result_labels,omitempty" toon:"result_labels,omitempty"`
+	ResultLabels []string `json:"result_labels" toon:"result_labels"`
 	// Schema ID (MongoDB ObjectID hex).
-	SchemaID string `json:"schema_id,omitempty" toon:"schema_id,omitempty"`
+	SchemaID string `json:"schema_id" toon:"schema_id"`
 	// Schema name.
-	SchemaName string `json:"schema_name,omitempty" toon:"schema_name,omitempty"`
+	SchemaName string `json:"schema_name" toon:"schema_name"`
 	// Lookup key label names.
-	SourceLabels []string `json:"source_labels,omitempty" toon:"source_labels,omitempty"`
+	SourceLabels []string `json:"source_labels" toon:"source_labels"`
 	// Schema status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Owning team ID.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Last update timestamp, Unix seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // MappingSchemaListResponse is generated from the Flashduty OpenAPI schema.
 type MappingSchemaListResponse struct {
 	// Mapping schemas.
-	Items []MappingSchemaItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []MappingSchemaItem `json:"items" toon:"items"`
 	// Total schema count.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // MappingSchemaUpdateRequest is generated from the Flashduty OpenAPI schema.
@@ -3838,45 +3838,45 @@ type MemberInfoRequest struct{}
 // MemberInfoResponse is generated from the Flashduty OpenAPI schema.
 type MemberInfoResponse struct {
 	// Account avatar URL
-	AccountAvatar string `json:"account_avatar,omitempty" toon:"account_avatar,omitempty"`
+	AccountAvatar string `json:"account_avatar" toon:"account_avatar"`
 	// Account email
-	AccountEmail string `json:"account_email,omitempty" toon:"account_email,omitempty"`
+	AccountEmail string `json:"account_email" toon:"account_email"`
 	// Account ID
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Account-level locale preference (e.g. zh-CN or en-US)
-	AccountLocale string `json:"account_locale,omitempty" toon:"account_locale,omitempty"`
+	AccountLocale string `json:"account_locale" toon:"account_locale"`
 	// Account name
-	AccountName string `json:"account_name,omitempty" toon:"account_name,omitempty"`
+	AccountName string `json:"account_name" toon:"account_name"`
 	// Assigned role IDs
-	AccountRoleIDs []uint64 `json:"account_role_ids,omitempty" toon:"account_role_ids,omitempty"`
+	AccountRoleIDs []uint64 `json:"account_role_ids" toon:"account_role_ids"`
 	// Account-level time zone (e.g. Asia/Shanghai)
-	AccountTimeZone string `json:"account_time_zone,omitempty" toon:"account_time_zone,omitempty"`
+	AccountTimeZone string `json:"account_time_zone" toon:"account_time_zone"`
 	// Member avatar URL
-	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
+	Avatar string `json:"avatar" toon:"avatar"`
 	// Phone country code
-	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
+	CountryCode string `json:"country_code" toon:"country_code"`
 	// Account domain
-	Domain string `json:"domain,omitempty" toon:"domain,omitempty"`
+	Domain string `json:"domain" toon:"domain"`
 	// Email address
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Whether email is verified
-	EmailVerified bool `json:"email_verified,omitempty" toon:"email_verified,omitempty"`
+	EmailVerified bool `json:"email_verified" toon:"email_verified"`
 	// Whether provisioned via SSO
-	IsExternal bool `json:"is_external,omitempty" toon:"is_external,omitempty"`
+	IsExternal bool `json:"is_external" toon:"is_external"`
 	// Locale preference
-	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	Locale string `json:"locale" toon:"locale"`
 	// Member ID
-	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
+	MemberID uint64 `json:"member_id" toon:"member_id"`
 	// Member display name
-	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	MemberName string `json:"member_name" toon:"member_name"`
 	// Masked phone number
-	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	Phone string `json:"phone" toon:"phone"`
 	// Whether phone is verified
-	PhoneVerified bool `json:"phone_verified,omitempty" toon:"phone_verified,omitempty"`
+	PhoneVerified bool `json:"phone_verified" toon:"phone_verified"`
 	// Member status. `enabled` — active member; `pending` — invited but not yet accepted; `deleted` — removed from the organization.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Time zone
-	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+	TimeZone string `json:"time_zone" toon:"time_zone"`
 }
 
 // MemberInviteRequest is generated from the Flashduty OpenAPI schema.
@@ -3890,45 +3890,45 @@ type MemberInviteRequest struct {
 // MemberInviteResponse is generated from the Flashduty OpenAPI schema.
 type MemberInviteResponse struct {
 	// Newly created members
-	Items []NewMemberItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []NewMemberItem `json:"items" toon:"items"`
 }
 
 // MemberItem is generated from the Flashduty OpenAPI schema.
 type MemberItem struct {
 	// Account ID
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Role IDs
-	AccountRoleIDs []uint64 `json:"account_role_ids,omitempty" toon:"account_role_ids,omitempty"`
+	AccountRoleIDs []uint64 `json:"account_role_ids" toon:"account_role_ids"`
 	// Avatar URL
-	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
+	Avatar string `json:"avatar" toon:"avatar"`
 	// Phone country code
-	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
+	CountryCode string `json:"country_code" toon:"country_code"`
 	// Creation timestamp (Unix seconds)
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Email address
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Email verified
-	EmailVerified bool `json:"email_verified,omitempty" toon:"email_verified,omitempty"`
+	EmailVerified bool `json:"email_verified" toon:"email_verified"`
 	// Provisioned via SSO
-	IsExternal bool `json:"is_external,omitempty" toon:"is_external,omitempty"`
+	IsExternal bool `json:"is_external" toon:"is_external"`
 	// Locale
-	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	Locale string `json:"locale" toon:"locale"`
 	// Member ID
-	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
+	MemberID uint64 `json:"member_id" toon:"member_id"`
 	// Display name
-	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	MemberName string `json:"member_name" toon:"member_name"`
 	// Masked phone number
-	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	Phone string `json:"phone" toon:"phone"`
 	// Phone verified
-	PhoneVerified bool `json:"phone_verified,omitempty" toon:"phone_verified,omitempty"`
+	PhoneVerified bool `json:"phone_verified" toon:"phone_verified"`
 	// External reference ID
-	RefID string `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	RefID string `json:"ref_id" toon:"ref_id"`
 	// Member status. `enabled` — active member; `pending` — invited but not yet accepted; `deleted` — removed from the organization.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Time zone
-	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+	TimeZone string `json:"time_zone" toon:"time_zone"`
 	// Update timestamp (Unix seconds)
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // MemberListRequest is generated from the Flashduty OpenAPI schema.
@@ -3948,9 +3948,9 @@ type MemberListRequest struct {
 type MemberListResponse struct {
 	ListOptions
 	// Member items
-	Items []MemberItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []MemberItem `json:"items" toon:"items"`
 	// Total count
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // MemberResetInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -4015,17 +4015,17 @@ type MergeIncidentsRequest struct {
 
 // MetricsBase is generated from the Flashduty OpenAPI schema.
 type MetricsBase struct {
-	AccountID   int64  `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	ChannelID   int64  `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	AccountID   int64  `json:"account_id" toon:"account_id"`
+	ChannelID   int64  `json:"channel_id" toon:"channel_id"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Hour bucket when `split_hours` is enabled.
-	Hours         string `json:"hours,omitempty" toon:"hours,omitempty"`
-	ResponderID   int64  `json:"responder_id,omitempty" toon:"responder_id,omitempty"`
-	ResponderName string `json:"responder_name,omitempty" toon:"responder_name,omitempty"`
-	TeamID        int64  `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	TeamName      string `json:"team_name,omitempty" toon:"team_name,omitempty"`
+	Hours         string `json:"hours" toon:"hours"`
+	ResponderID   int64  `json:"responder_id" toon:"responder_id"`
+	ResponderName string `json:"responder_name" toon:"responder_name"`
+	TeamID        int64  `json:"team_id" toon:"team_id"`
+	TeamName      string `json:"team_name" toon:"team_name"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
-	TS Timestamp `json:"ts,omitempty" toon:"ts,omitempty"`
+	TS Timestamp `json:"ts" toon:"ts"`
 }
 
 // MigrateStatusPageEmailSubscribersRequest is generated from the Flashduty OpenAPI schema.
@@ -4051,47 +4051,47 @@ type MigrateStatusPageStructureRequest struct {
 // NameMessage is generated from the Flashduty OpenAPI schema.
 type NameMessage struct {
 	// Empty on success, error message on failure.
-	Message string `json:"message,omitempty" toon:"message,omitempty"`
+	Message string `json:"message" toon:"message"`
 	// Rule name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 }
 
 // NewMemberItem is generated from the Flashduty OpenAPI schema.
 type NewMemberItem struct {
 	// Member ID
-	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
+	MemberID uint64 `json:"member_id" toon:"member_id"`
 	// Member display name
-	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	MemberName string `json:"member_name" toon:"member_name"`
 }
 
 // NotifyChat is generated from the Flashduty OpenAPI schema.
 type NotifyChat struct {
 	// Chat group identifier.
-	ChatID string `json:"chat_id,omitempty" toon:"chat_id,omitempty"`
+	ChatID string `json:"chat_id" toon:"chat_id"`
 	// Chat group display name.
-	ChatName string `json:"chat_name,omitempty" toon:"chat_name,omitempty"`
+	ChatName string `json:"chat_name" toon:"chat_name"`
 	// Integration data source ID used to send the notification.
-	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
 	// Failure reason if delivery did not succeed.
-	FailedReason string `json:"failed_reason,omitempty" toon:"failed_reason,omitempty"`
+	FailedReason string `json:"failed_reason" toon:"failed_reason"`
 }
 
 // NotifyPerson is generated from the Flashduty OpenAPI schema.
 type NotifyPerson struct {
 	// Failure reason if delivery did not succeed.
-	FailedReason string `json:"failed_reason,omitempty" toon:"failed_reason,omitempty"`
+	FailedReason string `json:"failed_reason" toon:"failed_reason"`
 	// Recipient member ID.
-	PersonID int64 `json:"person_id,omitempty" toon:"person_id,omitempty"`
+	PersonID int64 `json:"person_id" toon:"person_id"`
 }
 
 // NotifyRobot is generated from the Flashduty OpenAPI schema.
 type NotifyRobot struct {
 	// Robot alias.
-	Alias string `json:"alias,omitempty" toon:"alias,omitempty"`
+	Alias string `json:"alias" toon:"alias"`
 	// Failure reason if delivery did not succeed.
-	FailedReason string `json:"failed_reason,omitempty" toon:"failed_reason,omitempty"`
+	FailedReason string `json:"failed_reason" toon:"failed_reason"`
 	// Robot token or identifier.
-	Token string `json:"token,omitempty" toon:"token,omitempty"`
+	Token string `json:"token" toon:"token"`
 }
 
 // OnceTimeFilter is generated from the Flashduty OpenAPI schema.
@@ -4105,137 +4105,137 @@ type OnceTimeFilter struct {
 // PastIncidentItem is generated from the Flashduty OpenAPI schema.
 type PastIncidentItem struct {
 	// Account ID that owns the incident.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Account locale.
-	AccountLocale string `json:"account_locale,omitempty" toon:"account_locale,omitempty"`
+	AccountLocale string `json:"account_locale" toon:"account_locale"`
 	// Account name.
-	AccountName string `json:"account_name,omitempty" toon:"account_name,omitempty"`
+	AccountName string `json:"account_name" toon:"account_name"`
 	// Account time zone.
-	AccountTimeZone string `json:"account_time_zone,omitempty" toon:"account_time_zone,omitempty"`
+	AccountTimeZone string `json:"account_time_zone" toon:"account_time_zone"`
 	// Unix timestamp (seconds) when the incident was first acknowledged. 0 if unacknowledged.
-	AckTime Timestamp `json:"ack_time,omitempty" toon:"ack_time,omitempty"`
+	AckTime Timestamp `json:"ack_time" toon:"ack_time"`
 	// Count of alerts currently in Critical/Warning/Info state.
-	ActiveAlertCnt int64 `json:"active_alert_cnt,omitempty" toon:"active_alert_cnt,omitempty"`
+	ActiveAlertCnt int64 `json:"active_alert_cnt" toon:"active_alert_cnt"`
 	// AI-generated summary of the incident.
-	AISummary string `json:"ai_summary,omitempty" toon:"ai_summary,omitempty"`
+	AISummary string `json:"ai_summary" toon:"ai_summary"`
 	// Total count of alerts merged into this incident.
-	AlertCnt int64 `json:"alert_cnt,omitempty" toon:"alert_cnt,omitempty"`
+	AlertCnt int64 `json:"alert_cnt" toon:"alert_cnt"`
 	// Total raw alert event count across all merged alerts.
-	AlertEventCnt int64 `json:"alert_event_cnt,omitempty" toon:"alert_event_cnt,omitempty"`
+	AlertEventCnt int64 `json:"alert_event_cnt" toon:"alert_event_cnt"`
 	// Embedded alerts, only populated for notification templates and custom actions.
-	Alerts []AlertInfo `json:"alerts,omitempty" toon:"alerts,omitempty"`
+	Alerts []AlertInfo `json:"alerts" toon:"alerts"`
 	// Current assignment target for the incident.
-	AssignedTo AssignedTo `json:"assigned_to,omitempty" toon:"assigned_to,omitempty"`
+	AssignedTo AssignedTo `json:"assigned_to" toon:"assigned_to"`
 	// Channel ID. 0 for standalone incidents.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel display name.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Channel status.
-	ChannelStatus string `json:"channel_status,omitempty" toon:"channel_status,omitempty"`
+	ChannelStatus string `json:"channel_status" toon:"channel_status"`
 	// Unix timestamp (seconds) when the incident was closed. 0 if still open.
-	CloseTime Timestamp `json:"close_time,omitempty" toon:"close_time,omitempty"`
+	CloseTime Timestamp `json:"close_time" toon:"close_time"`
 	// Closer member info.
-	Closer PersonShort `json:"closer,omitempty" toon:"closer,omitempty"`
+	Closer PersonShort `json:"closer" toon:"closer"`
 	// Member ID that closed the incident. 0 if auto-closed.
-	CloserID int64 `json:"closer_id,omitempty" toon:"closer_id,omitempty"`
+	CloserID int64 `json:"closer_id" toon:"closer_id"`
 	// Creation timestamp (seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator member info.
-	Creator PersonShort `json:"creator,omitempty" toon:"creator,omitempty"`
+	Creator PersonShort `json:"creator" toon:"creator"`
 	// Member ID that created the incident. 0 if auto-created by the system.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Deprecated. Use `integration_id` instead.
-	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
 	// Deprecated. Use `integration_ids` instead.
-	DataSourceIDs []int64 `json:"data_source_ids,omitempty" toon:"data_source_ids,omitempty"`
+	DataSourceIDs []int64 `json:"data_source_ids" toon:"data_source_ids"`
 	// Deprecated. Use `integration_type` instead.
-	DataSourceType string `json:"data_source_type,omitempty" toon:"data_source_type,omitempty"`
+	DataSourceType string `json:"data_source_type" toon:"data_source_type"`
 	// Deprecated. Use `integration_types` instead.
-	DataSourceTypes []string `json:"data_source_types,omitempty" toon:"data_source_types,omitempty"`
+	DataSourceTypes []string `json:"data_source_types" toon:"data_source_types"`
 	// Deduplication key used to coalesce alerts.
-	DedupKey string `json:"dedup_key,omitempty" toon:"dedup_key,omitempty"`
+	DedupKey string `json:"dedup_key" toon:"dedup_key"`
 	// Soft-delete timestamp (seconds). Zero if not deleted.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Incident description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Web console URL for the incident.
-	DetailURL string `json:"detail_url,omitempty" toon:"detail_url,omitempty"`
+	DetailURL string `json:"detail_url" toon:"detail_url"`
 	// Unix timestamp (seconds) when the incident ended. 0 if still active.
-	EndTime Timestamp `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	EndTime Timestamp `json:"end_time" toon:"end_time"`
 	// MD5 hash used for content-equality checks.
-	EqualsMD5 string `json:"equals_md5,omitempty" toon:"equals_md5,omitempty"`
+	EqualsMD5 string `json:"equals_md5" toon:"equals_md5"`
 	// Whether the incident has ever been silenced.
-	EverMuted bool `json:"ever_muted,omitempty" toon:"ever_muted,omitempty"`
+	EverMuted bool `json:"ever_muted" toon:"ever_muted"`
 	// Custom field values keyed by field name.
-	Fields map[string]any `json:"fields,omitempty" toon:"fields,omitempty"`
+	Fields map[string]any `json:"fields" toon:"fields"`
 	// Frequency bucket for recurrence analysis: `frequent` or `rare`.
-	Frequency string `json:"frequency,omitempty" toon:"frequency,omitempty"`
+	Frequency string `json:"frequency" toon:"frequency"`
 	// Alert grouping method: `i` intelligent, `p` pattern, `n` none.
-	GroupMethod string `json:"group_method,omitempty" toon:"group_method,omitempty"`
+	GroupMethod string `json:"group_method" toon:"group_method"`
 	// Attached images.
-	Images []Image `json:"images,omitempty" toon:"images,omitempty"`
+	Images []Image `json:"images" toon:"images"`
 	// Impact description.
-	Impact string `json:"impact,omitempty" toon:"impact,omitempty"`
+	Impact string `json:"impact" toon:"impact"`
 	// Incident ID (MongoDB ObjectID).
-	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	IncidentID string `json:"incident_id" toon:"incident_id"`
 	// Configured incident severity.
-	IncidentSeverity string `json:"incident_severity,omitempty" toon:"incident_severity,omitempty"`
+	IncidentSeverity string `json:"incident_severity" toon:"incident_severity"`
 	// Current incident status, derived from alert statuses.
-	IncidentStatus string `json:"incident_status,omitempty" toon:"incident_status,omitempty"`
+	IncidentStatus string `json:"incident_status" toon:"incident_status"`
 	// First integration associated with the incident.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// All integration IDs contributing alerts to this incident.
-	IntegrationIDs []int64 `json:"integration_ids,omitempty" toon:"integration_ids,omitempty"`
+	IntegrationIDs []int64 `json:"integration_ids" toon:"integration_ids"`
 	// First alert's integration type string, used by the detail page for label mappings.
-	IntegrationType string `json:"integration_type,omitempty" toon:"integration_type,omitempty"`
+	IntegrationType string `json:"integration_type" toon:"integration_type"`
 	// Integration type strings for all contributing integrations.
-	IntegrationTypes []string `json:"integration_types,omitempty" toon:"integration_types,omitempty"`
+	IntegrationTypes []string `json:"integration_types" toon:"integration_types"`
 	// Labels propagated from alerts.
-	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	Labels map[string]string `json:"labels" toon:"labels"`
 	// Unix timestamp (seconds) of the most recent update.
-	LastTime Timestamp `json:"last_time,omitempty" toon:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// Channel-level link integrations rendered for this incident.
-	Links []LinkItem `json:"links,omitempty" toon:"links,omitempty"`
+	Links []LinkItem `json:"links" toon:"links"`
 	// Fields that were manually overridden after auto-population.
-	ManualOverrides []string `json:"manual_overrides,omitempty" toon:"manual_overrides,omitempty"`
+	ManualOverrides []string `json:"manual_overrides" toon:"manual_overrides"`
 	// Short display identifier; not guaranteed unique.
-	Num string `json:"num,omitempty" toon:"num,omitempty"`
+	Num string `json:"num" toon:"num"`
 	// Owner member info. May be deprecated.
-	Owner PersonShort `json:"owner,omitempty" toon:"owner,omitempty"`
+	Owner PersonShort `json:"owner" toon:"owner"`
 	// Primary owner member ID. 0 if none.
-	OwnerID int64 `json:"owner_id,omitempty" toon:"owner_id,omitempty"`
+	OwnerID int64 `json:"owner_id" toon:"owner_id"`
 	// Associated post-mortem ID, if any. One incident can only link to a single post-mortem.
-	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
 	// Incident progress state.
-	Progress string `json:"progress,omitempty" toon:"progress,omitempty"`
+	Progress string `json:"progress" toon:"progress"`
 	// Reporter email for manually created incidents.
-	ReporterEmail string `json:"reporter_email,omitempty" toon:"reporter_email,omitempty"`
+	ReporterEmail string `json:"reporter_email" toon:"reporter_email"`
 	// Resolution notes.
-	Resolution string `json:"resolution,omitempty" toon:"resolution,omitempty"`
+	Resolution string `json:"resolution" toon:"resolution"`
 	// Current responders with assignment/acknowledgement state.
-	Responders []Responder `json:"responders,omitempty" toon:"responders,omitempty"`
+	Responders []Responder `json:"responders" toon:"responders"`
 	// Root cause analysis.
-	RootCause string `json:"root_cause,omitempty" toon:"root_cause,omitempty"`
+	RootCause string `json:"root_cause" toon:"root_cause"`
 	// Similarity score from the vector search.
-	Score float64 `json:"score,omitempty" toon:"score,omitempty"`
+	Score float64 `json:"score" toon:"score"`
 	// Quick-silence URL for this incident.
-	SilenceURL string `json:"silence_url,omitempty" toon:"silence_url,omitempty"`
+	SilenceURL string `json:"silence_url" toon:"silence_url"`
 	// Unix timestamp (seconds) until which notifications are snoozed. 0 if not snoozed.
-	SnoozedBefore Timestamp `json:"snoozed_before,omitempty" toon:"snoozed_before,omitempty"`
+	SnoozedBefore Timestamp `json:"snoozed_before" toon:"snoozed_before"`
 	// Unix timestamp (seconds) when the incident started.
-	StartTime Timestamp `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	StartTime Timestamp `json:"start_time" toon:"start_time"`
 	// Incident title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Last update timestamp (seconds).
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // PermissionFactorItem is generated from the Flashduty OpenAPI schema.
 type PermissionFactorItem struct {
 	// Factor identifier (e.g., 'template:read:info').
-	FactorName string `json:"factor_name,omitempty" toon:"factor_name,omitempty"`
+	FactorName string `json:"factor_name" toon:"factor_name"`
 	// Factor type.
-	FactorType string `json:"factor_type,omitempty" toon:"factor_type,omitempty"`
+	FactorType string `json:"factor_type" toon:"factor_type"`
 }
 
 // PermissionFactorListRequest is generated from the Flashduty OpenAPI schema.
@@ -4247,21 +4247,21 @@ type PermissionFactorListRequest struct {
 // PermissionItem is generated from the Flashduty OpenAPI schema.
 type PermissionItem struct {
 	// Permission class (e.g., 'On-call', 'Organization').
-	Class string `json:"class,omitempty" toon:"class,omitempty"`
+	Class string `json:"class" toon:"class"`
 	// Human-readable permission description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Unique permission ID.
-	ID uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	ID uint64 `json:"id" toon:"id"`
 	// Present when with_all is true. Indicates whether this permission is granted to the requested roles.
-	IsGranted bool `json:"is_granted,omitempty" toon:"is_granted,omitempty"`
+	IsGranted bool `json:"is_granted" toon:"is_granted"`
 	// Permission display name.
-	PermissionName string `json:"permission_name,omitempty" toon:"permission_name,omitempty"`
+	PermissionName string `json:"permission_name" toon:"permission_name"`
 	// Whether this is a read or manage permission.
-	PermissionType string `json:"permission_type,omitempty" toon:"permission_type,omitempty"`
+	PermissionType string `json:"permission_type" toon:"permission_type"`
 	// Permission scope (e.g., 'on-call', 'organization').
-	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	Scope string `json:"scope" toon:"scope"`
 	// Permission status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 }
 
 // PersonInfosRequest is generated from the Flashduty OpenAPI schema.
@@ -4273,47 +4273,47 @@ type PersonInfosRequest struct {
 // PersonInfosResponse is generated from the Flashduty OpenAPI schema.
 type PersonInfosResponse struct {
 	// Person profiles
-	Items []PersonItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []PersonItem `json:"items" toon:"items"`
 }
 
 // PersonItem is generated from the Flashduty OpenAPI schema.
 type PersonItem struct {
 	// Account ID
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Login role (account/member)
-	As string `json:"as,omitempty" toon:"as,omitempty"`
+	As string `json:"as" toon:"as"`
 	// Avatar URL
-	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
+	Avatar string `json:"avatar" toon:"avatar"`
 	// Email address
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Email verified
-	EmailVerified bool `json:"email_verified,omitempty" toon:"email_verified,omitempty"`
+	EmailVerified bool `json:"email_verified" toon:"email_verified"`
 	// Locale
-	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	Locale string `json:"locale" toon:"locale"`
 	// Person ID
-	PersonID uint64 `json:"person_id,omitempty" toon:"person_id,omitempty"`
+	PersonID uint64 `json:"person_id" toon:"person_id"`
 	// Display name
-	PersonName string `json:"person_name,omitempty" toon:"person_name,omitempty"`
+	PersonName string `json:"person_name" toon:"person_name"`
 	// Phone number
-	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	Phone string `json:"phone" toon:"phone"`
 	// Phone verified
-	PhoneVerified bool `json:"phone_verified,omitempty" toon:"phone_verified,omitempty"`
+	PhoneVerified bool `json:"phone_verified" toon:"phone_verified"`
 	// Person status. `enabled` — active; `pending` — invited but not yet accepted; `deleted` — removed.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Time zone
-	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+	TimeZone string `json:"time_zone" toon:"time_zone"`
 }
 
 // PersonShort is generated from the Flashduty OpenAPI schema.
 type PersonShort struct {
 	// Role label for this member in the context of the current object.
-	As string `json:"as,omitempty" toon:"as,omitempty"`
+	As string `json:"as" toon:"as"`
 	// Member email address.
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Member ID.
-	PersonID int64 `json:"person_id,omitempty" toon:"person_id,omitempty"`
+	PersonID int64 `json:"person_id" toon:"person_id"`
 	// Member display name.
-	PersonName string `json:"person_name,omitempty" toon:"person_name,omitempty"`
+	PersonName string `json:"person_name" toon:"person_name"`
 }
 
 // PlatformEmptyObject is generated from the Flashduty OpenAPI schema.
@@ -4321,43 +4321,43 @@ type PlatformEmptyObject struct{}
 
 // PostMortemItem is generated from the Flashduty OpenAPI schema.
 type PostMortemItem struct {
-	Basics  PostMortemItemBasics  `json:"basics,omitempty" toon:"basics,omitempty"`
-	Content PostMortemItemContent `json:"content,omitempty" toon:"content,omitempty"`
+	Basics  PostMortemItemBasics  `json:"basics" toon:"basics"`
+	Content PostMortemItemContent `json:"content" toon:"content"`
 	// Follow-up action items rendered as a single string.
-	FollowUps string         `json:"follow_ups,omitempty" toon:"follow_ups,omitempty"`
-	Meta      PostMortemMeta `json:"meta,omitempty" toon:"meta,omitempty"`
+	FollowUps string         `json:"follow_ups" toon:"follow_ups"`
+	Meta      PostMortemMeta `json:"meta" toon:"meta"`
 }
 
 // PostMortemMeta is generated from the Flashduty OpenAPI schema.
 type PostMortemMeta struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Member IDs that contributed to the report.
-	AuthorIDs []int64 `json:"author_ids,omitempty" toon:"author_ids,omitempty"`
+	AuthorIDs []int64 `json:"author_ids" toon:"author_ids"`
 	// Owning channel ID. 0 if none.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Channel name, filled by the server.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Creation timestamp (seconds).
-	CreatedAtSeconds Timestamp `json:"created_at_seconds,omitempty" toon:"created_at_seconds,omitempty"`
+	CreatedAtSeconds Timestamp `json:"created_at_seconds" toon:"created_at_seconds"`
 	// Linked incident IDs.
-	IncidentIDs []string `json:"incident_ids,omitempty" toon:"incident_ids,omitempty"`
+	IncidentIDs []string `json:"incident_ids" toon:"incident_ids"`
 	// When true, only team members and admins can view.
-	IsPrivate bool `json:"is_private,omitempty" toon:"is_private,omitempty"`
+	IsPrivate bool `json:"is_private" toon:"is_private"`
 	// Number of uploaded media files.
-	MediaCount int64 `json:"media_count,omitempty" toon:"media_count,omitempty"`
+	MediaCount int64 `json:"media_count" toon:"media_count"`
 	// Deterministic post-mortem ID derived from account and incident IDs.
-	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
 	// Report status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Owning team ID. 0 if none.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Template used to initialize the report.
-	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+	TemplateID string `json:"template_id" toon:"template_id"`
 	// Report title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Last update timestamp (seconds).
-	UpdatedAtSeconds Timestamp `json:"updated_at_seconds,omitempty" toon:"updated_at_seconds,omitempty"`
+	UpdatedAtSeconds Timestamp `json:"updated_at_seconds" toon:"updated_at_seconds"`
 }
 
 // PreviewTemplateRequest is generated from the Flashduty OpenAPI schema.
@@ -4373,19 +4373,19 @@ type PreviewTemplateRequest struct {
 // PreviewTemplateResponse is generated from the Flashduty OpenAPI schema.
 type PreviewTemplateResponse struct {
 	// Rendered template output, present when success is true.
-	Content string `json:"content,omitempty" toon:"content,omitempty"`
+	Content string `json:"content" toon:"content"`
 	// Error message describing why rendering failed, present when success is false.
-	Message string `json:"message,omitempty" toon:"message,omitempty"`
+	Message string `json:"message" toon:"message"`
 	// Whether the template rendered without errors.
-	Success bool `json:"success,omitempty" toon:"success,omitempty"`
+	Success bool `json:"success" toon:"success"`
 }
 
 // QueryRow is generated from the Flashduty OpenAPI schema.
 type QueryRow struct {
 	// String-valued fields (labels, log fields, SQL columns).
-	Fields map[string]string `json:"fields,omitempty" toon:"fields,omitempty"`
+	Fields map[string]string `json:"fields" toon:"fields"`
 	// Numeric fields. For metric queries the canonical key is `__value__`. May be `null` for detail-oriented sources.
-	Values map[string]float64 `json:"values,omitempty" toon:"values,omitempty"`
+	Values map[string]float64 `json:"values" toon:"values"`
 }
 
 // QueryRowsRequest is generated from the Flashduty OpenAPI schema.
@@ -4441,58 +4441,58 @@ type ResolveIncidentRequest struct {
 // Responder is generated from the Flashduty OpenAPI schema.
 type Responder struct {
 	// Unix timestamp (seconds) when the member acknowledged. 0 if not yet acknowledged.
-	AcknowledgedAt Timestamp `json:"acknowledged_at,omitempty" toon:"acknowledged_at,omitempty"`
+	AcknowledgedAt Timestamp `json:"acknowledged_at" toon:"acknowledged_at"`
 	// Role label of this responder.
-	As string `json:"as,omitempty" toon:"as,omitempty"`
+	As string `json:"as" toon:"as"`
 	// Unix timestamp (seconds) when the member was assigned.
-	AssignedAt Timestamp `json:"assigned_at,omitempty" toon:"assigned_at,omitempty"`
+	AssignedAt Timestamp `json:"assigned_at" toon:"assigned_at"`
 	// Member email, filled by the server.
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Responder member ID.
-	PersonID int64 `json:"person_id,omitempty" toon:"person_id,omitempty"`
+	PersonID int64 `json:"person_id" toon:"person_id"`
 	// Member display name, filled by the server.
-	PersonName string `json:"person_name,omitempty" toon:"person_name,omitempty"`
+	PersonName string `json:"person_name" toon:"person_name"`
 }
 
 // ResponderInsightItem is generated from the Flashduty OpenAPI schema.
 type ResponderInsightItem struct {
-	AccountID          int64   `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	AcknowledgementPct float64 `json:"acknowledgement_pct,omitempty" toon:"acknowledgement_pct,omitempty"`
-	ChannelID          int64   `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
-	ChannelName        string  `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	AccountID          int64   `json:"account_id" toon:"account_id"`
+	AcknowledgementPct float64 `json:"acknowledgement_pct" toon:"acknowledgement_pct"`
+	ChannelID          int64   `json:"channel_id" toon:"channel_id"`
+	ChannelName        string  `json:"channel_name" toon:"channel_name"`
 	// Hour bucket when `split_hours` is enabled.
-	Hours                           string  `json:"hours,omitempty" toon:"hours,omitempty"`
-	MeanSecondsToAck                float64 `json:"mean_seconds_to_ack,omitempty" toon:"mean_seconds_to_ack,omitempty"`
-	ResponderID                     int64   `json:"responder_id,omitempty" toon:"responder_id,omitempty"`
-	ResponderName                   string  `json:"responder_name,omitempty" toon:"responder_name,omitempty"`
-	TeamID                          int64   `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	TeamName                        string  `json:"team_name,omitempty" toon:"team_name,omitempty"`
-	TotalEngagedSeconds             int64   `json:"total_engaged_seconds,omitempty" toon:"total_engaged_seconds,omitempty"`
-	TotalIncidentCnt                int64   `json:"total_incident_cnt,omitempty" toon:"total_incident_cnt,omitempty"`
-	TotalIncidentsAcknowledged      int64   `json:"total_incidents_acknowledged,omitempty" toon:"total_incidents_acknowledged,omitempty"`
-	TotalIncidentsEscalated         int64   `json:"total_incidents_escalated,omitempty" toon:"total_incidents_escalated,omitempty"`
-	TotalIncidentsManuallyEscalated int64   `json:"total_incidents_manually_escalated,omitempty" toon:"total_incidents_manually_escalated,omitempty"`
-	TotalIncidentsReassigned        int64   `json:"total_incidents_reassigned,omitempty" toon:"total_incidents_reassigned,omitempty"`
-	TotalIncidentsTimeoutEscalated  int64   `json:"total_incidents_timeout_escalated,omitempty" toon:"total_incidents_timeout_escalated,omitempty"`
-	TotalInterruptions              int64   `json:"total_interruptions,omitempty" toon:"total_interruptions,omitempty"`
-	TotalNotifications              int64   `json:"total_notifications,omitempty" toon:"total_notifications,omitempty"`
-	TotalSecondsToAck               int64   `json:"total_seconds_to_ack,omitempty" toon:"total_seconds_to_ack,omitempty"`
+	Hours                           string  `json:"hours" toon:"hours"`
+	MeanSecondsToAck                float64 `json:"mean_seconds_to_ack" toon:"mean_seconds_to_ack"`
+	ResponderID                     int64   `json:"responder_id" toon:"responder_id"`
+	ResponderName                   string  `json:"responder_name" toon:"responder_name"`
+	TeamID                          int64   `json:"team_id" toon:"team_id"`
+	TeamName                        string  `json:"team_name" toon:"team_name"`
+	TotalEngagedSeconds             int64   `json:"total_engaged_seconds" toon:"total_engaged_seconds"`
+	TotalIncidentCnt                int64   `json:"total_incident_cnt" toon:"total_incident_cnt"`
+	TotalIncidentsAcknowledged      int64   `json:"total_incidents_acknowledged" toon:"total_incidents_acknowledged"`
+	TotalIncidentsEscalated         int64   `json:"total_incidents_escalated" toon:"total_incidents_escalated"`
+	TotalIncidentsManuallyEscalated int64   `json:"total_incidents_manually_escalated" toon:"total_incidents_manually_escalated"`
+	TotalIncidentsReassigned        int64   `json:"total_incidents_reassigned" toon:"total_incidents_reassigned"`
+	TotalIncidentsTimeoutEscalated  int64   `json:"total_incidents_timeout_escalated" toon:"total_incidents_timeout_escalated"`
+	TotalInterruptions              int64   `json:"total_interruptions" toon:"total_interruptions"`
+	TotalNotifications              int64   `json:"total_notifications" toon:"total_notifications"`
+	TotalSecondsToAck               int64   `json:"total_seconds_to_ack" toon:"total_seconds_to_ack"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
-	TS Timestamp `json:"ts,omitempty" toon:"ts,omitempty"`
+	TS Timestamp `json:"ts" toon:"ts"`
 }
 
 // ResponderInsightResponse is generated from the Flashduty OpenAPI schema.
 type ResponderInsightResponse struct {
-	Items []ResponderInsightItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []ResponderInsightItem `json:"items" toon:"items"`
 }
 
 // ResponseEnvelope is generated from the Flashduty OpenAPI schema.
 type ResponseEnvelope struct {
 	// Endpoint-specific payload. See each operation's 200 response schema.
-	Data  any `json:"data,omitempty" toon:"data,omitempty"`
-	Error any `json:"error,omitempty" toon:"error,omitempty"`
+	Data  any `json:"data" toon:"data"`
+	Error any `json:"error" toon:"error"`
 	// Unique ID for this request. Mirrored in the Flashcat-Request-Id header. Include it when reporting issues.
-	RequestID string `json:"request_id,omitempty" toon:"request_id,omitempty"`
+	RequestID string `json:"request_id" toon:"request_id"`
 }
 
 // RoleGrantRequest is generated from the Flashduty OpenAPI schema.
@@ -4518,21 +4518,21 @@ type RoleInfoRequest struct {
 // RoleItem is generated from the Flashduty OpenAPI schema.
 type RoleItem struct {
 	// Unix epoch seconds the role was created.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Role description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// False for built-in roles which cannot be modified.
-	Editable bool `json:"editable,omitempty" toon:"editable,omitempty"`
+	Editable bool `json:"editable" toon:"editable"`
 	// IDs of permissions granted by this role.
-	PermissionIDs []uint64 `json:"permission_ids,omitempty" toon:"permission_ids,omitempty"`
+	PermissionIDs []uint64 `json:"permission_ids" toon:"permission_ids"`
 	// Unique role ID.
-	RoleID uint64 `json:"role_id,omitempty" toon:"role_id,omitempty"`
+	RoleID uint64 `json:"role_id" toon:"role_id"`
 	// Role display name.
-	RoleName string `json:"role_name,omitempty" toon:"role_name,omitempty"`
+	RoleName string `json:"role_name" toon:"role_name"`
 	// Role status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Unix epoch seconds the role was last updated.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // RoleListRequest is generated from the Flashduty OpenAPI schema.
@@ -4545,9 +4545,9 @@ type RoleListRequest struct {
 
 // RoleListResponse is generated from the Flashduty OpenAPI schema.
 type RoleListResponse struct {
-	Items []RoleItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []RoleItem `json:"items" toon:"items"`
 	// Total role count.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // RolePermissionListRequest is generated from the Flashduty OpenAPI schema.
@@ -4560,7 +4560,7 @@ type RolePermissionListRequest struct {
 
 // RolePermissionListResponse is generated from the Flashduty OpenAPI schema.
 type RolePermissionListResponse struct {
-	Items []PermissionItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []PermissionItem `json:"items" toon:"items"`
 }
 
 // RoleUpsertRequest is generated from the Flashduty OpenAPI schema.
@@ -4578,9 +4578,9 @@ type RoleUpsertRequest struct {
 // RoleUpsertResponse is generated from the Flashduty OpenAPI schema.
 type RoleUpsertResponse struct {
 	// Created or updated role ID.
-	RoleID uint64 `json:"role_id,omitempty" toon:"role_id,omitempty"`
+	RoleID uint64 `json:"role_id" toon:"role_id"`
 	// Role name echoed from the request.
-	RoleName string `json:"role_name,omitempty" toon:"role_name,omitempty"`
+	RoleName string `json:"role_name" toon:"role_name"`
 }
 
 // RouteCase is generated from the Flashduty OpenAPI schema.
@@ -4612,26 +4612,26 @@ type RouteInfoRequest struct {
 // RouteItem is generated from the Flashduty OpenAPI schema.
 type RouteItem struct {
 	// Ordered list of case branches.
-	Cases []RouteCase `json:"cases,omitempty" toon:"cases,omitempty"`
+	Cases []RouteCase `json:"cases" toon:"cases"`
 	// Creation time, Unix timestamp in seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// ID of the person who created the rule.
-	CreatorID int64        `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
-	Default   RouteDefault `json:"default,omitempty" toon:"default,omitempty"`
+	CreatorID int64        `json:"creator_id" toon:"creator_id"`
+	Default   RouteDefault `json:"default" toon:"default"`
 	// Soft-delete timestamp, Unix seconds. Omitted when the rule is active.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Integration the rule belongs to.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Optional sections that visually group cases.
-	Sections []RouteSection `json:"sections,omitempty" toon:"sections,omitempty"`
+	Sections []RouteSection `json:"sections" toon:"sections"`
 	// Rule status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Last update time, Unix timestamp in seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// ID of the person who performed the last update.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 	// Monotonic version number, incremented on each update. Use it for optimistic concurrency control.
-	Version int64 `json:"version,omitempty" toon:"version,omitempty"`
+	Version int64 `json:"version" toon:"version"`
 }
 
 // RouteMatchCondition is generated from the Flashduty OpenAPI schema.
@@ -4668,9 +4668,9 @@ type RuleConfigs struct {
 // RuleCreateResponse is generated from the Flashduty OpenAPI schema.
 type RuleCreateResponse struct {
 	// Newly created rule ID (MongoDB ObjectID).
-	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
+	RuleID string `json:"rule_id" toon:"rule_id"`
 	// Rule name echoed back from the request.
-	RuleName string `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
+	RuleName string `json:"rule_name" toon:"rule_name"`
 }
 
 // RuleEmptyRequest is generated from the Flashduty OpenAPI schema.
@@ -4764,11 +4764,11 @@ type RUMApplicationCreateRequest struct {
 // RUMApplicationCreateResponse is generated from the Flashduty OpenAPI schema.
 type RUMApplicationCreateResponse struct {
 	// Auto-generated unique application ID.
-	ApplicationID string `json:"application_id,omitempty" toon:"application_id,omitempty"`
+	ApplicationID string `json:"application_id" toon:"application_id"`
 	// Application display name.
-	ApplicationName string `json:"application_name,omitempty" toon:"application_name,omitempty"`
+	ApplicationName string `json:"application_name" toon:"application_name"`
 	// Token for RUM SDK initialization.
-	ClientToken string `json:"client_token,omitempty" toon:"client_token,omitempty"`
+	ClientToken string `json:"client_token" toon:"client_token"`
 }
 
 // RUMApplicationIDRequest is generated from the Flashduty OpenAPI schema.
@@ -4785,41 +4785,41 @@ type RUMApplicationInfosRequest struct {
 
 // RUMApplicationInfosResponse is generated from the Flashduty OpenAPI schema.
 type RUMApplicationInfosResponse struct {
-	Items []RUMApplicationItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []RUMApplicationItem `json:"items" toon:"items"`
 }
 
 // RUMApplicationItem is generated from the Flashduty OpenAPI schema.
 type RUMApplicationItem struct {
 	// Account ID.
-	AccountID int64                  `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	Alerting  RUMApplicationAlerting `json:"alerting,omitempty" toon:"alerting,omitempty"`
+	AccountID int64                  `json:"account_id" toon:"account_id"`
+	Alerting  RUMApplicationAlerting `json:"alerting" toon:"alerting"`
 	// Unique application ID.
-	ApplicationID string `json:"application_id,omitempty" toon:"application_id,omitempty"`
+	ApplicationID string `json:"application_id" toon:"application_id"`
 	// Application display name.
-	ApplicationName string `json:"application_name,omitempty" toon:"application_name,omitempty"`
+	ApplicationName string `json:"application_name" toon:"application_name"`
 	// Token used to initialize the RUM SDK.
-	ClientToken string `json:"client_token,omitempty" toon:"client_token,omitempty"`
+	ClientToken string `json:"client_token" toon:"client_token"`
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator member ID.
-	CreatedBy int64 `json:"created_by,omitempty" toon:"created_by,omitempty"`
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
 	// If `true`, the application is only accessible to team members.
-	IsPrivate bool `json:"is_private,omitempty" toon:"is_private,omitempty"`
+	IsPrivate bool `json:"is_private" toon:"is_private"`
 	// If `true`, geographic location is not inferred from IP.
-	NoGeo bool `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
+	NoGeo bool `json:"no_geo" toon:"no_geo"`
 	// If `true`, IP addresses are not collected.
-	NoIP bool `json:"no_ip,omitempty" toon:"no_ip,omitempty"`
+	NoIP bool `json:"no_ip" toon:"no_ip"`
 	// Application status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Owning team ID.
-	TeamID  int64                 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	Tracing RUMApplicationTracing `json:"tracing,omitempty" toon:"tracing,omitempty"`
+	TeamID  int64                 `json:"team_id" toon:"team_id"`
+	Tracing RUMApplicationTracing `json:"tracing" toon:"tracing"`
 	// Application type.
-	Type string `json:"type,omitempty" toon:"type,omitempty"`
+	Type string `json:"type" toon:"type"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // RUMApplicationListRequest is generated from the Flashduty OpenAPI schema.
@@ -4839,9 +4839,9 @@ type RUMApplicationListRequest struct {
 
 // RUMApplicationListResponse is generated from the Flashduty OpenAPI schema.
 type RUMApplicationListResponse struct {
-	HasNextPage bool                 `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []RUMApplicationItem `json:"items,omitempty" toon:"items,omitempty"`
-	Total       int64                `json:"total,omitempty" toon:"total,omitempty"`
+	HasNextPage bool                 `json:"has_next_page" toon:"has_next_page"`
+	Items       []RUMApplicationItem `json:"items" toon:"items"`
+	Total       int64                `json:"total" toon:"total"`
 }
 
 // RUMApplicationTracing is generated from the Flashduty OpenAPI schema.
@@ -4877,33 +4877,33 @@ type RUMIssueIDRequest struct {
 
 // RUMIssueItem is generated from the Flashduty OpenAPI schema.
 type RUMIssueItem struct {
-	Age             int64             `json:"age,omitempty" toon:"age,omitempty"`
-	ApplicationID   string            `json:"application_id,omitempty" toon:"application_id,omitempty"`
-	ApplicationName string            `json:"application_name,omitempty" toon:"application_name,omitempty"`
-	CreatedAt       int64             `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	Error           RUMIssueItemError `json:"error,omitempty" toon:"error,omitempty"`
+	Age             int64             `json:"age" toon:"age"`
+	ApplicationID   string            `json:"application_id" toon:"application_id"`
+	ApplicationName string            `json:"application_name" toon:"application_name"`
+	CreatedAt       int64             `json:"created_at" toon:"created_at"`
+	Error           RUMIssueItemError `json:"error" toon:"error"`
 	// Total error occurrences.
-	ErrorCount int64                 `json:"error_count,omitempty" toon:"error_count,omitempty"`
-	FirstSeen  RUMIssueItemFirstSeen `json:"first_seen,omitempty" toon:"first_seen,omitempty"`
+	ErrorCount int64                 `json:"error_count" toon:"error_count"`
+	FirstSeen  RUMIssueItemFirstSeen `json:"first_seen" toon:"first_seen"`
 	// Whether the error caused an app crash.
-	IsCrash bool `json:"is_crash,omitempty" toon:"is_crash,omitempty"`
+	IsCrash bool `json:"is_crash" toon:"is_crash"`
 	// Unique issue ID.
-	IssueID  string               `json:"issue_id,omitempty" toon:"issue_id,omitempty"`
-	LastSeen RUMIssueItemLastSeen `json:"last_seen,omitempty" toon:"last_seen,omitempty"`
+	IssueID  string               `json:"issue_id" toon:"issue_id"`
+	LastSeen RUMIssueItemLastSeen `json:"last_seen" toon:"last_seen"`
 	// Regression metadata. Present only when a previously resolved issue re-occurred.
-	Regression RUMIssueItemRegression `json:"regression,omitempty" toon:"regression,omitempty"`
-	ResolvedAt int64                  `json:"resolved_at,omitempty" toon:"resolved_at,omitempty"`
-	ResolvedBy int64                  `json:"resolved_by,omitempty" toon:"resolved_by,omitempty"`
-	Service    string                 `json:"service,omitempty" toon:"service,omitempty"`
+	Regression RUMIssueItemRegression `json:"regression" toon:"regression"`
+	ResolvedAt int64                  `json:"resolved_at" toon:"resolved_at"`
+	ResolvedBy int64                  `json:"resolved_by" toon:"resolved_by"`
+	Service    string                 `json:"service" toon:"service"`
 	// Affected user sessions.
-	SessionCount int64 `json:"session_count,omitempty" toon:"session_count,omitempty"`
+	SessionCount int64 `json:"session_count" toon:"session_count"`
 	// Issue severity level.
-	Severity       string                     `json:"severity,omitempty" toon:"severity,omitempty"`
-	Status         string                     `json:"status,omitempty" toon:"status,omitempty"`
-	SuspectedCause RUMIssueItemSuspectedCause `json:"suspected_cause,omitempty" toon:"suspected_cause,omitempty"`
-	TeamID         int64                      `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	UpdatedAt      int64                      `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
-	Versions       []string                   `json:"versions,omitempty" toon:"versions,omitempty"`
+	Severity       string                     `json:"severity" toon:"severity"`
+	Status         string                     `json:"status" toon:"status"`
+	SuspectedCause RUMIssueItemSuspectedCause `json:"suspected_cause" toon:"suspected_cause"`
+	TeamID         int64                      `json:"team_id" toon:"team_id"`
+	UpdatedAt      int64                      `json:"updated_at" toon:"updated_at"`
+	Versions       []string                   `json:"versions" toon:"versions"`
 }
 
 // RUMIssueListRequest is generated from the Flashduty OpenAPI schema.
@@ -4934,9 +4934,9 @@ type RUMIssueListRequest struct {
 
 // RUMIssueListResponse is generated from the Flashduty OpenAPI schema.
 type RUMIssueListResponse struct {
-	HasNextPage bool           `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []RUMIssueItem `json:"items,omitempty" toon:"items,omitempty"`
-	Total       int64          `json:"total,omitempty" toon:"total,omitempty"`
+	HasNextPage bool           `json:"has_next_page" toon:"has_next_page"`
+	Items       []RUMIssueItem `json:"items" toon:"items"`
+	Total       int64          `json:"total" toon:"total"`
 }
 
 // RUMIssueUpdateRequest is generated from the Flashduty OpenAPI schema.
@@ -4976,24 +4976,24 @@ type SLSProjectsRequest struct {
 // ScheduleCalculatedLayer is generated from the Flashduty OpenAPI schema.
 type ScheduleCalculatedLayer struct {
 	// Layer display name.
-	LayerName string `json:"layer_name,omitempty" toon:"layer_name,omitempty"`
+	LayerName string `json:"layer_name" toon:"layer_name"`
 	// Layer mode: 0 = common rotation, 1 = override.
-	Mode int64 `json:"mode,omitempty" toon:"mode,omitempty"`
+	Mode int64 `json:"mode" toon:"mode"`
 	// Layer internal name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Computed shifts.
-	Schedules []ScheduleCalculatedSchedule `json:"schedules,omitempty" toon:"schedules,omitempty"`
+	Schedules []ScheduleCalculatedSchedule `json:"schedules" toon:"schedules"`
 }
 
 // ScheduleCalculatedSchedule is generated from the Flashduty OpenAPI schema.
 type ScheduleCalculatedSchedule struct {
 	// Shift end timestamp (Unix seconds).
-	End   Timestamp     `json:"end,omitempty" toon:"end,omitempty"`
-	Group ScheduleGroup `json:"group,omitempty" toon:"group,omitempty"`
+	End   Timestamp     `json:"end" toon:"end"`
+	Group ScheduleGroup `json:"group" toon:"group"`
 	// Index inside the rotation.
-	Index int64 `json:"index,omitempty" toon:"index,omitempty"`
+	Index int64 `json:"index" toon:"index"`
 	// Shift start timestamp (Unix seconds).
-	Start Timestamp `json:"start,omitempty" toon:"start,omitempty"`
+	Start Timestamp `json:"start" toon:"start"`
 }
 
 // ScheduleDayMask is generated from the Flashduty OpenAPI schema.
@@ -5030,7 +5030,7 @@ type ScheduleGroup struct {
 // ScheduleIDResponse is generated from the Flashduty OpenAPI schema.
 type ScheduleIDResponse struct {
 	// ID of the newly created schedule.
-	ScheduleID int64 `json:"schedule_id,omitempty" toon:"schedule_id,omitempty"`
+	ScheduleID int64 `json:"schedule_id" toon:"schedule_id"`
 }
 
 // ScheduleIDsBodyRequest is generated from the Flashduty OpenAPI schema.
@@ -5081,52 +5081,52 @@ type ScheduleInfoRequest struct {
 // ScheduleItem is generated from the Flashduty OpenAPI schema.
 type ScheduleItem struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Creation timestamp (Unix seconds).
-	CreateAt Timestamp `json:"create_at,omitempty" toon:"create_at,omitempty"`
+	CreateAt Timestamp `json:"create_at" toon:"create_at"`
 	// Creator person ID.
-	CreateBy int64 `json:"create_by,omitempty" toon:"create_by,omitempty"`
+	CreateBy int64 `json:"create_by" toon:"create_by"`
 	// Current on-call group, or null when nobody is on-call.
-	CurOncall ScheduleOncallGroup `json:"cur_oncall,omitempty" toon:"cur_oncall,omitempty"`
+	CurOncall ScheduleOncallGroup `json:"cur_oncall" toon:"cur_oncall"`
 	// Schedule description. null when returned from /schedule/preview.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Disabled flag (0 = enabled, 1 = disabled). Deprecated. null when returned from /schedule/preview.
-	Disabled int64 `json:"disabled,omitempty" toon:"disabled,omitempty"`
+	Disabled int64 `json:"disabled" toon:"disabled"`
 	// Window end (Unix seconds).
-	End Timestamp `json:"end,omitempty" toon:"end,omitempty"`
+	End Timestamp `json:"end" toon:"end"`
 	// Field name used by the legacy update-field endpoint.
-	Field string `json:"field,omitempty" toon:"field,omitempty"`
+	Field string `json:"field" toon:"field"`
 	// Collapsed final schedule across all layers.
-	FinalSchedule ScheduleCalculatedLayer `json:"final_schedule,omitempty" toon:"final_schedule,omitempty"`
+	FinalSchedule ScheduleCalculatedLayer `json:"final_schedule" toon:"final_schedule"`
 	// Legacy team/group ID. null when returned from /schedule/preview.
-	GroupID int64 `json:"group_id,omitempty" toon:"group_id,omitempty"`
+	GroupID int64 `json:"group_id" toon:"group_id"`
 	// Schedule ID. null when returned from /schedule/preview.
-	ID int64 `json:"id,omitempty" toon:"id,omitempty"`
+	ID int64 `json:"id" toon:"id"`
 	// Alias of schedule_layers returned for compatibility.
-	LayerSchedules []ScheduleCalculatedLayer `json:"layer_schedules,omitempty" toon:"layer_schedules,omitempty"`
+	LayerSchedules []ScheduleCalculatedLayer `json:"layer_schedules" toon:"layer_schedules"`
 	// Rotation layers defined on the schedule.
-	Layers []ScheduleLayer `json:"layers,omitempty" toon:"layers,omitempty"`
+	Layers []ScheduleLayer `json:"layers" toon:"layers"`
 	// Schedule name (legacy field; mirrors schedule_name). null when returned from /schedule/preview.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Next on-call group, or null when unknown.
-	NextOncall ScheduleOncallGroup `json:"next_oncall,omitempty" toon:"next_oncall,omitempty"`
-	Notify     ScheduleNotify      `json:"notify,omitempty" toon:"notify,omitempty"`
+	NextOncall ScheduleOncallGroup `json:"next_oncall" toon:"next_oncall"`
+	Notify     ScheduleNotify      `json:"notify" toon:"notify"`
 	// Schedule ID.
-	ScheduleID int64 `json:"schedule_id,omitempty" toon:"schedule_id,omitempty"`
+	ScheduleID int64 `json:"schedule_id" toon:"schedule_id"`
 	// Computed layers for the requested window.
-	ScheduleLayers []ScheduleCalculatedLayer `json:"schedule_layers,omitempty" toon:"schedule_layers,omitempty"`
+	ScheduleLayers []ScheduleCalculatedLayer `json:"schedule_layers" toon:"schedule_layers"`
 	// Schedule display name. null when returned from /schedule/preview.
-	ScheduleName string `json:"schedule_name,omitempty" toon:"schedule_name,omitempty"`
+	ScheduleName string `json:"schedule_name" toon:"schedule_name"`
 	// Window start (Unix seconds).
-	Start Timestamp `json:"start,omitempty" toon:"start,omitempty"`
+	Start Timestamp `json:"start" toon:"start"`
 	// Legacy status flag. Deprecated. null when returned from /schedule/preview.
-	Status int64 `json:"status,omitempty" toon:"status,omitempty"`
+	Status int64 `json:"status" toon:"status"`
 	// Owning team ID. null when returned from /schedule/preview.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Last update timestamp (Unix seconds).
-	UpdateAt Timestamp `json:"update_at,omitempty" toon:"update_at,omitempty"`
+	UpdateAt Timestamp `json:"update_at" toon:"update_at"`
 	// Last updater person ID.
-	UpdateBy int64 `json:"update_by,omitempty" toon:"update_by,omitempty"`
+	UpdateBy int64 `json:"update_by" toon:"update_by"`
 }
 
 // ScheduleLayer is generated from the Flashduty OpenAPI schema.
@@ -5207,9 +5207,9 @@ type ScheduleListRequest struct {
 // ScheduleListResponse is generated from the Flashduty OpenAPI schema.
 type ScheduleListResponse struct {
 	// Schedules on this page.
-	Items []ScheduleItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []ScheduleItem `json:"items" toon:"items"`
 	// Total number of schedules matching the filters.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // ScheduleMember is generated from the Flashduty OpenAPI schema.
@@ -5243,16 +5243,16 @@ type ScheduleNotifyBy struct {
 // ScheduleOncallGroup is generated from the Flashduty OpenAPI schema.
 type ScheduleOncallGroup struct {
 	// Shift end timestamp (Unix seconds).
-	End   Timestamp     `json:"end,omitempty" toon:"end,omitempty"`
-	Group ScheduleGroup `json:"group,omitempty" toon:"group,omitempty"`
+	End   Timestamp     `json:"end" toon:"end"`
+	Group ScheduleGroup `json:"group" toon:"group"`
 	// Index inside the rotation.
-	Index int64 `json:"index,omitempty" toon:"index,omitempty"`
+	Index int64 `json:"index" toon:"index"`
 	// Shift start timestamp (Unix seconds).
-	Start Timestamp `json:"start,omitempty" toon:"start,omitempty"`
+	Start Timestamp `json:"start" toon:"start"`
 	// Update timestamp (Unix seconds).
-	UpdateAt Timestamp `json:"update_at,omitempty" toon:"update_at,omitempty"`
+	UpdateAt Timestamp `json:"update_at" toon:"update_at"`
 	// Layer weight the shift comes from.
-	Weight int64 `json:"weight,omitempty" toon:"weight,omitempty"`
+	Weight int64 `json:"weight" toon:"weight"`
 }
 
 // ScheduleRestrictPeriod is generated from the Flashduty OpenAPI schema.
@@ -5274,7 +5274,7 @@ type ScheduleSelfRequest struct {
 // ScheduleSelfResponse is generated from the Flashduty OpenAPI schema.
 type ScheduleSelfResponse struct {
 	// Schedules assigned to the current user (or matching the requested IDs).
-	Items []ScheduleItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []ScheduleItem `json:"items" toon:"items"`
 }
 
 // ScheduleUpsertRequest is generated from the Flashduty OpenAPI schema.
@@ -5300,30 +5300,30 @@ type ScheduleUpsertRequest struct {
 
 // SilenceRuleItem is generated from the Flashduty OpenAPI schema.
 type SilenceRuleItem struct {
-	AccountID   int64       `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	ChannelID   int64       `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
-	CreatedAt   int64       `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	DeletedAt   int64       `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
-	Description string      `json:"description,omitempty" toon:"description,omitempty"`
-	Filters     FilterGroup `json:"filters,omitempty" toon:"filters,omitempty"`
+	AccountID   int64       `json:"account_id" toon:"account_id"`
+	ChannelID   int64       `json:"channel_id" toon:"channel_id"`
+	CreatedAt   int64       `json:"created_at" toon:"created_at"`
+	DeletedAt   int64       `json:"deleted_at" toon:"deleted_at"`
+	Description string      `json:"description" toon:"description"`
+	Filters     FilterGroup `json:"filters" toon:"filters"`
 	// Source incident ID when the silence was created from an incident.
-	FromIncidentID string `json:"from_incident_id,omitempty" toon:"from_incident_id,omitempty"`
+	FromIncidentID string `json:"from_incident_id" toon:"from_incident_id"`
 	// When true, the silence rule is automatically deleted after its time window expires. Defaults to false.
-	IsAutoDelete bool `json:"is_auto_delete,omitempty" toon:"is_auto_delete,omitempty"`
+	IsAutoDelete bool `json:"is_auto_delete" toon:"is_auto_delete"`
 	// When true, silenced alerts are dropped instead of suppressed into incidents.
-	IsDirectlyDiscard bool `json:"is_directly_discard,omitempty" toon:"is_directly_discard,omitempty"`
+	IsDirectlyDiscard bool `json:"is_directly_discard" toon:"is_directly_discard"`
 	// Whether the rule is currently in effect.
-	IsEffective bool `json:"is_effective,omitempty" toon:"is_effective,omitempty"`
+	IsEffective bool `json:"is_effective" toon:"is_effective"`
 	// Evaluation priority. Lower runs first.
-	Priority   int64          `json:"priority,omitempty" toon:"priority,omitempty"`
-	RuleID     string         `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
-	RuleName   string         `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
-	Status     string         `json:"status,omitempty" toon:"status,omitempty"`
-	TimeFilter OnceTimeFilter `json:"time_filter,omitempty" toon:"time_filter,omitempty"`
+	Priority   int64          `json:"priority" toon:"priority"`
+	RuleID     string         `json:"rule_id" toon:"rule_id"`
+	RuleName   string         `json:"rule_name" toon:"rule_name"`
+	Status     string         `json:"status" toon:"status"`
+	TimeFilter OnceTimeFilter `json:"time_filter" toon:"time_filter"`
 	// Recurring time windows.
-	TimeFilters []TimeFilter `json:"time_filters,omitempty" toon:"time_filters,omitempty"`
-	UpdatedAt   int64        `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
-	UpdatedBy   int64        `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	TimeFilters []TimeFilter `json:"time_filters" toon:"time_filters"`
+	UpdatedAt   int64        `json:"updated_at" toon:"updated_at"`
+	UpdatedBy   int64        `json:"updated_by" toon:"updated_by"`
 }
 
 // SkillDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -5347,51 +5347,51 @@ type SkillGetRequest struct {
 // SkillItem is generated from the Flashduty OpenAPI schema.
 type SkillItem struct {
 	// Owning account.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Author declared in the skill frontmatter.
-	Author string `json:"author,omitempty" toon:"author,omitempty"`
+	Author string `json:"author" toon:"author"`
 	// Whether the calling member may edit or delete this resource.
-	CanEdit bool `json:"can_edit,omitempty" toon:"can_edit,omitempty"`
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
 	// SHA-256 checksum of the skill's zip package.
-	Checksum string `json:"checksum,omitempty" toon:"checksum,omitempty"`
+	Checksum string `json:"checksum" toon:"checksum"`
 	// Full SKILL.md body; omitted in list responses.
-	Content string `json:"content,omitempty" toon:"content,omitempty"`
+	Content string `json:"content" toon:"content"`
 	// Install response only: true for a fresh install, false for an in-place upsert.
-	Created bool `json:"created,omitempty" toon:"created,omitempty"`
+	Created bool `json:"created" toon:"created"`
 	// Creation time as a Unix timestamp in milliseconds.
-	CreatedAt TimestampMilli `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Member who created this resource.
-	CreatedBy int64 `json:"created_by,omitempty" toon:"created_by,omitempty"`
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
 	// What the skill does and when the agent should use it.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// A marketplace-sourced skill has been edited locally; auto-update skips it.
-	IsModified bool `json:"is_modified,omitempty" toon:"is_modified,omitempty"`
+	IsModified bool `json:"is_modified" toon:"is_modified"`
 	// License declared in the skill frontmatter.
-	License string `json:"license,omitempty" toon:"license,omitempty"`
+	License string `json:"license" toon:"license"`
 	// Object-storage key of the skill's zip package.
-	S3Key string `json:"s3_key,omitempty" toon:"s3_key,omitempty"`
+	S3Key string `json:"s3_key" toon:"s3_key"`
 	// Unique identifier of the skill.
-	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
+	SkillID string `json:"skill_id" toon:"skill_id"`
 	// Name of the skill, parsed from its SKILL.md frontmatter.
-	SkillName string `json:"skill_name,omitempty" toon:"skill_name,omitempty"`
+	SkillName string `json:"skill_name" toon:"skill_name"`
 	// Marketplace template this skill was installed from, if any.
-	SourceTemplateName string `json:"source_template_name,omitempty" toon:"source_template_name,omitempty"`
+	SourceTemplateName string `json:"source_template_name" toon:"source_template_name"`
 	// Marketplace template version captured at install time.
-	SourceTemplateVersion string `json:"source_template_version,omitempty" toon:"source_template_version,omitempty"`
+	SourceTemplateVersion string `json:"source_template_version" toon:"source_template_version"`
 	// Whether the skill is active and loadable by agents.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Tags declared in the skill frontmatter.
-	Tags []string `json:"tags,omitempty" toon:"tags,omitempty"`
+	Tags []string `json:"tags" toon:"tags"`
 	// Owning team; 0 means account scope.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Tools the skill requires, declared in its frontmatter.
-	Tools []string `json:"tools,omitempty" toon:"tools,omitempty"`
+	Tools []string `json:"tools" toon:"tools"`
 	// A newer marketplace template version exists for this skill.
-	UpdateAvailable bool `json:"update_available,omitempty" toon:"update_available,omitempty"`
+	UpdateAvailable bool `json:"update_available" toon:"update_available"`
 	// Last-update time as a Unix timestamp in milliseconds.
-	UpdatedAt TimestampMilli `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
 	// Skill version string from its frontmatter.
-	Version string `json:"version,omitempty" toon:"version,omitempty"`
+	Version string `json:"version" toon:"version"`
 }
 
 // SkillListRequest is generated from the Flashduty OpenAPI schema.
@@ -5406,9 +5406,9 @@ type SkillListRequest struct {
 // SkillListResponse is generated from the Flashduty OpenAPI schema.
 type SkillListResponse struct {
 	// Skills on the current page.
-	Skills []SkillItem `json:"skills,omitempty" toon:"skills,omitempty"`
+	Skills []SkillItem `json:"skills" toon:"skills"`
 	// Total number of skills matching the filters.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // SkillStatusRequest is generated from the Flashduty OpenAPI schema.
@@ -5438,25 +5438,25 @@ type SnoozeIncidentRequest struct {
 // SourcemapItem is generated from the Flashduty OpenAPI schema.
 type SourcemapItem struct {
 	// Upload timestamp, Unix epoch seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Git commit SHA for this build.
-	GitCommitSHA string `json:"git_commit_sha,omitempty" toon:"git_commit_sha,omitempty"`
+	GitCommitSHA string `json:"git_commit_sha" toon:"git_commit_sha"`
 	// Git repository URL associated with this build.
-	GitRepositoryURL string `json:"git_repository_url,omitempty" toon:"git_repository_url,omitempty"`
+	GitRepositoryURL string `json:"git_repository_url" toon:"git_repository_url"`
 	// Storage key uniquely identifying this sourcemap file.
-	Key string `json:"key,omitempty" toon:"key,omitempty"`
+	Key string `json:"key" toon:"key"`
 	// Free-form key-value metadata attached to the sourcemap. Shape depends on the upload client; common keys include `git_repository_url` and `git_commit_sha` (though those are also promoted to top-level fields).
-	Metadata map[string]any `json:"metadata,omitempty" toon:"metadata,omitempty"`
+	Metadata map[string]any `json:"metadata" toon:"metadata"`
 	// Application or service name.
-	Service string `json:"service,omitempty" toon:"service,omitempty"`
+	Service string `json:"service" toon:"service"`
 	// File size in bytes.
-	Size int64 `json:"size,omitempty" toon:"size,omitempty"`
+	Size int64 `json:"size" toon:"size"`
 	// Platform type: `browser`, `android`, or `ios`.
-	Type string `json:"type,omitempty" toon:"type,omitempty"`
+	Type string `json:"type" toon:"type"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Application version string.
-	Version string `json:"version,omitempty" toon:"version,omitempty"`
+	Version string `json:"version" toon:"version"`
 }
 
 // SourcemapListRequest is generated from the Flashduty OpenAPI schema.
@@ -5486,252 +5486,252 @@ type SourcemapListRequest struct {
 
 // SourcemapListResponse is generated from the Flashduty OpenAPI schema.
 type SourcemapListResponse struct {
-	Items []SourcemapItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []SourcemapItem `json:"items" toon:"items"`
 	// Total number of matching records.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // StatusPageChangeCreateResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageChangeCreateResponse struct {
 	// Newly created event ID.
-	ChangeID int64 `json:"change_id,omitempty" toon:"change_id,omitempty"`
+	ChangeID int64 `json:"change_id" toon:"change_id"`
 	// Event title (echoed from the request).
-	ChangeName string `json:"change_name,omitempty" toon:"change_name,omitempty"`
+	ChangeName string `json:"change_name" toon:"change_name"`
 }
 
 // StatusPageChangeItem is generated from the Flashduty OpenAPI schema.
 type StatusPageChangeItem struct {
 	// Components currently affected by this event, with their resulting status.
-	AffectedComponents []AffectedStatusPageComponentItem `json:"affected_components,omitempty" toon:"affected_components,omitempty"`
+	AffectedComponents []AffectedStatusPageComponentItem `json:"affected_components" toon:"affected_components"`
 	// Maintenance only: whether the status advances automatically based on the scheduled window.
-	AutoUpdateBySchedule bool `json:"auto_update_by_schedule,omitempty" toon:"auto_update_by_schedule,omitempty"`
+	AutoUpdateBySchedule bool `json:"auto_update_by_schedule" toon:"auto_update_by_schedule"`
 	// Event ID.
-	ChangeID int64 `json:"change_id,omitempty" toon:"change_id,omitempty"`
+	ChangeID int64 `json:"change_id" toon:"change_id"`
 	// Scheduled close time in unix seconds. Set for retrospective and maintenance events.
-	CloseAtSeconds Timestamp `json:"close_at_seconds,omitempty" toon:"close_at_seconds,omitempty"`
+	CloseAtSeconds Timestamp `json:"close_at_seconds" toon:"close_at_seconds"`
 	// Event description (Markdown).
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Whether this event is a retrospective (historical) one.
-	IsRetrospective bool `json:"is_retrospective,omitempty" toon:"is_retrospective,omitempty"`
+	IsRetrospective bool `json:"is_retrospective" toon:"is_retrospective"`
 	// Linked event IDs (related incidents, deployments, etc.).
-	LinkedChangeIDs []string `json:"linked_change_ids,omitempty" toon:"linked_change_ids,omitempty"`
+	LinkedChangeIDs []string `json:"linked_change_ids" toon:"linked_change_ids"`
 	// Whether subscribers were notified about this event.
-	NotifySubscribers bool `json:"notify_subscribers,omitempty" toon:"notify_subscribers,omitempty"`
+	NotifySubscribers bool `json:"notify_subscribers" toon:"notify_subscribers"`
 	// Parent status page ID.
-	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+	PageID int64 `json:"page_id" toon:"page_id"`
 	// Member IDs responsible for this event.
-	ResponderIDs []int64 `json:"responder_ids,omitempty" toon:"responder_ids,omitempty"`
+	ResponderIDs []int64 `json:"responder_ids" toon:"responder_ids"`
 	// Event start time in unix seconds.
-	StartAtSeconds Timestamp `json:"start_at_seconds,omitempty" toon:"start_at_seconds,omitempty"`
+	StartAtSeconds Timestamp `json:"start_at_seconds" toon:"start_at_seconds"`
 	// Current event status. Incident statuses: `investigating`/`identified`/`monitoring`/`resolved`. Maintenance statuses: `scheduled`/`ongoing`/`completed`.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Event title.
-	Title string `json:"title,omitempty" toon:"title,omitempty"`
+	Title string `json:"title" toon:"title"`
 	// Event type.
-	Type string `json:"type,omitempty" toon:"type,omitempty"`
+	Type string `json:"type" toon:"type"`
 	// Timeline updates attached to this event, ordered by time.
-	Updates []StatusPageChangeUpdateItem `json:"updates,omitempty" toon:"updates,omitempty"`
+	Updates []StatusPageChangeUpdateItem `json:"updates" toon:"updates"`
 }
 
 // StatusPageChangeListResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageChangeListResponse struct {
-	Items []StatusPageChangeItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []StatusPageChangeItem `json:"items" toon:"items"`
 }
 
 // StatusPageChangeTimelineCreateResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageChangeTimelineCreateResponse struct {
 	// Newly created update ID.
-	UpdateID string `json:"update_id,omitempty" toon:"update_id,omitempty"`
+	UpdateID string `json:"update_id" toon:"update_id"`
 }
 
 // StatusPageChangeUpdateItem is generated from the Flashduty OpenAPI schema.
 type StatusPageChangeUpdateItem struct {
 	// Update timestamp in unix seconds.
-	AtSeconds Timestamp `json:"at_seconds,omitempty" toon:"at_seconds,omitempty"`
+	AtSeconds Timestamp `json:"at_seconds" toon:"at_seconds"`
 	// Component status transitions applied by this update.
-	ComponentChanges []StatusPageComponentChangeItem `json:"component_changes,omitempty" toon:"component_changes,omitempty"`
+	ComponentChanges []StatusPageComponentChangeItem `json:"component_changes" toon:"component_changes"`
 	// Update description (Markdown).
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Event status after this update. Omitted when the update does not change the overall status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Update ID.
-	UpdateID string `json:"update_id,omitempty" toon:"update_id,omitempty"`
+	UpdateID string `json:"update_id" toon:"update_id"`
 }
 
 // StatusPageComponentChangeItem is generated from the Flashduty OpenAPI schema.
 type StatusPageComponentChangeItem struct {
 	// Component ID.
-	ComponentID string `json:"component_id,omitempty" toon:"component_id,omitempty"`
+	ComponentID string `json:"component_id" toon:"component_id"`
 	// Component display name. Populated by the backend on read; ignored on write.
-	ComponentName string `json:"component_name,omitempty" toon:"component_name,omitempty"`
+	ComponentName string `json:"component_name" toon:"component_name"`
 	// New component status. Incidents support `operational`/`degraded`/`partial_outage`/`full_outage`; maintenances support `operational`/`under_maintenance`.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 }
 
 // StatusPageComponentItem is generated from the Flashduty OpenAPI schema.
 type StatusPageComponentItem struct {
 	// Timestamp when the component was first available, in unix seconds.
-	AvailableSinceSeconds Timestamp `json:"available_since_seconds,omitempty" toon:"available_since_seconds,omitempty"`
+	AvailableSinceSeconds Timestamp `json:"available_since_seconds" toon:"available_since_seconds"`
 	// Component ID.
-	ComponentID string `json:"component_id,omitempty" toon:"component_id,omitempty"`
+	ComponentID string `json:"component_id" toon:"component_id"`
 	// Component description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// When true, the component is hidden entirely from summary endpoints.
-	HideAll bool `json:"hide_all,omitempty" toon:"hide_all,omitempty"`
+	HideAll bool `json:"hide_all" toon:"hide_all"`
 	// When true, uptime data is hidden from summary responses.
-	HideUptime bool `json:"hide_uptime,omitempty" toon:"hide_uptime,omitempty"`
+	HideUptime bool `json:"hide_uptime" toon:"hide_uptime"`
 	// Component display name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Display order within its section.
-	OrderID int64 `json:"order_id,omitempty" toon:"order_id,omitempty"`
+	OrderID int64 `json:"order_id" toon:"order_id"`
 	// Parent section ID.
-	SectionID string `json:"section_id,omitempty" toon:"section_id,omitempty"`
+	SectionID string `json:"section_id" toon:"section_id"`
 }
 
 // StatusPageItem is generated from the Flashduty OpenAPI schema.
 type StatusPageItem struct {
 	// Components tracked on the status page.
-	Components []StatusPageComponentItem `json:"components,omitempty" toon:"components,omitempty"`
+	Components []StatusPageComponentItem `json:"components" toon:"components"`
 	// Get-in-touch contact, a mailto or website URL.
-	ContactInfo string `json:"contact_info,omitempty" toon:"contact_info,omitempty"`
+	ContactInfo string `json:"contact_info" toon:"contact_info"`
 	// Custom domain pointing to the status page.
-	CustomDomain string `json:"custom_domain,omitempty" toon:"custom_domain,omitempty"`
+	CustomDomain string `json:"custom_domain" toon:"custom_domain"`
 	// Custom navigation links shown on the status page.
-	CustomLinks []map[string]string `json:"custom_links,omitempty" toon:"custom_links,omitempty"`
+	CustomLinks []map[string]string `json:"custom_links" toon:"custom_links"`
 	// Dark-mode logo image of the status page.
-	DarkLogo string `json:"dark_logo,omitempty" toon:"dark_logo,omitempty"`
+	DarkLogo string `json:"dark_logo" toon:"dark_logo"`
 	// How the timeline is displayed.
-	DateView string `json:"date_view,omitempty" toon:"date_view,omitempty"`
+	DateView string `json:"date_view" toon:"date_view"`
 	// How uptime is displayed.
-	DisplayUptimeMode string `json:"display_uptime_mode,omitempty" toon:"display_uptime_mode,omitempty"`
+	DisplayUptimeMode string `json:"display_uptime_mode" toon:"display_uptime_mode"`
 	// Favicon of the status page.
-	Favicon string `json:"favicon,omitempty" toon:"favicon,omitempty"`
+	Favicon string `json:"favicon" toon:"favicon"`
 	// Logo image of the status page.
-	Logo string `json:"logo,omitempty" toon:"logo,omitempty"`
+	Logo string `json:"logo" toon:"logo"`
 	// URL opened when the logo is clicked.
-	LogoURL string `json:"logo_url,omitempty" toon:"logo_url,omitempty"`
+	LogoURL string `json:"logo_url" toon:"logo_url"`
 	// Display name of the status page.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Footer content of the status page.
-	PageFooter string `json:"page_footer,omitempty" toon:"page_footer,omitempty"`
+	PageFooter string `json:"page_footer" toon:"page_footer"`
 	// Header content of the status page.
-	PageHeader string `json:"page_header,omitempty" toon:"page_header,omitempty"`
+	PageHeader string `json:"page_header" toon:"page_header"`
 	// Status page ID.
-	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+	PageID int64 `json:"page_id" toon:"page_id"`
 	// Sections grouping the components.
-	Sections     []StatusPageSectionItem    `json:"sections,omitempty" toon:"sections,omitempty"`
-	Subscription StatusPageSubscriptionItem `json:"subscription,omitempty" toon:"subscription,omitempty"`
+	Sections     []StatusPageSectionItem    `json:"sections" toon:"sections"`
+	Subscription StatusPageSubscriptionItem `json:"subscription" toon:"subscription"`
 	// Preferred change-event template type.
-	TemplatePreference string `json:"template_preference,omitempty" toon:"template_preference,omitempty"`
+	TemplatePreference string `json:"template_preference" toon:"template_preference"`
 	// Visibility type of the status page.
-	Type string `json:"type,omitempty" toon:"type,omitempty"`
+	Type string `json:"type" toon:"type"`
 	// URL-safe slug, unique per account.
-	URLName string `json:"url_name,omitempty" toon:"url_name,omitempty"`
+	URLName string `json:"url_name" toon:"url_name"`
 }
 
 // StatusPageMigrationJob is generated from the Flashduty OpenAPI schema.
 type StatusPageMigrationJob struct {
 	// Owner account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Job creation time, unix seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Terminal error message when `status` is `failed`.
-	Error string `json:"error,omitempty" toon:"error,omitempty"`
+	Error string `json:"error" toon:"error"`
 	// Migration job ID.
-	JobID string `json:"job_id,omitempty" toon:"job_id,omitempty"`
+	JobID string `json:"job_id" toon:"job_id"`
 	// Current migration phase.
-	Phase string `json:"phase,omitempty" toon:"phase,omitempty"`
+	Phase string `json:"phase" toon:"phase"`
 	// Per-entity progress counters.
-	Progress StatusPageMigrationProgress `json:"progress,omitempty" toon:"progress,omitempty"`
+	Progress StatusPageMigrationProgress `json:"progress" toon:"progress"`
 	// Atlassian Statuspage source page ID.
-	SourcePageID string `json:"source_page_id,omitempty" toon:"source_page_id,omitempty"`
+	SourcePageID string `json:"source_page_id" toon:"source_page_id"`
 	// Current job status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Flashduty target status page ID. Set once the job produces one, or supplied up front for subscriber migration.
-	TargetPageID int64 `json:"target_page_id,omitempty" toon:"target_page_id,omitempty"`
+	TargetPageID int64 `json:"target_page_id" toon:"target_page_id"`
 	// Last status update time, unix seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // StatusPageMigrationProgress is generated from the Flashduty OpenAPI schema.
 type StatusPageMigrationProgress struct {
 	// Steps completed so far.
-	CompletedSteps       int64 `json:"completed_steps,omitempty" toon:"completed_steps,omitempty"`
-	ComponentsImported   int64 `json:"components_imported,omitempty" toon:"components_imported,omitempty"`
-	IncidentsImported    int64 `json:"incidents_imported,omitempty" toon:"incidents_imported,omitempty"`
-	MaintenancesImported int64 `json:"maintenances_imported,omitempty" toon:"maintenances_imported,omitempty"`
-	SectionsImported     int64 `json:"sections_imported,omitempty" toon:"sections_imported,omitempty"`
-	SubscribersImported  int64 `json:"subscribers_imported,omitempty" toon:"subscribers_imported,omitempty"`
+	CompletedSteps       int64 `json:"completed_steps" toon:"completed_steps"`
+	ComponentsImported   int64 `json:"components_imported" toon:"components_imported"`
+	IncidentsImported    int64 `json:"incidents_imported" toon:"incidents_imported"`
+	MaintenancesImported int64 `json:"maintenances_imported" toon:"maintenances_imported"`
+	SectionsImported     int64 `json:"sections_imported" toon:"sections_imported"`
+	SubscribersImported  int64 `json:"subscribers_imported" toon:"subscribers_imported"`
 	// Number of subscribers skipped (e.g. because they would create duplicates).
-	SubscribersSkipped int64 `json:"subscribers_skipped,omitempty" toon:"subscribers_skipped,omitempty"`
-	TemplatesImported  int64 `json:"templates_imported,omitempty" toon:"templates_imported,omitempty"`
+	SubscribersSkipped int64 `json:"subscribers_skipped" toon:"subscribers_skipped"`
+	TemplatesImported  int64 `json:"templates_imported" toon:"templates_imported"`
 	// Total steps this job will perform.
-	TotalSteps int64 `json:"total_steps,omitempty" toon:"total_steps,omitempty"`
+	TotalSteps int64 `json:"total_steps" toon:"total_steps"`
 	// Non-fatal warnings recorded during the job.
-	Warnings []string `json:"warnings,omitempty" toon:"warnings,omitempty"`
+	Warnings []string `json:"warnings" toon:"warnings"`
 }
 
 // StatusPageMigrationStartResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageMigrationStartResponse struct {
 	// Migration job ID. Use this to poll status or request cancellation.
-	JobID string `json:"job_id,omitempty" toon:"job_id,omitempty"`
+	JobID string `json:"job_id" toon:"job_id"`
 }
 
 // StatusPageSectionItem is generated from the Flashduty OpenAPI schema.
 type StatusPageSectionItem struct {
 	// Section description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Whether the section and its components are hidden from summary endpoints.
-	HideAll bool `json:"hide_all,omitempty" toon:"hide_all,omitempty"`
+	HideAll bool `json:"hide_all" toon:"hide_all"`
 	// Whether uptime data is hidden from summary responses.
-	HideUptime bool `json:"hide_uptime,omitempty" toon:"hide_uptime,omitempty"`
+	HideUptime bool `json:"hide_uptime" toon:"hide_uptime"`
 	// Section name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Display order of the section.
-	OrderID int64 `json:"order_id,omitempty" toon:"order_id,omitempty"`
+	OrderID int64 `json:"order_id" toon:"order_id"`
 	// Section ID.
-	SectionID string `json:"section_id,omitempty" toon:"section_id,omitempty"`
+	SectionID string `json:"section_id" toon:"section_id"`
 }
 
 // StatusPageSubscriberListResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageSubscriberListResponse struct {
 	// Whether there is at least one more page after the current one.
-	HasNextPage bool                               `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []ExportedStatusPageSubscriberItem `json:"items,omitempty" toon:"items,omitempty"`
+	HasNextPage bool                               `json:"has_next_page" toon:"has_next_page"`
+	Items       []ExportedStatusPageSubscriberItem `json:"items" toon:"items"`
 	// Total matching subscribers.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // StatusPageSubscriptionItem is generated from the Flashduty OpenAPI schema.
 type StatusPageSubscriptionItem struct {
 	// Whether email subscription is enabled.
-	Email bool `json:"email,omitempty" toon:"email,omitempty"`
+	Email bool `json:"email" toon:"email"`
 	// Whether IM subscription is enabled.
-	Im bool `json:"im,omitempty" toon:"im,omitempty"`
+	Im bool `json:"im" toon:"im"`
 }
 
 // StoreRulesetItem is generated from the Flashduty OpenAPI schema.
 type StoreRulesetItem struct {
 	// Creation timestamp, Unix epoch seconds.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Account ID of the creator.
-	CreatorAccountID uint64 `json:"creator_account_id,omitempty" toon:"creator_account_id,omitempty"`
+	CreatorAccountID uint64 `json:"creator_account_id" toon:"creator_account_id"`
 	// Member ID of the creator.
-	CreatorID uint64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
 	// Display name of the creator.
-	CreatorName string `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
+	CreatorName string `json:"creator_name" toon:"creator_name"`
 	// Ruleset ID.
-	ID uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	ID uint64 `json:"id" toon:"id"`
 	// Description or title of the ruleset.
-	Note string `json:"note,omitempty" toon:"note,omitempty"`
+	Note string `json:"note" toon:"note"`
 	// Sharing scope. `0` = private (creator only), `1` = account-shared, `2` = public.
-	OpenFlag int64 `json:"open_flag,omitempty" toon:"open_flag,omitempty"`
+	OpenFlag int64 `json:"open_flag" toon:"open_flag"`
 	// JSON string containing the alert rule definitions. Omitted in list responses.
-	Payload string `json:"payload,omitempty" toon:"payload,omitempty"`
+	Payload string `json:"payload" toon:"payload"`
 	// Datasource type identifier this ruleset applies to.
-	TypeIdent string `json:"type_ident,omitempty" toon:"type_ident,omitempty"`
+	TypeIdent string `json:"type_ident" toon:"type_ident"`
 	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // StoreRulesetListRequest is generated from the Flashduty OpenAPI schema.
@@ -5778,18 +5778,18 @@ type TargetsListRequest struct {
 
 // TargetsListResponse is generated from the Flashduty OpenAPI schema.
 type TargetsListResponse struct {
-	Items []TargetsListResponseItemsItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []TargetsListResponseItemsItem `json:"items" toon:"items"`
 	// Opaque cursor for the next page. Absent / empty means this is the last page.
-	NextCursor string `json:"next_cursor,omitempty" toon:"next_cursor,omitempty"`
+	NextCursor string `json:"next_cursor" toon:"next_cursor"`
 	// Total matches for the current `(account_id, keyword)` pair, independent of `cursor`.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // TeamBriefItem is generated from the Flashduty OpenAPI schema.
 type TeamBriefItem struct {
-	PersonIDs []uint64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
-	TeamID    uint64   `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	TeamName  string   `json:"team_name,omitempty" toon:"team_name,omitempty"`
+	PersonIDs []uint64 `json:"person_ids" toon:"person_ids"`
+	TeamID    uint64   `json:"team_id" toon:"team_id"`
+	TeamName  string   `json:"team_name" toon:"team_name"`
 }
 
 // TeamDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -5820,37 +5820,37 @@ type TeamInfosRequest struct {
 
 // TeamInfosResponse is generated from the Flashduty OpenAPI schema.
 type TeamInfosResponse struct {
-	Items []TeamBriefItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []TeamBriefItem `json:"items" toon:"items"`
 }
 
 // TeamItem is generated from the Flashduty OpenAPI schema.
 type TeamItem struct {
 	// Owning account ID.
-	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Unix epoch seconds the team was created.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Member ID of the creator.
-	CreatorID uint64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
 	// Display name of the creator.
-	CreatorName string `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
+	CreatorName string `json:"creator_name" toon:"creator_name"`
 	// Free-form description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Member IDs of team members.
-	PersonIDs []uint64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
+	PersonIDs []uint64 `json:"person_ids" toon:"person_ids"`
 	// External reference ID for third-party HR system integration.
-	RefID string `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	RefID string `json:"ref_id" toon:"ref_id"`
 	// Team status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Unique team ID.
-	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID uint64 `json:"team_id" toon:"team_id"`
 	// Team display name. 1–39 characters, unique per account.
-	TeamName string `json:"team_name,omitempty" toon:"team_name,omitempty"`
+	TeamName string `json:"team_name" toon:"team_name"`
 	// Unix epoch seconds the team was last updated.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Member ID of the last editor.
-	UpdatedBy uint64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy uint64 `json:"updated_by" toon:"updated_by"`
 	// Display name of the last editor.
-	UpdatedByName string `json:"updated_by_name,omitempty" toon:"updated_by_name,omitempty"`
+	UpdatedByName string `json:"updated_by_name" toon:"updated_by_name"`
 }
 
 // TeamListRequest is generated from the Flashduty OpenAPI schema.
@@ -5869,9 +5869,9 @@ type TeamListRequest struct {
 // TeamListResponse is generated from the Flashduty OpenAPI schema.
 type TeamListResponse struct {
 	ListOptions
-	Items []TeamItem `json:"items,omitempty" toon:"items,omitempty"`
+	Items []TeamItem `json:"items" toon:"items"`
 	// Total number of teams matching the filter.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // TeamUpsertRequest is generated from the Flashduty OpenAPI schema.
@@ -5899,9 +5899,9 @@ type TeamUpsertRequest struct {
 // TeamUpsertResponse is generated from the Flashduty OpenAPI schema.
 type TeamUpsertResponse struct {
 	// Created or updated team ID.
-	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID uint64 `json:"team_id" toon:"team_id"`
 	// Team name echoed from the request.
-	TeamName string `json:"team_name,omitempty" toon:"team_name,omitempty"`
+	TeamName string `json:"team_name" toon:"team_name"`
 }
 
 // TemplateCreateRequest is generated from the Flashduty OpenAPI schema.
@@ -5945,9 +5945,9 @@ type TemplateCreateRequest struct {
 // TemplateCreateResponse is generated from the Flashduty OpenAPI schema.
 type TemplateCreateResponse struct {
 	// Newly created template ID.
-	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+	TemplateID string `json:"template_id" toon:"template_id"`
 	// Template name echoed from the request.
-	TemplateName string `json:"template_name,omitempty" toon:"template_name,omitempty"`
+	TemplateName string `json:"template_name" toon:"template_name"`
 }
 
 // TemplateIDRequest is generated from the Flashduty OpenAPI schema.
@@ -5959,55 +5959,55 @@ type TemplateIDRequest struct {
 // TemplateItem is generated from the Flashduty OpenAPI schema.
 type TemplateItem struct {
 	// ID of the owning account.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Unix epoch seconds the template was created.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Member ID of the creator.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Unix epoch seconds the template was soft-deleted. Absent (omitempty) when the template is live.
-	DeletedAt Timestamp `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Free-form description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// DingTalk robot message template source.
-	Dingtalk string `json:"dingtalk,omitempty" toon:"dingtalk,omitempty"`
+	Dingtalk string `json:"dingtalk" toon:"dingtalk"`
 	// DingTalk app message template source.
-	DingtalkApp string `json:"dingtalk_app,omitempty" toon:"dingtalk_app,omitempty"`
+	DingtalkApp string `json:"dingtalk_app" toon:"dingtalk_app"`
 	// Email body template source (Go `html/template` syntax).
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Feishu robot message template source.
-	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
+	Feishu string `json:"feishu" toon:"feishu"`
 	// Feishu app message template source.
-	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	FeishuApp string `json:"feishu_app" toon:"feishu_app"`
 	// Slack robot message template source.
-	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
+	Slack string `json:"slack" toon:"slack"`
 	// Slack app message template source.
-	SlackApp string `json:"slack_app,omitempty" toon:"slack_app,omitempty"`
+	SlackApp string `json:"slack_app" toon:"slack_app"`
 	// SMS template source (Go `text/template` syntax).
-	SMS string `json:"sms,omitempty" toon:"sms,omitempty"`
+	SMS string `json:"sms" toon:"sms"`
 	// Template lifecycle status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// ID of the team this template is scoped to, or 0 for account-wide.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Microsoft Teams app message template source.
-	TeamsApp string `json:"teams_app,omitempty" toon:"teams_app,omitempty"`
+	TeamsApp string `json:"teams_app" toon:"teams_app"`
 	// Telegram bot message template source.
-	Telegram string `json:"telegram,omitempty" toon:"telegram,omitempty"`
+	Telegram string `json:"telegram" toon:"telegram"`
 	// Template ID.
-	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+	TemplateID string `json:"template_id" toon:"template_id"`
 	// Unique template name within the account.
-	TemplateName string `json:"template_name,omitempty" toon:"template_name,omitempty"`
+	TemplateName string `json:"template_name" toon:"template_name"`
 	// Unix epoch seconds the template was last updated.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Member ID of the last editor.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 	// Voice call script template source.
-	Voice string `json:"voice,omitempty" toon:"voice,omitempty"`
+	Voice string `json:"voice" toon:"voice"`
 	// WeCom robot message template source.
-	Wecom string `json:"wecom,omitempty" toon:"wecom,omitempty"`
+	Wecom string `json:"wecom" toon:"wecom"`
 	// WeCom app message template source.
-	WecomApp string `json:"wecom_app,omitempty" toon:"wecom_app,omitempty"`
+	WecomApp string `json:"wecom_app" toon:"wecom_app"`
 	// Zoom bot message template source.
-	Zoom string `json:"zoom,omitempty" toon:"zoom,omitempty"`
+	Zoom string `json:"zoom" toon:"zoom"`
 }
 
 // TemplateListRequest is generated from the Flashduty OpenAPI schema.
@@ -6030,10 +6030,10 @@ type TemplateListRequest struct {
 // TemplateListResponse is generated from the Flashduty OpenAPI schema.
 type TemplateListResponse struct {
 	// True if another page exists after the returned one.
-	HasNextPage bool           `json:"has_next_page,omitempty" toon:"has_next_page,omitempty"`
-	Items       []TemplateItem `json:"items,omitempty" toon:"items,omitempty"`
+	HasNextPage bool           `json:"has_next_page" toon:"has_next_page"`
+	Items       []TemplateItem `json:"items" toon:"items"`
 	// Total number of templates matching the filter, across all pages.
-	Total int64 `json:"total,omitempty" toon:"total,omitempty"`
+	Total int64 `json:"total" toon:"total"`
 }
 
 // TemplateUpdateRequest is generated from the Flashduty OpenAPI schema.
@@ -6105,11 +6105,11 @@ type ToolCatalogRequest struct {
 // ToolCatalogResponse is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponse struct {
 	// Business error. `null` on success.
-	Error ToolCatalogResponseError `json:"error,omitempty" toon:"error,omitempty"`
+	Error ToolCatalogResponseError `json:"error" toon:"error"`
 	// Resolved target. `null` when locator could not be uniquely resolved.
-	Target ToolCatalogResponseTarget `json:"target,omitempty" toon:"target,omitempty"`
+	Target ToolCatalogResponseTarget `json:"target" toon:"target"`
 	// Tool catalog entries. Empty when `error` is non-null.
-	Tools []ToolCatalogResponseToolsItem `json:"tools,omitempty" toon:"tools,omitempty"`
+	Tools []ToolCatalogResponseToolsItem `json:"tools" toon:"tools"`
 }
 
 // ToolInvokeRequest is generated from the Flashduty OpenAPI schema.
@@ -6127,11 +6127,11 @@ type ToolInvokeRequest struct {
 // ToolInvokeResponse is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponse struct {
 	// Request-level business error. `null` on success.
-	Error ToolInvokeResponseError `json:"error,omitempty" toon:"error,omitempty"`
+	Error ToolInvokeResponseError `json:"error" toon:"error"`
 	// Per-tool results aligned with the request `tools[]` order. Empty when `error` is non-null.
-	Results []ToolInvokeResponseResultsItem `json:"results,omitempty" toon:"results,omitempty"`
+	Results []ToolInvokeResponseResultsItem `json:"results" toon:"results"`
 	// Resolved target.
-	Target ToolInvokeResponseTarget `json:"target,omitempty" toon:"target,omitempty"`
+	Target ToolInvokeResponseTarget `json:"target" toon:"target"`
 }
 
 // UnackIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -6142,18 +6142,18 @@ type UnackIncidentRequest struct {
 
 // UnsubscribeRuleItem is generated from the Flashduty OpenAPI schema.
 type UnsubscribeRuleItem struct {
-	AccountID   int64       `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	ChannelID   int64       `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
-	CreatedAt   int64       `json:"created_at,omitempty" toon:"created_at,omitempty"`
-	DeletedAt   int64       `json:"deleted_at,omitempty" toon:"deleted_at,omitempty"`
-	Description string      `json:"description,omitempty" toon:"description,omitempty"`
-	Filters     FilterGroup `json:"filters,omitempty" toon:"filters,omitempty"`
-	Priority    int64       `json:"priority,omitempty" toon:"priority,omitempty"`
-	RuleID      string      `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
-	RuleName    string      `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
-	Status      string      `json:"status,omitempty" toon:"status,omitempty"`
-	UpdatedAt   int64       `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
-	UpdatedBy   int64       `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	AccountID   int64       `json:"account_id" toon:"account_id"`
+	ChannelID   int64       `json:"channel_id" toon:"channel_id"`
+	CreatedAt   int64       `json:"created_at" toon:"created_at"`
+	DeletedAt   int64       `json:"deleted_at" toon:"deleted_at"`
+	Description string      `json:"description" toon:"description"`
+	Filters     FilterGroup `json:"filters" toon:"filters"`
+	Priority    int64       `json:"priority" toon:"priority"`
+	RuleID      string      `json:"rule_id" toon:"rule_id"`
+	RuleName    string      `json:"rule_name" toon:"rule_name"`
+	Status      string      `json:"status" toon:"status"`
+	UpdatedAt   int64       `json:"updated_at" toon:"updated_at"`
+	UpdatedBy   int64       `json:"updated_by" toon:"updated_by"`
 }
 
 // UpdateChannelRequest is generated from the Flashduty OpenAPI schema.
@@ -6187,7 +6187,7 @@ type UpdateChannelRequest struct {
 // UpdateChannelResponse is generated from the Flashduty OpenAPI schema.
 type UpdateChannelResponse struct {
 	// Newly generated token for external reporters. Only returned when `is_external_report_enabled` is set to `true` in the request. Callers should store this value; it cannot be retrieved afterwards.
-	ExternalReportToken string `json:"external_report_token,omitempty" toon:"external_report_token,omitempty"`
+	ExternalReportToken string `json:"external_report_token" toon:"external_report_token"`
 }
 
 // UpdateDropRuleRequest is generated from the Flashduty OpenAPI schema.
@@ -6352,191 +6352,191 @@ type WakeIncidentRequest struct {
 // WarRoom is generated from the Flashduty OpenAPI schema.
 type WarRoom struct {
 	// Chat/group ID on the IM side.
-	ChatID string `json:"chat_id,omitempty" toon:"chat_id,omitempty"`
+	ChatID string `json:"chat_id" toon:"chat_id"`
 	// Chat/group display name.
-	ChatName string `json:"chat_name,omitempty" toon:"chat_name,omitempty"`
+	ChatName string `json:"chat_name" toon:"chat_name"`
 	// Join link for the war room, if provided by the IM.
-	ShareLink string `json:"share_link,omitempty" toon:"share_link,omitempty"`
+	ShareLink string `json:"share_link" toon:"share_link"`
 }
 
 // WarRoomDataSourceItem is generated from the Flashduty OpenAPI schema.
 type WarRoomDataSourceItem struct {
 	// Account this integration belongs to.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Category of the integration plugin.
-	Category string `json:"category,omitempty" toon:"category,omitempty"`
+	Category string `json:"category" toon:"category"`
 	// Unix timestamp in seconds when the integration was created.
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Person who created the integration.
-	CreatorID int64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Integration ID.
-	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
 	// Integration description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// Exclusive integration ID associated with this integration.
-	ExclusiveDataSourceID int64 `json:"exclusive_data_source_id,omitempty" toon:"exclusive_data_source_id,omitempty"`
+	ExclusiveDataSourceID int64 `json:"exclusive_data_source_id" toon:"exclusive_data_source_id"`
 	// Integration ID, alias of data_source_id.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Push key used by alert sources to send to this integration.
-	IntegrationKey string `json:"integration_key,omitempty" toon:"integration_key,omitempty"`
+	IntegrationKey string `json:"integration_key" toon:"integration_key"`
 	// Unix timestamp in seconds of the most recent activity on the integration.
-	LastTime Timestamp `json:"last_time,omitempty" toon:"last_time,omitempty"`
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// Integration name.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Whether the integration is read-only.
-	NoEditable bool `json:"no_editable,omitempty" toon:"no_editable,omitempty"`
+	NoEditable bool `json:"no_editable" toon:"no_editable"`
 	// Plugin ID backing this integration.
-	PluginID int64 `json:"plugin_id,omitempty" toon:"plugin_id,omitempty"`
+	PluginID int64 `json:"plugin_id" toon:"plugin_id"`
 	// Type identifier of the integration plugin.
-	PluginType string `json:"plugin_type,omitempty" toon:"plugin_type,omitempty"`
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
 	// Localized display name of the integration plugin type.
-	PluginTypeName string `json:"plugin_type_name,omitempty" toon:"plugin_type_name,omitempty"`
+	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
 	// External reference ID of the integration.
-	RefID string `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	RefID string `json:"ref_id" toon:"ref_id"`
 	// Plugin-specific configuration of the integration.
-	Settings map[string]any `json:"settings,omitempty" toon:"settings,omitempty"`
+	Settings map[string]any `json:"settings" toon:"settings"`
 	// Current status of the integration.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Team that owns this integration.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Unix timestamp in seconds when the integration was last updated.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Person who last updated the integration.
-	UpdatedBy int64 `json:"updated_by,omitempty" toon:"updated_by,omitempty"`
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // WarRoomItem is generated from the Flashduty OpenAPI schema.
 type WarRoomItem struct {
 	// Account ID.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Chat/group ID on the IM side.
-	ChatID string `json:"chat_id,omitempty" toon:"chat_id,omitempty"`
+	ChatID string `json:"chat_id" toon:"chat_id"`
 	// Creation timestamp (seconds).
-	CreatedAt Timestamp `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Member ID that created the war room.
-	CreatedBy int64 `json:"created_by,omitempty" toon:"created_by,omitempty"`
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
 	// Associated incident ID (MongoDB ObjectID).
-	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	IncidentID string `json:"incident_id" toon:"incident_id"`
 	// IM integration ID.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// IM plugin type (e.g. `feishu`, `dingtalk`, `wecom`, `slack`).
-	PluginType string `json:"plugin_type,omitempty" toon:"plugin_type,omitempty"`
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
 	// War room status.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 }
 
 // WarRoomPersonItem is generated from the Flashduty OpenAPI schema.
 type WarRoomPersonItem struct {
 	// Account this person belongs to.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Role the person holds in the related context.
-	As string `json:"as,omitempty" toon:"as,omitempty"`
+	As string `json:"as" toon:"as"`
 	// URL of the person's avatar image.
-	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
+	Avatar string `json:"avatar" toon:"avatar"`
 	// Email address of the person.
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	Email string `json:"email" toon:"email"`
 	// Preferred language locale of the person.
-	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	Locale string `json:"locale" toon:"locale"`
 	// Person ID.
-	PersonID int64 `json:"person_id,omitempty" toon:"person_id,omitempty"`
+	PersonID int64 `json:"person_id" toon:"person_id"`
 	// Display name of the person.
-	PersonName string `json:"person_name,omitempty" toon:"person_name,omitempty"`
+	PersonName string `json:"person_name" toon:"person_name"`
 	// Phone number of the person.
-	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	Phone string `json:"phone" toon:"phone"`
 	// Current status of the person.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// Time zone of the person.
-	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+	TimeZone string `json:"time_zone" toon:"time_zone"`
 }
 
 // WebhookHistoryDetail is generated from the Flashduty OpenAPI schema.
 type WebhookHistoryDetail struct {
 	// Attempt sequence number.
-	Attempt int64 `json:"attempt,omitempty" toon:"attempt,omitempty"`
+	Attempt int64 `json:"attempt" toon:"attempt"`
 	// Channel ID when applicable.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Name of the associated channel, resolved at query time.
-	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
+	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Total elapsed time of the attempt in milliseconds.
-	Duration int64 `json:"duration,omitempty" toon:"duration,omitempty"`
+	Duration int64 `json:"duration" toon:"duration"`
 	// Destination URL.
-	Endpoint string `json:"endpoint,omitempty" toon:"endpoint,omitempty"`
+	Endpoint string `json:"endpoint" toon:"endpoint"`
 	// Error message when delivery failed.
-	ErrorMessage string `json:"error_message,omitempty" toon:"error_message,omitempty"`
+	ErrorMessage string `json:"error_message" toon:"error_message"`
 	// Event ID.
-	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	EventID string `json:"event_id" toon:"event_id"`
 	// Event time as a formatted timestamp string.
-	EventTime string `json:"event_time,omitempty" toon:"event_time,omitempty"`
+	EventTime string `json:"event_time" toon:"event_time"`
 	// Event type.
-	EventType string `json:"event_type,omitempty" toon:"event_type,omitempty"`
+	EventType string `json:"event_type" toon:"event_type"`
 	// Integration ID.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Source object ID.
-	RefID string `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	RefID string `json:"ref_id" toon:"ref_id"`
 	// Title of the source incident or alert, resolved at query time.
-	RefTitle string `json:"ref_title,omitempty" toon:"ref_title,omitempty"`
+	RefTitle string `json:"ref_title" toon:"ref_title"`
 	// Outbound request body payload.
-	RequestBody string `json:"request_body,omitempty" toon:"request_body,omitempty"`
+	RequestBody string `json:"request_body" toon:"request_body"`
 	// Serialized outbound request headers.
-	RequestHeaders string `json:"request_headers,omitempty" toon:"request_headers,omitempty"`
+	RequestHeaders string `json:"request_headers" toon:"request_headers"`
 	// Response body.
-	ResponseBody string `json:"response_body,omitempty" toon:"response_body,omitempty"`
+	ResponseBody string `json:"response_body" toon:"response_body"`
 	// Serialized response headers.
-	ResponseHeaders string `json:"response_headers,omitempty" toon:"response_headers,omitempty"`
+	ResponseHeaders string `json:"response_headers" toon:"response_headers"`
 	// Delivery outcome.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// HTTP status code.
-	StatusCode int64 `json:"status_code,omitempty" toon:"status_code,omitempty"`
+	StatusCode int64 `json:"status_code" toon:"status_code"`
 	// Source object kind. `incident` or `alert`.
-	WebhookType string `json:"webhook_type,omitempty" toon:"webhook_type,omitempty"`
+	WebhookType string `json:"webhook_type" toon:"webhook_type"`
 }
 
 // WebhookHistoryItem is generated from the Flashduty OpenAPI schema.
 type WebhookHistoryItem struct {
 	// Attempt sequence number.
-	Attempt int64 `json:"attempt,omitempty" toon:"attempt,omitempty"`
+	Attempt int64 `json:"attempt" toon:"attempt"`
 	// Channel ID associated with the event, when applicable.
-	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
 	// Total elapsed time of the attempt in milliseconds.
-	Duration int64 `json:"duration,omitempty" toon:"duration,omitempty"`
+	Duration int64 `json:"duration" toon:"duration"`
 	// Destination URL.
-	Endpoint string `json:"endpoint,omitempty" toon:"endpoint,omitempty"`
+	Endpoint string `json:"endpoint" toon:"endpoint"`
 	// Error message when delivery failed.
-	ErrorMessage string `json:"error_message,omitempty" toon:"error_message,omitempty"`
+	ErrorMessage string `json:"error_message" toon:"error_message"`
 	// Unique event identifier for the delivery attempt.
-	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	EventID string `json:"event_id" toon:"event_id"`
 	// Event time as a formatted timestamp string.
-	EventTime string `json:"event_time,omitempty" toon:"event_time,omitempty"`
+	EventTime string `json:"event_time" toon:"event_time"`
 	// Event type (e.g. `created`, `acknowledged`, `closed`).
-	EventType string `json:"event_type,omitempty" toon:"event_type,omitempty"`
+	EventType string `json:"event_type" toon:"event_type"`
 	// Integration ID that triggered the webhook.
-	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Source object ID (incident ID or alert ID).
-	RefID string `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	RefID string `json:"ref_id" toon:"ref_id"`
 	// Outbound request body payload.
-	RequestBody string `json:"request_body,omitempty" toon:"request_body,omitempty"`
+	RequestBody string `json:"request_body" toon:"request_body"`
 	// Serialized outbound request headers.
-	RequestHeaders string `json:"request_headers,omitempty" toon:"request_headers,omitempty"`
+	RequestHeaders string `json:"request_headers" toon:"request_headers"`
 	// Response body returned by the destination.
-	ResponseBody string `json:"response_body,omitempty" toon:"response_body,omitempty"`
+	ResponseBody string `json:"response_body" toon:"response_body"`
 	// Serialized response headers from the destination.
-	ResponseHeaders string `json:"response_headers,omitempty" toon:"response_headers,omitempty"`
+	ResponseHeaders string `json:"response_headers" toon:"response_headers"`
 	// Delivery outcome.
-	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	Status string `json:"status" toon:"status"`
 	// HTTP status code returned by the destination.
-	StatusCode int64 `json:"status_code,omitempty" toon:"status_code,omitempty"`
+	StatusCode int64 `json:"status_code" toon:"status_code"`
 	// Source object kind. `incident` or `alert`.
-	WebhookType string `json:"webhook_type,omitempty" toon:"webhook_type,omitempty"`
+	WebhookType string `json:"webhook_type" toon:"webhook_type"`
 }
 
 // AccountInfoRestrictions is generated from the Flashduty OpenAPI schema.
 type AccountInfoRestrictions struct {
 	// Whether subdomains of the allowed email domains are also accepted.
-	AllowSubdomain bool `json:"allow_subdomain,omitempty" toon:"allow_subdomain,omitempty"`
+	AllowSubdomain bool `json:"allow_subdomain" toon:"allow_subdomain"`
 	// Allowed login email domains.
-	EmailDomains []string `json:"email_domains,omitempty" toon:"email_domains,omitempty"`
+	EmailDomains []string `json:"email_domains" toon:"email_domains"`
 	// Allowed source IP/CIDR whitelist.
-	Ips []string `json:"ips,omitempty" toon:"ips,omitempty"`
+	Ips []string `json:"ips" toon:"ips"`
 }
 
 // AddIncidentResponderRequestNotify is generated from the Flashduty OpenAPI schema.
@@ -6562,17 +6562,17 @@ type AlertRuleEnabledTimesItem struct {
 // AlertRuleInfoResponseEnabledTimesItem is generated from the Flashduty OpenAPI schema.
 type AlertRuleInfoResponseEnabledTimesItem struct {
 	// Days of week (0=Sunday).
-	Days []int64 `json:"days,omitempty" toon:"days,omitempty"`
+	Days []int64 `json:"days" toon:"days"`
 	// End time, e.g. `18:00`.
-	Etime string `json:"etime,omitempty" toon:"etime,omitempty"`
+	Etime string `json:"etime" toon:"etime"`
 	// Start time, e.g. `09:00`.
-	Stime string `json:"stime,omitempty" toon:"stime,omitempty"`
+	Stime string `json:"stime" toon:"stime"`
 }
 
 // AuditLogParamsItem is generated from the Flashduty OpenAPI schema.
 type AuditLogParamsItem struct {
-	Key   string `json:"Key,omitempty" toon:"Key,omitempty"`
-	Value string `json:"Value,omitempty" toon:"Value,omitempty"`
+	Key   string `json:"Key" toon:"Key"`
+	Value string `json:"Value" toon:"Value"`
 }
 
 // CreateChannelRequestEscalateRule is generated from the Flashduty OpenAPI schema.
@@ -6802,26 +6802,26 @@ type DiagnoseRequestTimeRange struct {
 // DiagnoseResponseResultsItem is generated from the Flashduty OpenAPI schema.
 type DiagnoseResponseResultsItem struct {
 	// Only present for compare-style methods.
-	Baseline string `json:"baseline,omitempty" toon:"baseline,omitempty"`
+	Baseline string `json:"baseline" toon:"baseline"`
 	// Only present for compare-style methods.
-	BaselineWindow DiagnoseResponseResultsItemBaselineWindow `json:"baseline_window,omitempty" toon:"baseline_window,omitempty"`
+	BaselineWindow DiagnoseResponseResultsItemBaselineWindow `json:"baseline_window" toon:"baseline_window"`
 	// `pattern_snapshot` / `pattern_compare` for `log_patterns`; `single_window_shape` / `window_compare` for `metric_trends`.
-	Method string `json:"method,omitempty" toon:"method,omitempty"`
+	Method string `json:"method" toon:"method"`
 	// `log_patterns` only. Sorted RCA-first; each item carries pattern_hash, template, count, severity, sources, examples, and (for compare) baseline_count / change_ratio / is_new / is_gone.
-	Patterns []map[string]any `json:"patterns,omitempty" toon:"patterns,omitempty"`
+	Patterns []map[string]any `json:"patterns" toon:"patterns"`
 	// `metric_trends` only. Notable series with current / baseline / change / notable_period.
-	Series []map[string]any `json:"series,omitempty" toon:"series,omitempty"`
+	Series []map[string]any `json:"series" toon:"series"`
 	// Aggregate summary for this method. Shape differs between `log_patterns` (logs_scanned, patterns_total, surging_threshold, …) and `metric_trends` (series_total, data_quality, observations, …).
-	Summary map[string]any `json:"summary,omitempty" toon:"summary,omitempty"`
+	Summary map[string]any `json:"summary" toon:"summary"`
 	// Per-method advisory messages (e.g. `examples redacted`, sampling notices).
-	Warnings []string                          `json:"warnings,omitempty" toon:"warnings,omitempty"`
-	Window   DiagnoseResponseResultsItemWindow `json:"window,omitempty" toon:"window,omitempty"`
+	Warnings []string                          `json:"warnings" toon:"warnings"`
+	Window   DiagnoseResponseResultsItemWindow `json:"window" toon:"window"`
 }
 
 // DiagnoseResponseWindow is generated from the Flashduty OpenAPI schema.
 type DiagnoseResponseWindow struct {
-	End   int64 `json:"end,omitempty" toon:"end,omitempty"`
-	Start int64 `json:"start,omitempty" toon:"start,omitempty"`
+	End   int64 `json:"end" toon:"end"`
+	Start int64 `json:"start" toon:"start"`
 }
 
 // EscalateTargetBy is generated from the Flashduty OpenAPI schema.
@@ -6847,39 +6847,39 @@ type EscalateTargetWebhooksItem struct {
 // IncidentRawItemAssignedTo is generated from the Flashduty OpenAPI schema.
 type IncidentRawItemAssignedTo struct {
 	// Unix timestamp (seconds) when this assignment was made.
-	AssignedAt Timestamp `json:"assigned_at,omitempty" toon:"assigned_at,omitempty"`
+	AssignedAt Timestamp `json:"assigned_at" toon:"assigned_at"`
 	// Escalation rule ID (MongoDB ObjectID) driving the assignment.
-	EscalateRuleID string `json:"escalate_rule_id,omitempty" toon:"escalate_rule_id,omitempty"`
+	EscalateRuleID string `json:"escalate_rule_id" toon:"escalate_rule_id"`
 	// Display name of the escalation rule.
-	EscalateRuleName string `json:"escalate_rule_name,omitempty" toon:"escalate_rule_name,omitempty"`
+	EscalateRuleName string `json:"escalate_rule_name" toon:"escalate_rule_name"`
 	// Internal assignment record ID.
-	ID string `json:"id,omitempty" toon:"id,omitempty"`
+	ID string `json:"id" toon:"id"`
 	// Current level index within the escalation rule.
-	LayerIdx int64 `json:"layer_idx,omitempty" toon:"layer_idx,omitempty"`
+	LayerIdx int64 `json:"layer_idx" toon:"layer_idx"`
 	// Member IDs assigned directly to this incident.
-	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
+	PersonIDs []int64 `json:"person_ids" toon:"person_ids"`
 	// Assignment type.
-	Type string `json:"type,omitempty" toon:"type,omitempty"`
+	Type string `json:"type" toon:"type"`
 }
 
 // PostMortemItemBasics is generated from the Flashduty OpenAPI schema.
 type PostMortemItemBasics struct {
 	// Earliest start time among linked incidents (seconds).
-	IncidentsEarliestStartSeconds int64 `json:"incidents_earliest_start_seconds,omitempty" toon:"incidents_earliest_start_seconds,omitempty"`
+	IncidentsEarliestStartSeconds int64 `json:"incidents_earliest_start_seconds" toon:"incidents_earliest_start_seconds"`
 	// Highest severity among linked incidents.
-	IncidentsHighestSeverity string `json:"incidents_highest_severity,omitempty" toon:"incidents_highest_severity,omitempty"`
+	IncidentsHighestSeverity string `json:"incidents_highest_severity" toon:"incidents_highest_severity"`
 	// Latest close time among linked incidents (seconds).
-	IncidentsLatestCloseSeconds int64 `json:"incidents_latest_close_seconds,omitempty" toon:"incidents_latest_close_seconds,omitempty"`
+	IncidentsLatestCloseSeconds int64 `json:"incidents_latest_close_seconds" toon:"incidents_latest_close_seconds"`
 	// Cumulative duration in seconds.
-	IncidentsTotalDurationSeconds int64 `json:"incidents_total_duration_seconds,omitempty" toon:"incidents_total_duration_seconds,omitempty"`
+	IncidentsTotalDurationSeconds int64 `json:"incidents_total_duration_seconds" toon:"incidents_total_duration_seconds"`
 	// Responders involved in the incident(s).
-	Responders []Responder `json:"responders,omitempty" toon:"responders,omitempty"`
+	Responders []Responder `json:"responders" toon:"responders"`
 }
 
 // PostMortemItemContent is generated from the Flashduty OpenAPI schema.
 type PostMortemItemContent struct {
 	// Report body content (BlockNote JSON).
-	Content string `json:"content,omitempty" toon:"content,omitempty"`
+	Content string `json:"content" toon:"content"`
 }
 
 // RuleConfigsCheckAnydata is generated from the Flashduty OpenAPI schema.
@@ -6938,82 +6938,82 @@ type RuleConfigsRelateQueriesItem struct {
 
 // RUMIssueItemError is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemError struct {
-	Message string `json:"message,omitempty" toon:"message,omitempty"`
-	Type    string `json:"type,omitempty" toon:"type,omitempty"`
+	Message string `json:"message" toon:"message"`
+	Type    string `json:"type" toon:"type"`
 }
 
 // RUMIssueItemFirstSeen is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemFirstSeen struct {
-	Timestamp int64  `json:"timestamp,omitempty" toon:"timestamp,omitempty"`
-	Version   string `json:"version,omitempty" toon:"version,omitempty"`
+	Timestamp int64  `json:"timestamp" toon:"timestamp"`
+	Version   string `json:"version" toon:"version"`
 }
 
 // RUMIssueItemLastSeen is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemLastSeen struct {
-	Timestamp int64  `json:"timestamp,omitempty" toon:"timestamp,omitempty"`
-	Version   string `json:"version,omitempty" toon:"version,omitempty"`
+	Timestamp int64  `json:"timestamp" toon:"timestamp"`
+	Version   string `json:"version" toon:"version"`
 }
 
 // RUMIssueItemRegression is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemRegression struct {
 	// Timestamp when the regression was detected.
-	RegressedAt Timestamp `json:"regressed_at,omitempty" toon:"regressed_at,omitempty"`
+	RegressedAt Timestamp `json:"regressed_at" toon:"regressed_at"`
 	// Application version in which the regression was observed.
-	RegressedAtVersion string `json:"regressed_at_version,omitempty" toon:"regressed_at_version,omitempty"`
+	RegressedAtVersion string `json:"regressed_at_version" toon:"regressed_at_version"`
 	// Timestamp of the previous resolution before the regression.
-	ResolvedAt Timestamp `json:"resolved_at,omitempty" toon:"resolved_at,omitempty"`
+	ResolvedAt Timestamp `json:"resolved_at" toon:"resolved_at"`
 }
 
 // RUMIssueItemSuspectedCause is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemSuspectedCause struct {
-	PersonID int64  `json:"person_id,omitempty" toon:"person_id,omitempty"`
-	Reason   string `json:"reason,omitempty" toon:"reason,omitempty"`
-	Source   string `json:"source,omitempty" toon:"source,omitempty"`
-	Value    string `json:"value,omitempty" toon:"value,omitempty"`
+	PersonID int64  `json:"person_id" toon:"person_id"`
+	Reason   string `json:"reason" toon:"reason"`
+	Source   string `json:"source" toon:"source"`
+	Value    string `json:"value" toon:"value"`
 }
 
 // TargetsListResponseItemsItem is generated from the Flashduty OpenAPI schema.
 type TargetsListResponseItemsItem struct {
 	// Most recently observed Agent version.
-	AgentVersion string `json:"agent_version,omitempty" toon:"agent_version,omitempty"`
+	AgentVersion string `json:"agent_version" toon:"agent_version"`
 	// Edge cluster name.
-	ClusterName string `json:"cluster_name,omitempty" toon:"cluster_name,omitempty"`
+	ClusterName string `json:"cluster_name" toon:"cluster_name"`
 	// Edge instance address (`ip:port`), surfaced for diagnostics.
-	EdgeIpport string `json:"edge_ipport,omitempty" toon:"edge_ipport,omitempty"`
+	EdgeIpport string `json:"edge_ipport" toon:"edge_ipport"`
 	// Target kind, e.g. `host`, `mysql`. Filtering by kind is not supported in v1.
-	TargetKind string `json:"target_kind,omitempty" toon:"target_kind,omitempty"`
+	TargetKind string `json:"target_kind" toon:"target_kind"`
 	// Target identifier; the list is sorted by this field ascending.
-	TargetLocator string `json:"target_locator,omitempty" toon:"target_locator,omitempty"`
+	TargetLocator string `json:"target_locator" toon:"target_locator"`
 	// Last route-projection upsert time, Unix seconds. Treat as 'most recently observed', not a live-online indicator.
-	UpdatedAt Timestamp `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
 // ToolCatalogResponseError is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponseError struct {
-	Code    string `json:"code,omitempty" toon:"code,omitempty"`
-	Message string `json:"message,omitempty" toon:"message,omitempty"`
+	Code    string `json:"code" toon:"code"`
+	Message string `json:"message" toon:"message"`
 	// Returned for `ambiguous_target_kind`; lists the candidate kinds.
-	TargetKinds []string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
+	TargetKinds []string `json:"target_kinds" toon:"target_kinds"`
 }
 
 // ToolCatalogResponseTarget is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponseTarget struct {
-	Kind    string `json:"kind,omitempty" toon:"kind,omitempty"`
-	Locator string `json:"locator,omitempty" toon:"locator,omitempty"`
+	Kind    string `json:"kind" toon:"kind"`
+	Locator string `json:"locator" toon:"locator"`
 }
 
 // ToolCatalogResponseToolsItem is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponseToolsItem struct {
 	// Tool capability description for UI / AI-SRE consumption.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	Description string `json:"description" toon:"description"`
 	// JSON Schema for `tools[].params`.
-	InputSchema map[string]any `json:"input_schema,omitempty" toon:"input_schema,omitempty"`
+	InputSchema map[string]any `json:"input_schema" toon:"input_schema"`
 	// Tool name; pass into `/monit/tools/invoke` as `tools[].tool`.
-	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name" toon:"name"`
 	// Optional output JSON Schema; only returned when `include_output_shape=true`.
-	OutputShape map[string]any `json:"output_shape,omitempty" toon:"output_shape,omitempty"`
+	OutputShape map[string]any `json:"output_shape" toon:"output_shape"`
 	// Target kind this tool applies to.
-	TargetKind string `json:"target_kind,omitempty" toon:"target_kind,omitempty"`
+	TargetKind string `json:"target_kind" toon:"target_kind"`
 }
 
 // ToolInvokeRequestToolsItem is generated from the Flashduty OpenAPI schema.
@@ -7026,30 +7026,30 @@ type ToolInvokeRequestToolsItem struct {
 
 // ToolInvokeResponseError is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseError struct {
-	Code        string   `json:"code,omitempty" toon:"code,omitempty"`
-	Message     string   `json:"message,omitempty" toon:"message,omitempty"`
-	TargetKinds []string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
+	Code        string   `json:"code" toon:"code"`
+	Message     string   `json:"message" toon:"message"`
+	TargetKinds []string `json:"target_kinds" toon:"target_kinds"`
 }
 
 // ToolInvokeResponseResultsItem is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseResultsItem struct {
 	// Agent-self-reported tool execution time in milliseconds, excludes network. May be 0 when the failure occurred before the agent started executing.
-	AgentElapsedMs int64 `json:"agent_elapsed_ms,omitempty" toon:"agent_elapsed_ms,omitempty"`
+	AgentElapsedMs int64 `json:"agent_elapsed_ms" toon:"agent_elapsed_ms"`
 	// Successful tool payload — passthrough of monit-agent `ToolResultPayload.data` (typically `data` / `summary` / `truncated`). `null` when the per-tool `error` is set.
-	Data map[string]any `json:"data,omitempty" toon:"data,omitempty"`
+	Data map[string]any `json:"data" toon:"data"`
 	// Webapi-observed end-to-end time in milliseconds (webapi → ws → edge → agent → ws → webapi). A large gap vs `agent_elapsed_ms` indicates network / edge slowness.
-	E2eElapsedMs int64 `json:"e2e_elapsed_ms,omitempty" toon:"e2e_elapsed_ms,omitempty"`
+	E2eElapsedMs int64 `json:"e2e_elapsed_ms" toon:"e2e_elapsed_ms"`
 	// Per-tool error. Mutually exclusive with `data`.
-	Error ToolInvokeResponseResultsItemError `json:"error,omitempty" toon:"error,omitempty"`
-	Tool  string                             `json:"tool,omitempty" toon:"tool,omitempty"`
+	Error ToolInvokeResponseResultsItemError `json:"error" toon:"error"`
+	Tool  string                             `json:"tool" toon:"tool"`
 	// Agent-executed tool version. Empty when execution failed before the agent picked a version.
-	ToolVersion string `json:"tool_version,omitempty" toon:"tool_version,omitempty"`
+	ToolVersion string `json:"tool_version" toon:"tool_version"`
 }
 
 // ToolInvokeResponseTarget is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseTarget struct {
-	Kind    string `json:"kind,omitempty" toon:"kind,omitempty"`
-	Locator string `json:"locator,omitempty" toon:"locator,omitempty"`
+	Kind    string `json:"kind" toon:"kind"`
+	Locator string `json:"locator" toon:"locator"`
 }
 
 // CreateChannelRequestEscalateRuleTarget is generated from the Flashduty OpenAPI schema.
@@ -7104,14 +7104,14 @@ type CreateStatusPageChangeRequestUpdatesItemComponentChangesItem struct {
 
 // DiagnoseResponseResultsItemBaselineWindow is generated from the Flashduty OpenAPI schema.
 type DiagnoseResponseResultsItemBaselineWindow struct {
-	End   int64 `json:"end,omitempty" toon:"end,omitempty"`
-	Start int64 `json:"start,omitempty" toon:"start,omitempty"`
+	End   int64 `json:"end" toon:"end"`
+	Start int64 `json:"start" toon:"start"`
 }
 
 // DiagnoseResponseResultsItemWindow is generated from the Flashduty OpenAPI schema.
 type DiagnoseResponseResultsItemWindow struct {
-	End   int64 `json:"end,omitempty" toon:"end,omitempty"`
-	Start int64 `json:"start,omitempty" toon:"start,omitempty"`
+	End   int64 `json:"end" toon:"end"`
+	Start int64 `json:"start" toon:"start"`
 }
 
 // RuleConfigsCheckAnydataRecovery is generated from the Flashduty OpenAPI schema.
@@ -7132,8 +7132,8 @@ type RuleConfigsCheckThresholdRecovery struct {
 // ToolInvokeResponseResultsItemError is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseResultsItemError struct {
 	// Common values: `timeout`, `target_unavailable`, `edge_unsupported`, `invalid_tool_result`, `internal`, `invalid_args`, `unknown_tool`, `unknown_tool_version`, `unknown_toolset_hash`, `target_not_owned`, `wrong_agent`, `overloaded`, `denied`, `permission_denied`, `credential_unavailable`, `target_unreachable`.
-	Code    string `json:"code,omitempty" toon:"code,omitempty"`
-	Message string `json:"message,omitempty" toon:"message,omitempty"`
+	Code    string `json:"code" toon:"code"`
+	Message string `json:"message" toon:"message"`
 }
 
 // CreateChannelRequestEscalateRuleTargetBy is generated from the Flashduty OpenAPI schema.
