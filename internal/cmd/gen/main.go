@@ -667,7 +667,19 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		// (AccountID) while `--json` and the spec-derived help use snake_case
 		// (account_id); an agent that reads field names off a toon dump and pipes
 		// them into `--json | jq '.account_id'` hits all-null. Keep both tags.
-		fmt.Fprintf(&b, "\t%s %s `json:%q toon:%q`\n", field, gt, k+",omitempty", k+",omitempty")
+		// omitempty policy splits by direction: request structs KEEP ,omitempty
+		// (with the nullable→pointer rewrite above, a nil pointer is omitted while
+		// &false/&0 is still sent — tri-state; a non-nullable zero is genuinely
+		// "unset" and correctly dropped). Response structs DROP ,omitempty: the API
+		// returns the field and the CLI re-serializes the decoded struct
+		// (--json/--toon), so omitempty would silently swallow the false/0/[]/{}
+		// state fields the help advertises as present (e.g. rule.enabled=false on a
+		// disabled rule). Render them faithfully.
+		tag := k
+		if inReq {
+			tag = k + ",omitempty"
+		}
+		fmt.Fprintf(&b, "\t%s %s `json:%q toon:%q`\n", field, gt, tag, tag)
 	}
 	b.WriteString("}\n\n")
 	return b.String()
