@@ -2349,7 +2349,7 @@
       "get": {
         "operationId": "incidentPostMortemInfo",
         "summary": "Get post-mortem",
-        "description": "Retrieve the post-mortem report for a specific incident.",
+        "description": "Retrieve a post-mortem report by its `post_mortem_id`. List reports via `/incident/post-mortem/list` first — each row carries the incident it covers — then fetch the full report here by that id.",
         "tags": [
           "On-call/Incidents"
         ],
@@ -14510,7 +14510,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RuleIDRequest"
+                "$ref": "#/components/schemas/AuditRecordIDRequest"
               },
               "example": {
                 "id": 9001
@@ -23121,7 +23121,7 @@
           },
           "progress": {
             "type": "string",
-            "description": "Incident progress (e.g. `Processing`, `Resolved`)."
+            "description": "Incident progress — one of `Triggered`, `Processing`, `Closed`."
           }
         }
       },
@@ -32427,7 +32427,38 @@
           "export_fields": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "incident_id",
+                "title",
+                "severity",
+                "progress",
+                "channel_id",
+                "channel_name",
+                "team_id",
+                "team_name",
+                "created_at",
+                "seconds_to_ack",
+                "seconds_to_close",
+                "closed_by",
+                "engaged_seconds",
+                "hours",
+                "notifications",
+                "interruptions",
+                "acknowledgements",
+                "assignments",
+                "reassignments",
+                "escalations",
+                "manual_escalations",
+                "timeout_escalations",
+                "assigned_to",
+                "responders",
+                "description",
+                "labels",
+                "fields",
+                "creator_id",
+                "creator_name"
+              ]
             },
             "description": "Subset of CSV column keys to include in the export. At most 50 entries. Only used by the export endpoints."
           },
@@ -32790,7 +32821,7 @@
           },
           "progress": {
             "type": "string",
-            "description": "Incident progress state (e.g. `Triggered`, `Acknowledged`, `Closed`)."
+            "description": "Incident progress state — one of `Triggered`, `Processing`, `Closed`."
           },
           "severity": {
             "type": "string",
@@ -34487,6 +34518,19 @@
             "type": "integer",
             "format": "uint64",
             "description": "Rule ID."
+          }
+        }
+      },
+      "AuditRecordIDRequest": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "uint64",
+            "description": "Audit record ID — the `id` of an audit row returned by `POST /monit/rule/audits`, NOT the rule ID. Passing a rule ID returns HTTP 400."
           }
         }
       },

@@ -1013,6 +1013,12 @@ type AuditOperationTypeItem struct {
 	NameCn string `json:"name_cn,omitempty"`
 }
 
+// AuditRecordIDRequest is generated from the Flashduty OpenAPI schema.
+type AuditRecordIDRequest struct {
+	// Audit record ID — the `id` of an audit row returned by `POST /monit/rule/audits`, NOT the rule ID. Passing a rule ID returns HTTP 400.
+	ID uint64 `json:"id,omitempty"`
+}
+
 // AuditSearchRequest is generated from the Flashduty OpenAPI schema.
 type AuditSearchRequest struct {
 	// End of the search window, Unix epoch seconds. Must be after `start_time`. Maximum span 90 days.
@@ -2824,7 +2830,7 @@ type IncidentRawItem struct {
 	Labels            map[string]string         `json:"labels,omitempty"`
 	ManualEscalations int64                     `json:"manual_escalations,omitempty"`
 	Notifications     int64                     `json:"notifications,omitempty"`
-	// Incident progress state (e.g. `Triggered`, `Acknowledged`, `Closed`).
+	// Incident progress state — one of `Triggered`, `Processing`, `Closed`.
 	Progress           string           `json:"progress,omitempty"`
 	Reassignments      int64            `json:"reassignments,omitempty"`
 	Responders         []map[string]any `json:"responders,omitempty"`
@@ -2841,7 +2847,7 @@ type IncidentRawItem struct {
 type IncidentShort struct {
 	// Incident ID (ObjectID hex string).
 	IncidentID string `json:"incident_id,omitempty"`
-	// Incident progress (e.g. `Processing`, `Resolved`).
+	// Incident progress — one of `Triggered`, `Processing`, `Closed`.
 	Progress string `json:"progress,omitempty"`
 	// Incident title.
 	Title string `json:"title,omitempty"`
