@@ -1359,6 +1359,8 @@ type ChannelItem struct {
 	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Member ID who created the channel.
 	CreatorID int64 `json:"creator_id" toon:"creator_id"`
+	// Name of the member who created the channel (resolved from the member directory; empty when unavailable).
+	CreatorName string `json:"creator_name" toon:"creator_name"`
 	// Deletion timestamp (unix seconds). Non-zero only for soft-deleted channels.
 	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Free-form description.
@@ -1386,6 +1388,8 @@ type ChannelItem struct {
 	Status string `json:"status" toon:"status"`
 	// Owning team ID.
 	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Owning team name (resolved from the team directory; empty when unavailable).
+	TeamName string `json:"team_name" toon:"team_name"`
 	// Last update timestamp (unix seconds).
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
@@ -2911,6 +2915,8 @@ type IncidentInfo struct {
 type IncidentInfoRequest struct {
 	// Incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	// Short incident ID (the 6-character uppercased id shown in the UI). Not unique — resolves to the most recent match. Supply either incident_id or num.
+	Num string `json:"num,omitempty" toon:"num,omitempty"`
 }
 
 // IncidentListResponse is generated from the Flashduty OpenAPI schema.

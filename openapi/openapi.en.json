@@ -23896,15 +23896,16 @@
       },
       "IncidentInfoRequest": {
         "type": "object",
-        "description": "Lookup parameters for a single incident.",
-        "required": [
-          "incident_id"
-        ],
+        "description": "Lookup parameters for a single incident. Supply either incident_id or num.",
         "properties": {
           "incident_id": {
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "Incident ID (MongoDB ObjectID)."
+          },
+          "num": {
+            "type": "string",
+            "description": "Short incident ID (the 6-character uppercased id shown in the UI). Not unique — resolves to the most recent match. Supply either incident_id or num."
           }
         }
       },
@@ -26917,6 +26918,10 @@
             "format": "int64",
             "description": "Owning team ID."
           },
+          "team_name": {
+            "type": "string",
+            "description": "Owning team name (resolved from the team directory; empty when unavailable)."
+          },
           "managing_team_ids": {
             "type": "array",
             "items": {
@@ -26929,6 +26934,10 @@
             "type": "integer",
             "format": "int64",
             "description": "Member ID who created the channel."
+          },
+          "creator_name": {
+            "type": "string",
+            "description": "Name of the member who created the channel (resolved from the member directory; empty when unavailable)."
           },
           "account_id": {
             "type": "integer",

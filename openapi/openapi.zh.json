@@ -23887,15 +23887,16 @@
       },
       "IncidentInfoRequest": {
         "type": "object",
-        "description": "单个故障查询参数。",
-        "required": [
-          "incident_id"
-        ],
+        "description": "单个故障查询参数。incident_id 与 num 二者择一传入。",
         "properties": {
           "incident_id": {
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "故障 ID（MongoDB ObjectID）。"
+          },
+          "num": {
+            "type": "string",
+            "description": "故障短 ID（界面上展示的 6 位大写 ID）。不唯一——命中多个时返回最近一个。incident_id 与 num 二者择一传入。"
           }
         }
       },
@@ -26908,6 +26909,10 @@
             "format": "int64",
             "description": "所属团队 ID。"
           },
+          "team_name": {
+            "type": "string",
+            "description": "所属团队名称（由团队目录解析；无法解析时为空）。"
+          },
           "managing_team_ids": {
             "type": "array",
             "items": {
@@ -26920,6 +26925,10 @@
             "type": "integer",
             "format": "int64",
             "description": "创建者成员 ID。"
+          },
+          "creator_name": {
+            "type": "string",
+            "description": "创建者成员名称（由成员目录解析；无法解析时为空）。"
           },
           "account_id": {
             "type": "integer",
