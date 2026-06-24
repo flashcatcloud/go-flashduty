@@ -20864,74 +20864,6 @@
         }
       }
     },
-    "/safari/skill/download": {
-      "post": {
-        "operationId": "skill-read-download",
-        "summary": "Download skill",
-        "description": "Download a skill's zip archive by ID.",
-        "tags": [
-          "AI SRE/Skills"
-        ],
-        "security": [
-          {
-            "AppKeyAuth": []
-          }
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **60 requests/minute**; **5 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Returns the raw zip bytes (`application/zip`), not the JSON envelope. The filename is the skill name.\n",
-          "href": "/en/api-reference/ai-sre/skills/skill-read-download",
-          "metadata": {
-            "sidebarTitle": "Download skill"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Skill archive (zip).",
-            "headers": {
-              "Content-Disposition": {
-                "description": "attachment; filename=<skill_name>.zip",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/zip": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SkillDownloadRequest"
-              },
-              "example": {
-                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
-              }
-            }
-          }
-        }
-      }
-    },
     "/safari/skill/enable": {
       "post": {
         "operationId": "skill-read-enable",
@@ -39842,19 +39774,6 @@
         "required": [
           "name",
           "description"
-        ]
-      },
-      "SkillDownloadRequest": {
-        "type": "object",
-        "description": "Skill zip download by ID.",
-        "properties": {
-          "skill_id": {
-            "type": "string",
-            "description": "Target skill ID."
-          }
-        },
-        "required": [
-          "skill_id"
         ]
       },
       "GetWarRoomDefaultObserversResponse": {

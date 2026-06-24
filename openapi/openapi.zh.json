@@ -20856,74 +20856,6 @@
         }
       }
     },
-    "/safari/skill/download": {
-      "post": {
-        "operationId": "skill-read-download",
-        "summary": "下载技能",
-        "description": "按 ID 下载技能的 zip 压缩包。",
-        "tags": [
-          "AI SRE/技能"
-        ],
-        "security": [
-          {
-            "AppKeyAuth": []
-          }
-        ],
-        "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **60 次/分钟**；**5 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 返回原始 zip 字节流（`application/zip`），而非 JSON 信封。文件名为技能名称。\n",
-          "href": "/zh/api-reference/ai-sre/skills/skill-read-download",
-          "metadata": {
-            "sidebarTitle": "下载技能"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "技能压缩包（zip）。",
-            "headers": {
-              "Content-Disposition": {
-                "description": "attachment; filename=<skill_name>.zip",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/zip": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SkillDownloadRequest"
-              },
-              "example": {
-                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
-              }
-            }
-          }
-        }
-      }
-    },
     "/safari/skill/enable": {
       "post": {
         "operationId": "skill-read-enable",
@@ -39833,19 +39765,6 @@
         "required": [
           "name",
           "description"
-        ]
-      },
-      "SkillDownloadRequest": {
-        "type": "object",
-        "description": "按 ID 下载技能压缩包。",
-        "properties": {
-          "skill_id": {
-            "type": "string",
-            "description": "目标技能 ID。"
-          }
-        },
-        "required": [
-          "skill_id"
         ]
       },
       "GetWarRoomDefaultObserversResponse": {

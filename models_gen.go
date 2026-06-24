@@ -5547,12 +5547,6 @@ type SkillDeleteRequest struct {
 	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
 }
 
-// SkillDownloadRequest is generated from the Flashduty OpenAPI schema.
-type SkillDownloadRequest struct {
-	// Target skill ID.
-	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
-}
-
 // SkillGetRequest is generated from the Flashduty OpenAPI schema.
 type SkillGetRequest struct {
 	// Target skill ID.
