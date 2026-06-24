@@ -20382,7 +20382,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 列表行中省略 `content` 字段；如需读取技能正文，请查询单个技能详情。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 列表行中省略 `content` 字段；如需正文请单独查询某个技能。\n",
           "href": "/zh/api-reference/ai-sre/skills/skill-read-list",
           "metadata": {
             "sidebarTitle": "查询技能列表"
@@ -20414,7 +20414,7 @@
                     "total": 1,
                     "skills": [
                       {
-                        "skill_id": "skl-7f3a9c21b8e0",
+                        "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                         "account_id": 10023,
                         "team_id": 0,
                         "skill_name": "k8s-triage",
@@ -20425,6 +20425,10 @@
                           "triage"
                         ],
                         "author": "sre-team",
+                        "tools": [
+                          "bash",
+                          "mcp:prometheus/query"
+                        ],
                         "status": "enabled",
                         "created_by": 80011,
                         "created_at": 1716960000000,
@@ -20473,7 +20477,7 @@
       "post": {
         "operationId": "skill-read-get",
         "summary": "查看技能详情",
-        "description": "按 ID 返回单个技能的完整配置及 SKILL.md 正文。",
+        "description": "查看单个技能，包含完整的 SKILL.md 内容。",
         "tags": [
           "AI SRE/技能"
         ],
@@ -20512,7 +20516,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "skill_id": "skl-7f3a9c21b8e0",
+                    "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                     "account_id": 10023,
                     "team_id": 0,
                     "skill_name": "k8s-triage",
@@ -20523,6 +20527,10 @@
                       "triage"
                     ],
                     "author": "sre-team",
+                    "tools": [
+                      "bash",
+                      "mcp:prometheus/query"
+                    ],
                     "status": "enabled",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -20530,7 +20538,7 @@
                     "can_edit": true,
                     "update_available": false,
                     "is_modified": false,
-                    "content": "---\nname: k8s-triage\n---\nDiagnose unhealthy workloads..."
+                    "content": "---\nname: k8s-triage\ndescription: ...\n---\n# Triage steps"
                   }
                 }
               }
@@ -20557,7 +20565,7 @@
                 "$ref": "#/components/schemas/SkillGetRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -20568,7 +20576,7 @@
       "post": {
         "operationId": "skill-write-update",
         "summary": "更新技能",
-        "description": "编辑技能的描述或重新指定其所属团队。",
+        "description": "更新技能的描述或重新分配团队范围。",
         "tags": [
           "AI SRE/技能"
         ],
@@ -20578,7 +20586,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 仅可更新调用者有权编辑的技能，否则返回 AccessDenied。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Skill 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 仅 `description` 与 `team_id` 可编辑；技能正文需通过重新上传修改。\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/skills/skill-write-update",
           "metadata": {
             "sidebarTitle": "更新技能"
@@ -20607,17 +20615,21 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "skill_id": "skl-7f3a9c21b8e0",
+                    "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                     "account_id": 10023,
                     "team_id": 0,
                     "skill_name": "k8s-triage",
-                    "description": "Diagnose unhealthy Kubernetes workloads.",
+                    "description": "Updated triage runbook.",
                     "version": "1.2.0",
                     "tags": [
                       "kubernetes",
                       "triage"
                     ],
                     "author": "sre-team",
+                    "tools": [
+                      "bash",
+                      "mcp:prometheus/query"
+                    ],
                     "status": "enabled",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -20636,6 +20648,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
@@ -20651,8 +20666,8 @@
                 "$ref": "#/components/schemas/SkillUpdateRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0",
-                "description": "Diagnose unhealthy Kubernetes workloads."
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
+                "description": "Updated triage runbook."
               }
             }
           }
@@ -20663,7 +20678,7 @@
       "post": {
         "operationId": "skill-write-delete",
         "summary": "删除技能",
-        "description": "永久删除技能，使智能体无法再加载它。",
+        "description": "按 ID 删除技能。",
         "tags": [
           "AI SRE/技能"
         ],
@@ -20673,7 +20688,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Skill 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/skills/skill-write-delete",
           "metadata": {
             "sidebarTitle": "删除技能"
@@ -20694,14 +20709,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -20711,6 +20727,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -20727,7 +20746,7 @@
                 "$ref": "#/components/schemas/SkillDeleteRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -20738,7 +20757,7 @@
       "post": {
         "operationId": "skill-write-upload",
         "summary": "上传技能",
-        "description": "上传技能 zip 包并注册为新的账户或团队技能。",
+        "description": "上传技能压缩包（.skill/.zip/.tar.gz/.tgz）以创建或覆盖技能。",
         "tags": [
           "AI SRE/技能"
         ],
@@ -20748,7 +20767,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 请求体为 `multipart/form-data`，包含 `file` 部分（zip 包）与可选的 `team_id` 字段，而非 JSON。\n- 技能名称重复时返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **30 次/分钟**；**3 次/秒** |\n| 权限要求 | **Skill 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 以 `multipart/form-data` 提交，包含 `file` 部分。压缩包最大 100MB。\n- 设置 `replace=true` 可覆盖同名技能。\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/skills/skill-write-upload",
           "metadata": {
             "sidebarTitle": "上传技能"
@@ -20777,7 +20796,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "skill_id": "skl-7f3a9c21b8e0",
+                    "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                     "account_id": 10023,
                     "team_id": 0,
                     "skill_name": "k8s-triage",
@@ -20788,13 +20807,18 @@
                       "triage"
                     ],
                     "author": "sre-team",
+                    "tools": [
+                      "bash",
+                      "mcp:prometheus/query"
+                    ],
                     "status": "enabled",
                     "created_by": 80011,
                     "created_at": 1716960000000,
                     "updated_at": 1717046400000,
                     "can_edit": true,
                     "update_available": false,
-                    "is_modified": false
+                    "is_modified": false,
+                    "created": true
                   }
                 }
               }
@@ -20805,6 +20829,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -20818,22 +20845,11 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary",
-                    "description": "Skill zip package to upload."
-                  },
-                  "team_id": {
-                    "type": "integer",
-                    "format": "int64",
-                    "description": "Owning team for the new skill; 0 for account scope."
-                  }
-                },
-                "required": [
-                  "file"
-                ]
+                "$ref": "#/components/schemas/SkillUploadRequest"
+              },
+              "example": {
+                "team_id": 0,
+                "replace": false
               }
             }
           }
@@ -20844,7 +20860,7 @@
       "post": {
         "operationId": "skill-read-download",
         "summary": "下载技能",
-        "description": "以二进制附件形式下载技能的原始 zip 包。",
+        "description": "按 ID 下载技能的 zip 压缩包。",
         "tags": [
           "AI SRE/技能"
         ],
@@ -20854,7 +20870,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 响应为 `application/zip` 字节流并带有 `Content-Disposition` 附件头，而非 JSON 响应包。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **60 次/分钟**；**5 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 返回原始 zip 字节流（`application/zip`），而非 JSON 信封。文件名为技能名称。\n",
           "href": "/zh/api-reference/ai-sre/skills/skill-read-download",
           "metadata": {
             "sidebarTitle": "下载技能"
@@ -20862,28 +20878,20 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
+            "description": "技能压缩包（zip）。",
+            "headers": {
+              "Content-Disposition": {
+                "description": "attachment; filename=<skill_name>.zip",
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResponseEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "string",
-                          "format": "binary",
-                          "description": "Raw zip bytes (not wrapped in the JSON envelope)."
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
@@ -20909,7 +20917,7 @@
                 "$ref": "#/components/schemas/SkillDownloadRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -20920,7 +20928,7 @@
       "post": {
         "operationId": "skill-read-enable",
         "summary": "启用技能",
-        "description": "启用已禁用的技能，使智能体可在会话开始时加载它。",
+        "description": "启用已禁用的技能，使智能体可加载。",
         "tags": [
           "AI SRE/技能"
         ],
@@ -20930,7 +20938,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 仅可启用已禁用的技能；若技能已启用则返回 InvalidParameter。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Skill 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 仅可启用 `disabled` 状态的技能，否则返回 InvalidParameter。\n",
           "href": "/zh/api-reference/ai-sre/skills/skill-read-enable",
           "metadata": {
             "sidebarTitle": "启用技能"
@@ -20951,14 +20959,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -20968,6 +20977,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -20984,7 +20996,7 @@
                 "$ref": "#/components/schemas/SkillStatusRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -20995,7 +21007,7 @@
       "post": {
         "operationId": "skill-write-disable",
         "summary": "禁用技能",
-        "description": "禁用已启用的技能，使智能体不再加载它。",
+        "description": "禁用已启用的技能，使智能体不再加载。",
         "tags": [
           "AI SRE/技能"
         ],
@@ -21005,7 +21017,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 仅可禁用已启用的技能；若技能已禁用则返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Skill 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 仅可禁用 `enabled` 状态的技能，否则返回 InvalidParameter。\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/skills/skill-write-disable",
           "metadata": {
             "sidebarTitle": "禁用技能"
@@ -21026,14 +21038,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21043,6 +21056,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21059,7 +21075,7 @@
                 "$ref": "#/components/schemas/SkillStatusRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -21080,7 +21096,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 列表不含实时工具列表；如需探测工具请单独查询某个服务器。\n",
           "href": "/zh/api-reference/ai-sre/mcp-servers/mcp-read-server-list",
           "metadata": {
             "sidebarTitle": "查询 MCP 服务器列表"
@@ -21112,25 +21128,28 @@
                     "total": 1,
                     "servers": [
                       {
-                        "server_id": "mcp-2b5e8d14a7c9",
+                        "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                         "account_id": 10023,
                         "team_id": 0,
                         "can_edit": true,
-                        "server_name": "GitHub Tools",
-                        "description": "Read issues and pull requests from GitHub.",
-                        "transport": "stdio",
-                        "command": "npx",
-                        "args": [
-                          "-y",
-                          "@modelcontextprotocol/server-github"
-                        ],
-                        "env": {
-                          "GITHUB_TOKEN": "ghp_xxx"
-                        },
+                        "server_name": "prometheus",
+                        "description": "Query Prometheus metrics and alerts.",
+                        "transport": "streamable-http",
+                        "url": "https://mcp.example.com/prometheus",
                         "status": "enabled",
                         "connect_timeout": 10,
-                        "call_timeout": 30,
-                        "tool_count": 12,
+                        "call_timeout": 60,
+                        "tool_count": 2,
+                        "tools": [
+                          {
+                            "name": "query",
+                            "description": "Run a PromQL instant query."
+                          },
+                          {
+                            "name": "query_range",
+                            "description": "Run a PromQL range query."
+                          }
+                        ],
                         "auth_mode": "shared",
                         "created_by": 80011,
                         "created_at": 1716960000000,
@@ -21176,7 +21195,7 @@
       "post": {
         "operationId": "mcp-write-server-create",
         "summary": "创建 MCP 服务器",
-        "description": "注册一个新的 MCP 服务器，供智能体调用其工具。",
+        "description": "在账户下注册新的 MCP 服务器（连接器）。",
         "tags": [
           "AI SRE/MCP 服务器"
         ],
@@ -21186,7 +21205,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- `transport` 必须为 stdio、sse 或 streamable-http 之一，否则返回 InvalidParameter。\n- 服务器名称重复时返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **MCP 管理**（`ai-sre`） |\n\n## 使用说明\n\n- `command`/`args`/`env` 用于 `stdio`；`url`/`headers` 用于 `sse`/`streamable-http`。\n- 服务器名称在账户内必须唯一，重复将返回 InvalidParameter。\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/mcp-servers/mcp-write-server-create",
           "metadata": {
             "sidebarTitle": "创建 MCP 服务器"
@@ -21215,25 +21234,28 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "server_id": "mcp-2b5e8d14a7c9",
+                    "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "server_name": "GitHub Tools",
-                    "description": "Read issues and pull requests from GitHub.",
-                    "transport": "stdio",
-                    "command": "npx",
-                    "args": [
-                      "-y",
-                      "@modelcontextprotocol/server-github"
-                    ],
-                    "env": {
-                      "GITHUB_TOKEN": "ghp_xxx"
-                    },
+                    "server_name": "prometheus",
+                    "description": "Query Prometheus metrics and alerts.",
+                    "transport": "streamable-http",
+                    "url": "https://mcp.example.com/prometheus",
                     "status": "enabled",
                     "connect_timeout": 10,
-                    "call_timeout": 30,
-                    "tool_count": 12,
+                    "call_timeout": 60,
+                    "tool_count": 2,
+                    "tools": [
+                      {
+                        "name": "query",
+                        "description": "Run a PromQL instant query."
+                      },
+                      {
+                        "name": "query_range",
+                        "description": "Run a PromQL range query."
+                      }
+                    ],
                     "auth_mode": "shared",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -21248,6 +21270,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21264,19 +21289,11 @@
                 "$ref": "#/components/schemas/MCPServerCreateRequest"
               },
               "example": {
-                "server_name": "GitHub Tools",
-                "description": "Read issues and pull requests from GitHub.",
-                "transport": "stdio",
-                "command": "npx",
-                "args": [
-                  "-y",
-                  "@modelcontextprotocol/server-github"
-                ],
-                "env": {
-                  "GITHUB_TOKEN": "ghp_xxx"
-                },
-                "status": "enabled",
-                "team_id": 0
+                "server_name": "prometheus",
+                "description": "Query Prometheus metrics and alerts.",
+                "transport": "streamable-http",
+                "url": "https://mcp.example.com/prometheus",
+                "status": "enabled"
               }
             }
           }
@@ -21287,7 +21304,7 @@
       "post": {
         "operationId": "mcp-read-server-get",
         "summary": "查看 MCP 服务器详情",
-        "description": "返回单个 MCP 服务器的完整配置，并附带实时工具清单。",
+        "description": "查看单个 MCP 服务器并实时探测其工具列表。",
         "tags": [
           "AI SRE/MCP 服务器"
         ],
@@ -21297,7 +21314,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 该接口会发起实时工具探测；探测失败时填充 `list_error` 字段，而不会导致整个请求失败。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 详情接口会实时探测工具；探测失败时设置 `list_error`，请求本身仍成功。\n",
           "href": "/zh/api-reference/ai-sre/mcp-servers/mcp-read-server-get",
           "metadata": {
             "sidebarTitle": "查看 MCP 服务器详情"
@@ -21326,39 +21343,32 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "server_id": "mcp-2b5e8d14a7c9",
+                    "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "server_name": "GitHub Tools",
-                    "description": "Read issues and pull requests from GitHub.",
-                    "transport": "stdio",
-                    "command": "npx",
-                    "args": [
-                      "-y",
-                      "@modelcontextprotocol/server-github"
-                    ],
-                    "env": {
-                      "GITHUB_TOKEN": "ghp_xxx"
-                    },
+                    "server_name": "prometheus",
+                    "description": "Query Prometheus metrics and alerts.",
+                    "transport": "streamable-http",
+                    "url": "https://mcp.example.com/prometheus",
                     "status": "enabled",
                     "connect_timeout": 10,
-                    "call_timeout": 30,
-                    "tool_count": 12,
+                    "call_timeout": 60,
+                    "tool_count": 2,
+                    "tools": [
+                      {
+                        "name": "query",
+                        "description": "Run a PromQL instant query."
+                      },
+                      {
+                        "name": "query_range",
+                        "description": "Run a PromQL range query."
+                      }
+                    ],
                     "auth_mode": "shared",
                     "created_by": 80011,
                     "created_at": 1716960000000,
-                    "updated_at": 1717046400000,
-                    "tools": [
-                      {
-                        "name": "list_issues",
-                        "description": "List issues in a repository."
-                      },
-                      {
-                        "name": "get_pull_request",
-                        "description": "Fetch a pull request by number."
-                      }
-                    ]
+                    "updated_at": 1717046400000
                   }
                 }
               }
@@ -21385,7 +21395,7 @@
                 "$ref": "#/components/schemas/MCPServerGetRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21396,7 +21406,7 @@
       "post": {
         "operationId": "mcp-write-server-update",
         "summary": "更新 MCP 服务器",
-        "description": "编辑 MCP 服务器的连接设置或重新指定其所属团队。",
+        "description": "更新 MCP 服务器配置；省略字段表示不变。",
         "tags": [
           "AI SRE/MCP 服务器"
         ],
@@ -21406,7 +21416,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 内置 MCP 服务器为只读，无法修改。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **MCP 管理**（`ai-sre`） |\n\n## 使用说明\n\n- `env`/`headers` 中的脱敏密钥会被保留——回传脱敏值不会覆盖已存储的真实密钥。\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/mcp-servers/mcp-write-server-update",
           "metadata": {
             "sidebarTitle": "更新 MCP 服务器"
@@ -21435,25 +21445,28 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "server_id": "mcp-2b5e8d14a7c9",
+                    "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "server_name": "GitHub Tools",
-                    "description": "Read issues, PRs, and commits from GitHub.",
-                    "transport": "stdio",
-                    "command": "npx",
-                    "args": [
-                      "-y",
-                      "@modelcontextprotocol/server-github"
-                    ],
-                    "env": {
-                      "GITHUB_TOKEN": "ghp_xxx"
-                    },
+                    "server_name": "prometheus",
+                    "description": "Query Prometheus metrics, alerts, and rules.",
+                    "transport": "streamable-http",
+                    "url": "https://mcp.example.com/prometheus",
                     "status": "enabled",
                     "connect_timeout": 10,
-                    "call_timeout": 30,
-                    "tool_count": 12,
+                    "call_timeout": 60,
+                    "tool_count": 2,
+                    "tools": [
+                      {
+                        "name": "query",
+                        "description": "Run a PromQL instant query."
+                      },
+                      {
+                        "name": "query_range",
+                        "description": "Run a PromQL range query."
+                      }
+                    ],
                     "auth_mode": "shared",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -21468,6 +21481,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21484,8 +21500,8 @@
                 "$ref": "#/components/schemas/MCPServerUpdateRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9",
-                "description": "Read issues, PRs, and commits from GitHub."
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
+                "description": "Query Prometheus metrics, alerts, and rules."
               }
             }
           }
@@ -21496,7 +21512,7 @@
       "post": {
         "operationId": "mcp-write-server-delete",
         "summary": "删除 MCP 服务器",
-        "description": "永久删除 MCP 服务器，使智能体无法再使用其工具。",
+        "description": "按 ID 删除 MCP 服务器。",
         "tags": [
           "AI SRE/MCP 服务器"
         ],
@@ -21506,7 +21522,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 内置 MCP 服务器为只读，无法删除。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **MCP 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/mcp-servers/mcp-write-server-delete",
           "metadata": {
             "sidebarTitle": "删除 MCP 服务器"
@@ -21527,14 +21543,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21544,6 +21561,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21560,7 +21580,7 @@
                 "$ref": "#/components/schemas/MCPServerDeleteRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21571,7 +21591,7 @@
       "post": {
         "operationId": "mcp-write-server-enable",
         "summary": "启用 MCP 服务器",
-        "description": "启用已禁用的 MCP 服务器，使智能体可调用其工具。",
+        "description": "启用已禁用的 MCP 服务器。",
         "tags": [
           "AI SRE/MCP 服务器"
         ],
@@ -21581,7 +21601,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 内置 MCP 服务器为只读；若服务器已启用则返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **MCP 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/mcp-servers/mcp-write-server-enable",
           "metadata": {
             "sidebarTitle": "启用 MCP 服务器"
@@ -21602,14 +21622,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21619,6 +21640,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21635,7 +21659,7 @@
                 "$ref": "#/components/schemas/MCPServerStatusRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21646,7 +21670,7 @@
       "post": {
         "operationId": "mcp-write-server-disable",
         "summary": "禁用 MCP 服务器",
-        "description": "禁用 MCP 服务器，使智能体停止调用其工具。",
+        "description": "禁用已启用的 MCP 服务器。",
         "tags": [
           "AI SRE/MCP 服务器"
         ],
@@ -21656,7 +21680,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 内置 MCP 服务器为只读；若服务器已禁用则返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **MCP 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/mcp-servers/mcp-write-server-disable",
           "metadata": {
             "sidebarTitle": "禁用 MCP 服务器"
@@ -21677,14 +21701,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21694,6 +21719,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21710,7 +21738,7 @@
                 "$ref": "#/components/schemas/MCPServerStatusRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21721,7 +21749,7 @@
       "post": {
         "operationId": "remote-agent-write-create",
         "summary": "创建 A2A 智能体",
-        "description": "注册一个新的 A2A 远程智能体，供 SRE 智能体委派任务。",
+        "description": "通过智能体卡片 URL 注册新的 A2A 远程智能体。",
         "tags": [
           "AI SRE/A2A 智能体"
         ],
@@ -21731,7 +21759,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 创建时会拉取并校验 `card_url` 上的 agent card；若无法访问则返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Agent 管理**（`ai-sre`） |\n\n## 使用说明\n\n- `card_url` 必须可解析为有效的智能体卡片；无法访问或无效的卡片返回 InvalidParameter。\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/a2a-agents/remote-agent-write-create",
           "metadata": {
             "sidebarTitle": "创建 A2A 智能体"
@@ -21760,7 +21788,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "agent_id": "a2a_9d4c1f60b3a2"
+                    "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
                   }
                 }
               }
@@ -21771,6 +21799,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21787,13 +21818,9 @@
                 "$ref": "#/components/schemas/A2AAgentCreateRequest"
               },
               "example": {
-                "agent_name": "Network Diagnostics Agent",
-                "card_url": "https://agents.example.com/network-diag/.well-known/agent.json",
-                "description": "Runs traceroute and BGP-path analysis for network incidents.",
+                "agent_name": "deploy-bot",
+                "card_url": "https://agents.example.com/deploy-bot/card",
                 "auth_type": "bearer",
-                "auth_config": {
-                  "token": "secret"
-                },
                 "streaming": true,
                 "team_id": 0
               }
@@ -21816,7 +21843,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 分页使用 `offset`/`limit`（而非 `p`/`limit`）。\n",
           "href": "/zh/api-reference/ai-sre/a2a-agents/remote-agent-read-list",
           "metadata": {
             "sidebarTitle": "查询 A2A 智能体列表"
@@ -21847,30 +21874,27 @@
                   "data": {
                     "items": [
                       {
-                        "agent_id": "a2a_9d4c1f60b3a2",
+                        "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D",
                         "account_id": 10023,
                         "team_id": 0,
                         "can_edit": true,
-                        "agent_name": "Network Diagnostics Agent",
-                        "description": "Runs traceroute and BGP-path analysis for network incidents.",
-                        "card_url": "https://agents.example.com/network-diag/.well-known/agent.json",
+                        "agent_name": "deploy-bot",
+                        "description": "Remote agent that inspects deployment pipelines.",
+                        "card_url": "https://agents.example.com/deploy-bot/card",
                         "auth_type": "bearer",
-                        "auth_config": {
-                          "token": "secret"
-                        },
                         "streaming": true,
                         "status": "enabled",
-                        "agent_card_name": "network-diag",
+                        "agent_card_name": "Deploy Bot",
                         "agent_card_skills": [
-                          "traceroute",
-                          "bgp-analysis"
+                          "rollback",
+                          "diff"
                         ],
                         "card_resolve_timeout": 10,
                         "task_timeout": 120,
                         "auth_mode": "shared",
                         "created_by": 80011,
-                        "created_at": 1716960000,
-                        "updated_at": 1717046400
+                        "created_at": 1716960000000,
+                        "updated_at": 1717046400000
                       }
                     ],
                     "total": 1
@@ -21913,7 +21937,7 @@
       "post": {
         "operationId": "remote-agent-read-get",
         "summary": "查看 A2A 智能体详情",
-        "description": "按 ID 返回单个 A2A 智能体的完整配置。",
+        "description": "按 ID 查看单个 A2A 智能体。",
         "tags": [
           "AI SRE/A2A 智能体"
         ],
@@ -21952,30 +21976,27 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "agent_id": "a2a_9d4c1f60b3a2",
+                    "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "agent_name": "Network Diagnostics Agent",
-                    "description": "Runs traceroute and BGP-path analysis for network incidents.",
-                    "card_url": "https://agents.example.com/network-diag/.well-known/agent.json",
+                    "agent_name": "deploy-bot",
+                    "description": "Remote agent that inspects deployment pipelines.",
+                    "card_url": "https://agents.example.com/deploy-bot/card",
                     "auth_type": "bearer",
-                    "auth_config": {
-                      "token": "secret"
-                    },
                     "streaming": true,
                     "status": "enabled",
-                    "agent_card_name": "network-diag",
+                    "agent_card_name": "Deploy Bot",
                     "agent_card_skills": [
-                      "traceroute",
-                      "bgp-analysis"
+                      "rollback",
+                      "diff"
                     ],
                     "card_resolve_timeout": 10,
                     "task_timeout": 120,
                     "auth_mode": "shared",
                     "created_by": 80011,
-                    "created_at": 1716960000,
-                    "updated_at": 1717046400
+                    "created_at": 1716960000000,
+                    "updated_at": 1717046400000
                   }
                 }
               }
@@ -22002,7 +22023,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22013,7 +22034,7 @@
       "post": {
         "operationId": "remote-agent-write-update",
         "summary": "更新 A2A 智能体",
-        "description": "编辑 A2A 智能体的 card URL、鉴权、流式开关或所属团队。",
+        "description": "对 A2A 智能体执行部分更新；省略字段表示不变。",
         "tags": [
           "AI SRE/A2A 智能体"
         ],
@@ -22023,7 +22044,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 省略某字段即保持不变；仅请求中出现的字段会被更新。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Agent 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/a2a-agents/remote-agent-write-update",
           "metadata": {
             "sidebarTitle": "更新 A2A 智能体"
@@ -22044,14 +22065,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22061,6 +22083,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22077,8 +22102,8 @@
                 "$ref": "#/components/schemas/A2AAgentUpdateRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2",
-                "description": "Runs traceroute, BGP, and DNS analysis for network incidents."
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D",
+                "description": "Inspects deployment pipelines and proposes rollbacks."
               }
             }
           }
@@ -22089,7 +22114,7 @@
       "post": {
         "operationId": "remote-agent-write-enable",
         "summary": "启用 A2A 智能体",
-        "description": "启用已禁用的 A2A 智能体，使 SRE 智能体可向其委派任务。",
+        "description": "启用已禁用的 A2A 智能体。",
         "tags": [
           "AI SRE/A2A 智能体"
         ],
@@ -22099,7 +22124,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 若智能体已启用则返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Agent 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/a2a-agents/remote-agent-write-enable",
           "metadata": {
             "sidebarTitle": "启用 A2A 智能体"
@@ -22120,14 +22145,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22137,6 +22163,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22153,7 +22182,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22164,7 +22193,7 @@
       "post": {
         "operationId": "remote-agent-write-disable",
         "summary": "禁用 A2A 智能体",
-        "description": "禁用 A2A 智能体，使 SRE 智能体停止向其委派任务。",
+        "description": "禁用已启用的 A2A 智能体。",
         "tags": [
           "AI SRE/A2A 智能体"
         ],
@@ -22174,7 +22203,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 若智能体已禁用则返回 InvalidParameter。\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Agent 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/a2a-agents/remote-agent-write-disable",
           "metadata": {
             "sidebarTitle": "禁用 A2A 智能体"
@@ -22195,14 +22224,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22212,6 +22242,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22228,7 +22261,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22239,7 +22272,7 @@
       "post": {
         "operationId": "remote-agent-write-delete",
         "summary": "删除 A2A 智能体",
-        "description": "软删除 A2A 智能体注册，使其不再可用。",
+        "description": "按 ID 软删除 A2A 智能体。",
         "tags": [
           "AI SRE/A2A 智能体"
         ],
@@ -22249,7 +22282,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 每次调用都会记入账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **Agent 管理**（`ai-sre`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/a2a-agents/remote-agent-write-delete",
           "metadata": {
             "sidebarTitle": "删除 A2A 智能体"
@@ -22270,14 +22303,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "成功时恒为 null。"
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22287,6 +22321,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22303,7 +22340,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22314,7 +22351,7 @@
       "post": {
         "operationId": "session-read-list",
         "summary": "查询会话列表",
-        "description": "分页查询调用者在所属账户内可见的智能体会话，可按应用、入口来源、归档状态与团队范围过滤。读取范围限定为 app_key 解析出的人员可见范围。",
+        "description": "分页查询调用者可见的智能体会话，可按应用、入口、归档状态与团队过滤。",
         "tags": [
           "AI SRE/会话"
         ],
@@ -22324,26 +22361,10 @@
           }
         ],
         "x-mint": {
-          "content": "## 使用限制\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 频率限制 | 每个账户 **每分钟 1,000 次**；**每秒 50 次** |\n| 权限 | 无 —— 任意有效 `app_key` 均可调用 |\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 分页使用 `p`/`limit`（最大 100）；`scope` 默认 `all`（本人 + 所属团队）。\n- `is_running` 反映实时运行集合；`has_unread` 按调用者各自计算。\n",
           "href": "/zh/api-reference/ai-sre/sessions/session-read-list",
           "metadata": {
             "sidebarTitle": "查询会话列表"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionListRequest"
-              },
-              "example": {
-                "app_name": "ai-sre",
-                "limit": 2,
-                "orderby": "updated_at",
-                "scope": "all"
-              }
-            }
           }
         },
         "responses": {
@@ -22416,6 +22437,22 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionListRequest"
+              },
+              "example": {
+                "app_name": "ai-sre",
+                "limit": 2,
+                "orderby": "updated_at",
+                "scope": "all"
+              }
+            }
+          }
         }
       }
     },
@@ -22423,7 +22460,7 @@
       "post": {
         "operationId": "session-read-info",
         "summary": "查看会话详情",
-        "description": "查看单个会话详情，并返回其最近事件的一页（向更早方向分页）。使用 search_after_ctx 翻阅更早的历史。",
+        "description": "查看单个会话，并返回其最近事件的一页（向更早方向分页）。",
         "tags": [
           "AI SRE/会话"
         ],
@@ -22433,24 +22470,10 @@
           }
         ],
         "x-mint": {
-          "content": "## 使用限制\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 频率限制 | 每个账户 **每分钟 1,000 次**；**每秒 50 次** |\n| 权限 | 无 —— 任意有效 `app_key` 均可调用 |\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 使用上一次响应的 `search_after_ctx` 翻阅更早的历史。\n- `limit`（或旧版 `num_recent_events`）限制事件页大小；默认 100，最大 1000。\n",
           "href": "/zh/api-reference/ai-sre/sessions/session-read-info",
           "metadata": {
             "sidebarTitle": "查看会话详情"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionGetRequest"
-              },
-              "example": {
-                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
-                "num_recent_events": 50
-              }
-            }
           }
         },
         "responses": {
@@ -22543,14 +22566,25 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionGetRequest"
+              },
+              "example": {
+                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                "num_recent_events": 50
+              }
+            }
           }
         }
       }
@@ -22559,7 +22593,7 @@
       "post": {
         "operationId": "session-read-export",
         "summary": "导出会话记录",
-        "description": "以 NDJSON（application/x-ndjson）流式导出会话的完整事件记录，每行一个 JSON 对象。第一行始终为 session_meta 信封，其后为会话事件（见 ExportLine）。请逐行解析并写入文件，切勿将整段记录全部读入内存。include_subagents 为 true 时，每条 subagent_dispatch 行后会跟随子会话自身的事件流。",
+        "description": "以换行分隔的 JSON（NDJSON）流式导出会话的完整事件记录。",
         "tags": [
           "AI SRE/会话"
         ],
@@ -22569,10 +22603,35 @@
           }
         ],
         "x-mint": {
-          "content": "## 使用限制\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 频率限制 | 每个账户 **每分钟 1,000 次**；**每秒 50 次** |\n| 权限 | 无 —— 任意有效 `app_key` 均可调用 |\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 响应为 `application/x-ndjson`——请逐行解析并写入文件，切勿将整段记录读入内存。\n- 第一行始终为 `session_meta` 信封；`include_subagents=true` 会在派发行后内联各子会话的事件流。\n",
           "href": "/zh/api-reference/ai-sre/sessions/session-read-export",
           "metadata": {
             "sidebarTitle": "导出会话记录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "流式 NDJSON（application/x-ndjson）。每行一个 JSON 对象，以换行结束。第一行始终为 `session_meta` 信封，其后为会话事件。",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string",
+                  "description": "换行分隔的 JSON 流。请逐行解析，切勿缓冲整个响应体。"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         },
         "requestBody": {
@@ -22588,17 +22647,54 @@
               }
             }
           }
+        }
+      }
+    },
+    "/safari/session/delete": {
+      "post": {
+        "operationId": "session-write-delete",
+        "summary": "删除会话",
+        "description": "按 ID 删除会话。",
+        "tags": [
+          "AI SRE/会话"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 需要对该会话拥有管理权限（创建者、账户管理员或所属团队成员）。\n",
+          "href": "/zh/api-reference/ai-sre/sessions/session-write-delete",
+          "metadata": {
+            "sidebarTitle": "删除会话"
+          }
         },
         "responses": {
           "200": {
-            "description": "Streaming NDJSON (application/x-ndjson). One JSON object per line, terminated by a newline. The first line is always a `session_meta` envelope; subsequent lines are session events (see ExportLine).",
+            "description": "Success",
             "content": {
-              "application/x-ndjson": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "description": "Newline-delimited JSON stream. Parse line-by-line; do not buffer the whole body. Each line decodes to an ExportLine object — see #/components/schemas/ExportLine."
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "null",
+                          "description": "成功时恒为 null。"
+                        }
+                      }
+                    }
+                  ]
                 },
-                "example": "{\"type\":\"session_meta\",\"session_id\":\"sess_f8oDvqiG64uur6sBNsTc4u\",\"account_id\":2451002751131,\"app_name\":\"ai-sre\",\"started_at\":\"2026-06-02T02:39:31.228Z\",\"ended_at\":\"2026-06-02T02:39:53.457Z\",\"model\":\"deepseek-v4-pro\"}\n{\"type\":\"user_message\",\"seq\":1,\"ts\":\"2026-06-02T02:39:31.241Z\"}\n{\"type\":\"user_message\",\"seq\":2,\"ts\":\"2026-06-02T02:39:31.245Z\",\"content\":\"<attached_context> ... </attached_context>\"}\n{\"type\":\"final_answer\",\"seq\":3,\"ts\":\"2026-06-02T02:39:53.457Z\",\"content\":\"## Conclusion: noise alert, not a real incident ...\"}\n"
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
+                }
               }
             }
           },
@@ -22608,14 +22704,24 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionDeleteRequest"
+              },
+              "example": {
+                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u"
+              }
+            }
           }
         }
       }
@@ -22632,7 +22738,7 @@
     },
     "responses": {
       "BadRequest": {
-        "description": "请求非法 — 通常是参数缺失或格式不正确。",
+        "description": "Invalid request — usually a missing or malformed parameter.",
         "content": {
           "application/json": {
             "schema": {
@@ -22640,11 +22746,12 @@
             },
             "examples": {
               "missingParameter": {
+                "summary": "Missing required parameter",
                 "value": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "error": {
                     "code": "InvalidParameter",
-                    "message": "The specified parameter is not valid."
+                    "message": "The specified parameter skill_id is not valid."
                   }
                 }
               }
@@ -22653,7 +22760,7 @@
         }
       },
       "Unauthorized": {
-        "description": "app_key 缺失或无效。",
+        "description": "Missing or invalid app_key.",
         "content": {
           "application/json": {
             "schema": {
@@ -22674,14 +22781,14 @@
         }
       },
       "Forbidden": {
-        "description": "app_key 有效但没有执行该操作的权限。",
+        "description": "The app_key is valid but lacks permission for this operation.",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
             },
             "examples": {
-              "noEditPermission": {
+              "accessDenied": {
                 "value": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "error": {
@@ -22716,7 +22823,7 @@
         }
       },
       "TooManyRequests": {
-        "description": "命中限流。可能是全局 API 限流、账户级限流或集成级限流。限流按账户聚合。",
+        "description": "Rate limit hit. Either the global API limit or a per-account limit.",
         "content": {
           "application/json": {
             "schema": {
@@ -22737,7 +22844,7 @@
         }
       },
       "ServerError": {
-        "description": "服务端未预期错误。反馈问题时请携带 request_id。",
+        "description": "Unexpected server-side error. Include the request_id when reporting.",
         "content": {
           "application/json": {
             "schema": {
@@ -22761,7 +22868,7 @@
     "schemas": {
       "ErrorCode": {
         "type": "string",
-        "description": "Flashduty 错误码枚举。每个失败响应的 `error.code` 都是下列稳定值之一，HTTP 状态码仅作参考。\n\n| 错误码 | HTTP | 含义 |\n|---|---|---|\n| `OK` | 200 | 保留值，正常错误响应不会返回。 |\n| `InvalidParameter` | 400 | 必填参数缺失或未通过校验。 |\n| `BadRequest` | 400 | 通用的 400 错误，通常是请求本身不合法。 |\n| `InvalidContentType` | 400 | 请求头 `Content-Type` 不是 `application/json`。 |\n| `ResourceNotFound` | 400 | 目标资源不存在。注意 HTTP 状态码是 400 而非 404（历史设计）。 |\n| `NoLicense` | 400 | 功能需要有效授权，但未找到可用的 license。 |\n| `ReferenceExist` | 400 | 该资源仍被其他实体引用，无法删除。 |\n| `Unauthorized` | 401 | `app_key` 缺失、无效或已过期。 |\n| `BalanceNotEnough` | 402 | 账户余额不足，无法执行需要计费的操作。 |\n| `AccessDenied` | 403 | 身份认证通过，但 RBAC 权限不足以执行该操作。 |\n| `RouteNotFound` | 404 | 请求的 URL 路径不是已知路由。 |\n| `MethodNotAllowed` | 405 | 当前路径不接受所使用的 HTTP 方法。 |\n| `UndonedOrderExist` | 409 | 账户存在未完成的订单，请稍后重试。 |\n| `RequestLocked` | 423 | 因连续失败被临时锁定。 |\n| `EntityTooLarge` | 413 | 请求体超过允许的最大长度。 |\n| `RequestTooFrequently` | 429 | 命中限流（全局、账户级或集成级）。 |\n| `RequestVerifyRequired` | 428 | 操作需要二次验证码，但未提供。 |\n| `DangerousOperation` | 428 | 危险操作，需要进行 MFA 验证。 |\n| `InternalError` | 500 | 服务端未预期错误。反馈问题请附上 `request_id`。 |\n| `ServiceUnavailable` | 503 | 后端依赖不可用，请稍后重试。 |",
+        "description": "Flashduty error code enum. Every failed API response sets `error.code` to one of these values. The value is a stable wire string — not a localized message and not a numeric status. HTTP status is informational.",
         "enum": [
           "OK",
           "InvalidParameter",
@@ -22783,42 +22890,18 @@
           "DangerousOperation",
           "InternalError",
           "ServiceUnavailable"
-        ],
-        "x-enumDescriptions": {
-          "OK": "保留值，正常错误响应不会返回。",
-          "InvalidParameter": "必填参数缺失或未通过校验。",
-          "BadRequest": "通用的 400 错误，通常是请求本身不合法。",
-          "InvalidContentType": "请求头 `Content-Type` 不是 `application/json`。",
-          "ResourceNotFound": "目标资源不存在。注意 HTTP 状态码是 400 而非 404（历史设计）。",
-          "NoLicense": "功能需要有效授权，但未找到可用的 license。",
-          "ReferenceExist": "该资源仍被其他实体引用，无法删除。",
-          "Unauthorized": "`app_key` 缺失、无效或已过期。",
-          "BalanceNotEnough": "账户余额不足，无法执行需要计费的操作。",
-          "AccessDenied": "身份认证通过，但 RBAC 权限不足以执行该操作。",
-          "RouteNotFound": "请求的 URL 路径不是已知路由。",
-          "MethodNotAllowed": "当前路径不接受所使用的 HTTP 方法。",
-          "UndonedOrderExist": "账户存在未完成的订单，请稍后重试。",
-          "RequestLocked": "因连续失败被临时锁定。",
-          "EntityTooLarge": "请求体超过允许的最大长度。",
-          "RequestTooFrequently": "命中限流（全局、账户级或集成级）。",
-          "RequestVerifyRequired": "操作需要二次验证码，但未提供。",
-          "DangerousOperation": "危险操作，需要进行 MFA 验证。",
-          "InternalError": "服务端未预期错误。反馈问题请附上 `request_id`。",
-          "ServiceUnavailable": "后端依赖不可用，请稍后重试。"
-        },
-        "example": "InvalidParameter"
+        ]
       },
       "DutyError": {
         "type": "object",
-        "description": "响应结构中的错误 payload，仅在非 2xx 响应时出现。",
+        "description": "Error payload inside the response envelope. Present only on non-2xx responses.",
         "properties": {
           "code": {
             "$ref": "#/components/schemas/ErrorCode"
           },
           "message": {
             "type": "string",
-            "description": "用户可读的错误描述，语言会跟随调用方的 Accept-Language。可能包含字段名、ID 等请求上下文。",
-            "example": "The specified parameter template_id is not valid."
+            "description": "Human-readable error message, localized by the caller's Accept-Language. May contain field names, IDs, or other context from the failing request."
           }
         },
         "required": [
@@ -22846,7 +22929,7 @@
       },
       "ErrorResponse": {
         "type": "object",
-        "description": "错误响应结构。`error` 必填，`data` 不存在。",
+        "description": "Response envelope for errors. `error` is required; `data` is absent.",
         "properties": {
           "request_id": {
             "type": "string",
@@ -39168,11 +39251,11 @@
       },
       "MCPServerStatusRequest": {
         "type": "object",
-        "description": "Selector for the server whose status is being changed.",
+        "description": "按 ID 启用/禁用 MCP 服务器。",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the target server."
+            "description": "目标 MCP 服务器 ID。"
           }
         },
         "required": [
@@ -39181,114 +39264,114 @@
       },
       "SkillItem": {
         "type": "object",
-        "description": "An AI SRE skill — a packaged capability the agent can load at runtime.",
+        "description": "AI SRE 技能 —— 智能体可加载的 SKILL.md 打包资源。",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Unique identifier of the skill."
+            "description": "技能唯一 ID（前缀 `skill_`）。"
           },
           "account_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning account."
+            "description": "所属账户 ID。",
+            "format": "int64"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team; 0 means account scope."
+            "description": "团队范围：0 表示账户级；>0 表示所属团队。",
+            "format": "int64"
           },
           "skill_name": {
             "type": "string",
-            "description": "Name of the skill, parsed from its SKILL.md frontmatter."
+            "description": "技能名称，在账户内唯一。"
           },
           "description": {
             "type": "string",
-            "description": "What the skill does and when the agent should use it."
+            "description": "来自 SKILL.md frontmatter 的可读描述。"
           },
           "content": {
             "type": "string",
-            "description": "Full SKILL.md body; omitted in list responses."
+            "description": "完整的 SKILL.md 内容；列表响应中省略。"
           },
           "version": {
             "type": "string",
-            "description": "Skill version string from its frontmatter."
+            "description": "frontmatter 中的技能版本。"
           },
           "tags": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Tags declared in the skill frontmatter."
+            "description": "从 frontmatter 解析的标签。"
           },
           "author": {
             "type": "string",
-            "description": "Author declared in the skill frontmatter."
+            "description": "技能作者。"
           },
           "license": {
             "type": "string",
-            "description": "License declared in the skill frontmatter."
+            "description": "技能许可证。"
           },
           "tools": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Tools the skill requires, declared in its frontmatter."
+            "description": "所需工具（内置或 `mcp:server/tool`）。"
           },
           "s3_key": {
             "type": "string",
-            "description": "Object-storage key of the skill's zip package."
+            "description": "技能压缩包在对象存储中的 key。"
           },
           "checksum": {
             "type": "string",
-            "description": "SHA-256 checksum of the skill's zip package."
+            "description": "技能压缩包的 SHA-256 校验和。"
           },
           "status": {
             "type": "string",
+            "description": "技能状态。",
             "enum": [
               "enabled",
               "disabled"
-            ],
-            "description": "Whether the skill is active and loadable by agents."
+            ]
           },
           "created_by": {
             "type": "integer",
-            "format": "int64",
-            "description": "Member who created this resource."
+            "description": "创建该技能的成员 ID。",
+            "format": "int64"
           },
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Creation time as a Unix timestamp in milliseconds."
+            "description": "创建时间，Unix 毫秒时间戳。"
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Last-update time as a Unix timestamp in milliseconds."
+            "description": "最近更新时间，Unix 毫秒时间戳。"
           },
           "can_edit": {
             "type": "boolean",
-            "description": "Whether the calling member may edit or delete this resource."
+            "description": "调用者是否可编辑该技能。"
           },
           "source_template_name": {
             "type": "string",
-            "description": "Marketplace template this skill was installed from, if any."
+            "description": "该技能安装来源的市场模板名称；自建技能为空。"
           },
           "source_template_version": {
             "type": "string",
-            "description": "Marketplace template version captured at install time."
+            "description": "安装时的模板版本。"
           },
           "update_available": {
             "type": "boolean",
-            "description": "A newer marketplace template version exists for this skill."
+            "description": "当市场存在更新版本时为 true。"
           },
           "is_modified": {
             "type": "boolean",
-            "description": "A marketplace-sourced skill has been edited locally; auto-update skips it."
+            "description": "当市场来源技能被本地修改时为 true（自动更新将跳过）。"
           },
           "created": {
             "type": "boolean",
-            "description": "Install response only: true for a fresh install, false for an in-place upsert."
+            "description": "仅在“从会话安装”响应中出现：true 表示新建，false 表示原地更新。"
           }
         },
         "required": [
@@ -39492,15 +39575,17 @@
       },
       "A2AAgentListRequest": {
         "type": "object",
-        "description": "Filters for listing A2A agents.",
+        "description": "A2A 智能体列表的分页与团队过滤条件。",
         "properties": {
           "offset": {
             "type": "integer",
-            "description": "Number of rows to skip for pagination."
+            "description": "分页行偏移。",
+            "default": 0
           },
           "limit": {
             "type": "integer",
-            "description": "Maximum number of rows to return; defaults to 20."
+            "description": "每页数量。",
+            "default": 20
           },
           "team_ids": {
             "type": "array",
@@ -39508,31 +39593,37 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Restrict results to resources owned by these teams; intersected with the caller's visible set."
+            "description": "按团队 ID 过滤；为空则使用调用者可见范围。"
           },
           "include_account": {
-            "type": "boolean",
-            "description": "Include account-scoped rows alongside team-scoped ones; defaults to true."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "是否包含账户级（team_id=0）记录，默认 true。"
           }
         }
       },
       "SkillUpdateRequest": {
         "type": "object",
-        "description": "Editable fields of a skill.",
+        "description": "可编辑的技能元数据。",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to update."
+            "description": "目标技能 ID。"
           },
           "description": {
             "type": "string",
-            "maxLength": 1024,
-            "description": "New description for the skill."
+            "description": "新的描述。",
+            "maxLength": 1024
           },
           "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Reassign the skill to this team; omit to leave unchanged, 0 for account scope."
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "重新分配团队范围：0 表示账户级；>0 表示团队。省略则不变。",
+            "format": "int64"
           }
         },
         "required": [
@@ -39541,19 +39632,19 @@
       },
       "MCPServerListResponse": {
         "type": "object",
-        "description": "Paginated MCP server list.",
+        "description": "分页的 MCP 服务器列表。",
         "properties": {
           "total": {
             "type": "integer",
-            "format": "int64",
-            "description": "Total number of servers matching the filters."
+            "description": "匹配的服务器总数。",
+            "format": "int64"
           },
           "servers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MCPServerItem"
             },
-            "description": "MCP servers on the current page."
+            "description": "当前页的 MCP 服务器。"
           }
         },
         "required": [
@@ -39563,137 +39654,146 @@
       },
       "MCPServerItem": {
         "type": "object",
-        "description": "A configured MCP (Model Context Protocol) server the agent can call tools through.",
+        "description": "账户下注册的 MCP 服务器（连接器）。",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Unique identifier of the MCP server."
+            "description": "MCP 服务器唯一 ID（前缀 `mcp_`）。"
           },
           "account_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning account."
+            "description": "所属账户 ID。",
+            "format": "int64"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team; 0 means account scope."
+            "description": "团队范围：0 表示账户级；>0 表示所属团队。",
+            "format": "int64"
           },
           "can_edit": {
             "type": "boolean",
-            "description": "Whether the calling member may edit or delete this resource."
+            "description": "调用者是否可编辑该服务器。"
           },
           "server_name": {
             "type": "string",
-            "description": "Display name of the MCP server."
+            "description": "MCP 服务器名称，在账户内唯一。"
           },
           "description": {
             "type": "string",
-            "description": "What this MCP server provides."
+            "description": "服务器描述。"
           },
           "ai_description": {
             "type": "string",
-            "description": "LLM-generated description, preferred over description when present."
+            "description": "LLM 生成的描述，存在时优先于 `description`。"
           },
           "transport": {
             "type": "string",
+            "description": "传输协议。",
             "enum": [
               "stdio",
               "sse",
               "streamable-http"
-            ],
-            "description": "Transport used to reach the server."
+            ]
           },
           "command": {
             "type": "string",
-            "description": "Executable launched for stdio transport."
+            "description": "可执行命令（仅 stdio 传输）。"
           },
           "args": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Command-line arguments for the stdio executable."
+            "description": "命令参数（stdio 传输）。"
           },
           "env": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Environment variables passed to the stdio process."
+            "description": "环境变量（stdio 传输）；密钥值已脱敏。"
           },
           "url": {
             "type": "string",
-            "description": "Endpoint URL for sse or streamable-http transport."
+            "description": "服务器 URL（sse / streamable-http 传输）。"
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "HTTP headers sent to the remote endpoint; secret values are masked."
+            "description": "HTTP 头（sse / streamable-http）；密钥值已脱敏。"
           },
           "proxy_url": {
             "type": "string",
-            "description": "Outbound proxy URL used to reach the server."
+            "description": "访问服务器使用的出站代理 URL。"
           },
           "status": {
             "type": "string",
+            "description": "服务器状态。",
             "enum": [
               "enabled",
               "disabled"
-            ],
-            "description": "Whether the server is active and usable by agents."
+            ]
           },
           "connect_timeout": {
             "type": "integer",
-            "description": "Connection timeout in seconds."
+            "description": "连接超时，单位秒（0 表示默认 10 秒）。"
           },
           "call_timeout": {
             "type": "integer",
-            "description": "Per-call timeout in seconds."
+            "description": "工具调用超时，单位秒（0 表示默认 60 秒）。"
           },
           "tools": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MCPToolInfo"
             },
-            "description": "Live tool catalogue; populated only by get and test."
+            "description": "实时工具列表；由 get/test 接口填充。"
           },
           "tool_count": {
             "type": "integer",
-            "description": "Number of tools discovered on the server."
+            "description": "实时工具列表的数量。"
           },
           "list_error": {
             "type": "string",
-            "description": "Tool-probe failure message; present when the live probe failed."
+            "description": "实时获取工具列表失败时的错误信息。"
           },
           "auth_mode": {
             "type": "string",
-            "description": "Credential model: shared, per_user_secret, or per_user_oauth."
+            "description": "认证模式。",
+            "enum": [
+              "shared",
+              "per_user_secret",
+              "per_user_oauth"
+            ]
           },
           "secret_schema": {
             "type": "string",
-            "description": "JSON schema of the per-user secret."
+            "description": "JSON 编码的密钥 schema（per_user_secret 模式）。"
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "OAuth metadata JSON."
+            "description": "JSON 编码的 OAuth 元数据（per_user_oauth 模式）。"
+          },
+          "source_template_name": {
+            "type": "string",
+            "description": "该连接器安装来源的市场模板名称；自建为空。"
           },
           "created_by": {
             "type": "integer",
-            "format": "int64",
-            "description": "Member who created this resource."
+            "description": "创建该服务器的成员 ID。",
+            "format": "int64"
           },
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Creation time as a Unix timestamp in milliseconds."
+            "description": "创建时间，Unix 毫秒时间戳。"
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Last-update time as a Unix timestamp in milliseconds."
+            "description": "最近更新时间，Unix 毫秒时间戳。"
           }
         },
         "required": [
@@ -39714,18 +39814,20 @@
       },
       "MCPToolInfo": {
         "type": "object",
-        "description": "Metadata for a single tool exposed by an MCP server.",
+        "description": "MCP 服务器暴露的单个工具的元数据。",
         "properties": {
           "name": {
             "type": "string",
-            "description": "Tool name as advertised by the server."
+            "description": "工具名称。"
           },
           "description": {
             "type": "string",
-            "description": "What the tool does."
+            "description": "工具描述。"
           },
           "input_schema": {
-            "description": "JSON schema of the tool's input arguments."
+            "type": "object",
+            "additionalProperties": true,
+            "description": "描述工具输入参数的 JSON Schema。"
           }
         },
         "required": [
@@ -39735,11 +39837,11 @@
       },
       "SkillDownloadRequest": {
         "type": "object",
-        "description": "Selector for the skill to download.",
+        "description": "按 ID 下载技能压缩包。",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to download."
+            "description": "目标技能 ID。"
           }
         },
         "required": [
@@ -39819,11 +39921,11 @@
       },
       "SkillDeleteRequest": {
         "type": "object",
-        "description": "Selector for the skill to delete.",
+        "description": "按 ID 删除技能。",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to delete."
+            "description": "目标技能 ID。"
           }
         },
         "required": [
@@ -39832,11 +39934,11 @@
       },
       "MCPServerGetRequest": {
         "type": "object",
-        "description": "Selector for a single MCP server.",
+        "description": "按 ID 查询 MCP 服务器。",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the server to fetch."
+            "description": "目标 MCP 服务器 ID。"
           }
         },
         "required": [
@@ -39862,11 +39964,11 @@
       },
       "SkillGetRequest": {
         "type": "object",
-        "description": "Selector for a single skill.",
+        "description": "按 ID 查询技能。",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to fetch."
+            "description": "目标技能 ID。"
           }
         },
         "required": [
@@ -39875,19 +39977,19 @@
       },
       "SkillListResponse": {
         "type": "object",
-        "description": "Paginated skill list.",
+        "description": "分页的技能列表。",
         "properties": {
           "total": {
             "type": "integer",
-            "format": "int64",
-            "description": "Total number of skills matching the filters."
+            "description": "匹配的技能总数。",
+            "format": "int64"
           },
           "skills": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SkillItem"
             },
-            "description": "Skills on the current page."
+            "description": "当前页的技能。"
           }
         },
         "required": [
@@ -39984,11 +40086,11 @@
       },
       "SkillStatusRequest": {
         "type": "object",
-        "description": "Selector for the skill whose status is being changed.",
+        "description": "按 ID 启用/禁用技能。",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the target skill."
+            "description": "目标技能 ID。"
           }
         },
         "required": [
@@ -39997,90 +40099,95 @@
       },
       "MCPServerCreateRequest": {
         "type": "object",
-        "description": "Configuration for a new MCP server.",
+        "description": "新建 MCP 服务器的配置。",
         "properties": {
           "server_name": {
             "type": "string",
+            "description": "MCP 服务器名称，在账户内唯一。",
             "minLength": 1,
-            "maxLength": 255,
-            "description": "Display name of the server."
+            "maxLength": 255
           },
           "description": {
             "type": "string",
+            "description": "服务器描述。",
             "minLength": 1,
-            "maxLength": 1024,
-            "description": "What this MCP server provides."
+            "maxLength": 1024
           },
           "transport": {
             "type": "string",
+            "description": "传输协议。",
             "enum": [
               "stdio",
               "sse",
               "streamable-http"
-            ],
-            "description": "Transport used to reach the server."
+            ]
           },
           "command": {
             "type": "string",
-            "description": "Executable to launch for stdio transport."
+            "description": "可执行命令（stdio 传输）。"
           },
           "args": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Command-line arguments for the stdio executable."
+            "description": "命令参数（stdio 传输）。"
           },
           "env": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Environment variables for the stdio process."
+            "description": "环境变量（stdio 传输）。"
           },
           "url": {
             "type": "string",
-            "description": "Endpoint URL for sse or streamable-http transport."
+            "description": "服务器 URL（sse / streamable-http 传输）。"
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "HTTP headers sent to the remote endpoint."
+            "description": "HTTP 头（sse / streamable-http）。"
           },
           "connect_timeout": {
             "type": "integer",
-            "description": "Connection timeout in seconds."
+            "description": "连接超时，单位秒。0 表示默认（10 秒）。"
           },
           "call_timeout": {
             "type": "integer",
-            "description": "Per-call timeout in seconds."
+            "description": "工具调用超时，单位秒。0 表示默认（60 秒）。"
+          },
+          "auth_mode": {
+            "type": "string",
+            "description": "认证模式：shared（默认）、per_user_secret 或 per_user_oauth。"
+          },
+          "secret_schema": {
+            "type": "string",
+            "description": "JSON 密钥 schema；auth_mode=per_user_secret 时必填。"
+          },
+          "oauth_metadata": {
+            "type": "string",
+            "description": "JSON OAuth 元数据；为 per_user_oauth 预留。"
           },
           "status": {
             "type": "string",
+            "description": "初始状态。",
             "enum": [
               "enabled",
               "disabled"
             ],
-            "description": "Initial lifecycle state of the server."
+            "default": "enabled"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team for the new server; 0 for account scope."
+            "description": "团队范围：0 表示账户级；>0 表示团队。",
+            "format": "int64"
           },
-          "auth_mode": {
+          "source_template_name": {
             "type": "string",
-            "description": "Credential model; defaults to shared."
-          },
-          "secret_schema": {
-            "type": "string",
-            "description": "JSON schema of the per-user secret; required when auth_mode is per_user_secret."
-          },
-          "oauth_metadata": {
-            "type": "string",
-            "description": "OAuth metadata JSON; reserved for OAuth-based auth."
+            "description": "从连接器模板创建时的市场模板名称。"
           }
         },
         "required": [
@@ -40091,11 +40198,11 @@
       },
       "MCPServerDeleteRequest": {
         "type": "object",
-        "description": "Selector for the server to delete.",
+        "description": "按 ID 删除 MCP 服务器。",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the server to delete."
+            "description": "目标 MCP 服务器 ID。"
           }
         },
         "required": [
@@ -40104,15 +40211,17 @@
       },
       "SkillListRequest": {
         "type": "object",
-        "description": "Filters for listing skills.",
+        "description": "技能列表的分页与团队过滤条件。",
         "properties": {
           "p": {
             "type": "integer",
-            "description": "Page number, starting at 1."
+            "description": "页码，从 1 开始。",
+            "default": 1
           },
           "limit": {
             "type": "integer",
-            "description": "Page size; defaults to 20."
+            "description": "每页数量。",
+            "default": 20
           },
           "team_ids": {
             "type": "array",
@@ -40120,96 +40229,102 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Restrict results to resources owned by these teams; intersected with the caller's visible set."
+            "description": "按团队 ID 过滤；为空则使用调用者可见范围。"
           },
           "include_account": {
-            "type": "boolean",
-            "description": "Include account-scoped rows alongside team-scoped ones; defaults to true."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "是否包含账户级（team_id=0）记录，默认 true。"
           }
         }
       },
       "MCPServerUpdateRequest": {
         "type": "object",
-        "description": "Editable fields of an MCP server; omitted fields are left unchanged.",
+        "description": "MCP 服务器的部分更新；省略字段表示不变。",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the server to update."
+            "description": "目标 MCP 服务器 ID。"
           },
           "server_name": {
             "type": "string",
+            "description": "新名称。",
             "minLength": 1,
-            "maxLength": 255,
-            "description": "New display name."
+            "maxLength": 255
           },
           "description": {
             "type": "string",
+            "description": "新描述。",
             "minLength": 1,
-            "maxLength": 1024,
-            "description": "New description."
+            "maxLength": 1024
           },
           "transport": {
             "type": "string",
+            "description": "传输协议。",
             "enum": [
               "stdio",
               "sse",
               "streamable-http"
-            ],
-            "description": "New transport for the server."
+            ]
           },
           "command": {
             "type": "string",
-            "description": "New stdio executable."
+            "description": "可执行命令（stdio 传输）。"
           },
           "args": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "New stdio arguments."
+            "description": "命令参数（stdio 传输）。"
           },
           "env": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "New stdio environment variables."
+            "description": "环境变量（stdio 传输）。"
           },
           "url": {
             "type": "string",
-            "description": "New endpoint URL for remote transports."
+            "description": "服务器 URL（sse / streamable-http 传输）。"
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "New HTTP headers for the remote endpoint."
+            "description": "HTTP 头（sse / streamable-http）。"
           },
           "connect_timeout": {
             "type": "integer",
-            "description": "New connection timeout in seconds."
+            "description": "连接超时，单位秒。0 表示默认（10 秒）。"
           },
           "call_timeout": {
             "type": "integer",
-            "description": "New per-call timeout in seconds."
-          },
-          "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Reassign the server to this team; omit to leave unchanged, 0 for account scope."
+            "description": "工具调用超时，单位秒。0 表示默认（60 秒）。"
           },
           "auth_mode": {
             "type": "string",
-            "description": "New credential model."
+            "description": "认证模式：shared（默认）、per_user_secret 或 per_user_oauth。"
           },
           "secret_schema": {
             "type": "string",
-            "description": "New per-user secret JSON schema."
+            "description": "JSON 密钥 schema；auth_mode=per_user_secret 时必填。"
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "New OAuth metadata JSON."
+            "description": "JSON OAuth 元数据；为 per_user_oauth 预留。"
+          },
+          "team_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "重新分配团队范围：0 表示账户级；>0 表示团队。省略则不变。",
+            "format": "int64"
           }
         },
         "required": [
@@ -40331,19 +40446,19 @@
       },
       "A2AAgentListResponse": {
         "type": "object",
-        "description": "Paginated A2A agent list.",
+        "description": "分页的 A2A 智能体列表。",
         "properties": {
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/A2AAgentItem"
             },
-            "description": "A2A agents on the current page."
+            "description": "当前页的 A2A 智能体。"
           },
           "total": {
             "type": "integer",
-            "format": "int64",
-            "description": "Total number of agents matching the filters."
+            "description": "匹配的智能体总数。",
+            "format": "int64"
           }
         },
         "required": [
@@ -40353,106 +40468,111 @@
       },
       "A2AAgentItem": {
         "type": "object",
-        "description": "A registered A2A (agent-to-agent) remote agent the SRE agent can delegate to.",
+        "description": "已注册的 A2A（智能体到智能体）远程智能体。",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Unique identifier of the A2A agent."
+            "description": "A2A 智能体唯一 ID（前缀 `a2a_`）。"
           },
           "account_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning account."
+            "description": "所属账户 ID。",
+            "format": "int64"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team; 0 means account scope."
+            "description": "团队范围：0 表示账户级；>0 表示所属团队。",
+            "format": "int64"
           },
           "can_edit": {
             "type": "boolean",
-            "description": "Whether the calling member may edit or delete this resource."
+            "description": "调用者是否可编辑该智能体。"
           },
           "agent_name": {
             "type": "string",
-            "description": "Display name of the agent."
+            "description": "智能体显示名称。"
           },
           "description": {
             "type": "string",
-            "description": "What this agent does and when to delegate to it."
+            "description": "智能体描述。"
           },
           "card_url": {
             "type": "string",
-            "description": "URL of the agent's published A2A agent card."
+            "description": "远程智能体卡片的 URL。"
           },
           "auth_type": {
             "type": "string",
-            "description": "Authentication scheme used when calling the agent."
+            "description": "访问远程智能体的认证类型。"
           },
           "auth_config": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Authentication parameters keyed by name."
+            "description": "认证配置；密钥值已脱敏。"
           },
           "streaming": {
             "type": "boolean",
-            "description": "Whether the agent supports streaming responses."
+            "description": "远程智能体是否支持流式响应。"
           },
           "status": {
             "type": "string",
+            "description": "智能体状态。",
             "enum": [
               "enabled",
               "disabled"
-            ],
-            "description": "Whether the agent is active and reachable."
+            ]
           },
           "agent_card_name": {
             "type": "string",
-            "description": "Name resolved from the fetched agent card."
+            "description": "从远程卡片解析出的智能体名称。"
           },
           "agent_card_skills": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Skills advertised on the fetched agent card."
+            "description": "远程卡片声明的技能。"
           },
           "card_resolve_timeout": {
             "type": "integer",
-            "description": "Timeout for fetching the agent card, in seconds."
+            "description": "卡片解析超时，单位秒。"
           },
           "task_timeout": {
             "type": "integer",
-            "description": "Timeout for a single delegated task, in seconds."
+            "description": "单任务执行超时，单位秒。"
           },
           "auth_mode": {
             "type": "string",
-            "description": "Credential model: shared, per_user_secret, or per_user_oauth."
+            "description": "认证模式。",
+            "enum": [
+              "shared",
+              "per_user_secret",
+              "per_user_oauth"
+            ]
           },
           "secret_schema": {
             "type": "string",
-            "description": "JSON schema of the per-user secret."
+            "description": "JSON 编码的密钥 schema（per_user_secret 模式）。"
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "OAuth metadata JSON."
+            "description": "JSON 编码的 OAuth 元数据（per_user_oauth 模式）。"
           },
           "created_by": {
             "type": "integer",
-            "format": "int64",
-            "description": "Member who created this resource."
+            "description": "创建该智能体的成员 ID。",
+            "format": "int64"
           },
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Creation time as a Unix timestamp in seconds."
+            "description": "创建时间，Unix 毫秒时间戳。"
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Last-update time as a Unix timestamp in seconds."
+            "description": "最近更新时间，Unix 毫秒时间戳。"
           }
         },
         "required": [
@@ -40475,56 +40595,83 @@
       },
       "A2AAgentUpdateRequest": {
         "type": "object",
-        "description": "Editable fields of an A2A agent; omitted fields are left unchanged.",
+        "description": "A2A 智能体的部分更新；为空或省略的字段保持不变。",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Identifier of the agent to update."
+            "description": "目标智能体 ID。"
           },
           "agent_name": {
-            "type": "string",
-            "maxLength": 128,
-            "description": "New display name."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的显示名称。省略则不变。",
+            "maxLength": 128
           },
           "description": {
-            "type": "string",
-            "description": "New description."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的描述。省略则不变。"
           },
           "card_url": {
-            "type": "string",
-            "description": "New agent card URL."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的卡片 URL。省略则不变。"
           },
           "auth_type": {
-            "type": "string",
-            "description": "New authentication scheme."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的认证类型。省略则不变。"
           },
           "auth_config": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "New authentication parameters."
+            "description": "替换认证配置。省略则不变。"
           },
           "streaming": {
-            "type": "boolean",
-            "description": "Toggle streaming-response support."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "切换流式支持。省略则不变。"
           },
           "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Reassign the agent to this team; omit to leave unchanged, 0 for account scope."
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "重新分配团队范围。省略则不变。",
+            "format": "int64"
           },
           "auth_mode": {
-            "type": "string",
-            "description": "New credential model."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的认证模式：shared、per_user_secret 或 per_user_oauth。"
           },
           "secret_schema": {
-            "type": "string",
-            "description": "New per-user secret JSON schema."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的 JSON 密钥 schema。"
           },
           "oauth_metadata": {
-            "type": "string",
-            "description": "New OAuth metadata JSON."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的 JSON OAuth 元数据。"
           }
         },
         "required": [
@@ -40533,52 +40680,52 @@
       },
       "A2AAgentCreateRequest": {
         "type": "object",
-        "description": "Configuration for a new A2A agent.",
+        "description": "注册新 A2A 智能体的参数。",
         "properties": {
           "agent_name": {
             "type": "string",
-            "maxLength": 128,
-            "description": "Display name of the agent."
+            "description": "智能体显示名称。",
+            "maxLength": 128
           },
           "description": {
             "type": "string",
-            "description": "What this agent does and when to delegate to it."
+            "description": "智能体描述。"
           },
           "card_url": {
             "type": "string",
-            "description": "URL of the agent's published A2A agent card."
+            "description": "远程智能体卡片的 URL。"
           },
           "auth_type": {
             "type": "string",
-            "description": "Authentication scheme used when calling the agent."
+            "description": "远程智能体的认证类型。"
           },
           "auth_config": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Authentication parameters keyed by name."
+            "description": "认证配置键值对。"
           },
           "streaming": {
             "type": "boolean",
-            "description": "Whether the agent supports streaming responses."
+            "description": "远程智能体是否支持流式响应。"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team for the new agent; 0 for account scope."
+            "description": "团队范围：0 表示账户级；>0 表示团队。",
+            "format": "int64"
           },
           "auth_mode": {
             "type": "string",
-            "description": "Credential model; defaults to shared."
+            "description": "认证模式：shared（默认）、per_user_secret 或 per_user_oauth。"
           },
           "secret_schema": {
             "type": "string",
-            "description": "JSON schema of the per-user secret; required when auth_mode is per_user_secret."
+            "description": "JSON 密钥 schema；auth_mode=per_user_secret 时必填。"
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "OAuth metadata JSON; reserved for OAuth-based auth."
+            "description": "JSON OAuth 元数据；为 per_user_oauth 预留。"
           }
         },
         "required": [
@@ -40588,15 +40735,17 @@
       },
       "MCPServerListRequest": {
         "type": "object",
-        "description": "Filters for listing MCP servers.",
+        "description": "MCP 服务器列表的分页与团队过滤条件。",
         "properties": {
           "p": {
             "type": "integer",
-            "description": "Page number, starting at 1."
+            "description": "页码，从 1 开始。",
+            "default": 1
           },
           "limit": {
             "type": "integer",
-            "description": "Page size; defaults to 20."
+            "description": "每页数量。",
+            "default": 20
           },
           "team_ids": {
             "type": "array",
@@ -40604,21 +40753,24 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Restrict results to resources owned by these teams; intersected with the caller's visible set."
+            "description": "按团队 ID 过滤；为空则使用调用者可见范围。"
           },
           "include_account": {
-            "type": "boolean",
-            "description": "Include account-scoped rows alongside team-scoped ones; defaults to true."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "是否包含账户级（team_id=0）记录，默认 true。"
           }
         }
       },
       "A2AAgentCreateResponse": {
         "type": "object",
-        "description": "Identifier of the newly created A2A agent.",
+        "description": "注册 A2A 智能体的结果。",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Identifier of the created agent."
+            "description": "新建智能体的 ID。"
           }
         },
         "required": [
@@ -40761,11 +40913,11 @@
       },
       "A2AAgentIDRequest": {
         "type": "object",
-        "description": "Selector for a single A2A agent.",
+        "description": "按 ID 查询 A2A 智能体。",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Identifier of the target agent."
+            "description": "目标智能体 ID。"
           }
         },
         "required": [
@@ -40935,33 +41087,37 @@
       },
       "SessionListRequest": {
         "type": "object",
-        "description": "Filters for listing agent sessions. Reads are scoped to the account the app_key resolves to and to the resolved person's visible teams.",
+        "description": "查询智能体会话列表的过滤条件。读取范围限定为解析出的账户及调用者可见的团队。",
         "properties": {
           "app_name": {
             "type": "string",
-            "description": "Agent app whose sessions to list.",
+            "description": "要查询其会话的智能体应用。",
             "enum": [
               "ask-ai",
               "support",
               "support-website",
               "support-flashcat",
               "ai-sre",
-              "template-assistant"
+              "template-assistant",
+              "swe"
             ]
           },
           "p": {
             "type": "integer",
-            "description": "1-based page number; defaults to 1."
+            "description": "页码，从 1 开始。",
+            "default": 1,
+            "minimum": 1
           },
           "limit": {
             "type": "integer",
-            "description": "Page size, 1..100; defaults to 20.",
+            "description": "每页数量，1–100。",
             "minimum": 1,
-            "maximum": 100
+            "maximum": 100,
+            "default": 20
           },
           "orderby": {
             "type": "string",
-            "description": "Sort column.",
+            "description": "排序字段。",
             "enum": [
               "created_at",
               "updated_at"
@@ -40969,20 +41125,20 @@
           },
           "asc": {
             "type": "boolean",
-            "description": "Ascending sort when true; defaults to false (descending). Only honored when orderby is set."
+            "description": "为 true 时升序；仅在设置 `orderby` 时生效。"
           },
           "include_subagent_sessions": {
             "type": "boolean",
-            "description": "Include subagent (child) sessions in the result; defaults to false."
+            "description": "是否在列表中包含子智能体派生的会话。"
           },
           "keyword": {
             "type": "string",
-            "maxLength": 64,
-            "description": "Case-insensitive substring match against session name."
+            "description": "按会话名称关键字过滤。",
+            "maxLength": 64
           },
           "scope": {
             "type": "string",
-            "description": "Visibility scope: all (own + member-of-team rows, the default), personal (own only), or team (member teams only).",
+            "description": "可见范围：all（本人 + 所属团队，默认）、personal 或 team。",
             "enum": [
               "all",
               "personal",
@@ -40995,7 +41151,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Optional explicit team filter; intersected with the caller's visible set / scope."
+            "description": "可选的团队过滤；与 `scope` 取交集。"
           },
           "entry_kinds": {
             "type": "array",
@@ -41005,14 +41161,14 @@
                 "web",
                 "im",
                 "api",
-                "scheduled"
+                "automation"
               ]
             },
-            "description": "Restrict to sessions produced by these entry surfaces. Empty returns every kind."
+            "description": "仅返回由这些入口产生的会话；为空则返回所有类型。"
           },
           "status": {
             "type": "string",
-            "description": "Archive bucket: active (default, not archived), archived, or all.",
+            "description": "归档分桶：active（默认）返回未归档，archived 返回已归档，all 返回全部。",
             "enum": [
               "active",
               "archived",
@@ -41026,105 +41182,105 @@
       },
       "SessionTokenUsage": {
         "type": "object",
-        "description": "Cumulative session-level token rollup across all turns. The account-billing source of truth.",
+        "description": "跨所有轮次的会话级 token 累计汇总。账户计费的权威来源。",
         "properties": {
           "input_tokens": {
             "type": "integer",
             "format": "int64",
-            "description": "Total prompt (input) tokens, including the cached portion."
+            "description": "提示（输入）token 总数，含缓存部分。"
           },
           "cached_tokens": {
             "type": "integer",
             "format": "int64",
-            "description": "Portion of input_tokens served from the prompt cache."
+            "description": "input_tokens 中由提示缓存命中的部分。"
           },
           "output_tokens": {
             "type": "integer",
             "format": "int64",
-            "description": "Total generated (output) tokens."
+            "description": "生成（输出）token 总数。"
           },
           "reasoning_tokens": {
             "type": "integer",
             "format": "int64",
-            "description": "Total reasoning/thinking tokens."
+            "description": "推理/思考 token 总数。"
           }
         }
       },
       "EnvironmentBinding": {
         "type": "object",
-        "description": "The runner or cloud sandbox the session is bound to. Null until the first message.",
+        "description": "会话绑定的 runner 或云沙箱。首条消息前为 null。",
         "properties": {
           "kind": {
             "type": "string",
-            "description": "Environment kind (e.g. runner, sandbox)."
+            "description": "环境类型（如 runner、sandbox）。"
           },
           "id": {
             "type": "string",
-            "description": "Environment identifier."
+            "description": "环境标识。"
           },
           "name": {
             "type": "string",
-            "description": "Human-readable environment name."
+            "description": "可读的环境名称。"
           },
           "status": {
             "type": "string",
-            "description": "Binding status."
+            "description": "绑定状态。"
           }
         }
       },
       "ContextResolvedItem": {
         "type": "object",
-        "description": "Snapshot of the three-tier knowledge-pack resolution for this session.",
+        "description": "该会话三层知识包解析结果的快照。",
         "properties": {
           "account_pack_id": {
             "type": "string",
-            "description": "Resolved account-scoped pack id."
+            "description": "解析出的账户级知识包 ID。"
           },
           "team_pack_id": {
             "type": "string",
-            "description": "Resolved team-scoped pack id."
+            "description": "解析出的团队级知识包 ID。"
           },
           "incident_id": {
             "type": "string",
-            "description": "Bound incident id, when war-room originated."
+            "description": "作战室来源时绑定的故障 ID。"
           },
           "resolved_at_ms": {
             "type": "integer",
             "format": "int64",
-            "description": "Unix timestamp in milliseconds when the packs were resolved."
+            "description": "知识包解析时间，Unix 毫秒时间戳。"
           },
           "versions": {
             "type": "object",
             "additionalProperties": {
               "type": "integer"
             },
-            "description": "Per-pack resolved version map."
+            "description": "各知识包解析版本映射。"
           }
         }
       },
       "SessionItem": {
         "type": "object",
-        "description": "One agent session row.",
+        "description": "单条智能体会话记录。",
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "Session identifier."
+            "description": "会话标识。"
           },
           "parent_session_id": {
             "type": "string",
-            "description": "Parent session id for subagent (child) sessions; empty otherwise."
+            "description": "子智能体（子）会话的父会话 ID；否则为空。"
           },
           "session_name": {
             "type": "string",
-            "description": "Session title; may be empty for untitled sessions."
+            "description": "会话标题；未命名会话可能为空。"
           },
           "app_name": {
             "type": "string",
-            "description": "Agent app that owns the session."
+            "description": "拥有该会话的智能体应用。"
           },
           "entry_kind": {
             "type": "string",
-            "description": "Surface that created the session.",
+            "description": "创建该会话的入口来源。",
             "enum": [
               "web",
               "im",
@@ -41135,28 +41291,28 @@
           },
           "person_id": {
             "type": "string",
-            "description": "Creator person id."
+            "description": "创建者人员 ID。"
           },
           "team_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Owning team id; 0 means no team is bound. Immutable after create."
+            "description": "所属团队 ID；0 表示未绑定团队。创建后不可变更。"
           },
           "team_name": {
             "type": "string",
-            "description": "Resolved team name; empty for unbound rows or deleted teams."
+            "description": "解析出的团队名称；未绑定或团队已删除时为空。"
           },
           "is_mine": {
             "type": "boolean",
-            "description": "True when the caller created this session."
+            "description": "当该会话由调用者创建时为 true。"
           },
           "can_manage": {
             "type": "boolean",
-            "description": "True when the caller may rename/archive/delete the session."
+            "description": "当调用者可重命名/归档/删除该会话时为 true。"
           },
           "status": {
             "type": "string",
-            "description": "Lifecycle status.",
+            "description": "生命周期状态。",
             "enum": [
               "enabled",
               "deleted"
@@ -41164,26 +41320,26 @@
           },
           "incognito": {
             "type": "boolean",
-            "description": "True for incognito (non-persisted-memory) sessions."
+            "description": "无痕（不持久化记忆）会话时为 true。"
           },
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Unix timestamp in milliseconds when the session was created."
+            "description": "会话创建时间，Unix 毫秒时间戳。"
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Unix timestamp in milliseconds of the last session update."
+            "description": "会话最近更新时间，Unix 毫秒时间戳。"
           },
           "template_staging_round_id": {
             "type": "string",
-            "description": "Current save→validate round id (template-assistant only); empty otherwise."
+            "description": "当前 save→validate 轮次 ID（仅 template-assistant）；否则为空。"
           },
           "state": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Raw session-state bag (session-scoped keys). Omitted when empty."
+            "description": "原始会话状态包（会话级键）。为空时省略。"
           },
           "bound_environment": {
             "$ref": "#/components/schemas/EnvironmentBinding"
@@ -41197,81 +41353,81 @@
           "current_context_tokens": {
             "type": "integer",
             "format": "int64",
-            "description": "Size in tokens of the LLM context window as of the most recent turn. 0 means no turn has completed."
+            "description": "截至最近一轮的 LLM 上下文窗口的 token 数。0 表示尚无已完成的轮次。"
           },
           "context_window": {
             "type": "integer",
             "format": "int64",
-            "description": "The bound model's max context size in tokens. 0 means unknown."
+            "description": "所绑定模型的最大上下文 token 数。0 表示未知。"
           },
           "archived_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Unix timestamp in milliseconds when archived; 0 means not archived."
+            "description": "归档时间，Unix 毫秒时间戳；0 表示未归档。"
           },
           "pinned_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Caller's per-user pin timestamp in milliseconds; 0 means not pinned."
+            "description": "调用者的个人置顶时间，Unix 毫秒时间戳；0 表示未置顶。"
           },
           "last_event_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Unix timestamp in milliseconds of the most recent assistant-side event."
+            "description": "最近一条助手侧事件的时间，Unix 毫秒时间戳。"
           },
           "is_running": {
             "type": "boolean",
-            "description": "True when an agent turn is currently in flight for this session."
+            "description": "当该会话当前有正在进行的智能体轮次时为 true。"
           },
           "has_unread": {
             "type": "boolean",
-            "description": "True when there is assistant output the caller has not yet viewed."
+            "description": "当存在调用者尚未查看的助手输出时为 true。"
           }
         }
       },
       "SessionListResponse": {
         "type": "object",
-        "description": "A page of agent sessions.",
+        "description": "一页智能体会话。",
         "properties": {
           "total": {
             "type": "integer",
             "format": "int64",
-            "description": "Total number of sessions matching the filter (ignoring pagination)."
+            "description": "匹配过滤条件的会话总数（忽略分页）。"
           },
           "sessions": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SessionItem"
             },
-            "description": "The page of sessions."
+            "description": "当前页的会话。"
           }
         }
       },
       "SessionGetRequest": {
         "type": "object",
-        "description": "Fetch one session plus a recent page of its events.",
+        "description": "查询单个会话，并返回其最近事件的一页（向更早方向分页）。",
         "properties": {
           "session_id": {
             "type": "string",
-            "minLength": 1,
-            "description": "Session identifier."
+            "description": "目标会话 ID。",
+            "minLength": 1
           },
           "num_recent_events": {
             "type": "integer",
+            "description": "旧版每页数量：返回的最近事件数。与 `limit` 同时设置时以 `limit` 为准；0 使用服务端默认值（100）。",
             "minimum": 0,
-            "maximum": 1000,
-            "description": "Number of most-recent events to return; 0 uses the server default."
+            "maximum": 1000
           },
           "limit": {
             "type": "integer",
+            "description": "事件每页数量；优先于 `num_recent_events`。0 使用服务端默认值（100）。",
             "minimum": 0,
-            "maximum": 1000,
-            "description": "Alias for num_recent_events; takes precedence when both are set."
+            "maximum": 1000
           },
           "search_after_ctx": {
             "type": "string",
-            "maxLength": 4096,
-            "description": "Opaque keyset cursor from a previous response's search_after_ctx, to page backward through older events."
+            "description": "上一次响应返回的不透明游标；回传以获取更早的一页。",
+            "maxLength": 4096
           }
         },
         "required": [
@@ -41280,62 +41436,62 @@
       },
       "EventItem": {
         "type": "object",
-        "description": "One persisted session event. content/actions/usage_metadata carry the raw ADK envelope; treat them as opaque structured payloads.",
+        "description": "单条已持久化的会话事件。content/actions/usage_metadata 携带原始 ADK 信封，请将其视为不透明的结构化负载。",
         "properties": {
           "event_id": {
             "type": "string",
-            "description": "Event identifier."
+            "description": "事件标识。"
           },
           "session_id": {
             "type": "string",
-            "description": "Owning session id."
+            "description": "所属会话 ID。"
           },
           "invocation_id": {
             "type": "string",
-            "description": "ADK invocation id grouping a turn."
+            "description": "标识一轮的 ADK 调用 ID。"
           },
           "author": {
             "type": "string",
-            "description": "Event author (e.g. user, the agent name)."
+            "description": "事件作者（如 user 或智能体名称）。"
           },
           "branch": {
             "type": "string",
-            "description": "ADK branch path for nested agents."
+            "description": "嵌套智能体的 ADK 分支路径。"
           },
           "content": {
             "type": "object",
             "additionalProperties": true,
-            "description": "ADK content envelope {role, parts:[...]}."
+            "description": "ADK content 信封 {role, parts:[...]}。"
           },
           "actions": {
             "type": "object",
             "additionalProperties": true,
-            "description": "ADK actions envelope (state deltas, transfers, escalation)."
+            "description": "ADK actions 信封（状态增量、转移、升级）。"
           },
           "usage_metadata": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Per-turn token usage metadata."
+            "description": "单轮 token 用量元数据。"
           },
           "partial": {
             "type": "boolean",
-            "description": "True for a streaming partial chunk."
+            "description": "流式部分分片时为 true。"
           },
           "turn_complete": {
             "type": "boolean",
-            "description": "True on the terminal event of a turn."
+            "description": "一轮的终止事件上为 true。"
           },
           "error_code": {
             "type": "string",
-            "description": "Error code when the event represents a failure."
+            "description": "当该事件表示失败时的错误码。"
           },
           "error_message": {
             "type": "string",
-            "description": "Human-readable error message, when present."
+            "description": "可读的错误信息（如有）。"
           },
           "status": {
             "type": "string",
-            "description": "Event status.",
+            "description": "事件状态。",
             "enum": [
               "normal",
               "compressed"
@@ -41344,13 +41500,13 @@
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Unix timestamp in milliseconds when the event was written."
+            "description": "事件写入时间，Unix 毫秒时间戳。"
           }
         }
       },
       "SessionGetResponse": {
         "type": "object",
-        "description": "A session plus a backward-paged window of its events.",
+        "description": "一个会话及其事件的一页（向更早方向分页）。",
         "properties": {
           "session": {
             "$ref": "#/components/schemas/SessionItem"
@@ -41360,165 +41516,75 @@
             "items": {
               "$ref": "#/components/schemas/EventItem"
             },
-            "description": "Recent events, ascending by (created_at, event_id)."
+            "description": "最近事件，按 (created_at, event_id) 升序排列。"
           },
           "has_more_older": {
             "type": "boolean",
-            "description": "True when older events remain beyond this page."
+            "description": "当本页之外仍有更早的事件时为 true。"
           },
           "search_after_ctx": {
             "type": "string",
-            "description": "Opaque keyset cursor; pass back as search_after_ctx to fetch the next older page. Omitted when has_more_older is false."
+            "description": "不透明游标；作为 search_after_ctx 回传以获取更早的一页。has_more_older 为 false 时省略。"
           }
         }
       },
       "SessionExportRequest": {
         "type": "object",
-        "description": "Export the full event transcript of one session as a streaming NDJSON body.",
+        "description": "以流式 NDJSON 导出单个会话的完整事件记录。",
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "Session identifier to export."
+            "description": "目标会话 ID。"
           },
           "include_subagents": {
             "type": "boolean",
-            "description": "When true, each subagent_dispatch line is followed by the child session's full event stream, bracketed by its own session_meta. Defaults to false."
+            "description": "为 true 时，每条 subagent_dispatch 行后会跟随子会话的完整事件流，并以其自身的 session_meta 包裹。默认 false。"
           }
         },
         "required": [
           "session_id"
         ]
       },
-      "ExportUsage": {
+      "SkillUploadRequest": {
         "type": "object",
-        "description": "Per-LLM-call token counts on an export line. Absent fields are 0.",
+        "description": "上传技能压缩包的 multipart 表单。",
         "properties": {
-          "input_tokens": {
-            "type": "integer",
-            "description": "Prompt (input) tokens for the call."
-          },
-          "output_tokens": {
-            "type": "integer",
-            "description": "Generated (output) tokens for the call."
-          },
-          "cache_read": {
-            "type": "integer",
-            "description": "Tokens served from the prompt cache."
-          },
-          "cache_creation": {
-            "type": "integer",
-            "description": "Tokens written to the prompt cache."
-          }
-        }
-      },
-      "ExportLine": {
-        "type": "object",
-        "description": "One line of the NDJSON export stream. The `type` field discriminates the line: session_meta (always first), user_message, llm_call, tool_call, subagent_dispatch, final_answer, agent_text, or error (emitted only if the stream is truncated mid-export). Fields are sparse — only those relevant to the line type are present.",
-        "properties": {
-          "type": {
+          "file": {
             "type": "string",
-            "description": "Line discriminator.",
-            "enum": [
-              "session_meta",
-              "user_message",
-              "llm_call",
-              "tool_call",
-              "subagent_dispatch",
-              "final_answer",
-              "agent_text",
-              "error"
-            ]
+            "format": "binary",
+            "description": "技能压缩包（.skill / .zip / .tar.gz / .tgz），最大 100MB。"
           },
-          "seq": {
+          "team_id": {
             "type": "integer",
-            "description": "1-based monotonic sequence within the session (absent on session_meta)."
+            "description": "新技能的团队范围：0 表示账户级。",
+            "format": "int64"
           },
+          "replace": {
+            "type": "boolean",
+            "description": "为 true 时覆盖同名技能。"
+          },
+          "skill_id": {
+            "type": "string",
+            "description": "替换指定技能时的技能 ID。"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "SessionDeleteRequest": {
+        "type": "object",
+        "description": "按 ID 删除会话。",
+        "properties": {
           "session_id": {
             "type": "string",
-            "description": "Session id (on session_meta)."
-          },
-          "account_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Account id (on session_meta)."
-          },
-          "app_name": {
-            "type": "string",
-            "description": "Agent app (on session_meta)."
-          },
-          "parent_session_id": {
-            "type": "string",
-            "description": "Parent session id for child sessions (on session_meta)."
-          },
-          "started_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "RFC3339 start timestamp (session_meta uses session.created_at)."
-          },
-          "ended_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "RFC3339 end timestamp; stamped on llm_call/tool_call/session_meta."
-          },
-          "model": {
-            "type": "string",
-            "description": "Chat model provider key; on session_meta and llm_call."
-          },
-          "content": {
-            "type": "string",
-            "description": "Text content of the line (messages, answers, errors)."
-          },
-          "ts": {
-            "type": "string",
-            "format": "date-time",
-            "description": "RFC3339 timestamp of the event."
-          },
-          "usage": {
-            "$ref": "#/components/schemas/ExportUsage"
-          },
-          "name": {
-            "type": "string",
-            "description": "Tool name (on tool_call)."
-          },
-          "input": {
-            "type": "object",
-            "additionalProperties": true,
-            "description": "Tool call input arguments (on tool_call)."
-          },
-          "output": {
-            "type": "string",
-            "description": "Tool call output (on tool_call response side)."
-          },
-          "status": {
-            "type": "string",
-            "description": "Tool result status, e.g. ok or error."
-          },
-          "duration_ms": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Call duration in milliseconds."
-          },
-          "input_bytes": {
-            "type": "integer",
-            "description": "Byte size of the tool input."
-          },
-          "output_bytes": {
-            "type": "integer",
-            "description": "Byte size of the tool output."
-          },
-          "error": {
-            "type": "string",
-            "description": "Error detail when a call failed."
-          },
-          "agent_name": {
-            "type": "string",
-            "description": "Dispatched subagent name (on subagent_dispatch)."
-          },
-          "child_session_id": {
-            "type": "string",
-            "description": "Child session id created by the dispatch (on subagent_dispatch)."
+            "description": "目标会话 ID。",
+            "minLength": 1
           }
-        }
+        },
+        "required": [
+          "session_id"
+        ]
       }
     }
   }

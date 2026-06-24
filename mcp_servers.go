@@ -9,7 +9,7 @@ type McpServersService service
 
 // Get MCP server detail.
 //
-// Return the full configuration of a single MCP server, with a live tool catalogue.
+// Get one MCP server and run a live probe of its tool list.
 //
 // API: POST /safari/mcp/server/get (mcp-read-server-get).
 func (s *McpServersService) ReadServerGet(ctx context.Context, req *McpServerGetRequest) (*McpServerItem, *Response, error) {
@@ -23,7 +23,7 @@ func (s *McpServersService) ReadServerGet(ctx context.Context, req *McpServerGet
 
 // List MCP servers.
 //
-// List configured MCP servers visible to the caller across account and team scopes, with pagination.
+// List MCP servers visible to the caller across account and team scopes, with pagination.
 //
 // API: POST /safari/mcp/server/list (mcp-read-server-list).
 func (s *McpServersService) ReadServerList(ctx context.Context, req *McpServerListRequest) (*McpServerListResponse, *Response, error) {
@@ -37,7 +37,7 @@ func (s *McpServersService) ReadServerList(ctx context.Context, req *McpServerLi
 
 // Create MCP server.
 //
-// Register a new MCP server the agent can call tools through.
+// Register a new MCP server (connector) on the account.
 //
 // API: POST /safari/mcp/server/create (mcp-write-server-create).
 func (s *McpServersService) WriteServerCreate(ctx context.Context, req *McpServerCreateRequest) (*McpServerItem, *Response, error) {
@@ -51,7 +51,7 @@ func (s *McpServersService) WriteServerCreate(ctx context.Context, req *McpServe
 
 // Delete MCP server.
 //
-// Permanently remove an MCP server so agents can no longer use its tools.
+// Delete an MCP server by ID.
 //
 // API: POST /safari/mcp/server/delete (mcp-write-server-delete).
 func (s *McpServersService) WriteServerDelete(ctx context.Context, req *McpServerDeleteRequest) (*any, *Response, error) {
@@ -65,7 +65,7 @@ func (s *McpServersService) WriteServerDelete(ctx context.Context, req *McpServe
 
 // Disable MCP server.
 //
-// Deactivate an MCP server so agents stop calling its tools.
+// Disable an enabled MCP server.
 //
 // API: POST /safari/mcp/server/disable (mcp-write-server-disable).
 func (s *McpServersService) WriteServerDisable(ctx context.Context, req *McpServerStatusRequest) (*any, *Response, error) {
@@ -79,7 +79,7 @@ func (s *McpServersService) WriteServerDisable(ctx context.Context, req *McpServ
 
 // Enable MCP server.
 //
-// Activate a disabled MCP server so agents can call its tools.
+// Enable a disabled MCP server.
 //
 // API: POST /safari/mcp/server/enable (mcp-write-server-enable).
 func (s *McpServersService) WriteServerEnable(ctx context.Context, req *McpServerStatusRequest) (*any, *Response, error) {
@@ -93,7 +93,7 @@ func (s *McpServersService) WriteServerEnable(ctx context.Context, req *McpServe
 
 // Update MCP server.
 //
-// Edit an MCP server's connection settings or reassign its owning team.
+// Update an MCP server's configuration. Omit a field to leave it unchanged.
 //
 // API: POST /safari/mcp/server/update (mcp-write-server-update).
 func (s *McpServersService) WriteServerUpdate(ctx context.Context, req *McpServerUpdateRequest) (*McpServerItem, *Response, error) {

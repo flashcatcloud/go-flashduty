@@ -20422,7 +20422,7 @@
                     "total": 1,
                     "skills": [
                       {
-                        "skill_id": "skl-7f3a9c21b8e0",
+                        "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                         "account_id": 10023,
                         "team_id": 0,
                         "skill_name": "k8s-triage",
@@ -20433,6 +20433,10 @@
                           "triage"
                         ],
                         "author": "sre-team",
+                        "tools": [
+                          "bash",
+                          "mcp:prometheus/query"
+                        ],
                         "status": "enabled",
                         "created_by": 80011,
                         "created_at": 1716960000000,
@@ -20481,7 +20485,7 @@
       "post": {
         "operationId": "skill-read-get",
         "summary": "Get skill detail",
-        "description": "Return the full configuration and SKILL.md body of a single skill by ID.",
+        "description": "Get one skill including its full SKILL.md content.",
         "tags": [
           "AI SRE/Skills"
         ],
@@ -20520,7 +20524,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "skill_id": "skl-7f3a9c21b8e0",
+                    "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                     "account_id": 10023,
                     "team_id": 0,
                     "skill_name": "k8s-triage",
@@ -20531,6 +20535,10 @@
                       "triage"
                     ],
                     "author": "sre-team",
+                    "tools": [
+                      "bash",
+                      "mcp:prometheus/query"
+                    ],
                     "status": "enabled",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -20538,7 +20546,7 @@
                     "can_edit": true,
                     "update_available": false,
                     "is_modified": false,
-                    "content": "---\nname: k8s-triage\n---\nDiagnose unhealthy workloads..."
+                    "content": "---\nname: k8s-triage\ndescription: ...\n---\n# Triage steps"
                   }
                 }
               }
@@ -20565,7 +20573,7 @@
                 "$ref": "#/components/schemas/SkillGetRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -20576,7 +20584,7 @@
       "post": {
         "operationId": "skill-write-update",
         "summary": "Update skill",
-        "description": "Edit a skill's description or reassign its owning team.",
+        "description": "Update a skill's description or reassign its team scope.",
         "tags": [
           "AI SRE/Skills"
         ],
@@ -20586,7 +20594,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Only skills the caller may edit can be updated; others return AccessDenied.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Skill Manage** (`ai-sre`) |\n\n## Usage\n\n- Only `description` and `team_id` are editable; the skill body is changed by re-uploading.\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/skills/skill-write-update",
           "metadata": {
             "sidebarTitle": "Update skill"
@@ -20615,17 +20623,21 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "skill_id": "skl-7f3a9c21b8e0",
+                    "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                     "account_id": 10023,
                     "team_id": 0,
                     "skill_name": "k8s-triage",
-                    "description": "Diagnose unhealthy Kubernetes workloads.",
+                    "description": "Updated triage runbook.",
                     "version": "1.2.0",
                     "tags": [
                       "kubernetes",
                       "triage"
                     ],
                     "author": "sre-team",
+                    "tools": [
+                      "bash",
+                      "mcp:prometheus/query"
+                    ],
                     "status": "enabled",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -20644,6 +20656,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
@@ -20659,8 +20674,8 @@
                 "$ref": "#/components/schemas/SkillUpdateRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0",
-                "description": "Diagnose unhealthy Kubernetes workloads."
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
+                "description": "Updated triage runbook."
               }
             }
           }
@@ -20671,7 +20686,7 @@
       "post": {
         "operationId": "skill-write-delete",
         "summary": "Delete skill",
-        "description": "Permanently remove a skill so agents can no longer load it.",
+        "description": "Delete a skill by ID.",
         "tags": [
           "AI SRE/Skills"
         ],
@@ -20681,7 +20696,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Skill Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/skills/skill-write-delete",
           "metadata": {
             "sidebarTitle": "Delete skill"
@@ -20702,14 +20717,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -20719,6 +20735,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -20735,7 +20754,7 @@
                 "$ref": "#/components/schemas/SkillDeleteRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -20746,7 +20765,7 @@
       "post": {
         "operationId": "skill-write-upload",
         "summary": "Upload skill",
-        "description": "Upload a skill zip package and register it as a new account or team skill.",
+        "description": "Upload a skill archive (.skill/.zip/.tar.gz/.tgz) to create or replace a skill.",
         "tags": [
           "AI SRE/Skills"
         ],
@@ -20756,7 +20775,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Request is `multipart/form-data` with a `file` part (the zip) and an optional `team_id` field, not JSON.\n- Duplicate skill names return InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **30 requests/minute**; **3 requests/second** per account |\n| Permissions | **Skill Manage** (`ai-sre`) |\n\n## Usage\n\n- Send as `multipart/form-data` with a `file` part. Max archive size is 100MB.\n- Set `replace=true` to overwrite an existing same-name skill.\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/skills/skill-write-upload",
           "metadata": {
             "sidebarTitle": "Upload skill"
@@ -20785,7 +20804,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "skill_id": "skl-7f3a9c21b8e0",
+                    "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m",
                     "account_id": 10023,
                     "team_id": 0,
                     "skill_name": "k8s-triage",
@@ -20796,13 +20815,18 @@
                       "triage"
                     ],
                     "author": "sre-team",
+                    "tools": [
+                      "bash",
+                      "mcp:prometheus/query"
+                    ],
                     "status": "enabled",
                     "created_by": 80011,
                     "created_at": 1716960000000,
                     "updated_at": 1717046400000,
                     "can_edit": true,
                     "update_available": false,
-                    "is_modified": false
+                    "is_modified": false,
+                    "created": true
                   }
                 }
               }
@@ -20813,6 +20837,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -20826,22 +20853,11 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary",
-                    "description": "Skill zip package to upload."
-                  },
-                  "team_id": {
-                    "type": "integer",
-                    "format": "int64",
-                    "description": "Owning team for the new skill; 0 for account scope."
-                  }
-                },
-                "required": [
-                  "file"
-                ]
+                "$ref": "#/components/schemas/SkillUploadRequest"
+              },
+              "example": {
+                "team_id": 0,
+                "replace": false
               }
             }
           }
@@ -20852,7 +20868,7 @@
       "post": {
         "operationId": "skill-read-download",
         "summary": "Download skill",
-        "description": "Download the original zip package of a skill as a binary attachment.",
+        "description": "Download a skill's zip archive by ID.",
         "tags": [
           "AI SRE/Skills"
         ],
@@ -20862,7 +20878,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Responds with `application/zip` bytes and a `Content-Disposition` attachment header, not the JSON envelope.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **60 requests/minute**; **5 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Returns the raw zip bytes (`application/zip`), not the JSON envelope. The filename is the skill name.\n",
           "href": "/en/api-reference/ai-sre/skills/skill-read-download",
           "metadata": {
             "sidebarTitle": "Download skill"
@@ -20870,28 +20886,20 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
+            "description": "Skill archive (zip).",
+            "headers": {
+              "Content-Disposition": {
+                "description": "attachment; filename=<skill_name>.zip",
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResponseEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "string",
-                          "format": "binary",
-                          "description": "Raw zip bytes (not wrapped in the JSON envelope)."
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
@@ -20917,7 +20925,7 @@
                 "$ref": "#/components/schemas/SkillDownloadRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -20928,7 +20936,7 @@
       "post": {
         "operationId": "skill-read-enable",
         "summary": "Enable skill",
-        "description": "Activate a disabled skill so agents can load it at session start.",
+        "description": "Enable a disabled skill so the agent can load it.",
         "tags": [
           "AI SRE/Skills"
         ],
@@ -20938,7 +20946,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Only disabled skills can be enabled; an already-enabled skill returns InvalidParameter.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Skill Manage** (`ai-sre`) |\n\n## Usage\n\n- Only a `disabled` skill can be enabled; otherwise returns InvalidParameter.\n",
           "href": "/en/api-reference/ai-sre/skills/skill-read-enable",
           "metadata": {
             "sidebarTitle": "Enable skill"
@@ -20959,14 +20967,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -20976,6 +20985,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -20992,7 +21004,7 @@
                 "$ref": "#/components/schemas/SkillStatusRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -21003,7 +21015,7 @@
       "post": {
         "operationId": "skill-write-disable",
         "summary": "Disable skill",
-        "description": "Deactivate an enabled skill so agents no longer load it.",
+        "description": "Disable an enabled skill so the agent stops loading it.",
         "tags": [
           "AI SRE/Skills"
         ],
@@ -21013,7 +21025,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Only enabled skills can be disabled; an already-disabled skill returns InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Skill Manage** (`ai-sre`) |\n\n## Usage\n\n- Only an `enabled` skill can be disabled; otherwise returns InvalidParameter.\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/skills/skill-write-disable",
           "metadata": {
             "sidebarTitle": "Disable skill"
@@ -21034,14 +21046,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21051,6 +21064,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21067,7 +21083,7 @@
                 "$ref": "#/components/schemas/SkillStatusRequest"
               },
               "example": {
-                "skill_id": "skl-7f3a9c21b8e0"
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
               }
             }
           }
@@ -21078,7 +21094,7 @@
       "post": {
         "operationId": "mcp-read-server-list",
         "summary": "List MCP servers",
-        "description": "List configured MCP servers visible to the caller across account and team scopes, with pagination.",
+        "description": "List MCP servers visible to the caller across account and team scopes, with pagination.",
         "tags": [
           "AI SRE/MCP servers"
         ],
@@ -21088,7 +21104,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- The live tool list is not included; fetch a single server to probe its tools.\n",
           "href": "/en/api-reference/ai-sre/mcp-servers/mcp-read-server-list",
           "metadata": {
             "sidebarTitle": "List MCP servers"
@@ -21120,25 +21136,28 @@
                     "total": 1,
                     "servers": [
                       {
-                        "server_id": "mcp-2b5e8d14a7c9",
+                        "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                         "account_id": 10023,
                         "team_id": 0,
                         "can_edit": true,
-                        "server_name": "GitHub Tools",
-                        "description": "Read issues and pull requests from GitHub.",
-                        "transport": "stdio",
-                        "command": "npx",
-                        "args": [
-                          "-y",
-                          "@modelcontextprotocol/server-github"
-                        ],
-                        "env": {
-                          "GITHUB_TOKEN": "ghp_xxx"
-                        },
+                        "server_name": "prometheus",
+                        "description": "Query Prometheus metrics and alerts.",
+                        "transport": "streamable-http",
+                        "url": "https://mcp.example.com/prometheus",
                         "status": "enabled",
                         "connect_timeout": 10,
-                        "call_timeout": 30,
-                        "tool_count": 12,
+                        "call_timeout": 60,
+                        "tool_count": 2,
+                        "tools": [
+                          {
+                            "name": "query",
+                            "description": "Run a PromQL instant query."
+                          },
+                          {
+                            "name": "query_range",
+                            "description": "Run a PromQL range query."
+                          }
+                        ],
                         "auth_mode": "shared",
                         "created_by": 80011,
                         "created_at": 1716960000000,
@@ -21184,7 +21203,7 @@
       "post": {
         "operationId": "mcp-write-server-create",
         "summary": "Create MCP server",
-        "description": "Register a new MCP server the agent can call tools through.",
+        "description": "Register a new MCP server (connector) on the account.",
         "tags": [
           "AI SRE/MCP servers"
         ],
@@ -21194,7 +21213,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `transport` must be one of stdio, sse, or streamable-http; other values return InvalidParameter.\n- Duplicate server names return InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **MCP Manage** (`ai-sre`) |\n\n## Usage\n\n- `command`/`args`/`env` apply to `stdio`; `url`/`headers` apply to `sse`/`streamable-http`.\n- Server name must be unique within the account; duplicates return InvalidParameter.\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/mcp-servers/mcp-write-server-create",
           "metadata": {
             "sidebarTitle": "Create MCP server"
@@ -21223,25 +21242,28 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "server_id": "mcp-2b5e8d14a7c9",
+                    "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "server_name": "GitHub Tools",
-                    "description": "Read issues and pull requests from GitHub.",
-                    "transport": "stdio",
-                    "command": "npx",
-                    "args": [
-                      "-y",
-                      "@modelcontextprotocol/server-github"
-                    ],
-                    "env": {
-                      "GITHUB_TOKEN": "ghp_xxx"
-                    },
+                    "server_name": "prometheus",
+                    "description": "Query Prometheus metrics and alerts.",
+                    "transport": "streamable-http",
+                    "url": "https://mcp.example.com/prometheus",
                     "status": "enabled",
                     "connect_timeout": 10,
-                    "call_timeout": 30,
-                    "tool_count": 12,
+                    "call_timeout": 60,
+                    "tool_count": 2,
+                    "tools": [
+                      {
+                        "name": "query",
+                        "description": "Run a PromQL instant query."
+                      },
+                      {
+                        "name": "query_range",
+                        "description": "Run a PromQL range query."
+                      }
+                    ],
                     "auth_mode": "shared",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -21256,6 +21278,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21272,19 +21297,11 @@
                 "$ref": "#/components/schemas/MCPServerCreateRequest"
               },
               "example": {
-                "server_name": "GitHub Tools",
-                "description": "Read issues and pull requests from GitHub.",
-                "transport": "stdio",
-                "command": "npx",
-                "args": [
-                  "-y",
-                  "@modelcontextprotocol/server-github"
-                ],
-                "env": {
-                  "GITHUB_TOKEN": "ghp_xxx"
-                },
-                "status": "enabled",
-                "team_id": 0
+                "server_name": "prometheus",
+                "description": "Query Prometheus metrics and alerts.",
+                "transport": "streamable-http",
+                "url": "https://mcp.example.com/prometheus",
+                "status": "enabled"
               }
             }
           }
@@ -21295,7 +21312,7 @@
       "post": {
         "operationId": "mcp-read-server-get",
         "summary": "Get MCP server detail",
-        "description": "Return the full configuration of a single MCP server, with a live tool catalogue.",
+        "description": "Get one MCP server and run a live probe of its tool list.",
         "tags": [
           "AI SRE/MCP servers"
         ],
@@ -21305,7 +21322,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- A live tool probe runs on this call; failures populate `list_error` rather than failing the request.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- The detail call live-probes tools; on failure `list_error` is set and the request still succeeds.\n",
           "href": "/en/api-reference/ai-sre/mcp-servers/mcp-read-server-get",
           "metadata": {
             "sidebarTitle": "Get MCP server detail"
@@ -21334,39 +21351,32 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "server_id": "mcp-2b5e8d14a7c9",
+                    "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "server_name": "GitHub Tools",
-                    "description": "Read issues and pull requests from GitHub.",
-                    "transport": "stdio",
-                    "command": "npx",
-                    "args": [
-                      "-y",
-                      "@modelcontextprotocol/server-github"
-                    ],
-                    "env": {
-                      "GITHUB_TOKEN": "ghp_xxx"
-                    },
+                    "server_name": "prometheus",
+                    "description": "Query Prometheus metrics and alerts.",
+                    "transport": "streamable-http",
+                    "url": "https://mcp.example.com/prometheus",
                     "status": "enabled",
                     "connect_timeout": 10,
-                    "call_timeout": 30,
-                    "tool_count": 12,
+                    "call_timeout": 60,
+                    "tool_count": 2,
+                    "tools": [
+                      {
+                        "name": "query",
+                        "description": "Run a PromQL instant query."
+                      },
+                      {
+                        "name": "query_range",
+                        "description": "Run a PromQL range query."
+                      }
+                    ],
                     "auth_mode": "shared",
                     "created_by": 80011,
                     "created_at": 1716960000000,
-                    "updated_at": 1717046400000,
-                    "tools": [
-                      {
-                        "name": "list_issues",
-                        "description": "List issues in a repository."
-                      },
-                      {
-                        "name": "get_pull_request",
-                        "description": "Fetch a pull request by number."
-                      }
-                    ]
+                    "updated_at": 1717046400000
                   }
                 }
               }
@@ -21393,7 +21403,7 @@
                 "$ref": "#/components/schemas/MCPServerGetRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21404,7 +21414,7 @@
       "post": {
         "operationId": "mcp-write-server-update",
         "summary": "Update MCP server",
-        "description": "Edit an MCP server's connection settings or reassign its owning team.",
+        "description": "Update an MCP server's configuration. Omit a field to leave it unchanged.",
         "tags": [
           "AI SRE/MCP servers"
         ],
@@ -21414,7 +21424,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Built-in MCP servers are read-only and cannot be modified.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **MCP Manage** (`ai-sre`) |\n\n## Usage\n\n- Masked secret values in `env`/`headers` are preserved — sending the masked value back does not overwrite the stored secret.\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/mcp-servers/mcp-write-server-update",
           "metadata": {
             "sidebarTitle": "Update MCP server"
@@ -21443,25 +21453,28 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "server_id": "mcp-2b5e8d14a7c9",
+                    "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "server_name": "GitHub Tools",
-                    "description": "Read issues, PRs, and commits from GitHub.",
-                    "transport": "stdio",
-                    "command": "npx",
-                    "args": [
-                      "-y",
-                      "@modelcontextprotocol/server-github"
-                    ],
-                    "env": {
-                      "GITHUB_TOKEN": "ghp_xxx"
-                    },
+                    "server_name": "prometheus",
+                    "description": "Query Prometheus metrics, alerts, and rules.",
+                    "transport": "streamable-http",
+                    "url": "https://mcp.example.com/prometheus",
                     "status": "enabled",
                     "connect_timeout": 10,
-                    "call_timeout": 30,
-                    "tool_count": 12,
+                    "call_timeout": 60,
+                    "tool_count": 2,
+                    "tools": [
+                      {
+                        "name": "query",
+                        "description": "Run a PromQL instant query."
+                      },
+                      {
+                        "name": "query_range",
+                        "description": "Run a PromQL range query."
+                      }
+                    ],
                     "auth_mode": "shared",
                     "created_by": 80011,
                     "created_at": 1716960000000,
@@ -21476,6 +21489,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21492,8 +21508,8 @@
                 "$ref": "#/components/schemas/MCPServerUpdateRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9",
-                "description": "Read issues, PRs, and commits from GitHub."
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1",
+                "description": "Query Prometheus metrics, alerts, and rules."
               }
             }
           }
@@ -21504,7 +21520,7 @@
       "post": {
         "operationId": "mcp-write-server-delete",
         "summary": "Delete MCP server",
-        "description": "Permanently remove an MCP server so agents can no longer use its tools.",
+        "description": "Delete an MCP server by ID.",
         "tags": [
           "AI SRE/MCP servers"
         ],
@@ -21514,7 +21530,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Built-in MCP servers are read-only and cannot be deleted.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **MCP Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/mcp-servers/mcp-write-server-delete",
           "metadata": {
             "sidebarTitle": "Delete MCP server"
@@ -21535,14 +21551,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21552,6 +21569,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21568,7 +21588,7 @@
                 "$ref": "#/components/schemas/MCPServerDeleteRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21579,7 +21599,7 @@
       "post": {
         "operationId": "mcp-write-server-enable",
         "summary": "Enable MCP server",
-        "description": "Activate a disabled MCP server so agents can call its tools.",
+        "description": "Enable a disabled MCP server.",
         "tags": [
           "AI SRE/MCP servers"
         ],
@@ -21589,7 +21609,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Built-in MCP servers are read-only; an already-enabled server returns InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **MCP Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/mcp-servers/mcp-write-server-enable",
           "metadata": {
             "sidebarTitle": "Enable MCP server"
@@ -21610,14 +21630,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21627,6 +21648,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21643,7 +21667,7 @@
                 "$ref": "#/components/schemas/MCPServerStatusRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21654,7 +21678,7 @@
       "post": {
         "operationId": "mcp-write-server-disable",
         "summary": "Disable MCP server",
-        "description": "Deactivate an MCP server so agents stop calling its tools.",
+        "description": "Disable an enabled MCP server.",
         "tags": [
           "AI SRE/MCP servers"
         ],
@@ -21664,7 +21688,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Built-in MCP servers are read-only; an already-disabled server returns InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **MCP Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/mcp-servers/mcp-write-server-disable",
           "metadata": {
             "sidebarTitle": "Disable MCP server"
@@ -21685,14 +21709,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -21702,6 +21727,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21718,7 +21746,7 @@
                 "$ref": "#/components/schemas/MCPServerStatusRequest"
               },
               "example": {
-                "server_id": "mcp-2b5e8d14a7c9"
+                "server_id": "mcp_4kP9wQ2nLceRtY7uVb3xA1"
               }
             }
           }
@@ -21729,7 +21757,7 @@
       "post": {
         "operationId": "remote-agent-write-create",
         "summary": "Create A2A agent",
-        "description": "Register a new A2A remote agent the SRE agent can delegate tasks to.",
+        "description": "Register a new A2A remote agent from its agent-card URL.",
         "tags": [
           "AI SRE/A2A agents"
         ],
@@ -21739,7 +21767,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- The agent card at `card_url` is fetched and validated; an unreachable card returns InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Agent Manage** (`ai-sre`) |\n\n## Usage\n\n- `card_url` must resolve to a valid agent card; an unreachable or invalid card returns InvalidParameter.\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/a2a-agents/remote-agent-write-create",
           "metadata": {
             "sidebarTitle": "Create A2A agent"
@@ -21768,7 +21796,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "agent_id": "a2a_9d4c1f60b3a2"
+                    "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
                   }
                 }
               }
@@ -21779,6 +21807,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -21795,13 +21826,9 @@
                 "$ref": "#/components/schemas/A2AAgentCreateRequest"
               },
               "example": {
-                "agent_name": "Network Diagnostics Agent",
-                "card_url": "https://agents.example.com/network-diag/.well-known/agent.json",
-                "description": "Runs traceroute and BGP-path analysis for network incidents.",
+                "agent_name": "deploy-bot",
+                "card_url": "https://agents.example.com/deploy-bot/card",
                 "auth_type": "bearer",
-                "auth_config": {
-                  "token": "secret"
-                },
                 "streaming": true,
                 "team_id": 0
               }
@@ -21814,7 +21841,7 @@
       "post": {
         "operationId": "remote-agent-read-list",
         "summary": "List A2A agents",
-        "description": "List registered A2A agents visible to the caller across account and team scopes, with pagination.",
+        "description": "List A2A agents visible to the caller across account and team scopes, with pagination.",
         "tags": [
           "AI SRE/A2A agents"
         ],
@@ -21824,7 +21851,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Pagination uses `offset`/`limit` (not `p`/`limit`).\n",
           "href": "/en/api-reference/ai-sre/a2a-agents/remote-agent-read-list",
           "metadata": {
             "sidebarTitle": "List A2A agents"
@@ -21855,30 +21882,27 @@
                   "data": {
                     "items": [
                       {
-                        "agent_id": "a2a_9d4c1f60b3a2",
+                        "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D",
                         "account_id": 10023,
                         "team_id": 0,
                         "can_edit": true,
-                        "agent_name": "Network Diagnostics Agent",
-                        "description": "Runs traceroute and BGP-path analysis for network incidents.",
-                        "card_url": "https://agents.example.com/network-diag/.well-known/agent.json",
+                        "agent_name": "deploy-bot",
+                        "description": "Remote agent that inspects deployment pipelines.",
+                        "card_url": "https://agents.example.com/deploy-bot/card",
                         "auth_type": "bearer",
-                        "auth_config": {
-                          "token": "secret"
-                        },
                         "streaming": true,
                         "status": "enabled",
-                        "agent_card_name": "network-diag",
+                        "agent_card_name": "Deploy Bot",
                         "agent_card_skills": [
-                          "traceroute",
-                          "bgp-analysis"
+                          "rollback",
+                          "diff"
                         ],
                         "card_resolve_timeout": 10,
                         "task_timeout": 120,
                         "auth_mode": "shared",
                         "created_by": 80011,
-                        "created_at": 1716960000,
-                        "updated_at": 1717046400
+                        "created_at": 1716960000000,
+                        "updated_at": 1717046400000
                       }
                     ],
                     "total": 1
@@ -21921,7 +21945,7 @@
       "post": {
         "operationId": "remote-agent-read-get",
         "summary": "Get A2A agent detail",
-        "description": "Return the full configuration of a single A2A agent by ID.",
+        "description": "Get one A2A agent by ID.",
         "tags": [
           "AI SRE/A2A agents"
         ],
@@ -21960,30 +21984,27 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "agent_id": "a2a_9d4c1f60b3a2",
+                    "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D",
                     "account_id": 10023,
                     "team_id": 0,
                     "can_edit": true,
-                    "agent_name": "Network Diagnostics Agent",
-                    "description": "Runs traceroute and BGP-path analysis for network incidents.",
-                    "card_url": "https://agents.example.com/network-diag/.well-known/agent.json",
+                    "agent_name": "deploy-bot",
+                    "description": "Remote agent that inspects deployment pipelines.",
+                    "card_url": "https://agents.example.com/deploy-bot/card",
                     "auth_type": "bearer",
-                    "auth_config": {
-                      "token": "secret"
-                    },
                     "streaming": true,
                     "status": "enabled",
-                    "agent_card_name": "network-diag",
+                    "agent_card_name": "Deploy Bot",
                     "agent_card_skills": [
-                      "traceroute",
-                      "bgp-analysis"
+                      "rollback",
+                      "diff"
                     ],
                     "card_resolve_timeout": 10,
                     "task_timeout": 120,
                     "auth_mode": "shared",
                     "created_by": 80011,
-                    "created_at": 1716960000,
-                    "updated_at": 1717046400
+                    "created_at": 1716960000000,
+                    "updated_at": 1717046400000
                   }
                 }
               }
@@ -22010,7 +22031,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22021,7 +22042,7 @@
       "post": {
         "operationId": "remote-agent-write-update",
         "summary": "Update A2A agent",
-        "description": "Edit an A2A agent's card URL, auth, streaming flag, or owning team.",
+        "description": "Apply a partial update to an A2A agent. Omit a field to leave it unchanged.",
         "tags": [
           "AI SRE/A2A agents"
         ],
@@ -22031,7 +22052,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Omit a field to leave it unchanged; only fields present in the request are updated.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Agent Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/a2a-agents/remote-agent-write-update",
           "metadata": {
             "sidebarTitle": "Update A2A agent"
@@ -22052,14 +22073,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22069,6 +22091,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22085,8 +22110,8 @@
                 "$ref": "#/components/schemas/A2AAgentUpdateRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2",
-                "description": "Runs traceroute, BGP, and DNS analysis for network incidents."
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D",
+                "description": "Inspects deployment pipelines and proposes rollbacks."
               }
             }
           }
@@ -22097,7 +22122,7 @@
       "post": {
         "operationId": "remote-agent-write-enable",
         "summary": "Enable A2A agent",
-        "description": "Activate a disabled A2A agent so the SRE agent can delegate to it.",
+        "description": "Enable a disabled A2A agent.",
         "tags": [
           "AI SRE/A2A agents"
         ],
@@ -22107,7 +22132,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- An already-enabled agent returns InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Agent Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/a2a-agents/remote-agent-write-enable",
           "metadata": {
             "sidebarTitle": "Enable A2A agent"
@@ -22128,14 +22153,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22145,6 +22171,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22161,7 +22190,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22172,7 +22201,7 @@
       "post": {
         "operationId": "remote-agent-write-disable",
         "summary": "Disable A2A agent",
-        "description": "Deactivate an A2A agent so the SRE agent stops delegating to it.",
+        "description": "Disable an enabled A2A agent.",
         "tags": [
           "AI SRE/A2A agents"
         ],
@@ -22182,7 +22211,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- An already-disabled agent returns InvalidParameter.\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Agent Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/a2a-agents/remote-agent-write-disable",
           "metadata": {
             "sidebarTitle": "Disable A2A agent"
@@ -22203,14 +22232,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22220,6 +22250,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22236,7 +22269,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22247,7 +22280,7 @@
       "post": {
         "operationId": "remote-agent-write-delete",
         "summary": "Delete A2A agent",
-        "description": "Soft-delete an A2A agent registration so it can no longer be used.",
+        "description": "Soft-delete an A2A agent by ID.",
         "tags": [
           "AI SRE/A2A agents"
         ],
@@ -22257,7 +22290,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Every call is recorded in the account's audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Agent Manage** (`ai-sre`) |\n\n## Usage\n\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/a2a-agents/remote-agent-write-delete",
           "metadata": {
             "sidebarTitle": "Delete A2A agent"
@@ -22278,14 +22311,15 @@
                       "properties": {
                         "data": {
                           "type": "null",
-                          "description": "No payload; the operation returns an empty data field on success."
+                          "description": "Always null on success."
                         }
                       }
                     }
                   ]
                 },
                 "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
                 }
               }
             }
@@ -22295,6 +22329,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -22311,7 +22348,7 @@
                 "$ref": "#/components/schemas/A2AAgentIDRequest"
               },
               "example": {
-                "agent_id": "a2a_9d4c1f60b3a2"
+                "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D"
               }
             }
           }
@@ -22322,7 +22359,7 @@
       "post": {
         "operationId": "session-read-list",
         "summary": "List sessions",
-        "description": "List agent sessions visible to the caller within the resolved account, filtered by app, entry surface, archive status, and team scope, with pagination. Reads are scoped to the person the app_key resolves to.",
+        "description": "List agent sessions visible to the caller, filtered by app, surface, archive status, and team.",
         "tags": [
           "AI SRE/Sessions"
         ],
@@ -22332,26 +22369,10 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Pagination uses `p`/`limit` (max 100); `scope` defaults to `all` (own + member-of-team rows).\n- `is_running` reflects the live run-set; `has_unread` is computed per calling user.\n",
           "href": "/en/api-reference/ai-sre/sessions/session-read-list",
           "metadata": {
             "sidebarTitle": "List sessions"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionListRequest"
-              },
-              "example": {
-                "app_name": "ai-sre",
-                "limit": 2,
-                "orderby": "updated_at",
-                "scope": "all"
-              }
-            }
           }
         },
         "responses": {
@@ -22424,6 +22445,22 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionListRequest"
+              },
+              "example": {
+                "app_name": "ai-sre",
+                "limit": 2,
+                "orderby": "updated_at",
+                "scope": "all"
+              }
+            }
+          }
         }
       }
     },
@@ -22431,7 +22468,7 @@
       "post": {
         "operationId": "session-read-info",
         "summary": "Get session detail",
-        "description": "Fetch one session plus a backward-paged window of its most recent events. Use search_after_ctx to page through older history.",
+        "description": "Fetch one session plus a backward-paged window of its most recent events.",
         "tags": [
           "AI SRE/Sessions"
         ],
@@ -22441,24 +22478,10 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Page older history with `search_after_ctx` from the previous response.\n- `limit` (or legacy `num_recent_events`) caps the event page; default 100, max 1000.\n",
           "href": "/en/api-reference/ai-sre/sessions/session-read-info",
           "metadata": {
             "sidebarTitle": "Get session detail"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionGetRequest"
-              },
-              "example": {
-                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
-                "num_recent_events": 50
-              }
-            }
           }
         },
         "responses": {
@@ -22551,14 +22574,25 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionGetRequest"
+              },
+              "example": {
+                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u",
+                "num_recent_events": 50
+              }
+            }
           }
         }
       }
@@ -22567,7 +22601,7 @@
       "post": {
         "operationId": "session-read-export",
         "summary": "Export session transcript",
-        "description": "Stream a session's full event transcript as NDJSON (application/x-ndjson), one JSON object per line. The first line is always a session_meta envelope; subsequent lines are session events (see the ExportLine schema). Parse the body line-by-line and write to a file — do NOT buffer the entire transcript into memory. When include_subagents is true, each subagent_dispatch line is followed by the child session's own stream.",
+        "description": "Stream a session's full event transcript as newline-delimited JSON.",
         "tags": [
           "AI SRE/Sessions"
         ],
@@ -22577,10 +22611,35 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- The response is `application/x-ndjson` — parse line-by-line and write to a file; do not buffer the whole body in memory.\n- The first line is always a `session_meta` envelope; `include_subagents=true` inlines each child session's stream after its dispatch line.\n",
           "href": "/en/api-reference/ai-sre/sessions/session-read-export",
           "metadata": {
             "sidebarTitle": "Export session transcript"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Streaming NDJSON (application/x-ndjson). One JSON object per line, terminated by a newline. The first line is always a `session_meta` envelope; subsequent lines are session events.",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string",
+                  "description": "Newline-delimited JSON stream. Parse line-by-line; do not buffer the whole body."
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         },
         "requestBody": {
@@ -22596,17 +22655,54 @@
               }
             }
           }
+        }
+      }
+    },
+    "/safari/session/delete": {
+      "post": {
+        "operationId": "session-write-delete",
+        "summary": "Delete session",
+        "description": "Delete a session by ID.",
+        "tags": [
+          "AI SRE/Sessions"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Requires manage rights on the session (creator, account admin, or owning-team member).\n",
+          "href": "/en/api-reference/ai-sre/sessions/session-write-delete",
+          "metadata": {
+            "sidebarTitle": "Delete session"
+          }
         },
         "responses": {
           "200": {
-            "description": "Streaming NDJSON (application/x-ndjson). One JSON object per line, terminated by a newline. The first line is always a `session_meta` envelope; subsequent lines are session events (see ExportLine).",
+            "description": "Success",
             "content": {
-              "application/x-ndjson": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "description": "Newline-delimited JSON stream. Parse line-by-line; do not buffer the whole body. Each line decodes to an ExportLine object — see #/components/schemas/ExportLine."
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "null",
+                          "description": "Always null on success."
+                        }
+                      }
+                    }
+                  ]
                 },
-                "example": "{\"type\":\"session_meta\",\"session_id\":\"sess_f8oDvqiG64uur6sBNsTc4u\",\"account_id\":2451002751131,\"app_name\":\"ai-sre\",\"started_at\":\"2026-06-02T02:39:31.228Z\",\"ended_at\":\"2026-06-02T02:39:53.457Z\",\"model\":\"deepseek-v4-pro\"}\n{\"type\":\"user_message\",\"seq\":1,\"ts\":\"2026-06-02T02:39:31.241Z\"}\n{\"type\":\"user_message\",\"seq\":2,\"ts\":\"2026-06-02T02:39:31.245Z\",\"content\":\"<attached_context> ... </attached_context>\"}\n{\"type\":\"final_answer\",\"seq\":3,\"ts\":\"2026-06-02T02:39:53.457Z\",\"content\":\"## Conclusion: noise alert, not a real incident ...\"}\n"
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
+                }
               }
             }
           },
@@ -22616,14 +22712,24 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionDeleteRequest"
+              },
+              "example": {
+                "session_id": "sess_f8oDvqiG64uur6sBNsTc4u"
+              }
+            }
           }
         }
       }
@@ -22648,11 +22754,12 @@
             },
             "examples": {
               "missingParameter": {
+                "summary": "Missing required parameter",
                 "value": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "error": {
                     "code": "InvalidParameter",
-                    "message": "The specified parameter is not valid."
+                    "message": "The specified parameter skill_id is not valid."
                   }
                 }
               }
@@ -22689,7 +22796,7 @@
               "$ref": "#/components/schemas/ErrorResponse"
             },
             "examples": {
-              "noEditPermission": {
+              "accessDenied": {
                 "value": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "error": {
@@ -22724,7 +22831,7 @@
         }
       },
       "TooManyRequests": {
-        "description": "Rate limit hit. Either the global API limit, a per-account limit, or a per-integration limit.",
+        "description": "Rate limit hit. Either the global API limit or a per-account limit.",
         "content": {
           "application/json": {
             "schema": {
@@ -22769,7 +22876,7 @@
     "schemas": {
       "ErrorCode": {
         "type": "string",
-        "description": "Flashduty error code enum. Every failed API response sets `error.code` to one of these stable wire strings. HTTP status is informational — the authoritative signal is the enum value.\n\n| Code | HTTP | Meaning |\n|---|---|---|\n| `OK` | 200 | Reserved — not returned on real errors. |\n| `InvalidParameter` | 400 | A required parameter is missing or failed validation. |\n| `BadRequest` | 400 | Generic 400 used when no more specific code fits. |\n| `InvalidContentType` | 400 | The `Content-Type` header is not `application/json`. |\n| `ResourceNotFound` | 400 | The referenced resource does not exist. Note: returned as HTTP 400, not 404 (historical choice). |\n| `NoLicense` | 400 | The feature is license-gated and no active license was found. |\n| `ReferenceExist` | 400 | Deletion blocked — other entities still reference this resource. |\n| `Unauthorized` | 401 | `app_key` is missing, invalid, or expired. |\n| `BalanceNotEnough` | 402 | Billing-gated operation with insufficient account balance. |\n| `AccessDenied` | 403 | Authenticated but lacking the permission required for this operation. |\n| `RouteNotFound` | 404 | The request URL path is not a known route. |\n| `MethodNotAllowed` | 405 | The HTTP method is not allowed on this otherwise-known path. |\n| `UndonedOrderExist` | 409 | An outstanding billing order blocks this new one. Wait and retry. |\n| `RequestLocked` | 423 | Operation temporarily locked due to repeated failures. |\n| `EntityTooLarge` | 413 | Request body exceeds the configured max size. |\n| `RequestTooFrequently` | 429 | Rate limit hit — API-global, per-account, or per-integration. |\n| `RequestVerifyRequired` | 428 | Second-factor verification required but not supplied. |\n| `DangerousOperation` | 428 | High-risk operation requires MFA verification. |\n| `InternalError` | 500 | Unhandled server-side error. Include `request_id` in the bug report. |\n| `ServiceUnavailable` | 503 | A backend dependency is unavailable. Try again later. |",
+        "description": "Flashduty error code enum. Every failed API response sets `error.code` to one of these values. The value is a stable wire string — not a localized message and not a numeric status. HTTP status is informational.",
         "enum": [
           "OK",
           "InvalidParameter",
@@ -22791,30 +22898,7 @@
           "DangerousOperation",
           "InternalError",
           "ServiceUnavailable"
-        ],
-        "x-enumDescriptions": {
-          "OK": "Reserved — not returned on real errors.",
-          "InvalidParameter": "A required parameter is missing or failed validation.",
-          "BadRequest": "Generic 400 used when no more specific code fits.",
-          "InvalidContentType": "The `Content-Type` header is not `application/json`.",
-          "ResourceNotFound": "The referenced resource does not exist. Note: returned as HTTP 400, not 404 (historical choice).",
-          "NoLicense": "The feature is license-gated and no active license was found.",
-          "ReferenceExist": "Deletion blocked — other entities still reference this resource.",
-          "Unauthorized": "`app_key` is missing, invalid, or expired.",
-          "BalanceNotEnough": "Billing-gated operation with insufficient account balance.",
-          "AccessDenied": "Authenticated but lacking the permission required for this operation.",
-          "RouteNotFound": "The request URL path is not a known route.",
-          "MethodNotAllowed": "The HTTP method is not allowed on this otherwise-known path.",
-          "UndonedOrderExist": "An outstanding billing order blocks this new one. Wait and retry.",
-          "RequestLocked": "Operation temporarily locked due to repeated failures.",
-          "EntityTooLarge": "Request body exceeds the configured max size.",
-          "RequestTooFrequently": "Rate limit hit — API-global, per-account, or per-integration.",
-          "RequestVerifyRequired": "Second-factor verification required but not supplied.",
-          "DangerousOperation": "High-risk operation requires MFA verification.",
-          "InternalError": "Unhandled server-side error. Include `request_id` in the bug report.",
-          "ServiceUnavailable": "A backend dependency is unavailable. Try again later."
-        },
-        "example": "InvalidParameter"
+        ]
       },
       "DutyError": {
         "type": "object",
@@ -22825,8 +22909,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Human-readable error message, localized by the caller's Accept-Language. May contain field names, IDs, or other context from the failing request.",
-            "example": "The specified parameter template_id is not valid."
+            "description": "Human-readable error message, localized by the caller's Accept-Language. May contain field names, IDs, or other context from the failing request."
           }
         },
         "required": [
@@ -39177,11 +39260,11 @@
       },
       "MCPServerStatusRequest": {
         "type": "object",
-        "description": "Selector for the server whose status is being changed.",
+        "description": "MCP server enable/disable by ID.",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the target server."
+            "description": "Target MCP server ID."
           }
         },
         "required": [
@@ -39190,114 +39273,114 @@
       },
       "SkillItem": {
         "type": "object",
-        "description": "An AI SRE skill — a packaged capability the agent can load at runtime.",
+        "description": "An AI SRE skill — a packaged SKILL.md bundle the agent can load.",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Unique identifier of the skill."
+            "description": "Unique skill ID (prefix `skill_`)."
           },
           "account_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning account."
+            "description": "Owning account ID.",
+            "format": "int64"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team; 0 means account scope."
+            "description": "Team scope: 0 = account-wide; >0 = the owning team.",
+            "format": "int64"
           },
           "skill_name": {
             "type": "string",
-            "description": "Name of the skill, parsed from its SKILL.md frontmatter."
+            "description": "Skill name, unique within the account."
           },
           "description": {
             "type": "string",
-            "description": "What the skill does and when the agent should use it."
+            "description": "Human-readable description from the SKILL.md frontmatter."
           },
           "content": {
             "type": "string",
-            "description": "Full SKILL.md body; omitted in list responses."
+            "description": "Full SKILL.md content. Omitted in list responses."
           },
           "version": {
             "type": "string",
-            "description": "Skill version string from its frontmatter."
+            "description": "Skill version from the frontmatter."
           },
           "tags": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Tags declared in the skill frontmatter."
+            "description": "Tags parsed from the frontmatter."
           },
           "author": {
             "type": "string",
-            "description": "Author declared in the skill frontmatter."
+            "description": "Skill author."
           },
           "license": {
             "type": "string",
-            "description": "License declared in the skill frontmatter."
+            "description": "Skill license."
           },
           "tools": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Tools the skill requires, declared in its frontmatter."
+            "description": "Required tools (builtin or `mcp:server/tool`)."
           },
           "s3_key": {
             "type": "string",
-            "description": "Object-storage key of the skill's zip package."
+            "description": "Object-storage key of the skill zip."
           },
           "checksum": {
             "type": "string",
-            "description": "SHA-256 checksum of the skill's zip package."
+            "description": "SHA-256 checksum of the skill zip."
           },
           "status": {
             "type": "string",
+            "description": "Skill status.",
             "enum": [
               "enabled",
               "disabled"
-            ],
-            "description": "Whether the skill is active and loadable by agents."
+            ]
           },
           "created_by": {
             "type": "integer",
-            "format": "int64",
-            "description": "Member who created this resource."
+            "description": "Member ID that created the skill.",
+            "format": "int64"
           },
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Creation time as a Unix timestamp in milliseconds."
+            "description": "Creation time. Unix timestamp in milliseconds."
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Last-update time as a Unix timestamp in milliseconds."
+            "description": "Last update time. Unix timestamp in milliseconds."
           },
           "can_edit": {
             "type": "boolean",
-            "description": "Whether the calling member may edit or delete this resource."
+            "description": "Whether the caller may edit this skill."
           },
           "source_template_name": {
             "type": "string",
-            "description": "Marketplace template this skill was installed from, if any."
+            "description": "Marketplace template this skill was installed from; empty for user-authored."
           },
           "source_template_version": {
             "type": "string",
-            "description": "Marketplace template version captured at install time."
+            "description": "Template version at install time."
           },
           "update_available": {
             "type": "boolean",
-            "description": "A newer marketplace template version exists for this skill."
+            "description": "True when the marketplace has a newer template version."
           },
           "is_modified": {
             "type": "boolean",
-            "description": "A marketplace-sourced skill has been edited locally; auto-update skips it."
+            "description": "True when a marketplace-sourced skill was edited locally (auto-update skips it)."
           },
           "created": {
             "type": "boolean",
-            "description": "Install response only: true for a fresh install, false for an in-place upsert."
+            "description": "Set only on install-from-session responses: true = fresh install, false = in-place update."
           }
         },
         "required": [
@@ -39501,15 +39584,17 @@
       },
       "A2AAgentListRequest": {
         "type": "object",
-        "description": "Filters for listing A2A agents.",
+        "description": "Pagination and team filter for listing A2A agents.",
         "properties": {
           "offset": {
             "type": "integer",
-            "description": "Number of rows to skip for pagination."
+            "description": "Row offset for pagination.",
+            "default": 0
           },
           "limit": {
             "type": "integer",
-            "description": "Maximum number of rows to return; defaults to 20."
+            "description": "Page size.",
+            "default": 20
           },
           "team_ids": {
             "type": "array",
@@ -39517,31 +39602,37 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Restrict results to resources owned by these teams; intersected with the caller's visible set."
+            "description": "Filter to these team IDs; empty = the caller's visible set."
           },
           "include_account": {
-            "type": "boolean",
-            "description": "Include account-scoped rows alongside team-scoped ones; defaults to true."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Include account-scoped (team_id=0) rows. Defaults to true."
           }
         }
       },
       "SkillUpdateRequest": {
         "type": "object",
-        "description": "Editable fields of a skill.",
+        "description": "Editable skill metadata.",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to update."
+            "description": "Target skill ID."
           },
           "description": {
             "type": "string",
-            "maxLength": 1024,
-            "description": "New description for the skill."
+            "description": "New description.",
+            "maxLength": 1024
           },
           "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Reassign the skill to this team; omit to leave unchanged, 0 for account scope."
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Reassign team scope: 0 = account-wide; >0 = team. Omit to leave unchanged.",
+            "format": "int64"
           }
         },
         "required": [
@@ -39554,15 +39645,15 @@
         "properties": {
           "total": {
             "type": "integer",
-            "format": "int64",
-            "description": "Total number of servers matching the filters."
+            "description": "Total number of matching servers.",
+            "format": "int64"
           },
           "servers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MCPServerItem"
             },
-            "description": "MCP servers on the current page."
+            "description": "MCP servers on this page."
           }
         },
         "required": [
@@ -39572,75 +39663,75 @@
       },
       "MCPServerItem": {
         "type": "object",
-        "description": "A configured MCP (Model Context Protocol) server the agent can call tools through.",
+        "description": "An MCP server (connector) registered on the account.",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Unique identifier of the MCP server."
+            "description": "Unique MCP server ID (prefix `mcp_`)."
           },
           "account_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning account."
+            "description": "Owning account ID.",
+            "format": "int64"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team; 0 means account scope."
+            "description": "Team scope: 0 = account-wide; >0 = the owning team.",
+            "format": "int64"
           },
           "can_edit": {
             "type": "boolean",
-            "description": "Whether the calling member may edit or delete this resource."
+            "description": "Whether the caller may edit this server."
           },
           "server_name": {
             "type": "string",
-            "description": "Display name of the MCP server."
+            "description": "MCP server name, unique within the account."
           },
           "description": {
             "type": "string",
-            "description": "What this MCP server provides."
+            "description": "Server description."
           },
           "ai_description": {
             "type": "string",
-            "description": "LLM-generated description, preferred over description when present."
+            "description": "LLM-generated description, preferred over `description` when present."
           },
           "transport": {
             "type": "string",
+            "description": "Transport protocol.",
             "enum": [
               "stdio",
               "sse",
               "streamable-http"
-            ],
-            "description": "Transport used to reach the server."
+            ]
           },
           "command": {
             "type": "string",
-            "description": "Executable launched for stdio transport."
+            "description": "Executable command (stdio transport only)."
           },
           "args": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Command-line arguments for the stdio executable."
+            "description": "Command arguments (stdio transport)."
           },
           "env": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Environment variables passed to the stdio process."
+            "description": "Environment variables (stdio transport). Secret values are masked."
           },
           "url": {
             "type": "string",
-            "description": "Endpoint URL for sse or streamable-http transport."
+            "description": "Server URL (sse / streamable-http transport)."
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "HTTP headers sent to the remote endpoint; secret values are masked."
+            "description": "HTTP headers (sse / streamable-http). Secret values are masked."
           },
           "proxy_url": {
             "type": "string",
@@ -39648,61 +39739,70 @@
           },
           "status": {
             "type": "string",
+            "description": "Server status.",
             "enum": [
               "enabled",
               "disabled"
-            ],
-            "description": "Whether the server is active and usable by agents."
+            ]
           },
           "connect_timeout": {
             "type": "integer",
-            "description": "Connection timeout in seconds."
+            "description": "Connection timeout in seconds (0 = server default, 10s)."
           },
           "call_timeout": {
             "type": "integer",
-            "description": "Per-call timeout in seconds."
+            "description": "Tool-call timeout in seconds (0 = server default, 60s)."
           },
           "tools": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MCPToolInfo"
             },
-            "description": "Live tool catalogue; populated only by get and test."
+            "description": "Live tool list; populated by the get/test endpoints."
           },
           "tool_count": {
             "type": "integer",
-            "description": "Number of tools discovered on the server."
+            "description": "Number of tools in the live list."
           },
           "list_error": {
             "type": "string",
-            "description": "Tool-probe failure message; present when the live probe failed."
+            "description": "Error message when the live tool list failed."
           },
           "auth_mode": {
             "type": "string",
-            "description": "Credential model: shared, per_user_secret, or per_user_oauth."
+            "description": "Authentication mode.",
+            "enum": [
+              "shared",
+              "per_user_secret",
+              "per_user_oauth"
+            ]
           },
           "secret_schema": {
             "type": "string",
-            "description": "JSON schema of the per-user secret."
+            "description": "JSON-encoded secret schema (per_user_secret mode)."
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "OAuth metadata JSON."
+            "description": "JSON-encoded OAuth metadata (per_user_oauth mode)."
+          },
+          "source_template_name": {
+            "type": "string",
+            "description": "Marketplace template this connector was installed from; empty for user-authored."
           },
           "created_by": {
             "type": "integer",
-            "format": "int64",
-            "description": "Member who created this resource."
+            "description": "Member ID that created the server.",
+            "format": "int64"
           },
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Creation time as a Unix timestamp in milliseconds."
+            "description": "Creation time. Unix timestamp in milliseconds."
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Last-update time as a Unix timestamp in milliseconds."
+            "description": "Last update time. Unix timestamp in milliseconds."
           }
         },
         "required": [
@@ -39723,18 +39823,20 @@
       },
       "MCPToolInfo": {
         "type": "object",
-        "description": "Metadata for a single tool exposed by an MCP server.",
+        "description": "Metadata for one tool exposed by an MCP server.",
         "properties": {
           "name": {
             "type": "string",
-            "description": "Tool name as advertised by the server."
+            "description": "Tool name."
           },
           "description": {
             "type": "string",
-            "description": "What the tool does."
+            "description": "Tool description."
           },
           "input_schema": {
-            "description": "JSON schema of the tool's input arguments."
+            "type": "object",
+            "additionalProperties": true,
+            "description": "JSON Schema describing the tool's input parameters."
           }
         },
         "required": [
@@ -39744,11 +39846,11 @@
       },
       "SkillDownloadRequest": {
         "type": "object",
-        "description": "Selector for the skill to download.",
+        "description": "Skill zip download by ID.",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to download."
+            "description": "Target skill ID."
           }
         },
         "required": [
@@ -39828,11 +39930,11 @@
       },
       "SkillDeleteRequest": {
         "type": "object",
-        "description": "Selector for the skill to delete.",
+        "description": "Skill deletion by ID.",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to delete."
+            "description": "Target skill ID."
           }
         },
         "required": [
@@ -39841,11 +39943,11 @@
       },
       "MCPServerGetRequest": {
         "type": "object",
-        "description": "Selector for a single MCP server.",
+        "description": "MCP server lookup by ID.",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the server to fetch."
+            "description": "Target MCP server ID."
           }
         },
         "required": [
@@ -39871,11 +39973,11 @@
       },
       "SkillGetRequest": {
         "type": "object",
-        "description": "Selector for a single skill.",
+        "description": "Skill lookup by ID.",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the skill to fetch."
+            "description": "Target skill ID."
           }
         },
         "required": [
@@ -39888,15 +39990,15 @@
         "properties": {
           "total": {
             "type": "integer",
-            "format": "int64",
-            "description": "Total number of skills matching the filters."
+            "description": "Total number of matching skills.",
+            "format": "int64"
           },
           "skills": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SkillItem"
             },
-            "description": "Skills on the current page."
+            "description": "Skills on this page."
           }
         },
         "required": [
@@ -39993,11 +40095,11 @@
       },
       "SkillStatusRequest": {
         "type": "object",
-        "description": "Selector for the skill whose status is being changed.",
+        "description": "Skill enable/disable by ID.",
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Identifier of the target skill."
+            "description": "Target skill ID."
           }
         },
         "required": [
@@ -40010,86 +40112,91 @@
         "properties": {
           "server_name": {
             "type": "string",
+            "description": "MCP server name, unique within the account.",
             "minLength": 1,
-            "maxLength": 255,
-            "description": "Display name of the server."
+            "maxLength": 255
           },
           "description": {
             "type": "string",
+            "description": "Server description.",
             "minLength": 1,
-            "maxLength": 1024,
-            "description": "What this MCP server provides."
+            "maxLength": 1024
           },
           "transport": {
             "type": "string",
+            "description": "Transport protocol.",
             "enum": [
               "stdio",
               "sse",
               "streamable-http"
-            ],
-            "description": "Transport used to reach the server."
+            ]
           },
           "command": {
             "type": "string",
-            "description": "Executable to launch for stdio transport."
+            "description": "Executable command (stdio transport)."
           },
           "args": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Command-line arguments for the stdio executable."
+            "description": "Command arguments (stdio transport)."
           },
           "env": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Environment variables for the stdio process."
+            "description": "Environment variables (stdio transport)."
           },
           "url": {
             "type": "string",
-            "description": "Endpoint URL for sse or streamable-http transport."
+            "description": "Server URL (sse / streamable-http transport)."
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "HTTP headers sent to the remote endpoint."
+            "description": "HTTP headers (sse / streamable-http)."
           },
           "connect_timeout": {
             "type": "integer",
-            "description": "Connection timeout in seconds."
+            "description": "Connection timeout in seconds. 0 = default (10s)."
           },
           "call_timeout": {
             "type": "integer",
-            "description": "Per-call timeout in seconds."
+            "description": "Tool-call timeout in seconds. 0 = default (60s)."
+          },
+          "auth_mode": {
+            "type": "string",
+            "description": "Authentication mode: shared (default), per_user_secret, or per_user_oauth."
+          },
+          "secret_schema": {
+            "type": "string",
+            "description": "JSON secret schema; required when auth_mode=per_user_secret."
+          },
+          "oauth_metadata": {
+            "type": "string",
+            "description": "JSON OAuth metadata; reserved for per_user_oauth."
           },
           "status": {
             "type": "string",
+            "description": "Initial status.",
             "enum": [
               "enabled",
               "disabled"
             ],
-            "description": "Initial lifecycle state of the server."
+            "default": "enabled"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team for the new server; 0 for account scope."
+            "description": "Team scope: 0 = account-wide; >0 = team.",
+            "format": "int64"
           },
-          "auth_mode": {
+          "source_template_name": {
             "type": "string",
-            "description": "Credential model; defaults to shared."
-          },
-          "secret_schema": {
-            "type": "string",
-            "description": "JSON schema of the per-user secret; required when auth_mode is per_user_secret."
-          },
-          "oauth_metadata": {
-            "type": "string",
-            "description": "OAuth metadata JSON; reserved for OAuth-based auth."
+            "description": "Marketplace template name when created from a connector template."
           }
         },
         "required": [
@@ -40100,11 +40207,11 @@
       },
       "MCPServerDeleteRequest": {
         "type": "object",
-        "description": "Selector for the server to delete.",
+        "description": "MCP server deletion by ID.",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the server to delete."
+            "description": "Target MCP server ID."
           }
         },
         "required": [
@@ -40113,15 +40220,17 @@
       },
       "SkillListRequest": {
         "type": "object",
-        "description": "Filters for listing skills.",
+        "description": "Pagination and team filter for listing skills.",
         "properties": {
           "p": {
             "type": "integer",
-            "description": "Page number, starting at 1."
+            "description": "Page number, 1-based.",
+            "default": 1
           },
           "limit": {
             "type": "integer",
-            "description": "Page size; defaults to 20."
+            "description": "Page size.",
+            "default": 20
           },
           "team_ids": {
             "type": "array",
@@ -40129,96 +40238,102 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Restrict results to resources owned by these teams; intersected with the caller's visible set."
+            "description": "Filter to these team IDs; empty = the caller's visible set."
           },
           "include_account": {
-            "type": "boolean",
-            "description": "Include account-scoped rows alongside team-scoped ones; defaults to true."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Include account-scoped (team_id=0) rows. Defaults to true."
           }
         }
       },
       "MCPServerUpdateRequest": {
         "type": "object",
-        "description": "Editable fields of an MCP server; omitted fields are left unchanged.",
+        "description": "Partial update of an MCP server. Omit a field to leave it unchanged.",
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Identifier of the server to update."
+            "description": "Target MCP server ID."
           },
           "server_name": {
             "type": "string",
+            "description": "New name.",
             "minLength": 1,
-            "maxLength": 255,
-            "description": "New display name."
+            "maxLength": 255
           },
           "description": {
             "type": "string",
+            "description": "New description.",
             "minLength": 1,
-            "maxLength": 1024,
-            "description": "New description."
+            "maxLength": 1024
           },
           "transport": {
             "type": "string",
+            "description": "Transport protocol.",
             "enum": [
               "stdio",
               "sse",
               "streamable-http"
-            ],
-            "description": "New transport for the server."
+            ]
           },
           "command": {
             "type": "string",
-            "description": "New stdio executable."
+            "description": "Executable command (stdio transport)."
           },
           "args": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "New stdio arguments."
+            "description": "Command arguments (stdio transport)."
           },
           "env": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "New stdio environment variables."
+            "description": "Environment variables (stdio transport)."
           },
           "url": {
             "type": "string",
-            "description": "New endpoint URL for remote transports."
+            "description": "Server URL (sse / streamable-http transport)."
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "New HTTP headers for the remote endpoint."
+            "description": "HTTP headers (sse / streamable-http)."
           },
           "connect_timeout": {
             "type": "integer",
-            "description": "New connection timeout in seconds."
+            "description": "Connection timeout in seconds. 0 = default (10s)."
           },
           "call_timeout": {
             "type": "integer",
-            "description": "New per-call timeout in seconds."
-          },
-          "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Reassign the server to this team; omit to leave unchanged, 0 for account scope."
+            "description": "Tool-call timeout in seconds. 0 = default (60s)."
           },
           "auth_mode": {
             "type": "string",
-            "description": "New credential model."
+            "description": "Authentication mode: shared (default), per_user_secret, or per_user_oauth."
           },
           "secret_schema": {
             "type": "string",
-            "description": "New per-user secret JSON schema."
+            "description": "JSON secret schema; required when auth_mode=per_user_secret."
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "New OAuth metadata JSON."
+            "description": "JSON OAuth metadata; reserved for per_user_oauth."
+          },
+          "team_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Reassign team scope: 0 = account-wide; >0 = team. Omit to leave unchanged.",
+            "format": "int64"
           }
         },
         "required": [
@@ -40347,12 +40462,12 @@
             "items": {
               "$ref": "#/components/schemas/A2AAgentItem"
             },
-            "description": "A2A agents on the current page."
+            "description": "A2A agents on this page."
           },
           "total": {
             "type": "integer",
-            "format": "int64",
-            "description": "Total number of agents matching the filters."
+            "description": "Total number of matching agents.",
+            "format": "int64"
           }
         },
         "required": [
@@ -40362,106 +40477,111 @@
       },
       "A2AAgentItem": {
         "type": "object",
-        "description": "A registered A2A (agent-to-agent) remote agent the SRE agent can delegate to.",
+        "description": "A registered A2A (agent-to-agent) remote agent.",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Unique identifier of the A2A agent."
+            "description": "Unique A2A agent ID (prefix `a2a_`)."
           },
           "account_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning account."
+            "description": "Owning account ID.",
+            "format": "int64"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team; 0 means account scope."
+            "description": "Team scope: 0 = account-wide; >0 = the owning team.",
+            "format": "int64"
           },
           "can_edit": {
             "type": "boolean",
-            "description": "Whether the calling member may edit or delete this resource."
+            "description": "Whether the caller may edit this agent."
           },
           "agent_name": {
             "type": "string",
-            "description": "Display name of the agent."
+            "description": "Agent display name."
           },
           "description": {
             "type": "string",
-            "description": "What this agent does and when to delegate to it."
+            "description": "Agent description."
           },
           "card_url": {
             "type": "string",
-            "description": "URL of the agent's published A2A agent card."
+            "description": "URL of the remote agent card."
           },
           "auth_type": {
             "type": "string",
-            "description": "Authentication scheme used when calling the agent."
+            "description": "Authentication type for reaching the remote agent."
           },
           "auth_config": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Authentication parameters keyed by name."
+            "description": "Authentication config; secret values are masked."
           },
           "streaming": {
             "type": "boolean",
-            "description": "Whether the agent supports streaming responses."
+            "description": "Whether the remote agent supports streaming responses."
           },
           "status": {
             "type": "string",
+            "description": "Agent status.",
             "enum": [
               "enabled",
               "disabled"
-            ],
-            "description": "Whether the agent is active and reachable."
+            ]
           },
           "agent_card_name": {
             "type": "string",
-            "description": "Name resolved from the fetched agent card."
+            "description": "Agent name resolved from the remote card."
           },
           "agent_card_skills": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Skills advertised on the fetched agent card."
+            "description": "Skills advertised by the remote card."
           },
           "card_resolve_timeout": {
             "type": "integer",
-            "description": "Timeout for fetching the agent card, in seconds."
+            "description": "Card-resolution timeout in seconds."
           },
           "task_timeout": {
             "type": "integer",
-            "description": "Timeout for a single delegated task, in seconds."
+            "description": "Single-task execution timeout in seconds."
           },
           "auth_mode": {
             "type": "string",
-            "description": "Credential model: shared, per_user_secret, or per_user_oauth."
+            "description": "Authentication mode.",
+            "enum": [
+              "shared",
+              "per_user_secret",
+              "per_user_oauth"
+            ]
           },
           "secret_schema": {
             "type": "string",
-            "description": "JSON schema of the per-user secret."
+            "description": "JSON-encoded secret schema (per_user_secret mode)."
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "OAuth metadata JSON."
+            "description": "JSON-encoded OAuth metadata (per_user_oauth mode)."
           },
           "created_by": {
             "type": "integer",
-            "format": "int64",
-            "description": "Member who created this resource."
+            "description": "Member ID that created the agent.",
+            "format": "int64"
           },
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Creation time as a Unix timestamp in seconds."
+            "description": "Creation time. Unix timestamp in milliseconds."
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Last-update time as a Unix timestamp in seconds."
+            "description": "Last update time. Unix timestamp in milliseconds."
           }
         },
         "required": [
@@ -40484,56 +40604,83 @@
       },
       "A2AAgentUpdateRequest": {
         "type": "object",
-        "description": "Editable fields of an A2A agent; omitted fields are left unchanged.",
+        "description": "Partial update of an A2A agent. A null/omitted field is left unchanged.",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Identifier of the agent to update."
+            "description": "Target agent ID."
           },
           "agent_name": {
-            "type": "string",
-            "maxLength": 128,
-            "description": "New display name."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New display name. Omit to leave unchanged.",
+            "maxLength": 128
           },
           "description": {
-            "type": "string",
-            "description": "New description."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New description. Omit to leave unchanged."
           },
           "card_url": {
-            "type": "string",
-            "description": "New agent card URL."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New card URL. Omit to leave unchanged."
           },
           "auth_type": {
-            "type": "string",
-            "description": "New authentication scheme."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New auth type. Omit to leave unchanged."
           },
           "auth_config": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "New authentication parameters."
+            "description": "Replace the auth config. Omit to leave unchanged."
           },
           "streaming": {
-            "type": "boolean",
-            "description": "Toggle streaming-response support."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Toggle streaming support. Omit to leave unchanged."
           },
           "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Reassign the agent to this team; omit to leave unchanged, 0 for account scope."
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Reassign team scope. Omit to leave unchanged.",
+            "format": "int64"
           },
           "auth_mode": {
-            "type": "string",
-            "description": "New credential model."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New auth mode: shared, per_user_secret, or per_user_oauth."
           },
           "secret_schema": {
-            "type": "string",
-            "description": "New per-user secret JSON schema."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New JSON secret schema."
           },
           "oauth_metadata": {
-            "type": "string",
-            "description": "New OAuth metadata JSON."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New JSON OAuth metadata."
           }
         },
         "required": [
@@ -40542,52 +40689,52 @@
       },
       "A2AAgentCreateRequest": {
         "type": "object",
-        "description": "Configuration for a new A2A agent.",
+        "description": "Registration parameters for a new A2A agent.",
         "properties": {
           "agent_name": {
             "type": "string",
-            "maxLength": 128,
-            "description": "Display name of the agent."
+            "description": "Agent display name.",
+            "maxLength": 128
           },
           "description": {
             "type": "string",
-            "description": "What this agent does and when to delegate to it."
+            "description": "Agent description."
           },
           "card_url": {
             "type": "string",
-            "description": "URL of the agent's published A2A agent card."
+            "description": "URL of the remote agent card."
           },
           "auth_type": {
             "type": "string",
-            "description": "Authentication scheme used when calling the agent."
+            "description": "Authentication type for the remote agent."
           },
           "auth_config": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Authentication parameters keyed by name."
+            "description": "Authentication config key-values."
           },
           "streaming": {
             "type": "boolean",
-            "description": "Whether the agent supports streaming responses."
+            "description": "Whether the remote agent supports streaming."
           },
           "team_id": {
             "type": "integer",
-            "format": "int64",
-            "description": "Owning team for the new agent; 0 for account scope."
+            "description": "Team scope: 0 = account-wide; >0 = team.",
+            "format": "int64"
           },
           "auth_mode": {
             "type": "string",
-            "description": "Credential model; defaults to shared."
+            "description": "Authentication mode: shared (default), per_user_secret, or per_user_oauth."
           },
           "secret_schema": {
             "type": "string",
-            "description": "JSON schema of the per-user secret; required when auth_mode is per_user_secret."
+            "description": "JSON secret schema; required when auth_mode=per_user_secret."
           },
           "oauth_metadata": {
             "type": "string",
-            "description": "OAuth metadata JSON; reserved for OAuth-based auth."
+            "description": "JSON OAuth metadata; reserved for per_user_oauth."
           }
         },
         "required": [
@@ -40597,15 +40744,17 @@
       },
       "MCPServerListRequest": {
         "type": "object",
-        "description": "Filters for listing MCP servers.",
+        "description": "Pagination and team filter for listing MCP servers.",
         "properties": {
           "p": {
             "type": "integer",
-            "description": "Page number, starting at 1."
+            "description": "Page number, 1-based.",
+            "default": 1
           },
           "limit": {
             "type": "integer",
-            "description": "Page size; defaults to 20."
+            "description": "Page size.",
+            "default": 20
           },
           "team_ids": {
             "type": "array",
@@ -40613,21 +40762,24 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Restrict results to resources owned by these teams; intersected with the caller's visible set."
+            "description": "Filter to these team IDs; empty = the caller's visible set."
           },
           "include_account": {
-            "type": "boolean",
-            "description": "Include account-scoped rows alongside team-scoped ones; defaults to true."
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Include account-scoped (team_id=0) rows. Defaults to true."
           }
         }
       },
       "A2AAgentCreateResponse": {
         "type": "object",
-        "description": "Identifier of the newly created A2A agent.",
+        "description": "Result of registering an A2A agent.",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Identifier of the created agent."
+            "description": "ID of the newly created agent."
           }
         },
         "required": [
@@ -40770,11 +40922,11 @@
       },
       "A2AAgentIDRequest": {
         "type": "object",
-        "description": "Selector for a single A2A agent.",
+        "description": "A2A agent lookup by ID.",
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Identifier of the target agent."
+            "description": "Target agent ID."
           }
         },
         "required": [
@@ -40944,7 +41096,7 @@
       },
       "SessionListRequest": {
         "type": "object",
-        "description": "Filters for listing agent sessions. Reads are scoped to the account the app_key resolves to and to the resolved person's visible teams.",
+        "description": "Filters for listing agent sessions. Reads are scoped to the resolved account and the caller's visible teams.",
         "properties": {
           "app_name": {
             "type": "string",
@@ -40955,22 +41107,26 @@
               "support-website",
               "support-flashcat",
               "ai-sre",
-              "template-assistant"
+              "template-assistant",
+              "swe"
             ]
           },
           "p": {
             "type": "integer",
-            "description": "1-based page number; defaults to 1."
+            "description": "Page number, 1-based.",
+            "default": 1,
+            "minimum": 1
           },
           "limit": {
             "type": "integer",
-            "description": "Page size, 1..100; defaults to 20.",
+            "description": "Page size, 1–100.",
             "minimum": 1,
-            "maximum": 100
+            "maximum": 100,
+            "default": 20
           },
           "orderby": {
             "type": "string",
-            "description": "Sort column.",
+            "description": "Sort field.",
             "enum": [
               "created_at",
               "updated_at"
@@ -40978,20 +41134,20 @@
           },
           "asc": {
             "type": "boolean",
-            "description": "Ascending sort when true; defaults to false (descending). Only honored when orderby is set."
+            "description": "Ascending order when true; applies only when `orderby` is set."
           },
           "include_subagent_sessions": {
             "type": "boolean",
-            "description": "Include subagent (child) sessions in the result; defaults to false."
+            "description": "Include subagent-dispatched sessions in the list."
           },
           "keyword": {
             "type": "string",
-            "maxLength": 64,
-            "description": "Case-insensitive substring match against session name."
+            "description": "Filter by session-name keyword.",
+            "maxLength": 64
           },
           "scope": {
             "type": "string",
-            "description": "Visibility scope: all (own + member-of-team rows, the default), personal (own only), or team (member teams only).",
+            "description": "Visibility scope: all (own + member-of-team rows, default), personal, or team.",
             "enum": [
               "all",
               "personal",
@@ -41004,7 +41160,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Optional explicit team filter; intersected with the caller's visible set / scope."
+            "description": "Optional explicit team filter; intersects with `scope`."
           },
           "entry_kinds": {
             "type": "array",
@@ -41014,14 +41170,14 @@
                 "web",
                 "im",
                 "api",
-                "scheduled"
+                "automation"
               ]
             },
-            "description": "Restrict to sessions produced by these entry surfaces. Empty returns every kind."
+            "description": "Restrict to sessions produced by these surfaces; empty returns every kind."
           },
           "status": {
             "type": "string",
-            "description": "Archive bucket: active (default, not archived), archived, or all.",
+            "description": "Archive bucket: active (default) returns un-archived, archived returns archived, all returns both.",
             "enum": [
               "active",
               "archived",
@@ -41258,29 +41414,29 @@
       },
       "SessionGetRequest": {
         "type": "object",
-        "description": "Fetch one session plus a recent page of its events.",
+        "description": "Fetch one session plus a backward-paged window of its most recent events.",
         "properties": {
           "session_id": {
             "type": "string",
-            "minLength": 1,
-            "description": "Session identifier."
+            "description": "Target session ID.",
+            "minLength": 1
           },
           "num_recent_events": {
             "type": "integer",
+            "description": "Legacy page size: number of most-recent events to return. Superseded by `limit` when both are set; 0 uses the server default (100).",
             "minimum": 0,
-            "maximum": 1000,
-            "description": "Number of most-recent events to return; 0 uses the server default."
+            "maximum": 1000
           },
           "limit": {
             "type": "integer",
+            "description": "Page size for events; takes precedence over `num_recent_events`. 0 uses the server default (100).",
             "minimum": 0,
-            "maximum": 1000,
-            "description": "Alias for num_recent_events; takes precedence when both are set."
+            "maximum": 1000
           },
           "search_after_ctx": {
             "type": "string",
-            "maxLength": 4096,
-            "description": "Opaque keyset cursor from a previous response's search_after_ctx, to page backward through older events."
+            "description": "Opaque keyset cursor from a previous response; pass it back to fetch the next older page.",
+            "maxLength": 4096
           }
         },
         "required": [
@@ -41387,7 +41543,7 @@
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "Session identifier to export."
+            "description": "Target session ID."
           },
           "include_subagents": {
             "type": "boolean",
@@ -41398,136 +41554,46 @@
           "session_id"
         ]
       },
-      "ExportUsage": {
+      "SkillUploadRequest": {
         "type": "object",
-        "description": "Per-LLM-call token counts on an export line. Absent fields are 0.",
+        "description": "Multipart form for uploading a skill archive.",
         "properties": {
-          "input_tokens": {
-            "type": "integer",
-            "description": "Prompt (input) tokens for the call."
-          },
-          "output_tokens": {
-            "type": "integer",
-            "description": "Generated (output) tokens for the call."
-          },
-          "cache_read": {
-            "type": "integer",
-            "description": "Tokens served from the prompt cache."
-          },
-          "cache_creation": {
-            "type": "integer",
-            "description": "Tokens written to the prompt cache."
-          }
-        }
-      },
-      "ExportLine": {
-        "type": "object",
-        "description": "One line of the NDJSON export stream. The `type` field discriminates the line: session_meta (always first), user_message, llm_call, tool_call, subagent_dispatch, final_answer, agent_text, or error (emitted only if the stream is truncated mid-export). Fields are sparse — only those relevant to the line type are present.",
-        "properties": {
-          "type": {
+          "file": {
             "type": "string",
-            "description": "Line discriminator.",
-            "enum": [
-              "session_meta",
-              "user_message",
-              "llm_call",
-              "tool_call",
-              "subagent_dispatch",
-              "final_answer",
-              "agent_text",
-              "error"
-            ]
+            "format": "binary",
+            "description": "Skill archive (.skill / .zip / .tar.gz / .tgz). Max 100MB."
           },
-          "seq": {
+          "team_id": {
             "type": "integer",
-            "description": "1-based monotonic sequence within the session (absent on session_meta)."
+            "description": "Team scope for the new skill: 0 = account-wide.",
+            "format": "int64"
           },
+          "replace": {
+            "type": "boolean",
+            "description": "When true, overwrite an existing same-name skill."
+          },
+          "skill_id": {
+            "type": "string",
+            "description": "When replacing a specific skill, its skill ID."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "SessionDeleteRequest": {
+        "type": "object",
+        "description": "Session deletion by ID.",
+        "properties": {
           "session_id": {
             "type": "string",
-            "description": "Session id (on session_meta)."
-          },
-          "account_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Account id (on session_meta)."
-          },
-          "app_name": {
-            "type": "string",
-            "description": "Agent app (on session_meta)."
-          },
-          "parent_session_id": {
-            "type": "string",
-            "description": "Parent session id for child sessions (on session_meta)."
-          },
-          "started_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "RFC3339 start timestamp (session_meta uses session.created_at)."
-          },
-          "ended_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "RFC3339 end timestamp; stamped on llm_call/tool_call/session_meta."
-          },
-          "model": {
-            "type": "string",
-            "description": "Chat model provider key; on session_meta and llm_call."
-          },
-          "content": {
-            "type": "string",
-            "description": "Text content of the line (messages, answers, errors)."
-          },
-          "ts": {
-            "type": "string",
-            "format": "date-time",
-            "description": "RFC3339 timestamp of the event."
-          },
-          "usage": {
-            "$ref": "#/components/schemas/ExportUsage"
-          },
-          "name": {
-            "type": "string",
-            "description": "Tool name (on tool_call)."
-          },
-          "input": {
-            "type": "object",
-            "additionalProperties": true,
-            "description": "Tool call input arguments (on tool_call)."
-          },
-          "output": {
-            "type": "string",
-            "description": "Tool call output (on tool_call response side)."
-          },
-          "status": {
-            "type": "string",
-            "description": "Tool result status, e.g. ok or error."
-          },
-          "duration_ms": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Call duration in milliseconds."
-          },
-          "input_bytes": {
-            "type": "integer",
-            "description": "Byte size of the tool input."
-          },
-          "output_bytes": {
-            "type": "integer",
-            "description": "Byte size of the tool output."
-          },
-          "error": {
-            "type": "string",
-            "description": "Error detail when a call failed."
-          },
-          "agent_name": {
-            "type": "string",
-            "description": "Dispatched subagent name (on subagent_dispatch)."
-          },
-          "child_session_id": {
-            "type": "string",
-            "description": "Child session id created by the dispatch (on subagent_dispatch)."
+            "description": "Target session ID.",
+            "minLength": 1
           }
-        }
+        },
+        "required": [
+          "session_id"
+        ]
       }
     }
   }

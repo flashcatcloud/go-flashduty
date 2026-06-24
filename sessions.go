@@ -9,10 +9,10 @@ type SessionsService service
 
 // Get session detail.
 //
-// Fetch one session plus a backward-paged window of its most recent events. Use search_after_ctx to page through older history.
+// Fetch one session plus a backward-paged window of its most recent events.
 //
 // API: POST /safari/session/get (session-read-info).
-func (s *SessionsService) Info(ctx context.Context, req *SessionGetRequest) (*SessionGetResponse, *Response, error) {
+func (s *SessionsService) ReadInfo(ctx context.Context, req *SessionGetRequest) (*SessionGetResponse, *Response, error) {
 	out := new(SessionGetResponse)
 	resp, err := s.client.do(ctx, "/safari/session/get", req, out)
 	if err != nil {
@@ -23,12 +23,26 @@ func (s *SessionsService) Info(ctx context.Context, req *SessionGetRequest) (*Se
 
 // List sessions.
 //
-// List agent sessions visible to the caller within the resolved account, filtered by app, entry surface, archive status, and team scope, with pagination. Reads are scoped to the person the app_key resolves to.
+// List agent sessions visible to the caller, filtered by app, surface, archive status, and team.
 //
 // API: POST /safari/session/list (session-read-list).
-func (s *SessionsService) List(ctx context.Context, req *SessionListRequest) (*SessionListResponse, *Response, error) {
+func (s *SessionsService) ReadList(ctx context.Context, req *SessionListRequest) (*SessionListResponse, *Response, error) {
 	out := new(SessionListResponse)
 	resp, err := s.client.do(ctx, "/safari/session/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Delete session.
+//
+// Delete a session by ID.
+//
+// API: POST /safari/session/delete (session-write-delete).
+func (s *SessionsService) WriteDelete(ctx context.Context, req *SessionDeleteRequest) (*any, *Response, error) {
+	out := new(any)
+	resp, err := s.client.do(ctx, "/safari/session/delete", req, out)
 	if err != nil {
 		return nil, resp, err
 	}

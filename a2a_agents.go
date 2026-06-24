@@ -9,7 +9,7 @@ type A2aAgentsService service
 
 // Get A2A agent detail.
 //
-// Return the full configuration of a single A2A agent by ID.
+// Get one A2A agent by ID.
 //
 // API: POST /safari/a2a-agent/get (remote-agent-read-get).
 func (s *A2aAgentsService) ReadGet(ctx context.Context, req *A2aAgentIDRequest) (*A2aAgentItem, *Response, error) {
@@ -23,7 +23,7 @@ func (s *A2aAgentsService) ReadGet(ctx context.Context, req *A2aAgentIDRequest) 
 
 // List A2A agents.
 //
-// List registered A2A agents visible to the caller across account and team scopes, with pagination.
+// List A2A agents visible to the caller across account and team scopes, with pagination.
 //
 // API: POST /safari/a2a-agent/list (remote-agent-read-list).
 func (s *A2aAgentsService) ReadList(ctx context.Context, req *A2aAgentListRequest) (*A2aAgentListResponse, *Response, error) {
@@ -37,7 +37,7 @@ func (s *A2aAgentsService) ReadList(ctx context.Context, req *A2aAgentListReques
 
 // Create A2A agent.
 //
-// Register a new A2A remote agent the SRE agent can delegate tasks to.
+// Register a new A2A remote agent from its agent-card URL.
 //
 // API: POST /safari/a2a-agent/create (remote-agent-write-create).
 func (s *A2aAgentsService) WriteCreate(ctx context.Context, req *A2aAgentCreateRequest) (*A2aAgentCreateResponse, *Response, error) {
@@ -51,7 +51,7 @@ func (s *A2aAgentsService) WriteCreate(ctx context.Context, req *A2aAgentCreateR
 
 // Delete A2A agent.
 //
-// Soft-delete an A2A agent registration so it can no longer be used.
+// Soft-delete an A2A agent by ID.
 //
 // API: POST /safari/a2a-agent/delete (remote-agent-write-delete).
 func (s *A2aAgentsService) WriteDelete(ctx context.Context, req *A2aAgentIDRequest) (*any, *Response, error) {
@@ -65,7 +65,7 @@ func (s *A2aAgentsService) WriteDelete(ctx context.Context, req *A2aAgentIDReque
 
 // Disable A2A agent.
 //
-// Deactivate an A2A agent so the SRE agent stops delegating to it.
+// Disable an enabled A2A agent.
 //
 // API: POST /safari/a2a-agent/disable (remote-agent-write-disable).
 func (s *A2aAgentsService) WriteDisable(ctx context.Context, req *A2aAgentIDRequest) (*any, *Response, error) {
@@ -79,7 +79,7 @@ func (s *A2aAgentsService) WriteDisable(ctx context.Context, req *A2aAgentIDRequ
 
 // Enable A2A agent.
 //
-// Activate a disabled A2A agent so the SRE agent can delegate to it.
+// Enable a disabled A2A agent.
 //
 // API: POST /safari/a2a-agent/enable (remote-agent-write-enable).
 func (s *A2aAgentsService) WriteEnable(ctx context.Context, req *A2aAgentIDRequest) (*any, *Response, error) {
@@ -93,7 +93,7 @@ func (s *A2aAgentsService) WriteEnable(ctx context.Context, req *A2aAgentIDReque
 
 // Update A2A agent.
 //
-// Edit an A2A agent's card URL, auth, streaming flag, or owning team.
+// Apply a partial update to an A2A agent. Omit a field to leave it unchanged.
 //
 // API: POST /safari/a2a-agent/update (remote-agent-write-update).
 func (s *A2aAgentsService) WriteUpdate(ctx context.Context, req *A2aAgentUpdateRequest) (*any, *Response, error) {

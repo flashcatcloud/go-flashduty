@@ -25,7 +25,7 @@ func (e CSVFileResponse) String() string { return string(e) }
 // DataSourceListResponse is a list response payload.
 type DataSourceListResponse []DataSourceItem
 
-// ErrorCode Flashduty error code enum. Every failed API response sets `error.code` to one of these stable wire strings. HTTP status is informational — the authoritative signal is the enum value.
+// ErrorCode Flashduty error code enum. Every failed API response sets `error.code` to one of these values. The value is a stable wire string — not a localized message and not a numeric status. HTTP status is informational.
 type ErrorCode string
 
 const (
@@ -178,130 +178,130 @@ type ChannelsChannelEscalateWebhookRobotListResponse struct {
 
 // A2aAgentCreateRequest is generated from the Flashduty OpenAPI schema.
 type A2aAgentCreateRequest struct {
-	// Display name of the agent.
+	// Agent display name.
 	AgentName string `json:"agent_name,omitempty" toon:"agent_name,omitempty"`
-	// Authentication parameters keyed by name.
+	// Authentication config key-values.
 	AuthConfig map[string]string `json:"auth_config,omitempty" toon:"auth_config,omitempty"`
-	// Credential model; defaults to shared.
+	// Authentication mode: shared (default), per_user_secret, or per_user_oauth.
 	AuthMode string `json:"auth_mode,omitempty" toon:"auth_mode,omitempty"`
-	// Authentication scheme used when calling the agent.
+	// Authentication type for the remote agent.
 	AuthType string `json:"auth_type,omitempty" toon:"auth_type,omitempty"`
-	// URL of the agent's published A2A agent card.
+	// URL of the remote agent card.
 	CardURL string `json:"card_url,omitempty" toon:"card_url,omitempty"`
-	// What this agent does and when to delegate to it.
+	// Agent description.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// OAuth metadata JSON; reserved for OAuth-based auth.
+	// JSON OAuth metadata; reserved for per_user_oauth.
 	OauthMetadata string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
-	// JSON schema of the per-user secret; required when auth_mode is per_user_secret.
+	// JSON secret schema; required when auth_mode=per_user_secret.
 	SecretSchema string `json:"secret_schema,omitempty" toon:"secret_schema,omitempty"`
-	// Whether the agent supports streaming responses.
+	// Whether the remote agent supports streaming.
 	Streaming bool `json:"streaming,omitempty" toon:"streaming,omitempty"`
-	// Owning team for the new agent; 0 for account scope.
+	// Team scope: 0 = account-wide; >0 = team.
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
 // A2aAgentCreateResponse is generated from the Flashduty OpenAPI schema.
 type A2aAgentCreateResponse struct {
-	// Identifier of the created agent.
+	// ID of the newly created agent.
 	AgentID string `json:"agent_id" toon:"agent_id"`
 }
 
 // A2aAgentIDRequest is generated from the Flashduty OpenAPI schema.
 type A2aAgentIDRequest struct {
-	// Identifier of the target agent.
+	// Target agent ID.
 	AgentID string `json:"agent_id,omitempty" toon:"agent_id,omitempty"`
 }
 
 // A2aAgentItem is generated from the Flashduty OpenAPI schema.
 type A2aAgentItem struct {
-	// Owning account.
+	// Owning account ID.
 	AccountID int64 `json:"account_id" toon:"account_id"`
-	// Name resolved from the fetched agent card.
+	// Agent name resolved from the remote card.
 	AgentCardName string `json:"agent_card_name" toon:"agent_card_name"`
-	// Skills advertised on the fetched agent card.
+	// Skills advertised by the remote card.
 	AgentCardSkills []string `json:"agent_card_skills" toon:"agent_card_skills"`
-	// Unique identifier of the A2A agent.
+	// Unique A2A agent ID (prefix `a2a_`).
 	AgentID string `json:"agent_id" toon:"agent_id"`
-	// Display name of the agent.
+	// Agent display name.
 	AgentName string `json:"agent_name" toon:"agent_name"`
-	// Authentication parameters keyed by name.
+	// Authentication config; secret values are masked.
 	AuthConfig map[string]string `json:"auth_config" toon:"auth_config"`
-	// Credential model: shared, per_user_secret, or per_user_oauth.
+	// Authentication mode.
 	AuthMode string `json:"auth_mode" toon:"auth_mode"`
-	// Authentication scheme used when calling the agent.
+	// Authentication type for reaching the remote agent.
 	AuthType string `json:"auth_type" toon:"auth_type"`
-	// Whether the calling member may edit or delete this resource.
+	// Whether the caller may edit this agent.
 	CanEdit bool `json:"can_edit" toon:"can_edit"`
-	// Timeout for fetching the agent card, in seconds.
+	// Card-resolution timeout in seconds.
 	CardResolveTimeout int64 `json:"card_resolve_timeout" toon:"card_resolve_timeout"`
-	// URL of the agent's published A2A agent card.
+	// URL of the remote agent card.
 	CardURL string `json:"card_url" toon:"card_url"`
-	// Creation time as a Unix timestamp in seconds.
-	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
-	// Member who created this resource.
+	// Creation time. Unix timestamp in milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Member ID that created the agent.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
-	// What this agent does and when to delegate to it.
+	// Agent description.
 	Description string `json:"description" toon:"description"`
-	// OAuth metadata JSON.
+	// JSON-encoded OAuth metadata (per_user_oauth mode).
 	OauthMetadata string `json:"oauth_metadata" toon:"oauth_metadata"`
-	// JSON schema of the per-user secret.
+	// JSON-encoded secret schema (per_user_secret mode).
 	SecretSchema string `json:"secret_schema" toon:"secret_schema"`
-	// Whether the agent is active and reachable.
+	// Agent status.
 	Status string `json:"status" toon:"status"`
-	// Whether the agent supports streaming responses.
+	// Whether the remote agent supports streaming responses.
 	Streaming bool `json:"streaming" toon:"streaming"`
-	// Timeout for a single delegated task, in seconds.
+	// Single-task execution timeout in seconds.
 	TaskTimeout int64 `json:"task_timeout" toon:"task_timeout"`
-	// Owning team; 0 means account scope.
+	// Team scope: 0 = account-wide; >0 = the owning team.
 	TeamID int64 `json:"team_id" toon:"team_id"`
-	// Last-update time as a Unix timestamp in seconds.
-	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// Last update time. Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
 }
 
 // A2aAgentListRequest is generated from the Flashduty OpenAPI schema.
 type A2aAgentListRequest struct {
-	// Include account-scoped rows alongside team-scoped ones; defaults to true.
-	IncludeAccount bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
-	// Maximum number of rows to return; defaults to 20.
+	// Include account-scoped (team_id=0) rows. Defaults to true.
+	IncludeAccount *bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
+	// Page size.
 	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
-	// Number of rows to skip for pagination.
+	// Row offset for pagination.
 	Offset int64 `json:"offset,omitempty" toon:"offset,omitempty"`
-	// Restrict results to resources owned by these teams; intersected with the caller's visible set.
+	// Filter to these team IDs; empty = the caller's visible set.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
 }
 
 // A2aAgentListResponse is generated from the Flashduty OpenAPI schema.
 type A2aAgentListResponse struct {
-	// A2A agents on the current page.
+	// A2A agents on this page.
 	Items []A2aAgentItem `json:"items" toon:"items"`
-	// Total number of agents matching the filters.
+	// Total number of matching agents.
 	Total int64 `json:"total" toon:"total"`
 }
 
 // A2aAgentUpdateRequest is generated from the Flashduty OpenAPI schema.
 type A2aAgentUpdateRequest struct {
-	// Identifier of the agent to update.
+	// Target agent ID.
 	AgentID string `json:"agent_id,omitempty" toon:"agent_id,omitempty"`
-	// New display name.
-	AgentName string `json:"agent_name,omitempty" toon:"agent_name,omitempty"`
-	// New authentication parameters.
+	// New display name. Omit to leave unchanged.
+	AgentName *string `json:"agent_name,omitempty" toon:"agent_name,omitempty"`
+	// Replace the auth config. Omit to leave unchanged.
 	AuthConfig map[string]string `json:"auth_config,omitempty" toon:"auth_config,omitempty"`
-	// New credential model.
-	AuthMode string `json:"auth_mode,omitempty" toon:"auth_mode,omitempty"`
-	// New authentication scheme.
-	AuthType string `json:"auth_type,omitempty" toon:"auth_type,omitempty"`
-	// New agent card URL.
-	CardURL string `json:"card_url,omitempty" toon:"card_url,omitempty"`
-	// New description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// New OAuth metadata JSON.
-	OauthMetadata string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
-	// New per-user secret JSON schema.
-	SecretSchema string `json:"secret_schema,omitempty" toon:"secret_schema,omitempty"`
-	// Toggle streaming-response support.
-	Streaming bool `json:"streaming,omitempty" toon:"streaming,omitempty"`
-	// Reassign the agent to this team; omit to leave unchanged, 0 for account scope.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	// New auth mode: shared, per_user_secret, or per_user_oauth.
+	AuthMode *string `json:"auth_mode,omitempty" toon:"auth_mode,omitempty"`
+	// New auth type. Omit to leave unchanged.
+	AuthType *string `json:"auth_type,omitempty" toon:"auth_type,omitempty"`
+	// New card URL. Omit to leave unchanged.
+	CardURL *string `json:"card_url,omitempty" toon:"card_url,omitempty"`
+	// New description. Omit to leave unchanged.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// New JSON OAuth metadata.
+	OauthMetadata *string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
+	// New JSON secret schema.
+	SecretSchema *string `json:"secret_schema,omitempty" toon:"secret_schema,omitempty"`
+	// Toggle streaming support. Omit to leave unchanged.
+	Streaming *bool `json:"streaming,omitempty" toon:"streaming,omitempty"`
+	// Reassign team scope. Omit to leave unchanged.
+	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
 // AccountInfo is generated from the Flashduty OpenAPI schema.
@@ -2271,71 +2271,12 @@ type EventItem struct {
 	UsageMetadata map[string]any `json:"usage_metadata" toon:"usage_metadata"`
 }
 
-// ExportLine is generated from the Flashduty OpenAPI schema.
-type ExportLine struct {
-	// Account id (on session_meta).
-	AccountID int64 `json:"account_id" toon:"account_id"`
-	// Dispatched subagent name (on subagent_dispatch).
-	AgentName string `json:"agent_name" toon:"agent_name"`
-	// Agent app (on session_meta).
-	AppName string `json:"app_name" toon:"app_name"`
-	// Child session id created by the dispatch (on subagent_dispatch).
-	ChildSessionID string `json:"child_session_id" toon:"child_session_id"`
-	// Text content of the line (messages, answers, errors).
-	Content string `json:"content" toon:"content"`
-	// Call duration in milliseconds.
-	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
-	// RFC3339 end timestamp; stamped on llm_call/tool_call/session_meta.
-	EndedAt string `json:"ended_at" toon:"ended_at"`
-	// Error detail when a call failed.
-	Error string `json:"error" toon:"error"`
-	// Tool call input arguments (on tool_call).
-	Input map[string]any `json:"input" toon:"input"`
-	// Byte size of the tool input.
-	InputBytes int64 `json:"input_bytes" toon:"input_bytes"`
-	// Chat model provider key; on session_meta and llm_call.
-	Model string `json:"model" toon:"model"`
-	// Tool name (on tool_call).
-	Name string `json:"name" toon:"name"`
-	// Tool call output (on tool_call response side).
-	Output string `json:"output" toon:"output"`
-	// Byte size of the tool output.
-	OutputBytes int64 `json:"output_bytes" toon:"output_bytes"`
-	// Parent session id for child sessions (on session_meta).
-	ParentSessionID string `json:"parent_session_id" toon:"parent_session_id"`
-	// 1-based monotonic sequence within the session (absent on session_meta).
-	Seq int64 `json:"seq" toon:"seq"`
-	// Session id (on session_meta).
-	SessionID string `json:"session_id" toon:"session_id"`
-	// RFC3339 start timestamp (session_meta uses session.created_at).
-	StartedAt string `json:"started_at" toon:"started_at"`
-	// Tool result status, e.g. ok or error.
-	Status string `json:"status" toon:"status"`
-	// RFC3339 timestamp of the event.
-	TS string `json:"ts" toon:"ts"`
-	// Line discriminator.
-	Type  string      `json:"type" toon:"type"`
-	Usage ExportUsage `json:"usage" toon:"usage"`
-}
-
 // ExportStatusPageSubscribersRequest is generated from the Flashduty OpenAPI schema.
 type ExportStatusPageSubscribersRequest struct {
 	// Optional component IDs to filter subscribers by.
 	ComponentIDs []string `json:"component_ids,omitempty" toon:"component_ids,omitempty"`
 	// Status page ID.
 	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
-}
-
-// ExportUsage is generated from the Flashduty OpenAPI schema.
-type ExportUsage struct {
-	// Tokens written to the prompt cache.
-	CacheCreation int64 `json:"cache_creation" toon:"cache_creation"`
-	// Tokens served from the prompt cache.
-	CacheRead int64 `json:"cache_read" toon:"cache_read"`
-	// Prompt (input) tokens for the call.
-	InputTokens int64 `json:"input_tokens" toon:"input_tokens"`
-	// Generated (output) tokens for the call.
-	OutputTokens int64 `json:"output_tokens" toon:"output_tokens"`
 }
 
 // ExportedStatusPageSubscriberItem is generated from the Flashduty OpenAPI schema.
@@ -3544,170 +3485,174 @@ type ListWebhookHistoryResponse struct {
 
 // McpServerCreateRequest is generated from the Flashduty OpenAPI schema.
 type McpServerCreateRequest struct {
-	// Command-line arguments for the stdio executable.
+	// Command arguments (stdio transport).
 	Args []string `json:"args,omitempty" toon:"args,omitempty"`
-	// Credential model; defaults to shared.
+	// Authentication mode: shared (default), per_user_secret, or per_user_oauth.
 	AuthMode string `json:"auth_mode,omitempty" toon:"auth_mode,omitempty"`
-	// Per-call timeout in seconds.
+	// Tool-call timeout in seconds. 0 = default (60s).
 	CallTimeout int64 `json:"call_timeout,omitempty" toon:"call_timeout,omitempty"`
-	// Executable to launch for stdio transport.
+	// Executable command (stdio transport).
 	Command string `json:"command,omitempty" toon:"command,omitempty"`
-	// Connection timeout in seconds.
+	// Connection timeout in seconds. 0 = default (10s).
 	ConnectTimeout int64 `json:"connect_timeout,omitempty" toon:"connect_timeout,omitempty"`
-	// What this MCP server provides.
+	// Server description.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// Environment variables for the stdio process.
+	// Environment variables (stdio transport).
 	Env map[string]string `json:"env,omitempty" toon:"env,omitempty"`
-	// HTTP headers sent to the remote endpoint.
+	// HTTP headers (sse / streamable-http).
 	Headers map[string]string `json:"headers,omitempty" toon:"headers,omitempty"`
-	// OAuth metadata JSON; reserved for OAuth-based auth.
+	// JSON OAuth metadata; reserved for per_user_oauth.
 	OauthMetadata string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
-	// JSON schema of the per-user secret; required when auth_mode is per_user_secret.
+	// JSON secret schema; required when auth_mode=per_user_secret.
 	SecretSchema string `json:"secret_schema,omitempty" toon:"secret_schema,omitempty"`
-	// Display name of the server.
+	// MCP server name, unique within the account.
 	ServerName string `json:"server_name,omitempty" toon:"server_name,omitempty"`
-	// Initial lifecycle state of the server.
+	// Marketplace template name when created from a connector template.
+	SourceTemplateName string `json:"source_template_name,omitempty" toon:"source_template_name,omitempty"`
+	// Initial status.
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
-	// Owning team for the new server; 0 for account scope.
+	// Team scope: 0 = account-wide; >0 = team.
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	// Transport used to reach the server.
+	// Transport protocol.
 	Transport string `json:"transport,omitempty" toon:"transport,omitempty"`
-	// Endpoint URL for sse or streamable-http transport.
+	// Server URL (sse / streamable-http transport).
 	URL string `json:"url,omitempty" toon:"url,omitempty"`
 }
 
 // McpServerDeleteRequest is generated from the Flashduty OpenAPI schema.
 type McpServerDeleteRequest struct {
-	// Identifier of the server to delete.
+	// Target MCP server ID.
 	ServerID string `json:"server_id,omitempty" toon:"server_id,omitempty"`
 }
 
 // McpServerGetRequest is generated from the Flashduty OpenAPI schema.
 type McpServerGetRequest struct {
-	// Identifier of the server to fetch.
+	// Target MCP server ID.
 	ServerID string `json:"server_id,omitempty" toon:"server_id,omitempty"`
 }
 
 // McpServerItem is generated from the Flashduty OpenAPI schema.
 type McpServerItem struct {
-	// Owning account.
+	// Owning account ID.
 	AccountID int64 `json:"account_id" toon:"account_id"`
-	// LLM-generated description, preferred over description when present.
+	// LLM-generated description, preferred over `description` when present.
 	AIDescription string `json:"ai_description" toon:"ai_description"`
-	// Command-line arguments for the stdio executable.
+	// Command arguments (stdio transport).
 	Args []string `json:"args" toon:"args"`
-	// Credential model: shared, per_user_secret, or per_user_oauth.
+	// Authentication mode.
 	AuthMode string `json:"auth_mode" toon:"auth_mode"`
-	// Per-call timeout in seconds.
+	// Tool-call timeout in seconds (0 = server default, 60s).
 	CallTimeout int64 `json:"call_timeout" toon:"call_timeout"`
-	// Whether the calling member may edit or delete this resource.
+	// Whether the caller may edit this server.
 	CanEdit bool `json:"can_edit" toon:"can_edit"`
-	// Executable launched for stdio transport.
+	// Executable command (stdio transport only).
 	Command string `json:"command" toon:"command"`
-	// Connection timeout in seconds.
+	// Connection timeout in seconds (0 = server default, 10s).
 	ConnectTimeout int64 `json:"connect_timeout" toon:"connect_timeout"`
-	// Creation time as a Unix timestamp in milliseconds.
+	// Creation time. Unix timestamp in milliseconds.
 	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
-	// Member who created this resource.
+	// Member ID that created the server.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
-	// What this MCP server provides.
+	// Server description.
 	Description string `json:"description" toon:"description"`
-	// Environment variables passed to the stdio process.
+	// Environment variables (stdio transport). Secret values are masked.
 	Env map[string]string `json:"env" toon:"env"`
-	// HTTP headers sent to the remote endpoint; secret values are masked.
+	// HTTP headers (sse / streamable-http). Secret values are masked.
 	Headers map[string]string `json:"headers" toon:"headers"`
-	// Tool-probe failure message; present when the live probe failed.
+	// Error message when the live tool list failed.
 	ListError string `json:"list_error" toon:"list_error"`
-	// OAuth metadata JSON.
+	// JSON-encoded OAuth metadata (per_user_oauth mode).
 	OauthMetadata string `json:"oauth_metadata" toon:"oauth_metadata"`
 	// Outbound proxy URL used to reach the server.
 	ProxyURL string `json:"proxy_url" toon:"proxy_url"`
-	// JSON schema of the per-user secret.
+	// JSON-encoded secret schema (per_user_secret mode).
 	SecretSchema string `json:"secret_schema" toon:"secret_schema"`
-	// Unique identifier of the MCP server.
+	// Unique MCP server ID (prefix `mcp_`).
 	ServerID string `json:"server_id" toon:"server_id"`
-	// Display name of the MCP server.
+	// MCP server name, unique within the account.
 	ServerName string `json:"server_name" toon:"server_name"`
-	// Whether the server is active and usable by agents.
+	// Marketplace template this connector was installed from; empty for user-authored.
+	SourceTemplateName string `json:"source_template_name" toon:"source_template_name"`
+	// Server status.
 	Status string `json:"status" toon:"status"`
-	// Owning team; 0 means account scope.
+	// Team scope: 0 = account-wide; >0 = the owning team.
 	TeamID int64 `json:"team_id" toon:"team_id"`
-	// Number of tools discovered on the server.
+	// Number of tools in the live list.
 	ToolCount int64 `json:"tool_count" toon:"tool_count"`
-	// Live tool catalogue; populated only by get and test.
+	// Live tool list; populated by the get/test endpoints.
 	Tools []McpToolInfo `json:"tools" toon:"tools"`
-	// Transport used to reach the server.
+	// Transport protocol.
 	Transport string `json:"transport" toon:"transport"`
-	// Last-update time as a Unix timestamp in milliseconds.
+	// Last update time. Unix timestamp in milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
-	// Endpoint URL for sse or streamable-http transport.
+	// Server URL (sse / streamable-http transport).
 	URL string `json:"url" toon:"url"`
 }
 
 // McpServerListRequest is generated from the Flashduty OpenAPI schema.
 type McpServerListRequest struct {
 	ListOptions
-	// Include account-scoped rows alongside team-scoped ones; defaults to true.
-	IncludeAccount bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
-	// Restrict results to resources owned by these teams; intersected with the caller's visible set.
+	// Include account-scoped (team_id=0) rows. Defaults to true.
+	IncludeAccount *bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
+	// Filter to these team IDs; empty = the caller's visible set.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
 }
 
 // McpServerListResponse is generated from the Flashduty OpenAPI schema.
 type McpServerListResponse struct {
-	// MCP servers on the current page.
+	// MCP servers on this page.
 	Servers []McpServerItem `json:"servers" toon:"servers"`
-	// Total number of servers matching the filters.
+	// Total number of matching servers.
 	Total int64 `json:"total" toon:"total"`
 }
 
 // McpServerStatusRequest is generated from the Flashduty OpenAPI schema.
 type McpServerStatusRequest struct {
-	// Identifier of the target server.
+	// Target MCP server ID.
 	ServerID string `json:"server_id,omitempty" toon:"server_id,omitempty"`
 }
 
 // McpServerUpdateRequest is generated from the Flashduty OpenAPI schema.
 type McpServerUpdateRequest struct {
-	// New stdio arguments.
+	// Command arguments (stdio transport).
 	Args []string `json:"args,omitempty" toon:"args,omitempty"`
-	// New credential model.
+	// Authentication mode: shared (default), per_user_secret, or per_user_oauth.
 	AuthMode string `json:"auth_mode,omitempty" toon:"auth_mode,omitempty"`
-	// New per-call timeout in seconds.
+	// Tool-call timeout in seconds. 0 = default (60s).
 	CallTimeout int64 `json:"call_timeout,omitempty" toon:"call_timeout,omitempty"`
-	// New stdio executable.
+	// Executable command (stdio transport).
 	Command string `json:"command,omitempty" toon:"command,omitempty"`
-	// New connection timeout in seconds.
+	// Connection timeout in seconds. 0 = default (10s).
 	ConnectTimeout int64 `json:"connect_timeout,omitempty" toon:"connect_timeout,omitempty"`
 	// New description.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// New stdio environment variables.
+	// Environment variables (stdio transport).
 	Env map[string]string `json:"env,omitempty" toon:"env,omitempty"`
-	// New HTTP headers for the remote endpoint.
+	// HTTP headers (sse / streamable-http).
 	Headers map[string]string `json:"headers,omitempty" toon:"headers,omitempty"`
-	// New OAuth metadata JSON.
+	// JSON OAuth metadata; reserved for per_user_oauth.
 	OauthMetadata string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
-	// New per-user secret JSON schema.
+	// JSON secret schema; required when auth_mode=per_user_secret.
 	SecretSchema string `json:"secret_schema,omitempty" toon:"secret_schema,omitempty"`
-	// Identifier of the server to update.
+	// Target MCP server ID.
 	ServerID string `json:"server_id,omitempty" toon:"server_id,omitempty"`
-	// New display name.
+	// New name.
 	ServerName string `json:"server_name,omitempty" toon:"server_name,omitempty"`
-	// Reassign the server to this team; omit to leave unchanged, 0 for account scope.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	// New transport for the server.
+	// Reassign team scope: 0 = account-wide; >0 = team. Omit to leave unchanged.
+	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	// Transport protocol.
 	Transport string `json:"transport,omitempty" toon:"transport,omitempty"`
-	// New endpoint URL for remote transports.
+	// Server URL (sse / streamable-http transport).
 	URL string `json:"url,omitempty" toon:"url,omitempty"`
 }
 
 // McpToolInfo is generated from the Flashduty OpenAPI schema.
 type McpToolInfo struct {
-	// What the tool does.
+	// Tool description.
 	Description string `json:"description" toon:"description"`
-	// JSON schema of the tool's input arguments.
-	InputSchema any `json:"input_schema" toon:"input_schema"`
-	// Tool name as advertised by the server.
+	// JSON Schema describing the tool's input parameters.
+	InputSchema map[string]any `json:"input_schema" toon:"input_schema"`
+	// Tool name.
 	Name string `json:"name" toon:"name"`
 }
 
@@ -5435,23 +5380,29 @@ type ScheduleUpsertRequest struct {
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
+// SessionDeleteRequest is generated from the Flashduty OpenAPI schema.
+type SessionDeleteRequest struct {
+	// Target session ID.
+	SessionID string `json:"session_id,omitempty" toon:"session_id,omitempty"`
+}
+
 // SessionExportRequest is generated from the Flashduty OpenAPI schema.
 type SessionExportRequest struct {
 	// When true, each subagent_dispatch line is followed by the child session's full event stream, bracketed by its own session_meta. Defaults to false.
 	IncludeSubagents bool `json:"include_subagents,omitempty" toon:"include_subagents,omitempty"`
-	// Session identifier to export.
+	// Target session ID.
 	SessionID string `json:"session_id,omitempty" toon:"session_id,omitempty"`
 }
 
 // SessionGetRequest is generated from the Flashduty OpenAPI schema.
 type SessionGetRequest struct {
-	// Alias for num_recent_events; takes precedence when both are set.
+	// Page size for events; takes precedence over `num_recent_events`. 0 uses the server default (100).
 	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
-	// Number of most-recent events to return; 0 uses the server default.
+	// Legacy page size: number of most-recent events to return. Superseded by `limit` when both are set; 0 uses the server default (100).
 	NumRecentEvents int64 `json:"num_recent_events,omitempty" toon:"num_recent_events,omitempty"`
-	// Opaque keyset cursor from a previous response's search_after_ctx, to page backward through older events.
+	// Opaque keyset cursor from a previous response; pass it back to fetch the next older page.
 	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
-	// Session identifier.
+	// Target session ID.
 	SessionID string `json:"session_id,omitempty" toon:"session_id,omitempty"`
 }
 
@@ -5524,21 +5475,21 @@ type SessionListRequest struct {
 	ListOptions
 	// Agent app whose sessions to list.
 	AppName string `json:"app_name,omitempty" toon:"app_name,omitempty"`
-	// Ascending sort when true; defaults to false (descending). Only honored when orderby is set.
+	// Ascending order when true; applies only when `orderby` is set.
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
-	// Restrict to sessions produced by these entry surfaces. Empty returns every kind.
+	// Restrict to sessions produced by these surfaces; empty returns every kind.
 	EntryKinds []string `json:"entry_kinds,omitempty" toon:"entry_kinds,omitempty"`
-	// Include subagent (child) sessions in the result; defaults to false.
+	// Include subagent-dispatched sessions in the list.
 	IncludeSubagentSessions bool `json:"include_subagent_sessions,omitempty" toon:"include_subagent_sessions,omitempty"`
-	// Case-insensitive substring match against session name.
+	// Filter by session-name keyword.
 	Keyword string `json:"keyword,omitempty" toon:"keyword,omitempty"`
-	// Sort column.
+	// Sort field.
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
-	// Visibility scope: all (own + member-of-team rows, the default), personal (own only), or team (member teams only).
+	// Visibility scope: all (own + member-of-team rows, default), personal, or team.
 	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
-	// Archive bucket: active (default, not archived), archived, or all.
+	// Archive bucket: active (default) returns un-archived, archived returns archived, all returns both.
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
-	// Optional explicit team filter; intersected with the caller's visible set / scope.
+	// Optional explicit team filter; intersects with `scope`.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
 }
 
@@ -5592,102 +5543,114 @@ type SilenceRuleItem struct {
 
 // SkillDeleteRequest is generated from the Flashduty OpenAPI schema.
 type SkillDeleteRequest struct {
-	// Identifier of the skill to delete.
+	// Target skill ID.
 	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
 }
 
 // SkillDownloadRequest is generated from the Flashduty OpenAPI schema.
 type SkillDownloadRequest struct {
-	// Identifier of the skill to download.
+	// Target skill ID.
 	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
 }
 
 // SkillGetRequest is generated from the Flashduty OpenAPI schema.
 type SkillGetRequest struct {
-	// Identifier of the skill to fetch.
+	// Target skill ID.
 	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
 }
 
 // SkillItem is generated from the Flashduty OpenAPI schema.
 type SkillItem struct {
-	// Owning account.
+	// Owning account ID.
 	AccountID int64 `json:"account_id" toon:"account_id"`
-	// Author declared in the skill frontmatter.
+	// Skill author.
 	Author string `json:"author" toon:"author"`
-	// Whether the calling member may edit or delete this resource.
+	// Whether the caller may edit this skill.
 	CanEdit bool `json:"can_edit" toon:"can_edit"`
-	// SHA-256 checksum of the skill's zip package.
+	// SHA-256 checksum of the skill zip.
 	Checksum string `json:"checksum" toon:"checksum"`
-	// Full SKILL.md body; omitted in list responses.
+	// Full SKILL.md content. Omitted in list responses.
 	Content string `json:"content" toon:"content"`
-	// Install response only: true for a fresh install, false for an in-place upsert.
+	// Set only on install-from-session responses: true = fresh install, false = in-place update.
 	Created bool `json:"created" toon:"created"`
-	// Creation time as a Unix timestamp in milliseconds.
+	// Creation time. Unix timestamp in milliseconds.
 	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
-	// Member who created this resource.
+	// Member ID that created the skill.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
-	// What the skill does and when the agent should use it.
+	// Human-readable description from the SKILL.md frontmatter.
 	Description string `json:"description" toon:"description"`
-	// A marketplace-sourced skill has been edited locally; auto-update skips it.
+	// True when a marketplace-sourced skill was edited locally (auto-update skips it).
 	IsModified bool `json:"is_modified" toon:"is_modified"`
-	// License declared in the skill frontmatter.
+	// Skill license.
 	License string `json:"license" toon:"license"`
-	// Object-storage key of the skill's zip package.
+	// Object-storage key of the skill zip.
 	S3Key string `json:"s3_key" toon:"s3_key"`
-	// Unique identifier of the skill.
+	// Unique skill ID (prefix `skill_`).
 	SkillID string `json:"skill_id" toon:"skill_id"`
-	// Name of the skill, parsed from its SKILL.md frontmatter.
+	// Skill name, unique within the account.
 	SkillName string `json:"skill_name" toon:"skill_name"`
-	// Marketplace template this skill was installed from, if any.
+	// Marketplace template this skill was installed from; empty for user-authored.
 	SourceTemplateName string `json:"source_template_name" toon:"source_template_name"`
-	// Marketplace template version captured at install time.
+	// Template version at install time.
 	SourceTemplateVersion string `json:"source_template_version" toon:"source_template_version"`
-	// Whether the skill is active and loadable by agents.
+	// Skill status.
 	Status string `json:"status" toon:"status"`
-	// Tags declared in the skill frontmatter.
+	// Tags parsed from the frontmatter.
 	Tags []string `json:"tags" toon:"tags"`
-	// Owning team; 0 means account scope.
+	// Team scope: 0 = account-wide; >0 = the owning team.
 	TeamID int64 `json:"team_id" toon:"team_id"`
-	// Tools the skill requires, declared in its frontmatter.
+	// Required tools (builtin or `mcp:server/tool`).
 	Tools []string `json:"tools" toon:"tools"`
-	// A newer marketplace template version exists for this skill.
+	// True when the marketplace has a newer template version.
 	UpdateAvailable bool `json:"update_available" toon:"update_available"`
-	// Last-update time as a Unix timestamp in milliseconds.
+	// Last update time. Unix timestamp in milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
-	// Skill version string from its frontmatter.
+	// Skill version from the frontmatter.
 	Version string `json:"version" toon:"version"`
 }
 
 // SkillListRequest is generated from the Flashduty OpenAPI schema.
 type SkillListRequest struct {
 	ListOptions
-	// Include account-scoped rows alongside team-scoped ones; defaults to true.
-	IncludeAccount bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
-	// Restrict results to resources owned by these teams; intersected with the caller's visible set.
+	// Include account-scoped (team_id=0) rows. Defaults to true.
+	IncludeAccount *bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
+	// Filter to these team IDs; empty = the caller's visible set.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
 }
 
 // SkillListResponse is generated from the Flashduty OpenAPI schema.
 type SkillListResponse struct {
-	// Skills on the current page.
+	// Skills on this page.
 	Skills []SkillItem `json:"skills" toon:"skills"`
-	// Total number of skills matching the filters.
+	// Total number of matching skills.
 	Total int64 `json:"total" toon:"total"`
 }
 
 // SkillStatusRequest is generated from the Flashduty OpenAPI schema.
 type SkillStatusRequest struct {
-	// Identifier of the target skill.
+	// Target skill ID.
 	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
 }
 
 // SkillUpdateRequest is generated from the Flashduty OpenAPI schema.
 type SkillUpdateRequest struct {
-	// New description for the skill.
+	// New description.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// Identifier of the skill to update.
+	// Target skill ID.
 	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
-	// Reassign the skill to this team; omit to leave unchanged, 0 for account scope.
+	// Reassign team scope: 0 = account-wide; >0 = team. Omit to leave unchanged.
+	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// SkillUploadRequest is generated from the Flashduty OpenAPI schema.
+type SkillUploadRequest struct {
+	// Skill archive (.skill / .zip / .tar.gz / .tgz). Max 100MB.
+	File string `json:"file,omitempty" toon:"file,omitempty"`
+	// When true, overwrite an existing same-name skill.
+	Replace bool `json:"replace,omitempty" toon:"replace,omitempty"`
+	// When replacing a specific skill, its skill ID.
+	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
+	// Team scope for the new skill: 0 = account-wide.
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 

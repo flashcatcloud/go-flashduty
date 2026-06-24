@@ -97,3 +97,68 @@ func DecodeExportLine(line []byte) (*ExportLine, error) {
 	}
 	return &l, nil
 }
+
+// ExportLine is one decoded line of a session export stream. The Type field
+// discriminates the event kind (session_meta, user_message, llm_call, tool_call,
+// subagent_dispatch, final_answer, agent_text, error); the remaining fields are
+// populated per kind. It is hand-maintained here, alongside the hand-written
+// streaming Export endpoint, because the typed generator only models JSON-envelope
+// responses and excludes the NDJSON export stream (so its line schema is pruned as
+// unreferenced).
+type ExportLine struct {
+	// Account id (on session_meta).
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Dispatched subagent name (on subagent_dispatch).
+	AgentName string `json:"agent_name" toon:"agent_name"`
+	// Agent app (on session_meta).
+	AppName string `json:"app_name" toon:"app_name"`
+	// Child session id created by the dispatch (on subagent_dispatch).
+	ChildSessionID string `json:"child_session_id" toon:"child_session_id"`
+	// Text content of the line (messages, answers, errors).
+	Content string `json:"content" toon:"content"`
+	// Call duration in milliseconds.
+	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
+	// RFC3339 end timestamp; stamped on llm_call/tool_call/session_meta.
+	EndedAt string `json:"ended_at" toon:"ended_at"`
+	// Error detail when a call failed.
+	Error string `json:"error" toon:"error"`
+	// Tool call input arguments (on tool_call).
+	Input map[string]any `json:"input" toon:"input"`
+	// Byte size of the tool input.
+	InputBytes int64 `json:"input_bytes" toon:"input_bytes"`
+	// Chat model provider key; on session_meta and llm_call.
+	Model string `json:"model" toon:"model"`
+	// Tool name (on tool_call).
+	Name string `json:"name" toon:"name"`
+	// Tool call output (on tool_call response side).
+	Output string `json:"output" toon:"output"`
+	// Byte size of the tool output.
+	OutputBytes int64 `json:"output_bytes" toon:"output_bytes"`
+	// Parent session id for child sessions (on session_meta).
+	ParentSessionID string `json:"parent_session_id" toon:"parent_session_id"`
+	// 1-based monotonic sequence within the session (absent on session_meta).
+	Seq int64 `json:"seq" toon:"seq"`
+	// Session id (on session_meta).
+	SessionID string `json:"session_id" toon:"session_id"`
+	// RFC3339 start timestamp (session_meta uses session.created_at).
+	StartedAt string `json:"started_at" toon:"started_at"`
+	// Tool result status, e.g. ok or error.
+	Status string `json:"status" toon:"status"`
+	// RFC3339 timestamp of the event.
+	TS string `json:"ts" toon:"ts"`
+	// Line discriminator.
+	Type  string      `json:"type" toon:"type"`
+	Usage ExportUsage `json:"usage" toon:"usage"`
+}
+
+// ExportUsage is the token-usage sub-object on an ExportLine (llm_call events).
+type ExportUsage struct {
+	// Tokens written to the prompt cache.
+	CacheCreation int64 `json:"cache_creation" toon:"cache_creation"`
+	// Tokens served from the prompt cache.
+	CacheRead int64 `json:"cache_read" toon:"cache_read"`
+	// Prompt (input) tokens for the call.
+	InputTokens int64 `json:"input_tokens" toon:"input_tokens"`
+	// Generated (output) tokens for the call.
+	OutputTokens int64 `json:"output_tokens" toon:"output_tokens"`
+}
