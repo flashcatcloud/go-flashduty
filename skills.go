@@ -7,23 +7,9 @@ import "context"
 // SkillsService handles the "AI SRE/Skills" API resource.
 type SkillsService service
 
-// Download skill.
-//
-// Download the original zip package of a skill as a binary attachment.
-//
-// API: POST /safari/skill/download (skill-read-download).
-func (s *SkillsService) ReadDownload(ctx context.Context, req *SkillDownloadRequest) (*string, *Response, error) {
-	out := new(string)
-	resp, err := s.client.do(ctx, "/safari/skill/download", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // Enable skill.
 //
-// Activate a disabled skill so agents can load it at session start.
+// Enable a disabled skill so the agent can load it.
 //
 // API: POST /safari/skill/enable (skill-read-enable).
 func (s *SkillsService) ReadEnable(ctx context.Context, req *SkillStatusRequest) (*any, *Response, error) {
@@ -37,7 +23,7 @@ func (s *SkillsService) ReadEnable(ctx context.Context, req *SkillStatusRequest)
 
 // Get skill detail.
 //
-// Return the full configuration and SKILL.md body of a single skill by ID.
+// Get one skill including its full SKILL.md content.
 //
 // API: POST /safari/skill/get (skill-read-get).
 func (s *SkillsService) ReadGet(ctx context.Context, req *SkillGetRequest) (*SkillItem, *Response, error) {
@@ -65,7 +51,7 @@ func (s *SkillsService) ReadList(ctx context.Context, req *SkillListRequest) (*S
 
 // Delete skill.
 //
-// Permanently remove a skill so agents can no longer load it.
+// Delete a skill by ID.
 //
 // API: POST /safari/skill/delete (skill-write-delete).
 func (s *SkillsService) WriteDelete(ctx context.Context, req *SkillDeleteRequest) (*any, *Response, error) {
@@ -79,7 +65,7 @@ func (s *SkillsService) WriteDelete(ctx context.Context, req *SkillDeleteRequest
 
 // Disable skill.
 //
-// Deactivate an enabled skill so agents no longer load it.
+// Disable an enabled skill so the agent stops loading it.
 //
 // API: POST /safari/skill/disable (skill-write-disable).
 func (s *SkillsService) WriteDisable(ctx context.Context, req *SkillStatusRequest) (*any, *Response, error) {
@@ -93,7 +79,7 @@ func (s *SkillsService) WriteDisable(ctx context.Context, req *SkillStatusReques
 
 // Update skill.
 //
-// Edit a skill's description or reassign its owning team.
+// Update a skill's description or reassign its team scope.
 //
 // API: POST /safari/skill/update (skill-write-update).
 func (s *SkillsService) WriteUpdate(ctx context.Context, req *SkillUpdateRequest) (*SkillItem, *Response, error) {
@@ -107,7 +93,7 @@ func (s *SkillsService) WriteUpdate(ctx context.Context, req *SkillUpdateRequest
 
 // Upload skill.
 //
-// Upload a skill zip package and register it as a new account or team skill.
+// Upload a skill archive (.skill/.zip/.tar.gz/.tgz) to create or replace a skill.
 //
 // API: POST /safari/skill/upload (skill-write-upload).
 func (s *SkillsService) WriteUpload(ctx context.Context) (*SkillItem, *Response, error) {
