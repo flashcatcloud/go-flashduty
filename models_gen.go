@@ -162,6 +162,20 @@ func (e StatusPageSubscriberExportResponse) String() string { return string(e) }
 // StoreRulesetListResponse is a list response payload.
 type StoreRulesetListResponse []StoreRulesetItem
 
+// ChannelsChannelEscalateWebhookRobotListRequest is generated from the Flashduty OpenAPI schema.
+type ChannelsChannelEscalateWebhookRobotListRequest struct {
+	// Search keyword. Fuzzy matches against robot alias or token, case-insensitive.
+	Query string `json:"query,omitempty" toon:"query,omitempty"`
+	// Filter by robot type, e.g. `feishu`, `dingtalk`, `wecom`, `slack`, `teams`. Omit to return all types.
+	Type string `json:"type,omitempty" toon:"type,omitempty"`
+}
+
+// ChannelsChannelEscalateWebhookRobotListResponse is generated from the Flashduty OpenAPI schema.
+type ChannelsChannelEscalateWebhookRobotListResponse struct {
+	// Deduplicated list of webhook robots.
+	List []ChannelsChannelEscalateWebhookRobotListResponseListItem `json:"list" toon:"list"`
+}
+
 // A2aAgentCreateRequest is generated from the Flashduty OpenAPI schema.
 type A2aAgentCreateRequest struct {
 	// Display name of the agent.
@@ -6779,6 +6793,16 @@ type WebhookHistoryItem struct {
 	WebhookType string `json:"webhook_type" toon:"webhook_type"`
 }
 
+// ChannelsChannelEscalateWebhookRobotListResponseListItem is generated from the Flashduty OpenAPI schema.
+type ChannelsChannelEscalateWebhookRobotListResponseListItem struct {
+	// List of channels and escalation rules referencing this robot.
+	ReferencedBy []ChannelsChannelEscalateWebhookRobotListResponseListItemReferencedByItem `json:"referenced_by" toon:"referenced_by"`
+	// Robot configuration, including `token` (webhook URL or secret) and `alias` (robot display name) among other fields.
+	Settings map[string]any `json:"settings" toon:"settings"`
+	// Robot type, e.g. `feishu`, `dingtalk`, `wecom`, `slack`, `teams`, etc.
+	Type string `json:"type" toon:"type"`
+}
+
 // AccountInfoRestrictions is generated from the Flashduty OpenAPI schema.
 type AccountInfoRestrictions struct {
 	// Whether subdomains of the allowed email domains are also accepted.
@@ -7300,6 +7324,18 @@ type ToolInvokeResponseResultsItem struct {
 type ToolInvokeResponseTarget struct {
 	Kind    string `json:"kind" toon:"kind"`
 	Locator string `json:"locator" toon:"locator"`
+}
+
+// ChannelsChannelEscalateWebhookRobotListResponseListItemReferencedByItem is generated from the Flashduty OpenAPI schema.
+type ChannelsChannelEscalateWebhookRobotListResponseListItemReferencedByItem struct {
+	// Channel ID.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Channel name.
+	ChannelName string `json:"channel_name" toon:"channel_name"`
+	// Escalation rule ID (MongoDB ObjectID).
+	EscalateRuleID string `json:"escalate_rule_id" toon:"escalate_rule_id"`
+	// Escalation rule name.
+	EscalateRuleName string `json:"escalate_rule_name" toon:"escalate_rule_name"`
 }
 
 // CreateChannelRequestEscalateRuleTarget is generated from the Flashduty OpenAPI schema.

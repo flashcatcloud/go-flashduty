@@ -4806,6 +4806,172 @@
         }
       }
     },
+    "/channel/escalate/webhook/robot/list": {
+      "post": {
+        "operationId": "channelEscalateWebhookRobotList",
+        "summary": "查询分派策略中的群聊机器人列表",
+        "description": "查询当前账户下所有分派策略中配置的群聊机器人（Webhook），返回去重后的机器人列表及其被哪些协作空间/分派策略引用。",
+        "tags": [
+          "On-call/协作空间"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **协作空间查看**（`on-call`） |\n\n## 使用说明\n\n该接口用于查询当前账户下所有分派策略中配置的 IM 群聊机器人。系统会遍历所有分派策略的所有环节，提取其中配置的 Webhook 机器人（排除应用类型 `_app` 后缀的），按 `type + token` 去重后返回。\n\n每个机器人附带 `referenced_by` 列表，标明该机器人被哪些协作空间和分派策略引用，便于进行机器人的统一管理和影响范围评估。\n\n支持通过 `type` 筛选特定类型的机器人（如 `feishu`、`dingtalk`、`wecom`、`slack`、`teams` 等），也支持通过 `query` 对机器人的别名或 token 进行模糊搜索。",
+          "href": "/zh/api-reference/on-call/channels/channel-escalate-webhook-robot-list",
+          "metadata": {
+            "sidebarTitle": "查询群聊机器人列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "list": {
+                              "type": "array",
+                              "description": "去重后的群聊机器人列表。",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "description": "机器人类型，如 `feishu`、`dingtalk`、`wecom`、`slack`、`teams` 等。"
+                                  },
+                                  "settings": {
+                                    "type": "object",
+                                    "description": "机器人配置，包含 `token`（Webhook 地址或密钥）和 `alias`（机器人别名）等字段。",
+                                    "additionalProperties": true
+                                  },
+                                  "referenced_by": {
+                                    "type": "array",
+                                    "description": "引用该机器人的协作空间和分派策略列表。",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "channel_id": {
+                                          "type": "integer",
+                                          "format": "int64",
+                                          "description": "协作空间 ID。"
+                                        },
+                                        "channel_name": {
+                                          "type": "string",
+                                          "description": "协作空间名称。"
+                                        },
+                                        "escalate_rule_id": {
+                                          "type": "string",
+                                          "description": "分派策略 ID（MongoDB ObjectID）。"
+                                        },
+                                        "escalate_rule_name": {
+                                          "type": "string",
+                                          "description": "分派策略名称。"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "list": [
+                      {
+                        "type": "feishu",
+                        "settings": {
+                          "token": "https://open.feishu.cn/open-apis/bot/v2/hook/xxx",
+                          "alias": "运维告警群"
+                        },
+                        "referenced_by": [
+                          {
+                            "channel_id": 6193426913131,
+                            "channel_name": "订单系统",
+                            "escalate_rule_id": "69bd0ce95a238693176c1d66",
+                            "escalate_rule_name": "默认分派策略"
+                          },
+                          {
+                            "channel_id": 6193426913132,
+                            "channel_name": "支付系统",
+                            "escalate_rule_id": "69bd0ce95a238693176c1d67",
+                            "escalate_rule_name": "核心告警"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "dingtalk",
+                        "settings": {
+                          "token": "https://oapi.dingtalk.com/robot/send?access_token=xxx",
+                          "alias": "DBA 群"
+                        },
+                        "referenced_by": [
+                          {
+                            "channel_id": 6193426913131,
+                            "channel_name": "订单系统",
+                            "escalate_rule_id": "69bd0ce95a238693176c1d66",
+                            "escalate_rule_name": "默认分派策略"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "搜索关键词，按机器人别名（alias）或 token 模糊匹配，不区分大小写。"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "按机器人类型过滤，如 `feishu`、`dingtalk`、`wecom`、`slack`、`teams` 等。不传则返回所有类型。"
+                  }
+                }
+              },
+              "example": {
+                "query": "运维",
+                "type": "feishu"
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/escalate/rule/list": {
       "post": {
         "operationId": "channelEscalateRuleList",
