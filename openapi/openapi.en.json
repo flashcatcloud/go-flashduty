@@ -42379,7 +42379,8 @@
               "string",
               "null"
             ],
-            "description": "New description. Omit to leave unchanged."
+            "description": "New description. Omit to leave unchanged.",
+            "maxLength": 2000
           },
           "card_url": {
             "type": [
@@ -42454,7 +42455,8 @@
           },
           "description": {
             "type": "string",
-            "description": "Agent description."
+            "description": "Agent description.",
+            "maxLength": 2000
           },
           "card_url": {
             "type": "string",

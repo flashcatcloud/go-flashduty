@@ -42370,7 +42370,8 @@
               "string",
               "null"
             ],
-            "description": "新的描述。省略则不变。"
+            "description": "新的描述。省略则不变。",
+            "maxLength": 2000
           },
           "card_url": {
             "type": [
@@ -42445,7 +42446,8 @@
           },
           "description": {
             "type": "string",
-            "description": "智能体描述。"
+            "description": "智能体描述。",
+            "maxLength": 2000
           },
           "card_url": {
             "type": "string",
