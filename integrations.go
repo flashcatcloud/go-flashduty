@@ -7,12 +7,26 @@ import "context"
 // IntegrationsService handles the "On-call/Integrations" API resource.
 type IntegrationsService service
 
+// Attempt IM person linking.
+//
+// Try to automatically link unbound members to their IM accounts for one integration.
+//
+// API: POST /datasource/im/person/try-link (datasourceImPersonTryLink).
+func (s *IntegrationsService) DatasourceImPersonTryLink(ctx context.Context, req *TryLinkPersonRequest) (*TryLinkPersonResponse, *Response, error) {
+	out := new(TryLinkPersonResponse)
+	resp, err := s.client.do(ctx, "/datasource/im/person/try-link", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get webhook delivery detail.
 //
 // Retrieve the detailed payload and response for a specific webhook delivery attempt.
 //
 // API: POST /webhook/history/detail (webhookHistoryDetail).
-func (s *IntegrationsService) Detail(ctx context.Context, req *GetWebhookHistoryDetailRequest) (*WebhookHistoryDetail, *Response, error) {
+func (s *IntegrationsService) WebhookHistoryDetail(ctx context.Context, req *GetWebhookHistoryDetailRequest) (*WebhookHistoryDetail, *Response, error) {
 	out := new(WebhookHistoryDetail)
 	resp, err := s.client.do(ctx, "/webhook/history/detail", req, out)
 	if err != nil {
@@ -26,7 +40,7 @@ func (s *IntegrationsService) Detail(ctx context.Context, req *GetWebhookHistory
 // List the delivery history for outbound webhook notifications.
 //
 // API: POST /webhook/history/list (webhookHistoryList).
-func (s *IntegrationsService) List(ctx context.Context, req *ListWebhookHistoryRequest) (*ListWebhookHistoryResponse, *Response, error) {
+func (s *IntegrationsService) WebhookHistoryList(ctx context.Context, req *ListWebhookHistoryRequest) (*ListWebhookHistoryResponse, *Response, error) {
 	out := new(ListWebhookHistoryResponse)
 	resp, err := s.client.do(ctx, "/webhook/history/list", req, out)
 	if err != nil {

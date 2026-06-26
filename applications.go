@@ -49,6 +49,20 @@ func (s *ApplicationsService) ReadList(ctx context.Context, req *RUMApplicationL
 	return out, resp, nil
 }
 
+// Test application webhook.
+//
+// Send a sample RUM alert event to verify an application's webhook URL.
+//
+// API: POST /rum/application/webhook/test (rum-application-webhook-test).
+func (s *ApplicationsService) WebhookTest(ctx context.Context, req *RUMWebhookTestRequest) (*RUMWebhookTestResponse, *Response, error) {
+	out := new(RUMWebhookTestResponse)
+	resp, err := s.client.do(ctx, "/rum/application/webhook/test", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Create application.
 //
 // Create a new RUM application. Returns the generated `application_id` and `client_token`.

@@ -128,6 +128,10 @@
     {
       "name": "AI SRE/Sessions",
       "description": "AI SRE agent session history — list, inspect, and export transcripts."
+    },
+    {
+      "name": "Monitors/Monitor utilities",
+      "description": "Monitors service activation and data preview utilities."
     }
   ],
   "paths": {
@@ -22665,6 +22669,1840 @@
           }
         }
       }
+    },
+    "/datasource/im/person/try-link": {
+      "post": {
+        "operationId": "datasourceImPersonTryLink",
+        "summary": "Attempt IM person linking",
+        "description": "Try to automatically link unbound members to their IM accounts for one integration.",
+        "tags": [
+          "On-call/Integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- The server uses member email and phone values to find matching users in DingTalk, Feishu, or WeCom.\n- If no member can be linked, the response contains an empty `new_linked_person_ids` array.",
+          "href": "/en/api-reference/on-call/integrations/datasource-im-person-try-link",
+          "metadata": {
+            "sidebarTitle": "Attempt IM person linking"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TryLinkPersonResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "new_linked_person_ids": [
+                      5348648172131
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TryLinkPersonRequest"
+              },
+              "example": {
+                "integration_id": 6113996590131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/init": {
+      "post": {
+        "operationId": "postmortem-write-init",
+        "summary": "Initialize post-mortem",
+        "description": "Create a post-mortem draft from one or more incidents and a template.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Links at most 10 incidents to one post-mortem report.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/postmortem-write-init",
+          "metadata": {
+            "sidebarTitle": "Initialize post-mortem"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PostMortemItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "meta": {
+                      "account_id": 2451002751131,
+                      "title": "Postmortem1",
+                      "status": "published",
+                      "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                      "template_id": "post_mortem_default_tmpl_en-us",
+                      "incident_ids": [
+                        "69bb9233331067560c718ecd"
+                      ],
+                      "media_count": 0,
+                      "author_ids": [
+                        2477273692131
+                      ],
+                      "team_id": 2477033058131,
+                      "channel_id": 3047621227131,
+                      "is_private": false,
+                      "channel_name": "Ops Channel",
+                      "created_at_seconds": 1773900354,
+                      "updated_at_seconds": 1773909012
+                    },
+                    "basics": {
+                      "incidents_highest_severity": "Warning",
+                      "incidents_earliest_start_seconds": 1761133512,
+                      "incidents_latest_close_seconds": 1761133632,
+                      "incidents_total_duration_seconds": 120,
+                      "responders": [
+                        {
+                          "person_id": 3790925372131,
+                          "assigned_at": 1761133515,
+                          "acknowledged_at": 0
+                        }
+                      ]
+                    },
+                    "content": {
+                      "content": "{\"type\":\"doc\",\"content\":[]}"
+                    },
+                    "follow_ups": ""
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitPostMortemRequest"
+              },
+              "example": {
+                "incident_ids": [
+                  "69bb9233331067560c718ecd"
+                ],
+                "template_id": "post_mortem_default_tmpl_en-us"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/basics/reset": {
+      "post": {
+        "operationId": "postmortem-write-reset-basics",
+        "summary": "Update post-mortem basics",
+        "description": "Replace the incident facts stored in a post-mortem report.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/postmortem-write-reset-basics",
+          "metadata": {
+            "sidebarTitle": "Update post-mortem basics"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPostMortemBasicsRequest"
+              },
+              "example": {
+                "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                "incidents_highest_severity": "Warning",
+                "incidents_earliest_start_seconds": 1761133512,
+                "incidents_latest_close_seconds": 1761133632,
+                "incidents_total_duration_seconds": 120,
+                "responder_ids": [
+                  3790925372131
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/status/reset": {
+      "post": {
+        "operationId": "postmortem-write-reset-status",
+        "summary": "Update post-mortem status",
+        "description": "Set a post-mortem report to drafting or published.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/postmortem-write-reset-status",
+          "metadata": {
+            "sidebarTitle": "Update post-mortem status"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPostMortemStatusRequest"
+              },
+              "example": {
+                "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                "status": "published"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/title/reset": {
+      "post": {
+        "operationId": "postmortem-write-reset-title",
+        "summary": "Update post-mortem title",
+        "description": "Replace the title of a post-mortem report.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/postmortem-write-reset-title",
+          "metadata": {
+            "sidebarTitle": "Update post-mortem title"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPostMortemTitleRequest"
+              },
+              "example": {
+                "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                "title": "Production API latency incident"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/follow-ups/reset": {
+      "post": {
+        "operationId": "postmortem-write-reset-follow-ups",
+        "summary": "Update post-mortem follow-ups",
+        "description": "Replace the follow-up action items on a post-mortem report.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/postmortem-write-reset-follow-ups",
+          "metadata": {
+            "sidebarTitle": "Update post-mortem follow-ups"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPostMortemFollowUpsRequest"
+              },
+              "example": {
+                "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                "follow_ups": "- Add database saturation alert\n- Review cache TTL rollout"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/template/upsert": {
+      "post": {
+        "operationId": "postmortem-write-upsert-template",
+        "summary": "Create or update post-mortem template",
+        "description": "Create a custom post-mortem template or update an existing one.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/postmortem-write-upsert-template",
+          "metadata": {
+            "sidebarTitle": "Create or update post-mortem template"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PostMortemTemplate"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "account_id": 2451002751131,
+                    "template_id": "post_mortem_default_tmpl_en-us",
+                    "name": "Default post-mortem report",
+                    "description": "Default sections for post-mortem reports.",
+                    "content": "[{\"type\":\"heading\",\"content\":\"Summary\"}]",
+                    "content_markdown": "## Summary\nDescribe what happened.",
+                    "team_id": 2477033058131,
+                    "created_at_seconds": 1773900000,
+                    "updated_at_seconds": 1773903600
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPostMortemTemplateRequest"
+              },
+              "example": {
+                "team_id": 2477033058131,
+                "name": "Production incident template",
+                "description": "Template for production incident reviews.",
+                "content": "[{\"type\":\"heading\",\"content\":\"Summary\"}]",
+                "content_markdown": "## Summary\nDescribe what happened."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/template/delete": {
+      "post": {
+        "operationId": "postmortem-write-delete-template",
+        "summary": "Delete post-mortem template",
+        "description": "Delete a custom post-mortem template.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/postmortem-write-delete-template",
+          "metadata": {
+            "sidebarTitle": "Delete post-mortem template"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeletePostMortemTemplateRequest"
+              },
+              "example": {
+                "template_id": "post_mortem_custom_tmpl_01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/template/list": {
+      "post": {
+        "operationId": "postmortem-read-list-templates",
+        "summary": "List post-mortem templates",
+        "description": "Return built-in and custom post-mortem templates for the account.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Read** (`on-call`) |",
+          "href": "/en/api-reference/on-call/incidents/postmortem-read-list-templates",
+          "metadata": {
+            "sidebarTitle": "List post-mortem templates"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ListPostMortemTemplatesResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "total": 2,
+                    "has_next_page": false,
+                    "items": [
+                      {
+                        "account_id": 2451002751131,
+                        "template_id": "post_mortem_default_tmpl_en-us",
+                        "name": "Default post-mortem report",
+                        "description": "Default sections for post-mortem reports.",
+                        "content": "[{\"type\":\"heading\",\"content\":\"Summary\"}]",
+                        "content_markdown": "## Summary\nDescribe what happened.",
+                        "team_id": 2477033058131,
+                        "created_at_seconds": 1773900000,
+                        "updated_at_seconds": 1773903600
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListPostMortemTemplatesRequest"
+              },
+              "example": {
+                "p": 1,
+                "limit": 20,
+                "order_by": "created_at_seconds",
+                "asc": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/post-mortem/template/info": {
+      "get": {
+        "operationId": "postmortem-read-template-info",
+        "summary": "Get post-mortem template detail",
+        "description": "Return one post-mortem template by ID.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Read** (`on-call`) |",
+          "href": "/en/api-reference/on-call/incidents/postmortem-read-template-info",
+          "metadata": {
+            "sidebarTitle": "Get post-mortem template detail"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PostMortemTemplate"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "account_id": 2451002751131,
+                    "template_id": "post_mortem_default_tmpl_en-us",
+                    "name": "Default post-mortem report",
+                    "description": "Default sections for post-mortem reports.",
+                    "content": "[{\"type\":\"heading\",\"content\":\"Summary\"}]",
+                    "content_markdown": "## Summary\nDescribe what happened.",
+                    "team_id": 2477033058131,
+                    "created_at_seconds": 1773900000,
+                    "updated_at_seconds": 1773903600
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Template ID."
+          }
+        ]
+      }
+    },
+    "/monit/preview/sync": {
+      "post": {
+        "operationId": "monit-preview-sync",
+        "summary": "Preview datasource query",
+        "description": "Execute a synchronous datasource query and return the raw result. Used to preview alert rule expressions before saving.",
+        "tags": [
+          "Monitors/Monitor utilities"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **60 requests/minute**; **10 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `ds_type` must match the datasource type (e.g. `prometheus`, `loki`).\n- `ds_name` is the display name of the datasource as configured in the account.\n- `delay_seconds` shifts the query window backward by the specified number of seconds, useful for accommodating data ingestion latency.\n- The response body is the raw JSON returned by the datasource — its schema varies by datasource type.",
+          "href": "/en/api-reference/monitors/monitor-utilities/monit-preview-sync",
+          "metadata": {
+            "sidebarTitle": "Preview datasource query"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PreviewSyncResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "status": "success",
+                    "data": {
+                      "resultType": "vector",
+                      "result": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewSyncRequest"
+              },
+              "example": {
+                "ds_type": "prometheus",
+                "ds_name": "Prometheus Prod",
+                "expr": "rate(http_requests_total[5m])",
+                "delay_seconds": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/application/webhook/test": {
+      "post": {
+        "operationId": "rum-application-webhook-test",
+        "summary": "Test application webhook",
+        "description": "Send a sample RUM alert event to verify an application's webhook URL.",
+        "tags": [
+          "RUM/Applications"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- The endpoint validates the URL before sending the sample event.\n- A failed delivery still returns HTTP 200 with `ok=false` and the delivery error in `message`.",
+          "href": "/en/api-reference/rum/applications/rum-application-webhook-test",
+          "metadata": {
+            "sidebarTitle": "Test application webhook"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumWebhookTestResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "ok": true,
+                    "status_code": 200,
+                    "message": "ok"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumWebhookTestRequest"
+              },
+              "example": {
+                "application_id": "rum-app-prod",
+                "webhook_url": "https://hooks.example.com/rum-alerts"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/info": {
+      "get": {
+        "operationId": "statusPageInfo",
+        "summary": "Get status page detail",
+        "description": "Retrieve detailed configuration for a specific status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-info",
+          "metadata": {
+            "sidebarTitle": "Get status page detail"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "page_id": 5750613685214,
+                    "name": "Flashduty Status Page",
+                    "url_name": "flashduty-statuspage",
+                    "type": "public",
+                    "custom_domain": "status.example.com",
+                    "logo": "https://cdn.example.com/logo.png",
+                    "favicon": "https://cdn.example.com/favicon.png",
+                    "page_header": "Welcome to our status page",
+                    "page_footer": "2025 Example Corp",
+                    "date_view": "list",
+                    "display_uptime_mode": "chart_and_percentage",
+                    "custom_links": [
+                      {
+                        "key": "Documentation",
+                        "value": "https://docs.example.com"
+                      }
+                    ],
+                    "contact_info": "mailto:support@example.com",
+                    "components": [
+                      {
+                        "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                        "section_id": "01KC3FKKX5TSVG6Z3X1QNGF6V2",
+                        "name": "Web Console",
+                        "available_since_seconds": 1765349358,
+                        "order_id": 1
+                      }
+                    ],
+                    "sections": [
+                      {
+                        "section_id": "01KC3FKKX5TSVG6Z3X1QNGF6V2",
+                        "name": "Core Services",
+                        "description": "Our core services",
+                        "order_id": 1,
+                        "hide_uptime": false,
+                        "hide_all": false
+                      }
+                    ],
+                    "subscription": {
+                      "email": true,
+                      "im": false
+                    },
+                    "template_preference": "message"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Status page ID"
+          }
+        ]
+      }
+    },
+    "/status-page/create": {
+      "post": {
+        "operationId": "statusPageCreate",
+        "summary": "Create status page",
+        "description": "Create a new status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-create",
+          "metadata": {
+            "sidebarTitle": "Create status page"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "page_id": 6294565612043,
+                    "page_name": "My Status Page",
+                    "page_url_name": "my-status-page"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyRequest"
+              },
+              "example": {
+                "name": "My Status Page",
+                "url_name": "my-status-page",
+                "type": "public",
+                "page_header": "Welcome to our status page",
+                "contact_info": "mailto:support@example.com"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/update": {
+      "post": {
+        "operationId": "statusPageUpdate",
+        "summary": "Update status page",
+        "description": "Update an existing status page configuration.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-update",
+          "metadata": {
+            "sidebarTitle": "Update status page"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyRequest"
+              },
+              "example": {
+                "page_id": 5750613685214,
+                "name": "Flashduty Status Page (Updated)",
+                "page_header": "Updated status page header",
+                "contact_info": "mailto:support@example.com"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/delete": {
+      "post": {
+        "operationId": "statusPageDelete",
+        "summary": "Delete status page",
+        "description": "Delete a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-delete",
+          "metadata": {
+            "sidebarTitle": "Delete status page"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyRequest"
+              },
+              "example": {
+                "page_id": 5750613685214
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/component/upsert": {
+      "post": {
+        "operationId": "statusPageComponentUpsert",
+        "summary": "Upsert status page component",
+        "description": "Create or update a service component on a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-component-upsert",
+          "metadata": {
+            "sidebarTitle": "Upsert status page component"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UpsertStatusPageComponentResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "component_ids": [
+                      "01KP032KMN9YFBMPWANJMFZFG1"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertStatusPageComponentRequest"
+              },
+              "example": {
+                "page_id": 5750613685214,
+                "components": [
+                  {
+                    "name": "Web Console",
+                    "description": "Main web interface",
+                    "section_id": "01KC3FKKX5TSVG6Z3X1QNGF6V2",
+                    "order_id": 1
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/component/delete": {
+      "post": {
+        "operationId": "statusPageComponentDelete",
+        "summary": "Delete status page component",
+        "description": "Delete a service component from a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-component-delete",
+          "metadata": {
+            "sidebarTitle": "Delete status page component"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteStatusPageComponentRequest"
+              },
+              "example": {
+                "page_id": 5750613685214,
+                "component_ids": [
+                  "01KP032KMN9YFBMPWANJMFZFG1"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/section/upsert": {
+      "post": {
+        "operationId": "statusPageSectionUpsert",
+        "summary": "Upsert status page section",
+        "description": "Create or update a section on a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-section-upsert",
+          "metadata": {
+            "sidebarTitle": "Upsert status page section"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UpsertStatusPageSectionResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "section_ids": [
+                      "01KP032J1FV2H8DDGN0QSJ1CAR"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertStatusPageSectionRequest"
+              },
+              "example": {
+                "page_id": 5750613685214,
+                "sections": [
+                  {
+                    "name": "Core Services",
+                    "description": "Our core services",
+                    "order_id": 1
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/section/delete": {
+      "post": {
+        "operationId": "statusPageSectionDelete",
+        "summary": "Delete status page section",
+        "description": "Delete a section from a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-section-delete",
+          "metadata": {
+            "sidebarTitle": "Delete status page section"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteStatusPageSectionRequest"
+              },
+              "example": {
+                "page_id": 5750613685214,
+                "section_ids": [
+                  "01KP032J1FV2H8DDGN0QSJ1CAR"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/template/upsert": {
+      "post": {
+        "operationId": "statusPageTemplateUpsert",
+        "summary": "Upsert status page template",
+        "description": "Create or update an event template for a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-template-upsert",
+          "metadata": {
+            "sidebarTitle": "Upsert status page template"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UpsertStatusPageTemplateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "template_id": "01KP0339G5XDEPM4R86T2B23EP"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertStatusPageTemplateRequest"
+              },
+              "example": {
+                "page_id": 5720156736380,
+                "type": "pre_defined",
+                "template": {
+                  "title": "Service Disruption",
+                  "event_type": "incident",
+                  "status": "investigating",
+                  "description": "We are investigating a service disruption affecting some users."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/template/delete": {
+      "post": {
+        "operationId": "statusPageTemplateDelete",
+        "summary": "Delete status page template",
+        "description": "Delete an event template from a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Status Pages Manage** (`on-call`) |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-template-delete",
+          "metadata": {
+            "sidebarTitle": "Delete status page template"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteStatusPageTemplateRequest"
+              },
+              "example": {
+                "page_id": 5720156736380,
+                "type": "pre_defined",
+                "template_id": "01KP0339G5XDEPM4R86T2B23EP"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status-page/template/list": {
+      "get": {
+        "operationId": "statusPageTemplateList",
+        "summary": "List status page templates",
+        "description": "List all event templates for a status page.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "href": "/en/api-reference/on-call/status-pages/status-page-template-list",
+          "metadata": {
+            "sidebarTitle": "List status page templates"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "template_id": "01KC8KP6PHVPSCAB0BTKZBN2HR",
+                        "title": "Service Disruption",
+                        "type": "incident",
+                        "status": "identified",
+                        "description": "We have identified the root cause."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Status page ID."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pre_defined",
+                "message"
+              ]
+            },
+            "description": "Template category. `pre_defined` returns predefined event templates; `message` returns message notification templates."
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -22686,12 +24524,11 @@
             },
             "examples": {
               "missingParameter": {
-                "summary": "Missing required parameter",
                 "value": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "error": {
                     "code": "InvalidParameter",
-                    "message": "The specified parameter skill_id is not valid."
+                    "message": "The specified parameter is not valid."
                   }
                 }
               }
@@ -22728,7 +24565,7 @@
               "$ref": "#/components/schemas/ErrorResponse"
             },
             "examples": {
-              "accessDenied": {
+              "noEditPermission": {
                 "value": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "error": {
@@ -22763,7 +24600,7 @@
         }
       },
       "TooManyRequests": {
-        "description": "Rate limit hit. Either the global API limit or a per-account limit.",
+        "description": "Rate limit hit. Either the global API limit, a per-account limit, or a per-integration limit.",
         "content": {
           "application/json": {
             "schema": {
@@ -41513,6 +43350,706 @@
         "required": [
           "session_id"
         ]
+      },
+      "DeletePostMortemTemplateRequest": {
+        "type": "object",
+        "description": "Parameters for deleting a post-mortem template.",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "Template ID."
+          }
+        }
+      },
+      "InitPostMortemRequest": {
+        "type": "object",
+        "description": "Parameters for initializing a post-mortem report from incidents.",
+        "required": [
+          "incident_ids",
+          "template_id"
+        ],
+        "properties": {
+          "incident_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            },
+            "description": "Incident IDs to link to the report. 1-10 incidents."
+          },
+          "template_id": {
+            "type": "string",
+            "description": "Template ID used to initialize the report."
+          }
+        }
+      },
+      "ListPostMortemTemplatesRequest": {
+        "type": "object",
+        "description": "Pagination and ordering options for post-mortem templates.",
+        "properties": {
+          "order_by": {
+            "type": "string",
+            "enum": [
+              "created_at_seconds"
+            ],
+            "description": "Field used to order results."
+          },
+          "asc": {
+            "type": "boolean",
+            "description": "Ascending order when true."
+          },
+          "p": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Page number starting at 1."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 20,
+            "description": "Page size, at most 100."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Cursor from a previous response for forward pagination."
+          }
+        }
+      },
+      "ListPostMortemTemplatesResponse": {
+        "type": "object",
+        "description": "Paginated list of post-mortem templates.",
+        "required": [
+          "items",
+          "total",
+          "has_next_page"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostMortemTemplate"
+            },
+            "description": "Templates in the current page."
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total matching templates."
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "description": "True when another page is available."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Cursor for forward pagination."
+          }
+        }
+      },
+      "PostMortemTemplate": {
+        "type": "object",
+        "description": "Post-mortem report template.",
+        "required": [
+          "account_id",
+          "template_id",
+          "name",
+          "description",
+          "content",
+          "content_markdown",
+          "team_id",
+          "created_at_seconds",
+          "updated_at_seconds"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Account ID that owns the template. 0 for built-in templates."
+          },
+          "template_id": {
+            "type": "string",
+            "description": "Template ID. Built-in templates use a stable `post_mortem_default_tmpl_*` ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "Template name shown in the console."
+          },
+          "description": {
+            "type": "string",
+            "description": "Template description."
+          },
+          "content": {
+            "type": "string",
+            "description": "BlockNote JSON content used to initialize the report body."
+          },
+          "content_markdown": {
+            "type": "string",
+            "description": "Markdown version of the template content, used by AI generation."
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Managing team ID. Built-in templates use 0."
+          },
+          "created_at_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the template was created."
+          },
+          "updated_at_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the template was last updated."
+          }
+        }
+      },
+      "PreviewSyncRequest": {
+        "type": "object",
+        "required": [
+          "ds_type",
+          "ds_name",
+          "expr"
+        ],
+        "description": "Parameters for a synchronous datasource query preview.",
+        "properties": {
+          "ds_type": {
+            "type": "string",
+            "description": "Datasource type, e.g. `prometheus`, `loki`, `elasticsearch`."
+          },
+          "ds_name": {
+            "type": "string",
+            "description": "Datasource display name as configured in the account."
+          },
+          "expr": {
+            "type": "string",
+            "description": "Query expression. Format depends on `ds_type` (PromQL for Prometheus, LogQL for Loki, etc.)."
+          },
+          "delay_seconds": {
+            "type": "integer",
+            "description": "Shift the query window backward by this many seconds to compensate for data ingestion latency."
+          },
+          "args": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional type-specific query arguments."
+          }
+        }
+      },
+      "PreviewSyncResponse": {
+        "type": "object",
+        "description": "Raw JSON response from the datasource. Schema varies by datasource type."
+      },
+      "ResetPostMortemBasicsRequest": {
+        "type": "object",
+        "description": "Basic incident facts to write back to a post-mortem report.",
+        "required": [
+          "post_mortem_id",
+          "incidents_highest_severity",
+          "incidents_earliest_start_seconds"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "Post-mortem ID."
+          },
+          "incidents_highest_severity": {
+            "type": "string",
+            "description": "Highest severity among linked incidents."
+          },
+          "incidents_earliest_start_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Unix timestamp in seconds for the earliest linked incident start time."
+          },
+          "incidents_latest_close_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Unix timestamp in seconds for the latest linked incident close time. 0 when still open."
+          },
+          "incidents_total_duration_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Total incident duration in seconds."
+          },
+          "responder_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Responder member IDs to store on the report."
+          }
+        }
+      },
+      "ResetPostMortemFollowUpsRequest": {
+        "type": "object",
+        "description": "Parameters for replacing post-mortem follow-up action items.",
+        "required": [
+          "post_mortem_id"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "Post-mortem ID."
+          },
+          "follow_ups": {
+            "type": "string",
+            "description": "Follow-up action items as free text."
+          }
+        }
+      },
+      "ResetPostMortemStatusRequest": {
+        "type": "object",
+        "description": "Parameters for changing a post-mortem report status.",
+        "required": [
+          "post_mortem_id",
+          "status"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "Post-mortem ID."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "drafting",
+              "published"
+            ],
+            "description": "Target report status."
+          }
+        }
+      },
+      "ResetPostMortemTitleRequest": {
+        "type": "object",
+        "description": "Parameters for changing a post-mortem report title.",
+        "required": [
+          "post_mortem_id",
+          "title"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "Post-mortem ID."
+          },
+          "title": {
+            "type": "string",
+            "description": "New report title."
+          }
+        }
+      },
+      "RumWebhookTestRequest": {
+        "type": "object",
+        "description": "Parameters for sending a sample RUM alert webhook.",
+        "required": [
+          "application_id",
+          "webhook_url"
+        ],
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM application ID."
+          },
+          "webhook_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Webhook URL to receive the sample alert event."
+          }
+        }
+      },
+      "RumWebhookTestResponse": {
+        "type": "object",
+        "description": "Result of the webhook test delivery.",
+        "required": [
+          "ok",
+          "status_code",
+          "message"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the webhook endpoint accepted the sample event."
+          },
+          "status_code": {
+            "type": "integer",
+            "description": "HTTP status code returned by the webhook endpoint. 0 when the request did not receive a response."
+          },
+          "message": {
+            "type": "string",
+            "description": "`ok` on success, otherwise the delivery error message."
+          }
+        }
+      },
+      "TryLinkPersonRequest": {
+        "type": "object",
+        "description": "Parameters for attempting automatic IM account linking.",
+        "required": [
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "IM integration ID."
+          }
+        }
+      },
+      "TryLinkPersonResponse": {
+        "type": "object",
+        "description": "People linked by this attempt.",
+        "required": [
+          "new_linked_person_ids"
+        ],
+        "properties": {
+          "new_linked_person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Person IDs newly linked during this call."
+          }
+        }
+      },
+      "UpsertPostMortemTemplateRequest": {
+        "type": "object",
+        "description": "Parameters for creating or updating a post-mortem template.",
+        "required": [
+          "name",
+          "content"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "Template ID. Omit to create a new template; provide it to update an existing template."
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Managing team ID. Required when creating a custom template."
+          },
+          "name": {
+            "type": "string",
+            "description": "Template name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Template description."
+          },
+          "content": {
+            "type": "string",
+            "description": "BlockNote JSON template content."
+          },
+          "content_markdown": {
+            "type": "string",
+            "description": "Markdown version of the template content."
+          }
+        }
+      },
+      "DeleteStatusPageComponentRequest": {
+        "type": "object",
+        "description": "Parameters for deleting one or more service components from a status page.",
+        "required": [
+          "page_id",
+          "component_ids"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          },
+          "component_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of components to delete."
+          }
+        }
+      },
+      "DeleteStatusPageSectionRequest": {
+        "type": "object",
+        "description": "Parameters for deleting one or more sections from a status page.",
+        "required": [
+          "page_id",
+          "section_ids"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          },
+          "section_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of sections to delete."
+          }
+        }
+      },
+      "DeleteStatusPageTemplateRequest": {
+        "type": "object",
+        "description": "Parameters for deleting a status page template.",
+        "required": [
+          "page_id",
+          "type",
+          "template_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "pre_defined",
+              "message"
+            ],
+            "description": "Template category."
+          },
+          "template_id": {
+            "type": "string",
+            "description": "Template ID to delete."
+          }
+        }
+      },
+      "UpsertStatusPageComponentRequest": {
+        "type": "object",
+        "description": "Parameters for creating or updating one or more service components on a status page.",
+        "required": [
+          "page_id",
+          "components"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          },
+          "components": {
+            "type": "array",
+            "description": "Components to create or update.",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "component_id": {
+                  "type": "string",
+                  "description": "Component ID. Omit to create a new component; supply to update an existing one."
+                },
+                "section_id": {
+                  "type": "string",
+                  "description": "Parent section ID. Omit to place the component at the top level."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Component display name."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Component description."
+                },
+                "order_id": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Display order within its section."
+                },
+                "hide_uptime": {
+                  "type": "boolean",
+                  "description": "When true, uptime data is hidden from summary responses."
+                },
+                "hide_all": {
+                  "type": "boolean",
+                  "description": "When true, the component is hidden entirely from summary endpoints."
+                }
+              }
+            }
+          }
+        }
+      },
+      "UpsertStatusPageComponentResponse": {
+        "type": "object",
+        "description": "Result of upserting status page components.",
+        "required": [
+          "component_ids"
+        ],
+        "properties": {
+          "component_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of the created or updated components, in the same order as the request."
+          }
+        }
+      },
+      "UpsertStatusPageSectionRequest": {
+        "type": "object",
+        "description": "Parameters for creating or updating one or more sections on a status page.",
+        "required": [
+          "page_id",
+          "sections"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          },
+          "sections": {
+            "type": "array",
+            "description": "Sections to create or update.",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "section_id": {
+                  "type": "string",
+                  "description": "Section ID. Omit to create a new section; supply to update an existing one."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Section display name."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Section description."
+                },
+                "order_id": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Display order."
+                },
+                "hide_uptime": {
+                  "type": "boolean",
+                  "description": "When true, uptime data for all components in this section is hidden."
+                },
+                "hide_all": {
+                  "type": "boolean",
+                  "description": "When true, the entire section is hidden from summary endpoints."
+                }
+              }
+            }
+          }
+        }
+      },
+      "UpsertStatusPageSectionResponse": {
+        "type": "object",
+        "description": "Result of upserting status page sections.",
+        "required": [
+          "section_ids"
+        ],
+        "properties": {
+          "section_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of the created or updated sections, in the same order as the request."
+          }
+        }
+      },
+      "UpsertStatusPageTemplateRequest": {
+        "type": "object",
+        "description": "Parameters for creating or updating a status page template.",
+        "required": [
+          "page_id",
+          "type",
+          "template"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "pre_defined",
+              "message"
+            ],
+            "description": "Template category. `pre_defined` for predefined event templates; `message` for notification message templates."
+          },
+          "template": {
+            "type": "object",
+            "description": "Template content.",
+            "required": [
+              "title",
+              "event_type",
+              "status"
+            ],
+            "properties": {
+              "template_id": {
+                "type": "string",
+                "description": "Template ID. Omit to create; supply to update."
+              },
+              "title": {
+                "type": "string",
+                "description": "Template title."
+              },
+              "event_type": {
+                "type": "string",
+                "enum": [
+                  "incident",
+                  "maintenance"
+                ],
+                "description": "Event type this template applies to."
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "investigating",
+                  "identified",
+                  "monitoring",
+                  "resolved",
+                  "scheduled",
+                  "ongoing",
+                  "completed"
+                ],
+                "description": "Event status this template represents."
+              },
+              "description": {
+                "type": "string",
+                "description": "Template body text (Markdown)."
+              }
+            }
+          }
+        }
+      },
+      "UpsertStatusPageTemplateResponse": {
+        "type": "object",
+        "description": "Result of upserting a status page template.",
+        "required": [
+          "template_id"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "ID of the created or updated template."
+          }
+        }
       }
     }
   }
