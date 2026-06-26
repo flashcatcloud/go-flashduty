@@ -7,6 +7,20 @@ import "context"
 // IntegrationsService handles the "On-call/Integrations" API resource.
 type IntegrationsService service
 
+// Attempt IM person linking.
+//
+// Try to automatically link unbound members to their IM accounts for one integration.
+//
+// API: POST /datasource/im/person/try-link (datasourceImPersonTryLink).
+func (s *IntegrationsService) DatasourceImPersonTryLink(ctx context.Context, req *TryLinkPersonRequest) (*TryLinkPersonResponse, *Response, error) {
+	out := new(TryLinkPersonResponse)
+	resp, err := s.client.do(ctx, "/datasource/im/person/try-link", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get webhook delivery detail.
 //
 // Retrieve the detailed payload and response for a specific webhook delivery attempt.
