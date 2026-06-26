@@ -7697,8 +7697,8 @@ type CreateEscalationRuleRequestLayersItemTargetWebhooksItem struct {
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
 
-// IncidentsIncidentPostMortemInfoRequest holds the query parameters for Get post-mortem.
-type IncidentsIncidentPostMortemInfoRequest struct {
+// IncidentsPostMortemInfoRequest holds the query parameters for Get post-mortem.
+type IncidentsPostMortemInfoRequest struct {
 	// Post-mortem ID. Deterministic hash derived from account ID and the set of linked incident IDs.
 	PostMortemID string `url:"post_mortem_id"`
 }

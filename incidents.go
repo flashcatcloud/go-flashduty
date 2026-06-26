@@ -12,7 +12,7 @@ type IncidentsService service
 // Return historical responders suggested as default observers when opening a war room.
 //
 // API: POST /incident/war-room/default-observers (incident-read-get-war-room-default-observers).
-func (s *IncidentsService) IncidentReadGetWarRoomDefaultObservers(ctx context.Context, req *GetWarRoomDefaultObserversRequest) (*GetWarRoomDefaultObserversResponse, *Response, error) {
+func (s *IncidentsService) ReadGetWarRoomDefaultObservers(ctx context.Context, req *GetWarRoomDefaultObserversRequest) (*GetWarRoomDefaultObserversResponse, *Response, error) {
 	out := new(GetWarRoomDefaultObserversResponse)
 	resp, err := s.client.do(ctx, "/incident/war-room/default-observers", req, out)
 	if err != nil {
@@ -26,7 +26,7 @@ func (s *IncidentsService) IncidentReadGetWarRoomDefaultObservers(ctx context.Co
 // Add one or more members to the IM war room bound to an incident integration.
 //
 // API: POST /incident/war-room/add-member (incident-write-add-war-room-member).
-func (s *IncidentsService) IncidentWriteAddWarRoomMember(ctx context.Context, req *AddWarRoomMemberRequest) (*string, *Response, error) {
+func (s *IncidentsService) WriteAddWarRoomMember(ctx context.Context, req *AddWarRoomMemberRequest) (*string, *Response, error) {
 	out := new(string)
 	resp, err := s.client.do(ctx, "/incident/war-room/add-member", req, out)
 	if err != nil {
@@ -40,7 +40,7 @@ func (s *IncidentsService) IncidentWriteAddWarRoomMember(ctx context.Context, re
 // Acknowledge an incident to indicate you are actively working on it.
 //
 // API: POST /incident/ack (incidentAck).
-func (s *IncidentsService) IncidentAck(ctx context.Context, req *AckIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Ack(ctx context.Context, req *AckIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/ack", req, nil)
 }
 
@@ -49,7 +49,7 @@ func (s *IncidentsService) IncidentAck(ctx context.Context, req *AckIncidentRequ
 // List all alerts merged into a specific incident.
 //
 // API: POST /incident/alert/list (incidentAlertList).
-func (s *IncidentsService) IncidentAlertList(ctx context.Context, req *ListIncidentAlertsRequest) (*ListIncidentAlertsResponse, *Response, error) {
+func (s *IncidentsService) AlertList(ctx context.Context, req *ListIncidentAlertsRequest) (*ListIncidentAlertsResponse, *Response, error) {
 	out := new(ListIncidentAlertsResponse)
 	resp, err := s.client.do(ctx, "/incident/alert/list", req, out)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *IncidentsService) IncidentAlertList(ctx context.Context, req *ListIncid
 // Dispatch an incident to a specific escalation level or responder.
 //
 // API: POST /incident/assign (incidentAssign).
-func (s *IncidentsService) IncidentAssign(ctx context.Context, req *AssignIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Assign(ctx context.Context, req *AssignIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/assign", req, nil)
 }
 
@@ -72,7 +72,7 @@ func (s *IncidentsService) IncidentAssign(ctx context.Context, req *AssignIncide
 // Add a text comment to the incident timeline.
 //
 // API: POST /incident/comment (incidentComment).
-func (s *IncidentsService) IncidentComment(ctx context.Context, req *CommentIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Comment(ctx context.Context, req *CommentIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/comment", req, nil)
 }
 
@@ -81,7 +81,7 @@ func (s *IncidentsService) IncidentComment(ctx context.Context, req *CommentInci
 // Manually create a new incident and assign responders.
 //
 // API: POST /incident/create (incidentCreate).
-func (s *IncidentsService) IncidentCreate(ctx context.Context, req *CreateIncidentRequest) (*CreateIncidentResponse, *Response, error) {
+func (s *IncidentsService) Create(ctx context.Context, req *CreateIncidentRequest) (*CreateIncidentResponse, *Response, error) {
 	out := new(CreateIncidentResponse)
 	resp, err := s.client.do(ctx, "/incident/create", req, out)
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *IncidentsService) IncidentCreate(ctx context.Context, req *CreateIncide
 // Execute a custom action configured for an incident.
 //
 // API: POST /incident/custom-action/do (incidentCustomActionDo).
-func (s *IncidentsService) IncidentCustomActionDo(ctx context.Context, req *DoIncidentCustomActionRequest) (*DoIncidentCustomActionResponse, *Response, error) {
+func (s *IncidentsService) CustomActionDo(ctx context.Context, req *DoIncidentCustomActionRequest) (*DoIncidentCustomActionResponse, *Response, error) {
 	out := new(DoIncidentCustomActionResponse)
 	resp, err := s.client.do(ctx, "/incident/custom-action/do", req, out)
 	if err != nil {
@@ -109,7 +109,7 @@ func (s *IncidentsService) IncidentCustomActionDo(ctx context.Context, req *DoIn
 // Disable automatic merging for a specific incident.
 //
 // API: POST /incident/disable-merge (incidentDisableMerge).
-func (s *IncidentsService) IncidentDisableMerge(ctx context.Context, req *DisableIncidentMergeRequest) (*Response, error) {
+func (s *IncidentsService) DisableMerge(ctx context.Context, req *DisableIncidentMergeRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/disable-merge", req, nil)
 }
 
@@ -118,7 +118,7 @@ func (s *IncidentsService) IncidentDisableMerge(ctx context.Context, req *Disabl
 // Retrieve the timeline feed for a specific incident, including state changes, comments and system events.
 //
 // API: POST /incident/feed (incidentFeed).
-func (s *IncidentsService) IncidentFeed(ctx context.Context, req *ListIncidentFeedRequest) (*ListIncidentFeedResponse, *Response, error) {
+func (s *IncidentsService) Feed(ctx context.Context, req *ListIncidentFeedRequest) (*ListIncidentFeedResponse, *Response, error) {
 	out := new(ListIncidentFeedResponse)
 	resp, err := s.client.do(ctx, "/incident/feed", req, out)
 	if err != nil {
@@ -132,7 +132,7 @@ func (s *IncidentsService) IncidentFeed(ctx context.Context, req *ListIncidentFe
 // Update a custom field value on an incident.
 //
 // API: POST /incident/field/reset (incidentFieldReset).
-func (s *IncidentsService) IncidentFieldReset(ctx context.Context, req *ResetIncidentFieldRequest) (*Response, error) {
+func (s *IncidentsService) FieldReset(ctx context.Context, req *ResetIncidentFieldRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/field/reset", req, nil)
 }
 
@@ -141,7 +141,7 @@ func (s *IncidentsService) IncidentFieldReset(ctx context.Context, req *ResetInc
 // Retrieve detailed information for a single incident including timeline, alerts, responders and custom fields.
 //
 // API: POST /incident/info (incidentInfo).
-func (s *IncidentsService) IncidentInfo(ctx context.Context, req *IncidentInfoRequest) (*IncidentInfo, *Response, error) {
+func (s *IncidentsService) Info(ctx context.Context, req *IncidentInfoRequest) (*IncidentInfo, *Response, error) {
 	out := new(IncidentInfo)
 	resp, err := s.client.do(ctx, "/incident/info", req, out)
 	if err != nil {
@@ -155,7 +155,7 @@ func (s *IncidentsService) IncidentInfo(ctx context.Context, req *IncidentInfoRe
 // Query a paginated list of incidents with filters by channel, severity, status, responder, and time range.
 //
 // API: POST /incident/list (incidentList).
-func (s *IncidentsService) IncidentList(ctx context.Context, req *ListIncidentsRequest) (*IncidentListResponse, *Response, error) {
+func (s *IncidentsService) List(ctx context.Context, req *ListIncidentsRequest) (*IncidentListResponse, *Response, error) {
 	out := new(IncidentListResponse)
 	resp, err := s.client.do(ctx, "/incident/list", req, out)
 	if err != nil {
@@ -169,7 +169,7 @@ func (s *IncidentsService) IncidentList(ctx context.Context, req *ListIncidentsR
 // Retrieve multiple incidents by their IDs in a single request.
 //
 // API: POST /incident/list-by-ids (incidentListByIds).
-func (s *IncidentsService) IncidentListByIDs(ctx context.Context, req *ListIncidentsByIDsRequest) (*IncidentListResponse, *Response, error) {
+func (s *IncidentsService) ListByIDs(ctx context.Context, req *ListIncidentsByIDsRequest) (*IncidentListResponse, *Response, error) {
 	out := new(IncidentListResponse)
 	resp, err := s.client.do(ctx, "/incident/list-by-ids", req, out)
 	if err != nil {
@@ -183,7 +183,7 @@ func (s *IncidentsService) IncidentListByIDs(ctx context.Context, req *ListIncid
 // Merge one or more incidents into a target incident.
 //
 // API: POST /incident/merge (incidentMerge).
-func (s *IncidentsService) IncidentMerge(ctx context.Context, req *MergeIncidentsRequest) (*Response, error) {
+func (s *IncidentsService) Merge(ctx context.Context, req *MergeIncidentsRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/merge", req, nil)
 }
 
@@ -192,7 +192,7 @@ func (s *IncidentsService) IncidentMerge(ctx context.Context, req *MergeIncident
 // List historical incidents related to the current incident for reference during triage.
 //
 // API: POST /incident/past/list (incidentPastList).
-func (s *IncidentsService) IncidentPastList(ctx context.Context, req *ListPastIncidentsRequest) (*ListPastIncidentsResponse, *Response, error) {
+func (s *IncidentsService) PastList(ctx context.Context, req *ListPastIncidentsRequest) (*ListPastIncidentsResponse, *Response, error) {
 	out := new(ListPastIncidentsResponse)
 	resp, err := s.client.do(ctx, "/incident/past/list", req, out)
 	if err != nil {
@@ -206,7 +206,7 @@ func (s *IncidentsService) IncidentPastList(ctx context.Context, req *ListPastIn
 // Delete a post-mortem report.
 //
 // API: POST /incident/post-mortem/delete (incidentPostMortemDelete).
-func (s *IncidentsService) IncidentPostMortemDelete(ctx context.Context, req *DeletePostMortemRequest) (*Response, error) {
+func (s *IncidentsService) PostMortemDelete(ctx context.Context, req *DeletePostMortemRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/post-mortem/delete", req, nil)
 }
 
@@ -215,7 +215,7 @@ func (s *IncidentsService) IncidentPostMortemDelete(ctx context.Context, req *De
 // Retrieve a post-mortem report by its `post_mortem_id`. List reports via `/incident/post-mortem/list` first — each row carries the incident it covers — then fetch the full report here by that id.
 //
 // API: GET /incident/post-mortem/info (incidentPostMortemInfo).
-func (s *IncidentsService) IncidentPostMortemInfo(ctx context.Context, req *IncidentsIncidentPostMortemInfoRequest) (*PostMortemItem, *Response, error) {
+func (s *IncidentsService) PostMortemInfo(ctx context.Context, req *IncidentsPostMortemInfoRequest) (*PostMortemItem, *Response, error) {
 	out := new(PostMortemItem)
 	resp, err := s.client.doGet(ctx, "/incident/post-mortem/info", req, out)
 	if err != nil {
@@ -229,7 +229,7 @@ func (s *IncidentsService) IncidentPostMortemInfo(ctx context.Context, req *Inci
 // List post-mortem reports with optional filters.
 //
 // API: POST /incident/post-mortem/list (incidentPostMortemList).
-func (s *IncidentsService) IncidentPostMortemList(ctx context.Context, req *ListPostMortemsRequest) (*ListPostMortemsResponse, *Response, error) {
+func (s *IncidentsService) PostMortemList(ctx context.Context, req *ListPostMortemsRequest) (*ListPostMortemsResponse, *Response, error) {
 	out := new(ListPostMortemsResponse)
 	resp, err := s.client.do(ctx, "/incident/post-mortem/list", req, out)
 	if err != nil {
@@ -243,7 +243,7 @@ func (s *IncidentsService) IncidentPostMortemList(ctx context.Context, req *List
 // Permanently delete an incident and all associated data.
 //
 // API: POST /incident/remove (incidentRemove).
-func (s *IncidentsService) IncidentRemove(ctx context.Context, req *RemoveIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Remove(ctx context.Context, req *RemoveIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/remove", req, nil)
 }
 
@@ -252,7 +252,7 @@ func (s *IncidentsService) IncidentRemove(ctx context.Context, req *RemoveIncide
 // Reopen a previously resolved incident.
 //
 // API: POST /incident/reopen (incidentReopen).
-func (s *IncidentsService) IncidentReopen(ctx context.Context, req *ReopenIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Reopen(ctx context.Context, req *ReopenIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/reopen", req, nil)
 }
 
@@ -261,7 +261,7 @@ func (s *IncidentsService) IncidentReopen(ctx context.Context, req *ReopenIncide
 // Update one or more editable fields of an incident in a single call, including title, description, impact, root cause, resolution, and severity. At least one field must be provided.
 //
 // API: POST /incident/reset (incidentReset).
-func (s *IncidentsService) IncidentReset(ctx context.Context, req *UpdateIncidentFieldsRequest) (*Response, error) {
+func (s *IncidentsService) Reset(ctx context.Context, req *UpdateIncidentFieldsRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/reset", req, nil)
 }
 
@@ -270,7 +270,7 @@ func (s *IncidentsService) IncidentReset(ctx context.Context, req *UpdateInciden
 // Mark an incident as resolved.
 //
 // API: POST /incident/resolve (incidentResolve).
-func (s *IncidentsService) IncidentResolve(ctx context.Context, req *ResolveIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Resolve(ctx context.Context, req *ResolveIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/resolve", req, nil)
 }
 
@@ -279,7 +279,7 @@ func (s *IncidentsService) IncidentResolve(ctx context.Context, req *ResolveInci
 // Add a responder to an existing incident.
 //
 // API: POST /incident/responder/add (incidentResponderAdd).
-func (s *IncidentsService) IncidentResponderAdd(ctx context.Context, req *AddIncidentResponderRequest) (*Response, error) {
+func (s *IncidentsService) ResponderAdd(ctx context.Context, req *AddIncidentResponderRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/responder/add", req, nil)
 }
 
@@ -288,7 +288,7 @@ func (s *IncidentsService) IncidentResponderAdd(ctx context.Context, req *AddInc
 // Temporarily snooze notifications for an incident until a specified time.
 //
 // API: POST /incident/snooze (incidentSnooze).
-func (s *IncidentsService) IncidentSnooze(ctx context.Context, req *SnoozeIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Snooze(ctx context.Context, req *SnoozeIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/snooze", req, nil)
 }
 
@@ -297,7 +297,7 @@ func (s *IncidentsService) IncidentSnooze(ctx context.Context, req *SnoozeIncide
 // Remove the acknowledge status from an incident.
 //
 // API: POST /incident/unack (incidentUnack).
-func (s *IncidentsService) IncidentUnack(ctx context.Context, req *UnackIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Unack(ctx context.Context, req *UnackIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/unack", req, nil)
 }
 
@@ -306,7 +306,7 @@ func (s *IncidentsService) IncidentUnack(ctx context.Context, req *UnackIncident
 // Cancel the snooze on an incident and resume notifications.
 //
 // API: POST /incident/wake (incidentWake).
-func (s *IncidentsService) IncidentWake(ctx context.Context, req *WakeIncidentRequest) (*Response, error) {
+func (s *IncidentsService) Wake(ctx context.Context, req *WakeIncidentRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/wake", req, nil)
 }
 
@@ -315,7 +315,7 @@ func (s *IncidentsService) IncidentWake(ctx context.Context, req *WakeIncidentRe
 // Create a war room channel for collaborative incident response.
 //
 // API: POST /incident/war-room/create (incidentWarRoomCreate).
-func (s *IncidentsService) IncidentWarRoomCreate(ctx context.Context, req *CreateWarRoomRequest) (*WarRoom, *Response, error) {
+func (s *IncidentsService) WarRoomCreate(ctx context.Context, req *CreateWarRoomRequest) (*WarRoom, *Response, error) {
 	out := new(WarRoom)
 	resp, err := s.client.do(ctx, "/incident/war-room/create", req, out)
 	if err != nil {
@@ -329,7 +329,7 @@ func (s *IncidentsService) IncidentWarRoomCreate(ctx context.Context, req *Creat
 // Delete an incident war room.
 //
 // API: POST /incident/war-room/delete (incidentWarRoomDelete).
-func (s *IncidentsService) IncidentWarRoomDelete(ctx context.Context, req *DeleteWarRoomRequest) (*Response, error) {
+func (s *IncidentsService) WarRoomDelete(ctx context.Context, req *DeleteWarRoomRequest) (*Response, error) {
 	return s.client.do(ctx, "/incident/war-room/delete", req, nil)
 }
 
@@ -338,7 +338,7 @@ func (s *IncidentsService) IncidentWarRoomDelete(ctx context.Context, req *Delet
 // Retrieve the war room configuration and members for an incident.
 //
 // API: POST /incident/war-room/detail (incidentWarRoomDetail).
-func (s *IncidentsService) IncidentWarRoomDetail(ctx context.Context, req *GetWarRoomDetailRequest) (*WarRoom, *Response, error) {
+func (s *IncidentsService) WarRoomDetail(ctx context.Context, req *GetWarRoomDetailRequest) (*WarRoom, *Response, error) {
 	out := new(WarRoom)
 	resp, err := s.client.do(ctx, "/incident/war-room/detail", req, out)
 	if err != nil {
@@ -352,7 +352,7 @@ func (s *IncidentsService) IncidentWarRoomDetail(ctx context.Context, req *GetWa
 // List all war rooms associated with an incident.
 //
 // API: POST /incident/war-room/list (incidentWarRoomList).
-func (s *IncidentsService) IncidentWarRoomList(ctx context.Context, req *ListWarRoomsRequest) (*ListWarRoomsResponse, *Response, error) {
+func (s *IncidentsService) WarRoomList(ctx context.Context, req *ListWarRoomsRequest) (*ListWarRoomsResponse, *Response, error) {
 	out := new(ListWarRoomsResponse)
 	resp, err := s.client.do(ctx, "/incident/war-room/list", req, out)
 	if err != nil {

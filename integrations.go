@@ -26,7 +26,7 @@ func (s *IntegrationsService) DatasourceImPersonTryLink(ctx context.Context, req
 // Retrieve the detailed payload and response for a specific webhook delivery attempt.
 //
 // API: POST /webhook/history/detail (webhookHistoryDetail).
-func (s *IntegrationsService) WebhookHistoryDetail(ctx context.Context, req *GetWebhookHistoryDetailRequest) (*WebhookHistoryDetail, *Response, error) {
+func (s *IntegrationsService) Detail(ctx context.Context, req *GetWebhookHistoryDetailRequest) (*WebhookHistoryDetail, *Response, error) {
 	out := new(WebhookHistoryDetail)
 	resp, err := s.client.do(ctx, "/webhook/history/detail", req, out)
 	if err != nil {
@@ -40,7 +40,7 @@ func (s *IntegrationsService) WebhookHistoryDetail(ctx context.Context, req *Get
 // List the delivery history for outbound webhook notifications.
 //
 // API: POST /webhook/history/list (webhookHistoryList).
-func (s *IntegrationsService) WebhookHistoryList(ctx context.Context, req *ListWebhookHistoryRequest) (*ListWebhookHistoryResponse, *Response, error) {
+func (s *IntegrationsService) List(ctx context.Context, req *ListWebhookHistoryRequest) (*ListWebhookHistoryResponse, *Response, error) {
 	out := new(ListWebhookHistoryResponse)
 	resp, err := s.client.do(ctx, "/webhook/history/list", req, out)
 	if err != nil {
