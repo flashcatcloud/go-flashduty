@@ -40650,6 +40650,7 @@
         },
         "required": [
           "agent_name",
+          "instructions",
           "card_url"
         ]
       },
