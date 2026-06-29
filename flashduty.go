@@ -97,14 +97,27 @@ type pageMeta struct {
 // parameter and JSON-encoding body when non-nil. Most Flashduty endpoints are
 // POST actions; a handful are GET with query parameters.
 func (c *Client) newRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
+	return c.newRequestWithAppKey(ctx, method, path, body, true)
+}
+
+// newRequestWithoutAppKey builds a request for endpoints that use their own
+// authentication scheme instead of the account app_key, such as Automation HTTP
+// POST trigger bearer tokens.
+func (c *Client) newRequestWithoutAppKey(ctx context.Context, method, path string, body any) (*http.Request, error) {
+	return c.newRequestWithAppKey(ctx, method, path, body, false)
+}
+
+func (c *Client) newRequestWithAppKey(ctx context.Context, method, path string, body any, withAppKey bool) (*http.Request, error) {
 	rel, err := url.Parse(strings.TrimPrefix(path, "/"))
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: invalid path %q: %w", path, err)
 	}
 	u := c.BaseURL.ResolveReference(rel)
-	q := u.Query()
-	q.Set("app_key", c.appKey)
-	u.RawQuery = q.Encode()
+	if withAppKey {
+		q := u.Query()
+		q.Set("app_key", c.appKey)
+		u.RawQuery = q.Encode()
+	}
 
 	var buf io.Reader
 	var rawBody []byte
@@ -168,6 +181,10 @@ func (c *Client) doMethod(ctx context.Context, method, path string, body, out an
 	if err != nil {
 		return nil, err
 	}
+	return c.doRequest(req, out)
+}
+
+func (c *Client) doRequest(req *http.Request, out any) (*Response, error) {
 	httpResp, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: request to %s failed: %v", sanitizeURL(req.URL), sanitizeError(err))

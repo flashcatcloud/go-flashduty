@@ -9,6 +9,7 @@ type service struct{ client *Client }
 // genServices is embedded in Client to expose the generated service handles.
 type genServices struct {
 	A2aAgents             *A2aAgentsService
+	Automations           *AutomationsService
 	McpServers            *McpServersService
 	Sessions              *SessionsService
 	Skills                *SkillsService
@@ -43,6 +44,7 @@ type genServices struct {
 func (c *Client) initServices() {
 	c.common.client = c
 	c.A2aAgents = (*A2aAgentsService)(&c.common)
+	c.Automations = (*AutomationsService)(&c.common)
 	c.McpServers = (*McpServersService)(&c.common)
 	c.Sessions = (*SessionsService)(&c.common)
 	c.Skills = (*SkillsService)(&c.common)
