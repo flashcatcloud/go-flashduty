@@ -1065,6 +1065,231 @@ type AuditSearchResponse struct {
 	Total int64 `json:"total" toon:"total"`
 }
 
+// AutomationFireAPITriggerRequest is generated from the Flashduty OpenAPI schema.
+type AutomationFireAPITriggerRequest struct {
+	// Optional idempotency key; the same trigger + dedup_key reuses the same run.
+	DedupKey string `json:"dedup_key,omitempty" toon:"dedup_key,omitempty"`
+	// Context text passed to this Automation run.
+	Text string `json:"text,omitempty" toon:"text,omitempty"`
+}
+
+// AutomationFireAPITriggerResponse is generated from the Flashduty OpenAPI schema.
+type AutomationFireAPITriggerResponse struct {
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Created or reused run ID.
+	RunID string `json:"run_id" toon:"run_id"`
+	// Current run status.
+	Status string `json:"status" toon:"status"`
+	// Trigger kind.
+	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
+}
+
+// AutomationRuleCreateRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRuleCreateRequest struct {
+	// Run cadence. Supports 4 fields (`hour day month weekday`, minute defaults to 0) and 5 fields (`minute hour day month weekday`). The minute must be one fixed integer; 6-field seconds are not supported. The create API currently requires this field even for HTTP-POST-only rules; send a valid cron and set `schedule_trigger_enabled=false`.
+	CronExpr string `json:"cron_expr,omitempty" toon:"cron_expr,omitempty"`
+	// Whether the rule is enabled after creation. Omitted API value is false; Chat/CLI create sends true by default unless the user asks for disabled.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// BYOC Runner ID. Used only when `environment_kind=byoc`.
+	EnvironmentID string `json:"environment_id,omitempty" toon:"environment_id,omitempty"`
+	// Runtime environment kind. Omit or send an empty value for automatic selection.
+	EnvironmentKind string `json:"environment_kind,omitempty" toon:"environment_kind,omitempty"`
+	// Whether to create and enable an HTTP POST trigger. When enabled, the response includes a one-time token.
+	HTTPPostTriggerEnabled bool `json:"http_post_trigger_enabled,omitempty" toon:"http_post_trigger_enabled,omitempty"`
+	// Rule name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Task prompt sent to the AI SRE agent on each run.
+	Prompt string `json:"prompt,omitempty" toon:"prompt,omitempty"`
+	// Whether the schedule trigger is enabled. Defaults to true when omitted; HTTP-POST-only rules should send false.
+	ScheduleTriggerEnabled *bool `json:"schedule_trigger_enabled,omitempty" toon:"schedule_trigger_enabled,omitempty"`
+	// Scope team ID. 0 or omitted means a personal rule; >0 means a team in the account. Immutable after creation.
+	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// AutomationRuleIDRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRuleIDRequest struct {
+	// Rule ID.
+	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
+}
+
+// AutomationRuleItem is generated from the Flashduty OpenAPI schema.
+type AutomationRuleItem struct {
+	// Account ID.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Whether the caller can manage this rule.
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
+	// Creation time, Unix milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Normalized 5-field cron expression.
+	CronExpr string `json:"cron_expr" toon:"cron_expr"`
+	// Whether the rule is enabled.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// BYOC Runner ID.
+	EnvironmentID string `json:"environment_id" toon:"environment_id"`
+	// Runtime environment kind. Omit or send an empty value for automatic selection.
+	EnvironmentKind string `json:"environment_kind" toon:"environment_kind"`
+	// HTTP POST trigger token. Returned only on create or token rotation; save it immediately.
+	HTTPPostToken string `json:"http_post_token" toon:"http_post_token"`
+	// Whether the HTTP POST trigger is enabled.
+	HTTPPostTriggerEnabled bool `json:"http_post_trigger_enabled" toon:"http_post_trigger_enabled"`
+	// HTTP POST trigger ID.
+	HTTPPostTriggerID string `json:"http_post_trigger_id" toon:"http_post_trigger_id"`
+	// HTTP POST trigger path.
+	HTTPPostTriggerURL string `json:"http_post_trigger_url" toon:"http_post_trigger_url"`
+	// Rule name.
+	Name string `json:"name" toon:"name"`
+	// Creator person ID.
+	OwnerID int64 `json:"owner_id" toon:"owner_id"`
+	// Task prompt.
+	Prompt string `json:"prompt" toon:"prompt"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Hidden session run scope.
+	RunScope string `json:"run_scope" toon:"run_scope"`
+	// Whether the schedule trigger is enabled.
+	ScheduleTriggerEnabled bool `json:"schedule_trigger_enabled" toon:"schedule_trigger_enabled"`
+	// Schedule trigger ID.
+	ScheduleTriggerID string `json:"schedule_trigger_id" toon:"schedule_trigger_id"`
+	// Scope team ID; 0 means personal rule.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Last update time, Unix milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
+// AutomationRuleListRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRuleListRequest struct {
+	ListOptions
+	// Filter by enabled status.
+	Enabled *bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Compatibility field; when scope is empty and this is false, behaves like team scope.
+	IncludePerson *bool `json:"include_person,omitempty" toon:"include_person,omitempty"`
+	// Filter by name keyword.
+	Keyword string `json:"keyword,omitempty" toon:"keyword,omitempty"`
+	// Scope filter. Defaults to all.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// Filter to these team IDs; this filters results and does not expand access.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
+}
+
+// AutomationRuleListResponse is generated from the Flashduty OpenAPI schema.
+type AutomationRuleListResponse struct {
+	Rules []AutomationRuleItem `json:"rules" toon:"rules"`
+	// Total count.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// AutomationRuleUpdateRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRuleUpdateRequest struct {
+	// Run cadence. Supports 4 fields (`hour day month weekday`, minute defaults to 0) and 5 fields (`minute hour day month weekday`). The minute must be one fixed integer; 6-field seconds are not supported. The create API currently requires this field even for HTTP-POST-only rules; send a valid cron and set `schedule_trigger_enabled=false`.
+	CronExpr string `json:"cron_expr,omitempty" toon:"cron_expr,omitempty"`
+	// Whether the rule is enabled.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// BYOC Runner ID.
+	EnvironmentID string `json:"environment_id,omitempty" toon:"environment_id,omitempty"`
+	// Runtime environment kind. Omit or send an empty value for automatic selection.
+	EnvironmentKind string `json:"environment_kind,omitempty" toon:"environment_kind,omitempty"`
+	// Whether the HTTP POST trigger is enabled. Sending true creates one when missing.
+	HTTPPostTriggerEnabled bool `json:"http_post_trigger_enabled,omitempty" toon:"http_post_trigger_enabled,omitempty"`
+	// New rule name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// New task prompt.
+	Prompt string `json:"prompt,omitempty" toon:"prompt,omitempty"`
+	// Whether to rotate the HTTP POST trigger token. The new token is returned only in this response.
+	RotateHTTPPostTriggerToken bool `json:"rotate_http_post_trigger_token,omitempty" toon:"rotate_http_post_trigger_token,omitempty"`
+	// Target rule ID.
+	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
+	// Whether the schedule trigger is enabled.
+	ScheduleTriggerEnabled bool `json:"schedule_trigger_enabled,omitempty" toon:"schedule_trigger_enabled,omitempty"`
+	// Only the current value is accepted; personal/team scope is immutable after creation.
+	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// AutomationRunItem is generated from the Flashduty OpenAPI schema.
+type AutomationRunItem struct {
+	// Account ID.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Attempt count.
+	Attempts int64 `json:"attempts" toon:"attempts"`
+	// Completion time, Unix milliseconds. 0 means not completed.
+	CompletedAt TimestampMilli `json:"completed_at" toon:"completed_at"`
+	// Creation time, Unix milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Duration in milliseconds.
+	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
+	// Error code.
+	ErrorCode string `json:"error_code" toon:"error_code"`
+	// Error message.
+	ErrorMessage string `json:"error_message" toon:"error_message"`
+	// Run kind.
+	Kind string `json:"kind" toon:"kind"`
+	// Idempotency key for this occurrence.
+	OccurrenceKey string `json:"occurrence_key" toon:"occurrence_key"`
+	// Run result JSON.
+	ResultJSON any `json:"result_json" toon:"result_json"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Run ID.
+	RunID string `json:"run_id" toon:"run_id"`
+	// Start time, Unix milliseconds.
+	StartedAt TimestampMilli `json:"started_at" toon:"started_at"`
+	// Run stats JSON.
+	StatsJSON any `json:"stats_json" toon:"stats_json"`
+	// Run status.
+	Status string `json:"status" toon:"status"`
+	// Trigger kind.
+	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
+	// Last update time, Unix milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
+// AutomationRunListRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRunListRequest struct {
+	ListOptions
+	// Target rule ID.
+	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
+	// Start-time lower bound, Unix milliseconds.
+	StartedAfterMs int64 `json:"started_after_ms,omitempty" toon:"started_after_ms,omitempty"`
+	// Start-time upper bound, Unix milliseconds.
+	StartedBeforeMs int64 `json:"started_before_ms,omitempty" toon:"started_before_ms,omitempty"`
+	// Run status filter.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	// Trigger kind filter.
+	TriggerKind string `json:"trigger_kind,omitempty" toon:"trigger_kind,omitempty"`
+}
+
+// AutomationRunListResponse is generated from the Flashduty OpenAPI schema.
+type AutomationRunListResponse struct {
+	Runs []AutomationRunItem `json:"runs" toon:"runs"`
+	// Total count.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// AutomationTemplateItem is generated from the Flashduty OpenAPI schema.
+type AutomationTemplateItem struct {
+	// Template description.
+	Description string `json:"description" toon:"description"`
+	// Whether the template is enabled.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// Icon identifier.
+	Icon string `json:"icon" toon:"icon"`
+	// Template name.
+	Name string `json:"name" toon:"name"`
+	// Template prompt.
+	Prompt string `json:"prompt" toon:"prompt"`
+}
+
+// AutomationTemplateListRequest is generated from the Flashduty OpenAPI schema.
+type AutomationTemplateListRequest struct {
+	// Template locale such as zh-CN or en-US. Omit to detect from the request locale.
+	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+}
+
+// AutomationTemplateListResponse is generated from the Flashduty OpenAPI schema.
+type AutomationTemplateListResponse struct {
+	Templates []AutomationTemplateItem `json:"templates" toon:"templates"`
+}
+
 // CalEventIDRequest is generated from the Flashduty OpenAPI schema.
 type CalEventIDRequest struct {
 	// Calendar ID.
