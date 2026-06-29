@@ -360,3 +360,104 @@ func (s *IncidentsService) WarRoomList(ctx context.Context, req *ListWarRoomsReq
 	}
 	return out, resp, nil
 }
+
+// List post-mortem templates.
+//
+// Return built-in and custom post-mortem templates for the account.
+//
+// API: POST /incident/post-mortem/template/list (postmortem-read-list-templates).
+func (s *IncidentsService) PostmortemReadListTemplates(ctx context.Context, req *ListPostMortemTemplatesRequest) (*ListPostMortemTemplatesResponse, *Response, error) {
+	out := new(ListPostMortemTemplatesResponse)
+	resp, err := s.client.do(ctx, "/incident/post-mortem/template/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Get post-mortem template detail.
+//
+// Return one post-mortem template by ID.
+//
+// API: GET /incident/post-mortem/template/info (postmortem-read-template-info).
+func (s *IncidentsService) PostmortemReadTemplateInfo(ctx context.Context, req *IncidentsPostmortemReadTemplateInfoRequest) (*PostMortemTemplate, *Response, error) {
+	out := new(PostMortemTemplate)
+	resp, err := s.client.doGet(ctx, "/incident/post-mortem/template/info", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Delete post-mortem template.
+//
+// Delete a custom post-mortem template.
+//
+// API: POST /incident/post-mortem/template/delete (postmortem-write-delete-template).
+func (s *IncidentsService) PostmortemWriteDeleteTemplate(ctx context.Context, req *DeletePostMortemTemplateRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/post-mortem/template/delete", req, nil)
+}
+
+// Initialize post-mortem.
+//
+// Create a post-mortem draft from one or more incidents and a template.
+//
+// API: POST /incident/post-mortem/init (postmortem-write-init).
+func (s *IncidentsService) PostmortemWriteInit(ctx context.Context, req *InitPostMortemRequest) (*PostMortemItem, *Response, error) {
+	out := new(PostMortemItem)
+	resp, err := s.client.do(ctx, "/incident/post-mortem/init", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Update post-mortem basics.
+//
+// Replace the incident facts stored in a post-mortem report.
+//
+// API: POST /incident/post-mortem/basics/reset (postmortem-write-reset-basics).
+func (s *IncidentsService) PostmortemWriteResetBasics(ctx context.Context, req *ResetPostMortemBasicsRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/post-mortem/basics/reset", req, nil)
+}
+
+// Update post-mortem follow-ups.
+//
+// Replace the follow-up action items on a post-mortem report.
+//
+// API: POST /incident/post-mortem/follow-ups/reset (postmortem-write-reset-follow-ups).
+func (s *IncidentsService) PostmortemWriteResetFollowUps(ctx context.Context, req *ResetPostMortemFollowUpsRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/post-mortem/follow-ups/reset", req, nil)
+}
+
+// Update post-mortem status.
+//
+// Set a post-mortem report to drafting or published.
+//
+// API: POST /incident/post-mortem/status/reset (postmortem-write-reset-status).
+func (s *IncidentsService) PostmortemWriteResetStatus(ctx context.Context, req *ResetPostMortemStatusRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/post-mortem/status/reset", req, nil)
+}
+
+// Update post-mortem title.
+//
+// Replace the title of a post-mortem report.
+//
+// API: POST /incident/post-mortem/title/reset (postmortem-write-reset-title).
+func (s *IncidentsService) PostmortemWriteResetTitle(ctx context.Context, req *ResetPostMortemTitleRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/post-mortem/title/reset", req, nil)
+}
+
+// Create or update post-mortem template.
+//
+// Create a custom post-mortem template or update an existing one.
+//
+// API: POST /incident/post-mortem/template/upsert (postmortem-write-upsert-template).
+func (s *IncidentsService) PostmortemWriteUpsertTemplate(ctx context.Context, req *UpsertPostMortemTemplateRequest) (*PostMortemTemplate, *Response, error) {
+	out := new(PostMortemTemplate)
+	resp, err := s.client.do(ctx, "/incident/post-mortem/template/upsert", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}

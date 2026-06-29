@@ -127,6 +127,56 @@ func (s *StatusPagesService) ChangeUpdate(ctx context.Context, req *UpdateStatus
 	return s.client.do(ctx, "/status-page/change/update", req, nil)
 }
 
+// Delete status page component.
+//
+// Delete a service component from a status page.
+//
+// API: POST /status-page/component/delete (statusPageComponentDelete).
+func (s *StatusPagesService) ComponentDelete(ctx context.Context, req *DeleteStatusPageComponentRequest) (*Response, error) {
+	return s.client.do(ctx, "/status-page/component/delete", req, nil)
+}
+
+// Upsert status page component.
+//
+// Create or update a service component on a status page.
+//
+// API: POST /status-page/component/upsert (statusPageComponentUpsert).
+func (s *StatusPagesService) ComponentUpsert(ctx context.Context, req *UpsertStatusPageComponentRequest) (*UpsertStatusPageComponentResponse, *Response, error) {
+	out := new(UpsertStatusPageComponentResponse)
+	resp, err := s.client.do(ctx, "/status-page/component/upsert", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Create status page.
+//
+// Create a new status page.
+//
+// API: POST /status-page/create (statusPageCreate).
+func (s *StatusPagesService) Create(ctx context.Context) (*Response, error) {
+	return s.client.do(ctx, "/status-page/create", nil, nil)
+}
+
+// Delete status page.
+//
+// Delete a status page.
+//
+// API: POST /status-page/delete (statusPageDelete).
+func (s *StatusPagesService) Delete(ctx context.Context) (*Response, error) {
+	return s.client.do(ctx, "/status-page/delete", nil, nil)
+}
+
+// Get status page detail.
+//
+// Retrieve detailed configuration for a specific status page.
+//
+// API: GET /status-page/info (statusPageInfo).
+func (s *StatusPagesService) Info(ctx context.Context, req *StatusPagesInfoRequest) (*Response, error) {
+	return s.client.doGet(ctx, "/status-page/info", req, nil)
+}
+
 // Migrate email subscribers.
 //
 // Start a migration job that imports email subscribers from an Atlassian Statuspage into an existing Flashduty status page.
@@ -178,6 +228,29 @@ func (s *StatusPagesService) MigrationStatus(ctx context.Context, req *StatusPag
 	return out, resp, nil
 }
 
+// Delete status page section.
+//
+// Delete a section from a status page.
+//
+// API: POST /status-page/section/delete (statusPageSectionDelete).
+func (s *StatusPagesService) SectionDelete(ctx context.Context, req *DeleteStatusPageSectionRequest) (*Response, error) {
+	return s.client.do(ctx, "/status-page/section/delete", req, nil)
+}
+
+// Upsert status page section.
+//
+// Create or update a section on a status page.
+//
+// API: POST /status-page/section/upsert (statusPageSectionUpsert).
+func (s *StatusPagesService) SectionUpsert(ctx context.Context, req *UpsertStatusPageSectionRequest) (*UpsertStatusPageSectionResponse, *Response, error) {
+	out := new(UpsertStatusPageSectionResponse)
+	resp, err := s.client.do(ctx, "/status-page/section/upsert", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Export subscribers.
 //
 // Export subscribers list for a status page as a CSV attachment. The response is a `text/csv` file with columns: Method, Recipient, Components, Subscribe All, Locale.
@@ -213,4 +286,45 @@ func (s *StatusPagesService) SubscriberList(ctx context.Context, req *StatusPage
 		return nil, resp, err
 	}
 	return out, resp, nil
+}
+
+// Delete status page template.
+//
+// Delete an event template from a status page.
+//
+// API: POST /status-page/template/delete (statusPageTemplateDelete).
+func (s *StatusPagesService) TemplateDelete(ctx context.Context, req *DeleteStatusPageTemplateRequest) (*Response, error) {
+	return s.client.do(ctx, "/status-page/template/delete", req, nil)
+}
+
+// List status page templates.
+//
+// List all event templates for a status page.
+//
+// API: GET /status-page/template/list (statusPageTemplateList).
+func (s *StatusPagesService) TemplateList(ctx context.Context, req *StatusPagesTemplateListRequest) (*Response, error) {
+	return s.client.doGet(ctx, "/status-page/template/list", req, nil)
+}
+
+// Upsert status page template.
+//
+// Create or update an event template for a status page.
+//
+// API: POST /status-page/template/upsert (statusPageTemplateUpsert).
+func (s *StatusPagesService) TemplateUpsert(ctx context.Context, req *UpsertStatusPageTemplateRequest) (*UpsertStatusPageTemplateResponse, *Response, error) {
+	out := new(UpsertStatusPageTemplateResponse)
+	resp, err := s.client.do(ctx, "/status-page/template/upsert", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Update status page.
+//
+// Update an existing status page configuration.
+//
+// API: POST /status-page/update (statusPageUpdate).
+func (s *StatusPagesService) Update(ctx context.Context) (*Response, error) {
+	return s.client.do(ctx, "/status-page/update", nil, nil)
 }

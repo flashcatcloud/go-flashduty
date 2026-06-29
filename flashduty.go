@@ -97,14 +97,20 @@ type pageMeta struct {
 // parameter and JSON-encoding body when non-nil. Most Flashduty endpoints are
 // POST actions; a handful are GET with query parameters.
 func (c *Client) newRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
+	return c.newRequestWithAppKey(ctx, method, path, body, true)
+}
+
+func (c *Client) newRequestWithAppKey(ctx context.Context, method, path string, body any, withAppKey bool) (*http.Request, error) {
 	rel, err := url.Parse(strings.TrimPrefix(path, "/"))
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: invalid path %q: %w", path, err)
 	}
 	u := c.BaseURL.ResolveReference(rel)
-	q := u.Query()
-	q.Set("app_key", c.appKey)
-	u.RawQuery = q.Encode()
+	if withAppKey {
+		q := u.Query()
+		q.Set("app_key", c.appKey)
+		u.RawQuery = q.Encode()
+	}
 
 	var buf io.Reader
 	var rawBody []byte
@@ -164,9 +170,20 @@ func (c *Client) doGet(ctx context.Context, path string, opt, out any) (*Respons
 // (when non-nil), and returns a Response. A non-nil envelope error or a non-2xx
 // status yields an *ErrorResponse (or *RateLimitError on 429).
 func (c *Client) doMethod(ctx context.Context, method, path string, body, out any) (*Response, error) {
-	req, err := c.newRequest(ctx, method, path, body)
+	return c.doMethodWithAppKey(ctx, method, path, body, out, true, nil)
+}
+
+func (c *Client) doMethodWithoutAppKey(ctx context.Context, method, path string, body, out any, configure func(*http.Request)) (*Response, error) {
+	return c.doMethodWithAppKey(ctx, method, path, body, out, false, configure)
+}
+
+func (c *Client) doMethodWithAppKey(ctx context.Context, method, path string, body, out any, withAppKey bool, configure func(*http.Request)) (*Response, error) {
+	req, err := c.newRequestWithAppKey(ctx, method, path, body, withAppKey)
 	if err != nil {
 		return nil, err
+	}
+	if configure != nil {
+		configure(req)
 	}
 	httpResp, err := c.client.Do(req)
 	if err != nil {

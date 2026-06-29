@@ -1065,6 +1065,205 @@ type AuditSearchResponse struct {
 	Total int64 `json:"total" toon:"total"`
 }
 
+// AutomationFireAPITriggerRequest is generated from the Flashduty OpenAPI schema.
+type AutomationFireAPITriggerRequest struct {
+	// Optional idempotency key; the same trigger + dedup_key reuses the same run.
+	DedupKey string `json:"dedup_key,omitempty" toon:"dedup_key,omitempty"`
+	// Context text passed to this Automation run.
+	Text string `json:"text,omitempty" toon:"text,omitempty"`
+}
+
+// AutomationFireAPITriggerResponse is generated from the Flashduty OpenAPI schema.
+type AutomationFireAPITriggerResponse struct {
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Created or reused run ID.
+	RunID string `json:"run_id" toon:"run_id"`
+	// Current run status.
+	Status string `json:"status" toon:"status"`
+	// Trigger kind.
+	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
+}
+
+// AutomationRuleCreateRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRuleCreateRequest struct {
+	// Run cadence. Supports 4 fields (`hour day month weekday`, minute defaults to 0) and 5 fields (`minute hour day month weekday`). The minute must be one fixed integer; 6-field seconds are not supported. The create API currently requires this field even for HTTP-POST-only rules; send a valid cron and set `schedule_trigger_enabled=false`.
+	CronExpr string `json:"cron_expr,omitempty" toon:"cron_expr,omitempty"`
+	// Whether the rule is enabled after creation. Omitted API value is false; Chat/CLI create sends true by default unless the user asks for disabled.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// BYOC Runner ID. Used only when `environment_kind=byoc`.
+	EnvironmentID string `json:"environment_id,omitempty" toon:"environment_id,omitempty"`
+	// Runtime environment kind. Omit or send an empty value for automatic selection.
+	EnvironmentKind string `json:"environment_kind,omitempty" toon:"environment_kind,omitempty"`
+	// Whether to create and enable an HTTP POST trigger. When enabled, the response includes a one-time token.
+	HTTPPostTriggerEnabled bool `json:"http_post_trigger_enabled,omitempty" toon:"http_post_trigger_enabled,omitempty"`
+	// Rule name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Task prompt sent to the AI SRE agent on each run.
+	Prompt string `json:"prompt,omitempty" toon:"prompt,omitempty"`
+	// Whether the schedule trigger is enabled. Defaults to true when omitted; HTTP-POST-only rules should send false.
+	ScheduleTriggerEnabled *bool `json:"schedule_trigger_enabled,omitempty" toon:"schedule_trigger_enabled,omitempty"`
+	// Scope team ID. 0 or omitted means a personal rule; >0 means a team in the account. Immutable after creation.
+	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// AutomationRuleIDRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRuleIDRequest struct {
+	// Rule ID.
+	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
+}
+
+// AutomationRuleItem is generated from the Flashduty OpenAPI schema.
+type AutomationRuleItem struct {
+	// Account ID.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Whether the caller can manage this rule.
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
+	// Creation time, Unix milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Normalized 5-field cron expression.
+	CronExpr string `json:"cron_expr" toon:"cron_expr"`
+	// Whether the rule is enabled.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// BYOC Runner ID.
+	EnvironmentID string `json:"environment_id" toon:"environment_id"`
+	// Runtime environment kind. Omit or send an empty value for automatic selection.
+	EnvironmentKind string `json:"environment_kind" toon:"environment_kind"`
+	// HTTP POST trigger token. Returned only on create or token rotation; save it immediately.
+	HTTPPostToken string `json:"http_post_token" toon:"http_post_token"`
+	// Whether the HTTP POST trigger is enabled.
+	HTTPPostTriggerEnabled bool `json:"http_post_trigger_enabled" toon:"http_post_trigger_enabled"`
+	// HTTP POST trigger ID.
+	HTTPPostTriggerID string `json:"http_post_trigger_id" toon:"http_post_trigger_id"`
+	// HTTP POST trigger path.
+	HTTPPostTriggerURL string `json:"http_post_trigger_url" toon:"http_post_trigger_url"`
+	// Rule name.
+	Name string `json:"name" toon:"name"`
+	// Creator person ID.
+	OwnerID int64 `json:"owner_id" toon:"owner_id"`
+	// Task prompt.
+	Prompt string `json:"prompt" toon:"prompt"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Hidden session run scope.
+	RunScope string `json:"run_scope" toon:"run_scope"`
+	// Whether the schedule trigger is enabled.
+	ScheduleTriggerEnabled bool `json:"schedule_trigger_enabled" toon:"schedule_trigger_enabled"`
+	// Schedule trigger ID.
+	ScheduleTriggerID string `json:"schedule_trigger_id" toon:"schedule_trigger_id"`
+	// Scope team ID; 0 means personal rule.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Last update time, Unix milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
+// AutomationRuleListRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRuleListRequest struct {
+	ListOptions
+	// Filter by enabled status.
+	Enabled *bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Compatibility field; when scope is empty and this is false, behaves like team scope.
+	IncludePerson *bool `json:"include_person,omitempty" toon:"include_person,omitempty"`
+	// Filter by name keyword.
+	Keyword string `json:"keyword,omitempty" toon:"keyword,omitempty"`
+	// Scope filter. Defaults to all.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// Filter to these team IDs; this filters results and does not expand access.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
+}
+
+// AutomationRuleListResponse is generated from the Flashduty OpenAPI schema.
+type AutomationRuleListResponse struct {
+	Rules []AutomationRuleItem `json:"rules" toon:"rules"`
+	// Total count.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// AutomationRunItem is generated from the Flashduty OpenAPI schema.
+type AutomationRunItem struct {
+	// Account ID.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Attempt count.
+	Attempts int64 `json:"attempts" toon:"attempts"`
+	// Completion time, Unix milliseconds. 0 means not completed.
+	CompletedAt TimestampMilli `json:"completed_at" toon:"completed_at"`
+	// Creation time, Unix milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Duration in milliseconds.
+	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
+	// Error code.
+	ErrorCode string `json:"error_code" toon:"error_code"`
+	// Error message.
+	ErrorMessage string `json:"error_message" toon:"error_message"`
+	// Run kind.
+	Kind string `json:"kind" toon:"kind"`
+	// Idempotency key for this occurrence.
+	OccurrenceKey string `json:"occurrence_key" toon:"occurrence_key"`
+	// Run result JSON.
+	ResultJSON any `json:"result_json" toon:"result_json"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Run ID.
+	RunID string `json:"run_id" toon:"run_id"`
+	// Start time, Unix milliseconds.
+	StartedAt TimestampMilli `json:"started_at" toon:"started_at"`
+	// Run stats JSON.
+	StatsJSON any `json:"stats_json" toon:"stats_json"`
+	// Run status.
+	Status string `json:"status" toon:"status"`
+	// Trigger kind.
+	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
+	// Last update time, Unix milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
+// AutomationRunListRequest is generated from the Flashduty OpenAPI schema.
+type AutomationRunListRequest struct {
+	ListOptions
+	// Target rule ID.
+	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
+	// Start-time lower bound, Unix milliseconds.
+	StartedAfterMs int64 `json:"started_after_ms,omitempty" toon:"started_after_ms,omitempty"`
+	// Start-time upper bound, Unix milliseconds.
+	StartedBeforeMs int64 `json:"started_before_ms,omitempty" toon:"started_before_ms,omitempty"`
+	// Run status filter.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	// Trigger kind filter.
+	TriggerKind string `json:"trigger_kind,omitempty" toon:"trigger_kind,omitempty"`
+}
+
+// AutomationRunListResponse is generated from the Flashduty OpenAPI schema.
+type AutomationRunListResponse struct {
+	Runs []AutomationRunItem `json:"runs" toon:"runs"`
+	// Total count.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// AutomationTemplateItem is generated from the Flashduty OpenAPI schema.
+type AutomationTemplateItem struct {
+	// Template description.
+	Description string `json:"description" toon:"description"`
+	// Whether the template is enabled.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// Icon identifier.
+	Icon string `json:"icon" toon:"icon"`
+	// Template name.
+	Name string `json:"name" toon:"name"`
+	// Template prompt.
+	Prompt string `json:"prompt" toon:"prompt"`
+}
+
+// AutomationTemplateListRequest is generated from the Flashduty OpenAPI schema.
+type AutomationTemplateListRequest struct {
+	// Template locale such as zh-CN or en-US. Omit to detect from the request locale.
+	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+}
+
+// AutomationTemplateListResponse is generated from the Flashduty OpenAPI schema.
+type AutomationTemplateListResponse struct {
+	Templates []AutomationTemplateItem `json:"templates" toon:"templates"`
+}
+
 // CalEventIDRequest is generated from the Flashduty OpenAPI schema.
 type CalEventIDRequest struct {
 	// Calendar ID.
@@ -1916,6 +2115,12 @@ type DeletePostMortemRequest struct {
 	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
 }
 
+// DeletePostMortemTemplateRequest is generated from the Flashduty OpenAPI schema.
+type DeletePostMortemTemplateRequest struct {
+	// Template ID.
+	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+}
+
 // DeleteStatusPageChangeRequest is generated from the Flashduty OpenAPI schema.
 type DeleteStatusPageChangeRequest struct {
 	// Target event ID.
@@ -1932,6 +2137,32 @@ type DeleteStatusPageChangeTimelineRequest struct {
 	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
 	// Timeline update ID to delete.
 	UpdateID string `json:"update_id,omitempty" toon:"update_id,omitempty"`
+}
+
+// DeleteStatusPageComponentRequest is generated from the Flashduty OpenAPI schema.
+type DeleteStatusPageComponentRequest struct {
+	// IDs of components to delete.
+	ComponentIDs []string `json:"component_ids,omitempty" toon:"component_ids,omitempty"`
+	// Status page ID.
+	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+}
+
+// DeleteStatusPageSectionRequest is generated from the Flashduty OpenAPI schema.
+type DeleteStatusPageSectionRequest struct {
+	// Status page ID.
+	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+	// IDs of sections to delete.
+	SectionIDs []string `json:"section_ids,omitempty" toon:"section_ids,omitempty"`
+}
+
+// DeleteStatusPageTemplateRequest is generated from the Flashduty OpenAPI schema.
+type DeleteStatusPageTemplateRequest struct {
+	// Status page ID.
+	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+	// Template ID to delete.
+	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+	// Template category.
+	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
 
 // DeleteWarRoomRequest is generated from the Flashduty OpenAPI schema.
@@ -2951,6 +3182,14 @@ type InhibitRuleItem struct {
 	UpdatedBy         int64       `json:"updated_by" toon:"updated_by"`
 }
 
+// InitPostMortemRequest is generated from the Flashduty OpenAPI schema.
+type InitPostMortemRequest struct {
+	// Incident IDs to link to the report. 1-10 incidents.
+	IncidentIDs []string `json:"incident_ids,omitempty" toon:"incident_ids,omitempty"`
+	// Template ID used to initialize the report.
+	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+}
+
 // InsightAlertByLabelItem is generated from the Flashduty OpenAPI schema.
 type InsightAlertByLabelItem struct {
 	// Hour bucket when `split_hours` is enabled.
@@ -3374,6 +3613,27 @@ type ListPastIncidentsRequest struct {
 type ListPastIncidentsResponse struct {
 	// Similar past incidents with similarity scores.
 	Items []PastIncidentItem `json:"items" toon:"items"`
+}
+
+// ListPostMortemTemplatesRequest is generated from the Flashduty OpenAPI schema.
+type ListPostMortemTemplatesRequest struct {
+	ListOptions
+	// Ascending order when true.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Field used to order results.
+	OrderBy string `json:"order_by,omitempty" toon:"order_by,omitempty"`
+}
+
+// ListPostMortemTemplatesResponse is generated from the Flashduty OpenAPI schema.
+type ListPostMortemTemplatesResponse struct {
+	// True when another page is available.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Templates in the current page.
+	Items []PostMortemTemplate `json:"items" toon:"items"`
+	// Cursor for forward pagination.
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
+	// Total matching templates.
+	Total int64 `json:"total" toon:"total"`
 }
 
 // ListPostMortemsRequest is generated from the Flashduty OpenAPI schema.
@@ -4442,6 +4702,45 @@ type PostMortemMeta struct {
 	UpdatedAtSeconds Timestamp `json:"updated_at_seconds" toon:"updated_at_seconds"`
 }
 
+// PostMortemTemplate is generated from the Flashduty OpenAPI schema.
+type PostMortemTemplate struct {
+	// Account ID that owns the template. 0 for built-in templates.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// BlockNote JSON content used to initialize the report body.
+	Content string `json:"content" toon:"content"`
+	// Markdown version of the template content, used by AI generation.
+	ContentMarkdown string `json:"content_markdown" toon:"content_markdown"`
+	// Unix timestamp in seconds when the template was created.
+	CreatedAtSeconds Timestamp `json:"created_at_seconds" toon:"created_at_seconds"`
+	// Template description.
+	Description string `json:"description" toon:"description"`
+	// Template name shown in the console.
+	Name string `json:"name" toon:"name"`
+	// Managing team ID. Built-in templates use 0.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Template ID. Built-in templates use a stable `post_mortem_default_tmpl_*` ID.
+	TemplateID string `json:"template_id" toon:"template_id"`
+	// Unix timestamp in seconds when the template was last updated.
+	UpdatedAtSeconds Timestamp `json:"updated_at_seconds" toon:"updated_at_seconds"`
+}
+
+// PreviewSyncRequest is generated from the Flashduty OpenAPI schema.
+type PreviewSyncRequest struct {
+	// Additional type-specific query arguments.
+	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
+	// Shift the query window backward by this many seconds to compensate for data ingestion latency.
+	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
+	// Datasource display name as configured in the account.
+	DsName string `json:"ds_name,omitempty" toon:"ds_name,omitempty"`
+	// Datasource type, e.g. `prometheus`, `loki`, `elasticsearch`.
+	DsType string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
+	// Query expression. Format depends on `ds_type` (PromQL for Prometheus, LogQL for Loki, etc.).
+	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
+}
+
+// PreviewSyncResponse is generated from the Flashduty OpenAPI schema.
+type PreviewSyncResponse struct{}
+
 // PreviewTemplateRequest is generated from the Flashduty OpenAPI schema.
 type PreviewTemplateRequest struct {
 	// Template content to render.
@@ -4508,6 +4807,46 @@ type ResetIncidentFieldRequest struct {
 	FieldValue any `json:"field_value,omitempty" toon:"field_value,omitempty"`
 	// Incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+}
+
+// ResetPostMortemBasicsRequest is generated from the Flashduty OpenAPI schema.
+type ResetPostMortemBasicsRequest struct {
+	// Unix timestamp in seconds for the earliest linked incident start time.
+	IncidentsEarliestStartSeconds int64 `json:"incidents_earliest_start_seconds,omitempty" toon:"incidents_earliest_start_seconds,omitempty"`
+	// Highest severity among linked incidents.
+	IncidentsHighestSeverity string `json:"incidents_highest_severity,omitempty" toon:"incidents_highest_severity,omitempty"`
+	// Unix timestamp in seconds for the latest linked incident close time. 0 when still open.
+	IncidentsLatestCloseSeconds int64 `json:"incidents_latest_close_seconds,omitempty" toon:"incidents_latest_close_seconds,omitempty"`
+	// Total incident duration in seconds.
+	IncidentsTotalDurationSeconds int64 `json:"incidents_total_duration_seconds,omitempty" toon:"incidents_total_duration_seconds,omitempty"`
+	// Post-mortem ID.
+	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+	// Responder member IDs to store on the report.
+	ResponderIDs []int64 `json:"responder_ids,omitempty" toon:"responder_ids,omitempty"`
+}
+
+// ResetPostMortemFollowUpsRequest is generated from the Flashduty OpenAPI schema.
+type ResetPostMortemFollowUpsRequest struct {
+	// Follow-up action items as free text.
+	FollowUps string `json:"follow_ups,omitempty" toon:"follow_ups,omitempty"`
+	// Post-mortem ID.
+	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+}
+
+// ResetPostMortemStatusRequest is generated from the Flashduty OpenAPI schema.
+type ResetPostMortemStatusRequest struct {
+	// Post-mortem ID.
+	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+	// Target report status.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+}
+
+// ResetPostMortemTitleRequest is generated from the Flashduty OpenAPI schema.
+type ResetPostMortemTitleRequest struct {
+	// Post-mortem ID.
+	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+	// New report title.
+	Title string `json:"title,omitempty" toon:"title,omitempty"`
 }
 
 // ResolveIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -5029,6 +5368,24 @@ type RUMIssueUpdateRequest struct {
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
 	// Suspected cause.
 	SuspectedCause string `json:"suspected_cause,omitempty" toon:"suspected_cause,omitempty"`
+}
+
+// RUMWebhookTestRequest is generated from the Flashduty OpenAPI schema.
+type RUMWebhookTestRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id,omitempty" toon:"application_id,omitempty"`
+	// Webhook URL to receive the sample alert event.
+	WebhookURL string `json:"webhook_url,omitempty" toon:"webhook_url,omitempty"`
+}
+
+// RUMWebhookTestResponse is generated from the Flashduty OpenAPI schema.
+type RUMWebhookTestResponse struct {
+	// `ok` on success, otherwise the delivery error message.
+	Message string `json:"message" toon:"message"`
+	// Whether the webhook endpoint accepted the sample event.
+	OK bool `json:"ok" toon:"ok"`
+	// HTTP status code returned by the webhook endpoint. 0 when the request did not receive a response.
+	StatusCode int64 `json:"status_code" toon:"status_code"`
 }
 
 // SLSLogstoresRequest is generated from the Flashduty OpenAPI schema.
@@ -6355,6 +6712,18 @@ type ToolInvokeResponse struct {
 	Target ToolInvokeResponseTarget `json:"target" toon:"target"`
 }
 
+// TryLinkPersonRequest is generated from the Flashduty OpenAPI schema.
+type TryLinkPersonRequest struct {
+	// IM integration ID.
+	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+}
+
+// TryLinkPersonResponse is generated from the Flashduty OpenAPI schema.
+type TryLinkPersonResponse struct {
+	// Person IDs newly linked during this call.
+	NewLinkedPersonIDs []int64 `json:"new_linked_person_ids" toon:"new_linked_person_ids"`
+}
+
 // UnackIncidentRequest is generated from the Flashduty OpenAPI schema.
 type UnackIncidentRequest struct {
 	// Incident IDs to unacknowledge. At most 100 per call.
@@ -6551,6 +6920,22 @@ type UpdateStatusPageChangeTimelineRequest struct {
 	UpdateID string `json:"update_id,omitempty" toon:"update_id,omitempty"`
 }
 
+// UpsertPostMortemTemplateRequest is generated from the Flashduty OpenAPI schema.
+type UpsertPostMortemTemplateRequest struct {
+	// BlockNote JSON template content.
+	Content string `json:"content,omitempty" toon:"content,omitempty"`
+	// Markdown version of the template content.
+	ContentMarkdown string `json:"content_markdown,omitempty" toon:"content_markdown,omitempty"`
+	// Template description.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Template name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Managing team ID. Required when creating a custom template.
+	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	// Template ID. Omit to create a new template; provide it to update an existing template.
+	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+}
+
 // UpsertRouteRequest is generated from the Flashduty OpenAPI schema.
 type UpsertRouteRequest struct {
 	// Ordered list of case branches. Cases are evaluated top to bottom.
@@ -6562,6 +6947,50 @@ type UpsertRouteRequest struct {
 	Sections []RouteSection `json:"sections,omitempty" toon:"sections,omitempty"`
 	// Expected current version for optimistic concurrency control. Pass the value returned by the latest read.
 	Version int64 `json:"version,omitempty" toon:"version,omitempty"`
+}
+
+// UpsertStatusPageComponentRequest is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageComponentRequest struct {
+	// Components to create or update.
+	Components []UpsertStatusPageComponentRequestComponentsItem `json:"components,omitempty" toon:"components,omitempty"`
+	// Status page ID.
+	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+}
+
+// UpsertStatusPageComponentResponse is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageComponentResponse struct {
+	// IDs of the created or updated components, in the same order as the request.
+	ComponentIDs []string `json:"component_ids" toon:"component_ids"`
+}
+
+// UpsertStatusPageSectionRequest is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageSectionRequest struct {
+	// Status page ID.
+	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+	// Sections to create or update.
+	Sections []UpsertStatusPageSectionRequestSectionsItem `json:"sections,omitempty" toon:"sections,omitempty"`
+}
+
+// UpsertStatusPageSectionResponse is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageSectionResponse struct {
+	// IDs of the created or updated sections, in the same order as the request.
+	SectionIDs []string `json:"section_ids" toon:"section_ids"`
+}
+
+// UpsertStatusPageTemplateRequest is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageTemplateRequest struct {
+	// Status page ID.
+	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
+	// Template content.
+	Template UpsertStatusPageTemplateRequestTemplate `json:"template,omitempty" toon:"template,omitempty"`
+	// Template category. `pre_defined` for predefined event templates; `message` for notification message templates.
+	Type string `json:"type,omitempty" toon:"type,omitempty"`
+}
+
+// UpsertStatusPageTemplateResponse is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageTemplateResponse struct {
+	// ID of the created or updated template.
+	TemplateID string `json:"template_id" toon:"template_id"`
 }
 
 // WakeIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -7283,6 +7712,54 @@ type ToolInvokeResponseTarget struct {
 	Locator string `json:"locator" toon:"locator"`
 }
 
+// UpsertStatusPageComponentRequestComponentsItem is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageComponentRequestComponentsItem struct {
+	// Component ID. Omit to create a new component; supply to update an existing one.
+	ComponentID string `json:"component_id,omitempty" toon:"component_id,omitempty"`
+	// Component description.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// When true, the component is hidden entirely from summary endpoints.
+	HideAll bool `json:"hide_all,omitempty" toon:"hide_all,omitempty"`
+	// When true, uptime data is hidden from summary responses.
+	HideUptime bool `json:"hide_uptime,omitempty" toon:"hide_uptime,omitempty"`
+	// Component display name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Display order within its section.
+	OrderID int64 `json:"order_id,omitempty" toon:"order_id,omitempty"`
+	// Parent section ID. Omit to place the component at the top level.
+	SectionID string `json:"section_id,omitempty" toon:"section_id,omitempty"`
+}
+
+// UpsertStatusPageSectionRequestSectionsItem is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageSectionRequestSectionsItem struct {
+	// Section description.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// When true, the entire section is hidden from summary endpoints.
+	HideAll bool `json:"hide_all,omitempty" toon:"hide_all,omitempty"`
+	// When true, uptime data for all components in this section is hidden.
+	HideUptime bool `json:"hide_uptime,omitempty" toon:"hide_uptime,omitempty"`
+	// Section display name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Display order.
+	OrderID int64 `json:"order_id,omitempty" toon:"order_id,omitempty"`
+	// Section ID. Omit to create a new section; supply to update an existing one.
+	SectionID string `json:"section_id,omitempty" toon:"section_id,omitempty"`
+}
+
+// UpsertStatusPageTemplateRequestTemplate is generated from the Flashduty OpenAPI schema.
+type UpsertStatusPageTemplateRequestTemplate struct {
+	// Template body text (Markdown).
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Event type this template applies to.
+	EventType string `json:"event_type,omitempty" toon:"event_type,omitempty"`
+	// Event status this template represents.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	// Template ID. Omit to create; supply to update.
+	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
+	// Template title.
+	Title string `json:"title,omitempty" toon:"title,omitempty"`
+}
+
 // ChannelsChannelEscalateWebhookRobotListResponseListItemReferencedByItem is generated from the Flashduty OpenAPI schema.
 type ChannelsChannelEscalateWebhookRobotListResponseListItemReferencedByItem struct {
 	// Channel ID.
@@ -7425,6 +7902,12 @@ type IncidentsPostMortemInfoRequest struct {
 	PostMortemID string `url:"post_mortem_id"`
 }
 
+// IncidentsPostmortemReadTemplateInfoRequest holds the query parameters for Get post-mortem template detail.
+type IncidentsPostmortemReadTemplateInfoRequest struct {
+	// Template ID.
+	TemplateID string `url:"template_id"`
+}
+
 // StatusPagesChangeActiveListRequest holds the query parameters for List active status page events.
 type StatusPagesChangeActiveListRequest struct {
 	// Status page ID.
@@ -7455,6 +7938,12 @@ type StatusPagesChangeListRequest struct {
 	Status string `url:"status"`
 }
 
+// StatusPagesInfoRequest holds the query parameters for Get status page detail.
+type StatusPagesInfoRequest struct {
+	// Status page ID
+	PageID string `url:"page_id"`
+}
+
 // StatusPagesMigrationStatusRequest holds the query parameters for Get migration status.
 type StatusPagesMigrationStatusRequest struct {
 	// Migration job ID returned by `migrate-structure` or `migrate-email-subscribers`.
@@ -7471,4 +7960,12 @@ type StatusPagesSubscriberListRequest struct {
 	P int64 `url:"p,omitempty"`
 	// Page size (1-100).
 	Limit int64 `url:"limit,omitempty"`
+}
+
+// StatusPagesTemplateListRequest holds the query parameters for List status page templates.
+type StatusPagesTemplateListRequest struct {
+	// Status page ID.
+	PageID int64 `url:"page_id"`
+	// Template category. `pre_defined` returns predefined event templates; `message` returns message notification templates.
+	Type string `url:"type"`
 }

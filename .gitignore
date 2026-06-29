@@ -1,5 +1,6 @@
 /dist/
 /bin/
+.worktrees/
 *.out
 .DS_Store
 

@@ -93,10 +93,15 @@ func run() error {
 		root:       root,
 		schemas:    asMap(asMap(spec["components"])["schemas"]),
 		emptyTypes: map[string]bool{},
-		skip:       map[string]bool{"SuccessEnvelope": true, "ErrorResponse": true, "DutyError": true},
-		queued:     map[string]bool{},
-		synth:      map[string]any{},
-		reqSynth:   map[string]bool{},
+		skip: map[string]bool{
+			"SuccessEnvelope":             true,
+			"ErrorResponse":               true,
+			"DutyError":                   true,
+			"AutomationRuleUpdateRequest": true, // hand-written to preserve partial-update pointer semantics.
+		},
+		queued:   map[string]bool{},
+		synth:    map[string]any{},
+		reqSynth: map[string]bool{},
 	}
 	g.detectEmpty()
 	g.reqGoNames = g.computeRequestReachable(asMap(spec["paths"]))
@@ -169,6 +174,12 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 			if isStreamingOp(o) {
 				continue
 			}
+			// The generated client is an app_key client and does not template path
+			// parameters. Endpoints with operation-level non-AppKey auth or path
+			// params need hand-written methods.
+			if needsHandWrittenOperation(o) {
+				continue
+			}
 			tag, _ := tags[0].(string)
 			byTag[tag] = append(byTag[tag], opEntry{p, m, o})
 		}
@@ -190,7 +201,7 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 		for _, e := range entries {
 			opIDs = append(opIDs, str(e.op, "operationId"))
 		}
-		names := methodNames(opIDs)
+		names := methodNames(tag, opIDs)
 
 		svc := service{Name: serviceName(tag), Tag: tag}
 		for _, e := range entries {
@@ -229,6 +240,24 @@ func isStreamingOp(o map[string]any) bool {
 	}
 	_, hasJSON := content["application/json"]
 	return !hasJSON
+}
+
+func needsHandWrittenOperation(o map[string]any) bool {
+	for _, raw := range asSlice(o["parameters"]) {
+		if str(asMap(raw), "in") == "path" {
+			return true
+		}
+	}
+	rawSecurity, ok := o["security"]
+	if !ok {
+		return false
+	}
+	for _, raw := range asSlice(rawSecurity) {
+		if _, ok := asMap(raw)["AppKeyAuth"]; ok {
+			return false
+		}
+	}
+	return true
 }
 
 // getRequestType synthesizes a request struct from a GET op's query parameters
