@@ -100,13 +100,6 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 	return c.newRequestWithAppKey(ctx, method, path, body, true)
 }
 
-// newRequestWithoutAppKey builds a request for endpoints that use their own
-// authentication scheme instead of the account app_key, such as Automation HTTP
-// POST trigger bearer tokens.
-func (c *Client) newRequestWithoutAppKey(ctx context.Context, method, path string, body any) (*http.Request, error) {
-	return c.newRequestWithAppKey(ctx, method, path, body, false)
-}
-
 func (c *Client) newRequestWithAppKey(ctx context.Context, method, path string, body any, withAppKey bool) (*http.Request, error) {
 	rel, err := url.Parse(strings.TrimPrefix(path, "/"))
 	if err != nil {
@@ -177,14 +170,21 @@ func (c *Client) doGet(ctx context.Context, path string, opt, out any) (*Respons
 // (when non-nil), and returns a Response. A non-nil envelope error or a non-2xx
 // status yields an *ErrorResponse (or *RateLimitError on 429).
 func (c *Client) doMethod(ctx context.Context, method, path string, body, out any) (*Response, error) {
-	req, err := c.newRequest(ctx, method, path, body)
+	return c.doMethodWithAppKey(ctx, method, path, body, out, true, nil)
+}
+
+func (c *Client) doMethodWithoutAppKey(ctx context.Context, method, path string, body, out any, configure func(*http.Request)) (*Response, error) {
+	return c.doMethodWithAppKey(ctx, method, path, body, out, false, configure)
+}
+
+func (c *Client) doMethodWithAppKey(ctx context.Context, method, path string, body, out any, withAppKey bool, configure func(*http.Request)) (*Response, error) {
+	req, err := c.newRequestWithAppKey(ctx, method, path, body, withAppKey)
 	if err != nil {
 		return nil, err
 	}
-	return c.doRequest(req, out)
-}
-
-func (c *Client) doRequest(req *http.Request, out any) (*Response, error) {
+	if configure != nil {
+		configure(req)
+	}
 	httpResp, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: request to %s failed: %v", sanitizeURL(req.URL), sanitizeError(err))

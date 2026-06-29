@@ -25,14 +25,10 @@ func (s *AutomationsService) TriggerWriteFire(ctx context.Context, triggerID, to
 	}
 
 	path := "/safari/automation/triggers/" + url.PathEscape(triggerID) + "/fire"
-	httpReq, err := s.client.newRequestWithoutAppKey(ctx, http.MethodPost, path, req)
-	if err != nil {
-		return nil, nil, err
-	}
-	httpReq.Header.Set("Authorization", "Bearer "+token)
-
 	out := new(AutomationFireAPITriggerResponse)
-	resp, err := s.client.doRequest(httpReq, out)
+	resp, err := s.client.doMethodWithoutAppKey(ctx, http.MethodPost, path, req, out, func(httpReq *http.Request) {
+		httpReq.Header.Set("Authorization", "Bearer "+token)
+	})
 	if err != nil {
 		return nil, resp, err
 	}
