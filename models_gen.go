@@ -188,8 +188,8 @@ type A2aAgentCreateRequest struct {
 	AuthType string `json:"auth_type,omitempty" toon:"auth_type,omitempty"`
 	// URL of the remote agent card.
 	CardURL string `json:"card_url,omitempty" toon:"card_url,omitempty"`
-	// Agent description.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Invocation instructions included in AI SRE's system prompt to decide when to call this A2A agent. Must be nonblank.
+	Instructions string `json:"instructions,omitempty" toon:"instructions,omitempty"`
 	// JSON OAuth metadata; reserved for per_user_oauth.
 	OauthMetadata string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
 	// JSON secret schema; required when auth_mode=per_user_secret.
@@ -240,8 +240,8 @@ type A2aAgentItem struct {
 	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Member ID that created the agent.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
-	// Agent description.
-	Description string `json:"description" toon:"description"`
+	// Invocation instructions included in AI SRE's system prompt to decide when to call this A2A agent.
+	Instructions string `json:"instructions" toon:"instructions"`
 	// JSON-encoded OAuth metadata (per_user_oauth mode).
 	OauthMetadata string `json:"oauth_metadata" toon:"oauth_metadata"`
 	// JSON-encoded secret schema (per_user_secret mode).
@@ -292,8 +292,8 @@ type A2aAgentUpdateRequest struct {
 	AuthType *string `json:"auth_type,omitempty" toon:"auth_type,omitempty"`
 	// New card URL. Omit to leave unchanged.
 	CardURL *string `json:"card_url,omitempty" toon:"card_url,omitempty"`
-	// New description. Omit to leave unchanged.
-	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// New invocation instructions. Omit to leave unchanged; when supplied, must be nonblank.
+	Instructions *string `json:"instructions,omitempty" toon:"instructions,omitempty"`
 	// New JSON OAuth metadata.
 	OauthMetadata *string `json:"oauth_metadata,omitempty" toon:"oauth_metadata,omitempty"`
 	// New JSON secret schema.

@@ -21769,7 +21769,8 @@
                 "card_url": "https://agents.example.com/deploy-bot/card",
                 "auth_type": "bearer",
                 "streaming": true,
-                "team_id": 0
+                "team_id": 0,
+                "instructions": "Use when deployment pipelines need inspection or rollback advice."
               }
             }
           }
@@ -21826,7 +21827,6 @@
                         "team_id": 0,
                         "can_edit": true,
                         "agent_name": "deploy-bot",
-                        "description": "Remote agent that inspects deployment pipelines.",
                         "card_url": "https://agents.example.com/deploy-bot/card",
                         "auth_type": "bearer",
                         "streaming": true,
@@ -21841,7 +21841,8 @@
                         "auth_mode": "shared",
                         "created_by": 80011,
                         "created_at": 1716960000000,
-                        "updated_at": 1717046400000
+                        "updated_at": 1717046400000,
+                        "instructions": "Remote agent that inspects deployment pipelines."
                       }
                     ],
                     "total": 1
@@ -21928,7 +21929,6 @@
                     "team_id": 0,
                     "can_edit": true,
                     "agent_name": "deploy-bot",
-                    "description": "Remote agent that inspects deployment pipelines.",
                     "card_url": "https://agents.example.com/deploy-bot/card",
                     "auth_type": "bearer",
                     "streaming": true,
@@ -21943,7 +21943,8 @@
                     "auth_mode": "shared",
                     "created_by": 80011,
                     "created_at": 1716960000000,
-                    "updated_at": 1717046400000
+                    "updated_at": 1717046400000,
+                    "instructions": "Remote agent that inspects deployment pipelines."
                   }
                 }
               }
@@ -22050,7 +22051,7 @@
               },
               "example": {
                 "agent_id": "a2a_6mWqZ2pK9nLcR3tY8uVb4D",
-                "description": "Inspects deployment pipelines and proposes rollbacks."
+                "instructions": "Inspect deployment pipelines and propose rollback steps."
               }
             }
           }
@@ -43038,10 +43039,6 @@
             "type": "string",
             "description": "Agent display name."
           },
-          "description": {
-            "type": "string",
-            "description": "Agent description."
-          },
           "card_url": {
             "type": "string",
             "description": "URL of the remote agent card."
@@ -43119,6 +43116,10 @@
             "type": "integer",
             "format": "int64",
             "description": "Last update time. Unix timestamp in milliseconds."
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Invocation instructions included in AI SRE's system prompt to decide when to call this A2A agent."
           }
         },
         "required": [
@@ -43127,7 +43128,7 @@
           "team_id",
           "can_edit",
           "agent_name",
-          "description",
+          "instructions",
           "card_url",
           "auth_type",
           "streaming",
@@ -43154,14 +43155,6 @@
             ],
             "description": "New display name. Omit to leave unchanged.",
             "maxLength": 128
-          },
-          "description": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "New description. Omit to leave unchanged.",
-            "maxLength": 2000
           },
           "card_url": {
             "type": [
@@ -43219,6 +43212,13 @@
               "null"
             ],
             "description": "New JSON OAuth metadata."
+          },
+          "instructions": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New invocation instructions. Omit to leave unchanged; when supplied, must be nonblank."
           }
         },
         "required": [
@@ -43233,11 +43233,6 @@
             "type": "string",
             "description": "Agent display name.",
             "maxLength": 128
-          },
-          "description": {
-            "type": "string",
-            "description": "Agent description.",
-            "maxLength": 2000
           },
           "card_url": {
             "type": "string",
@@ -43274,10 +43269,15 @@
           "oauth_metadata": {
             "type": "string",
             "description": "JSON OAuth metadata; reserved for per_user_oauth."
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Invocation instructions included in AI SRE's system prompt to decide when to call this A2A agent. Must be nonblank."
           }
         },
         "required": [
           "agent_name",
+          "instructions",
           "card_url"
         ]
       },
