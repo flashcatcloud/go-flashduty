@@ -74,18 +74,6 @@
       "description": "Manage shared rule sets (rulesets) in the Monitors rule repository. Rulesets can be shared publicly or within an account."
     },
     {
-      "name": "RUM/Applications",
-      "description": "Manage Real User Monitoring (RUM) applications."
-    },
-    {
-      "name": "RUM/Issues",
-      "description": "Query and manage RUM error tracking issues and preset severity rules."
-    },
-    {
-      "name": "RUM/Sourcemaps",
-      "description": "Manage and query RUM sourcemap files for browser, Android, and iOS error symbolication."
-    },
-    {
       "name": "Platform/Members",
       "description": ""
     },
@@ -135,6 +123,26 @@
     },
     {
       "name": "AI SRE/Automations"
+    },
+    {
+      "name": "RUM/Applications",
+      "description": "Manage Real User Monitoring (RUM) applications."
+    },
+    {
+      "name": "RUM/Data query",
+      "description": "Run RUM analytics queries over event data."
+    },
+    {
+      "name": "RUM/Issues",
+      "description": "Query and manage RUM error tracking issues and preset severity rules."
+    },
+    {
+      "name": "RUM/Facets",
+      "description": "Query RUM facet fields and their value distributions for building analytics filters."
+    },
+    {
+      "name": "RUM/Sourcemaps",
+      "description": "Manage and query RUM sourcemap files for browser, Android, and iOS error symbolication."
     }
   ],
   "paths": {
@@ -597,7 +605,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Read** (`on-call`) |",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Read** (`on-call`) |\n\n## Usage\n\n- Set `include_events=true` only when you need a preview of each alert's raw events.\n- Event previews are capped at the 20 newest events per alert. Use `POST /alert/event/list` for a full paginated event history.\n- `event_cnt` still reports the total number of raw events merged into each alert.",
           "href": "/en/api-reference/on-call/incidents/incident-alert-list",
           "metadata": {
             "sidebarTitle": "List alerts of incident"
@@ -666,7 +674,20 @@
                         "images": null,
                         "data_source_name": "FlashMonit",
                         "data_source_type": "monit.alert",
-                        "data_source_ref_id": "a_2451002751131"
+                        "data_source_ref_id": "a_2451002751131",
+                        "events": [
+                          {
+                            "event_id": "69da451df77b1b51f40e83df",
+                            "alert_id": "69da451df77b1b51f40e83de",
+                            "title": "CPU usage > 90%",
+                            "event_severity": "Critical",
+                            "event_status": "Critical",
+                            "event_time": 1712650000,
+                            "labels": {
+                              "host": "web-01"
+                            }
+                          }
+                        ]
                       }
                     ]
                   }
@@ -698,7 +719,8 @@
                 "incident_id": "69da451ef77b1b51f40e83ee",
                 "is_active": true,
                 "limit": 100,
-                "p": 1
+                "p": 1,
+                "include_events": true
               }
             }
           }
@@ -6060,12 +6082,12 @@
       "post": {
         "operationId": "alert-read-event-list",
         "summary": "List events for an alert",
-        "description": "Return all raw events that have been ingested into a specific alert, in chronological order.",
+        "description": "Return raw events for an alert with cursor or page-number pagination.",
         "tags": [
           "On-call/Alerts"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Channels Read** (`on-call`) |\n\n## Usage\n\n- Each alert accumulates raw events from the integration. This endpoint exposes the raw event history for a given alert.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Channels Read** (`on-call`) |\n\n## Usage\n\n- Results are newest-first by default. Set `asc=true` to read events oldest-first.\n- Use `limit` with `search_after_ctx` from the previous response to fetch the next page.\n- Classic page-number pagination is also supported with `p`, but `p * limit` must stay within 10,000 records.\n- Each alert can accumulate a large raw event history; prefer cursor pagination for hot alerts.",
           "href": "/en/api-reference/on-call/alerts/alert-read-event-list",
           "metadata": {
             "sidebarTitle": "List events for an alert"
@@ -6094,6 +6116,9 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
+                    "total": 57,
+                    "has_next_page": true,
+                    "search_after_ctx": "663a1b2c3d4e5f6789abc001",
                     "items": [
                       {
                         "event_id": "663a1b2c3d4e5f6789abc001",
@@ -6133,7 +6158,8 @@
                 "$ref": "#/components/schemas/AlertEventListRequest"
               },
               "example": {
-                "alert_id": "663a1b2c3d4e5f6789abcdef"
+                "alert_id": "663a1b2c3d4e5f6789abcdef",
+                "limit": 20
               }
             }
           }
@@ -15612,6 +15638,280 @@
         }
       }
     },
+    "/rum/facet/count": {
+      "post": {
+        "operationId": "rum-read-facet-count",
+        "summary": "Count facet value distribution",
+        "description": "Return the top N values for a facet field within a time range, sorted by occurrence count descending.",
+        "tags": [
+          "RUM/Facets"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Use `POST /rum/facet/list` to discover available `facet_key` values for each scope.\n- The `scope` must be one of: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`.\n- Pass `dql` to further filter events before counting. DQL syntax follows the RUM query language.\n- Pass `sql` with a WHERE-clause only (no SELECT) for SQL-style filtering.\n- Default limit is 100; maximum is 100.\n- Time range is required (`start_time` / `end_time` in Unix epoch **milliseconds**). Maximum span is 31 days.",
+          "href": "/en/api-reference/rum/facets/rum-read-facet-count",
+          "metadata": {
+            "sidebarTitle": "Count facet value distribution"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumFacetCountResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "facet_value": "TypeError",
+                        "count": 1523
+                      },
+                      {
+                        "facet_value": "ReferenceError",
+                        "count": 342
+                      },
+                      {
+                        "facet_value": "SyntaxError",
+                        "count": 89
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumFacetCountRequest"
+              },
+              "example": {
+                "scope": "error",
+                "facet_key": "error.type",
+                "start_time": 1712620800000,
+                "end_time": 1712707200000,
+                "limit": 10
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/application/webhook/test": {
+      "post": {
+        "operationId": "rum-application-webhook-test",
+        "summary": "Test application webhook",
+        "description": "Send a sample RUM alert event to verify an application's webhook URL.",
+        "tags": [
+          "RUM/Applications"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- The endpoint validates the URL before sending the sample event.\n- A failed delivery still returns HTTP 200 with `ok=false` and the delivery error in `message`.",
+          "href": "/en/api-reference/rum/applications/rum-application-webhook-test",
+          "metadata": {
+            "sidebarTitle": "Test application webhook"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumWebhookTestResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "ok": true,
+                    "status_code": 200,
+                    "message": "ok"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumWebhookTestRequest"
+              },
+              "example": {
+                "application_id": "rum-app-prod",
+                "webhook_url": "https://hooks.example.com/rum-alerts"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/info": {
+      "post": {
+        "operationId": "rum-issue-read-info",
+        "summary": "Get issue detail",
+        "description": "Retrieve full details of a single issue by `issue_id`.",
+        "tags": [
+          "RUM/Issues"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "href": "/en/api-reference/rum/issues/rum-issue-read-info",
+          "metadata": {
+            "sidebarTitle": "Get issue detail"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumIssueItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "team_id": 2477033058131,
+                    "issue_id": "NHEacQHi2DhXqobr9qPQz9",
+                    "application_id": "eWbr4xk3ZRnLabRa6unqwD",
+                    "application_name": "Flashduty DEV",
+                    "service": "fd-console",
+                    "status": "for_review",
+                    "error_count": 752,
+                    "session_count": 381,
+                    "is_crash": false,
+                    "age": 5078684,
+                    "resolved_at": 0,
+                    "resolved_by": 0,
+                    "created_at": 1770883154944,
+                    "updated_at": 1775961914595,
+                    "first_seen": {
+                      "timestamp": 1770883154944,
+                      "version": "1.0.0"
+                    },
+                    "last_seen": {
+                      "timestamp": 1775961839090,
+                      "version": "1.0.0"
+                    },
+                    "error": {
+                      "message": "Script error.",
+                      "type": "Error"
+                    },
+                    "suspected_cause": {
+                      "source": "auto",
+                      "value": "code.exception",
+                      "reason": "The error message 'Script error.' typically indicates an unhandled exception in JavaScript.",
+                      "person_id": 0
+                    },
+                    "versions": [
+                      "1.0.0"
+                    ],
+                    "severity": "Info"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumIssueIDRequest"
+              },
+              "example": {
+                "issue_id": "NHEacQHi2DhXqobr9qPQz9"
+              }
+            }
+          }
+        }
+      }
+    },
     "/rum/application/list": {
       "post": {
         "operationId": "rum-application-read-list",
@@ -15679,7 +15979,24 @@
                         "created_by": 4441703362131,
                         "updated_by": 3790925372131,
                         "created_at": 1746673831462,
-                        "updated_at": 1773398630657
+                        "updated_at": 1773398630657,
+                        "links": {
+                          "enabled": true,
+                          "systems": [
+                            {
+                              "id": "s3-crash-logs",
+                              "name": "S3 Crash Logs",
+                              "icon_text": "S3",
+                              "icon_color": "#0F766E",
+                              "url": "https://s3.example.com/logs?app=${application_id}&trace=${trace_id}",
+                              "event_types": [
+                                "crash",
+                                "error"
+                              ],
+                              "enabled": true
+                            }
+                          ]
+                        }
                       },
                       {
                         "account_id": 2451002751131,
@@ -15708,7 +16025,11 @@
                         "created_by": 2476444212131,
                         "updated_by": 3122470302131,
                         "created_at": 1742958482000,
-                        "updated_at": 1772096392711
+                        "updated_at": 1772096392711,
+                        "links": {
+                          "enabled": false,
+                          "systems": []
+                        }
                       }
                     ]
                   }
@@ -15747,19 +16068,19 @@
         }
       }
     },
-    "/rum/application/info": {
+    "/rum/facet/list": {
       "post": {
-        "operationId": "rum-application-read-info",
-        "summary": "Get application detail",
-        "description": "Retrieve full details of a single RUM application by `application_id`.",
+        "operationId": "rum-read-facet-list",
+        "summary": "List RUM facet fields",
+        "description": "Return all available RUM field definitions, optionally filtered by scope and facet status.",
         "tags": [
-          "RUM/Applications"
+          "RUM/Facets"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
-          "href": "/en/api-reference/rum/applications/rum-application-read-info",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Use the returned `field_key` values as `facet_key` in `POST /rum/facet/count`.\n- Valid `scopes` are: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`.\n- Set `is_facet: true` to return only facet-enabled fields (those that support value distribution queries).",
+          "href": "/en/api-reference/rum/facets/rum-read-facet-list",
           "metadata": {
-            "sidebarTitle": "Get application detail"
+            "sidebarTitle": "List RUM facet fields"
           }
         },
         "responses": {
@@ -15776,104 +16097,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/RumApplicationItem"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "account_id": 2451002751131,
-                    "application_id": "WoyQQ3BohkdtPivubEvE8o",
-                    "application_name": "flashcat-rum",
-                    "type": "browser",
-                    "client_token": "a3cea433a8685a398cdfd68f54a45e06131",
-                    "team_id": 2477033058131,
-                    "is_private": true,
-                    "no_ip": true,
-                    "no_geo": false,
-                    "alerting": {
-                      "enabled": true,
-                      "channel_ids": [
-                        2490121812131
-                      ],
-                      "integration_id": 4759595678131
-                    },
-                    "tracing": {
-                      "enabled": false,
-                      "open_type": "",
-                      "endpoint": ""
-                    },
-                    "status": "enabled",
-                    "created_by": 4441703362131,
-                    "updated_by": 3790925372131,
-                    "created_at": 1746673831462,
-                    "updated_at": 1773398630657
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RumApplicationIDRequest"
-              },
-              "example": {
-                "application_id": "WoyQQ3BohkdtPivubEvE8o"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/rum/application/infos": {
-      "post": {
-        "operationId": "rum-application-read-infos",
-        "summary": "Batch get applications",
-        "description": "Retrieve details for multiple RUM applications by their IDs in one request.",
-        "tags": [
-          "RUM/Applications"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Maximum 200 IDs per request.",
-          "href": "/en/api-reference/rum/applications/rum-application-read-infos",
-          "metadata": {
-            "sidebarTitle": "Batch get applications"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/RumApplicationInfosResponse"
+                          "$ref": "#/components/schemas/RumFacetListResponse"
                         }
                       }
                     }
@@ -15884,61 +16108,23 @@
                   "data": {
                     "items": [
                       {
-                        "account_id": 2451002751131,
-                        "application_id": "eWbr4xk3ZRnLabRa6unqwD",
-                        "application_name": "Flashduty DEV",
-                        "type": "browser",
-                        "client_token": "ce8d1be90fc6534f89ce36ebf526765e131",
-                        "team_id": 2477033058131,
-                        "is_private": false,
-                        "no_ip": false,
-                        "no_geo": false,
-                        "alerting": {
-                          "enabled": true,
-                          "channel_ids": [
-                            5962711836131,
-                            5967875767131
-                          ],
-                          "integration_id": 4759595678131
-                        },
-                        "tracing": {
-                          "enabled": true,
-                          "open_type": "popup",
-                          "endpoint": "https://www.tracing.com/${trace_id}"
-                        },
-                        "status": "enabled",
-                        "created_by": 2476444212131,
-                        "updated_by": 3122470302131,
-                        "created_at": 1742958482000,
-                        "updated_at": 1772096392711
-                      },
-                      {
-                        "account_id": 2451002751131,
-                        "application_id": "WoyQQ3BohkdtPivubEvE8o",
-                        "application_name": "flashcat-rum",
-                        "type": "browser",
-                        "client_token": "a3cea433a8685a398cdfd68f54a45e06131",
-                        "team_id": 2477033058131,
-                        "is_private": true,
-                        "no_ip": true,
-                        "no_geo": false,
-                        "alerting": {
-                          "enabled": true,
-                          "channel_ids": [
-                            2490121812131
-                          ],
-                          "integration_id": 4759595678131
-                        },
-                        "tracing": {
-                          "enabled": false,
-                          "open_type": "",
-                          "endpoint": ""
-                        },
-                        "status": "enabled",
-                        "created_by": 4441703362131,
-                        "updated_by": 3790925372131,
-                        "created_at": 1746673831462,
-                        "updated_at": 1773398630657
+                        "account_id": 0,
+                        "field_key": "error.type",
+                        "field_name": "Error type",
+                        "group": "Error",
+                        "description": "The type of the error.",
+                        "value_type": "string",
+                        "show_type": "list",
+                        "unit_family": "",
+                        "unit_name": "",
+                        "edit_able": false,
+                        "is_facet": true,
+                        "enum_values": [],
+                        "scopes": [
+                          "error"
+                        ],
+                        "status": "active",
+                        "queryable": true
                       }
                     ]
                   }
@@ -15964,32 +16150,32 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RumApplicationInfosRequest"
+                "$ref": "#/components/schemas/RumFacetListRequest"
               },
               "example": {
-                "application_ids": [
-                  "eWbr4xk3ZRnLabRa6unqwD",
-                  "WoyQQ3BohkdtPivubEvE8o"
-                ]
+                "scopes": [
+                  "error"
+                ],
+                "is_facet": true
               }
             }
           }
         }
       }
     },
-    "/rum/application/create": {
+    "/sourcemap/stack/enrich": {
       "post": {
-        "operationId": "rum-application-write-create",
-        "summary": "Create application",
-        "description": "Create a new RUM application. Returns the generated `application_id` and `client_token`.",
+        "operationId": "sourcemap-read-stack-enrich",
+        "summary": "Enrich a stack trace",
+        "description": "Symbolicate or deobfuscate a browser, Android, iOS, Mini Program, or HarmonyOS stack trace.",
         "tags": [
-          "RUM/Applications"
+          "RUM/Sourcemaps"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- `type` must be one of: `browser`, `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`.\n- `client_token` is auto-generated and used to initialize the RUM SDK.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-          "href": "/en/api-reference/rum/applications/rum-application-write-create",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `type` defaults to `browser` when omitted for backward compatibility.\n- Set `near` from 1 to 20 to include source-code snippets around converted frames.\n- For Android NDK native crashes, provide `arch` and `source_type: ndk` so the backend routes to native symbolication.\n- For iOS crash stacks, pass `binary_images` so addresses can be relocated against the uploaded dSYM files.\n- `no_cache` is intended for debugging and bypasses cached enrich results.",
+          "href": "/en/api-reference/rum/sourcemaps/sourcemap-read-stack-enrich",
           "metadata": {
-            "sidebarTitle": "Create application"
+            "sidebarTitle": "Enrich a stack trace"
           }
         },
         "responses": {
@@ -16006,7 +16192,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/RumApplicationCreateResponse"
+                          "$ref": "#/components/schemas/SourcemapStackEnrichResponse"
                         }
                       }
                     }
@@ -16015,9 +16201,31 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "application_id": "qLpu24Dz4CAzWsESPbJYWA",
-                    "application_name": "My Web App",
-                    "client_token": "e090078724855a4ca168c3884880dfbc131"
+                    "frames": [
+                      {
+                        "function": "renderCheckout",
+                        "file": "src/pages/checkout.tsx",
+                        "line": 42,
+                        "column": 17,
+                        "converted": true,
+                        "code_snippets": [
+                          {
+                            "line": 41,
+                            "code": "const cart = props.cart;"
+                          },
+                          {
+                            "line": 42,
+                            "code": "return cart.items.map(renderItem);"
+                          }
+                        ],
+                        "original_frame": {
+                          "function": "render",
+                          "file": "https://cdn.example.com/app.min.js",
+                          "line": 1,
+                          "column": 2345
+                        }
+                      }
+                    ]
                   }
                 }
               }
@@ -16041,32 +16249,33 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RumApplicationCreateRequest"
+                "$ref": "#/components/schemas/SourcemapStackEnrichRequest"
               },
               "example": {
-                "application_name": "My Web App",
                 "type": "browser",
-                "team_id": 2477033058131,
-                "is_private": false
+                "service": "my-web-app",
+                "version": "1.0.0",
+                "stack": "TypeError: Cannot read properties of undefined\n    at render (https://cdn.example.com/app.min.js:1:2345)",
+                "near": 3
               }
             }
           }
         }
       }
     },
-    "/rum/application/update": {
+    "/rum/data/query": {
       "post": {
-        "operationId": "rum-application-write-update",
-        "summary": "Update application",
-        "description": "Update an existing RUM application. All fields except `application_id` are optional — only provided fields are updated.",
+        "operationId": "rum-read-data-query",
+        "summary": "Query RUM data",
+        "description": "Run one or more SQL-style RUM data queries over a bounded time range.",
         "tags": [
-          "RUM/Applications"
+          "RUM/Data query"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-          "href": "/en/api-reference/rum/applications/rum-application-write-update",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Send 1 to 10 queries in one request; each query `id` becomes a key in the response object.\n- `start_time` and `end_time` are required Unix epoch milliseconds. The maximum time range is 31 days.\n- Use `format: table` for tabular results, or `format: time_series` for bucketed time-series results.\n- For `time_series`, `interval` defaults to 3600 seconds and `max_points` defaults to 1226 when omitted.\n- `search_after_ctx` is returned by paginated table queries and can be sent back to continue scanning.",
+          "href": "/en/api-reference/rum/data-query/rum-read-data-query",
           "metadata": {
-            "sidebarTitle": "Update application"
+            "sidebarTitle": "Query RUM data"
           }
         },
         "responses": {
@@ -16083,7 +16292,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/EmptyResponse"
+                          "$ref": "#/components/schemas/RumDataQueryResponse"
                         }
                       }
                     }
@@ -16091,7 +16300,34 @@
                 },
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {}
+                  "data": {
+                    "errors_by_type": {
+                      "data": {
+                        "fields": [
+                          {
+                            "name": "error.type",
+                            "type": "String",
+                            "nullable": false
+                          },
+                          {
+                            "name": "errors",
+                            "type": "UInt64",
+                            "nullable": false
+                          }
+                        ],
+                        "values": [
+                          [
+                            "TypeError",
+                            1523
+                          ],
+                          [
+                            "ReferenceError",
+                            342
+                          ]
+                        ]
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -16114,87 +16350,19 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RumApplicationUpdateRequest"
+                "$ref": "#/components/schemas/RumDataQueryRequest"
               },
               "example": {
-                "application_id": "WoyQQ3BohkdtPivubEvE8o",
-                "application_name": "My Web App v2",
-                "alerting": {
-                  "enabled": true,
-                  "channel_ids": [
-                    2490121812131
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/rum/application/delete": {
-      "post": {
-        "operationId": "rum-application-write-delete",
-        "summary": "Delete application",
-        "description": "Delete a RUM application by `application_id`.",
-        "tags": [
-          "RUM/Applications"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-          "href": "/en/api-reference/rum/applications/rum-application-write-delete",
-          "metadata": {
-            "sidebarTitle": "Delete application"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/EmptyResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {}
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RumApplicationIDRequest"
-              },
-              "example": {
-                "application_id": "qLpu24Dz4CAzWsESPbJYWA"
+                "start_time": 1712620800000,
+                "end_time": 1712707200000,
+                "queries": [
+                  {
+                    "id": "errors_by_type",
+                    "sql": "SELECT error.type, count(*) AS errors FROM error GROUP BY error.type ORDER BY errors DESC LIMIT 10",
+                    "format": "table",
+                    "time_zone": "Asia/Shanghai"
+                  }
+                ]
               }
             }
           }
@@ -16362,113 +16530,6 @@
         }
       }
     },
-    "/rum/issue/info": {
-      "post": {
-        "operationId": "rum-issue-read-info",
-        "summary": "Get issue detail",
-        "description": "Retrieve full details of a single issue by `issue_id`.",
-        "tags": [
-          "RUM/Issues"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
-          "href": "/en/api-reference/rum/issues/rum-issue-read-info",
-          "metadata": {
-            "sidebarTitle": "Get issue detail"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/RumIssueItem"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "team_id": 2477033058131,
-                    "issue_id": "NHEacQHi2DhXqobr9qPQz9",
-                    "application_id": "eWbr4xk3ZRnLabRa6unqwD",
-                    "application_name": "Flashduty DEV",
-                    "service": "fd-console",
-                    "status": "for_review",
-                    "error_count": 752,
-                    "session_count": 381,
-                    "is_crash": false,
-                    "age": 5078684,
-                    "resolved_at": 0,
-                    "resolved_by": 0,
-                    "created_at": 1770883154944,
-                    "updated_at": 1775961914595,
-                    "first_seen": {
-                      "timestamp": 1770883154944,
-                      "version": "1.0.0"
-                    },
-                    "last_seen": {
-                      "timestamp": 1775961839090,
-                      "version": "1.0.0"
-                    },
-                    "error": {
-                      "message": "Script error.",
-                      "type": "Error"
-                    },
-                    "suspected_cause": {
-                      "source": "auto",
-                      "value": "code.exception",
-                      "reason": "The error message 'Script error.' typically indicates an unhandled exception in JavaScript.",
-                      "person_id": 0
-                    },
-                    "versions": [
-                      "1.0.0"
-                    ],
-                    "severity": "Info"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RumIssueIDRequest"
-              },
-              "example": {
-                "issue_id": "NHEacQHi2DhXqobr9qPQz9"
-              }
-            }
-          }
-        }
-      }
-    },
     "/rum/issue/update": {
       "post": {
         "operationId": "rum-issue-write-update",
@@ -16534,6 +16595,627 @@
               "example": {
                 "issue_id": "NHEacQHi2DhXqobr9qPQz9",
                 "status": "resolved"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/application/infos": {
+      "post": {
+        "operationId": "rum-application-read-infos",
+        "summary": "Batch get applications",
+        "description": "Retrieve details for multiple RUM applications by their IDs in one request.",
+        "tags": [
+          "RUM/Applications"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Maximum 200 IDs per request.",
+          "href": "/en/api-reference/rum/applications/rum-application-read-infos",
+          "metadata": {
+            "sidebarTitle": "Batch get applications"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumApplicationInfosResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "account_id": 2451002751131,
+                        "application_id": "eWbr4xk3ZRnLabRa6unqwD",
+                        "application_name": "Flashduty DEV",
+                        "type": "browser",
+                        "client_token": "ce8d1be90fc6534f89ce36ebf526765e131",
+                        "team_id": 2477033058131,
+                        "is_private": false,
+                        "no_ip": false,
+                        "no_geo": false,
+                        "alerting": {
+                          "enabled": true,
+                          "channel_ids": [
+                            5962711836131,
+                            5967875767131
+                          ],
+                          "integration_id": 4759595678131
+                        },
+                        "tracing": {
+                          "enabled": true,
+                          "open_type": "popup",
+                          "endpoint": "https://www.tracing.com/${trace_id}"
+                        },
+                        "status": "enabled",
+                        "created_by": 2476444212131,
+                        "updated_by": 3122470302131,
+                        "created_at": 1742958482000,
+                        "updated_at": 1772096392711,
+                        "links": {
+                          "enabled": false,
+                          "systems": []
+                        }
+                      },
+                      {
+                        "account_id": 2451002751131,
+                        "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                        "application_name": "flashcat-rum",
+                        "type": "browser",
+                        "client_token": "a3cea433a8685a398cdfd68f54a45e06131",
+                        "team_id": 2477033058131,
+                        "is_private": true,
+                        "no_ip": true,
+                        "no_geo": false,
+                        "alerting": {
+                          "enabled": true,
+                          "channel_ids": [
+                            2490121812131
+                          ],
+                          "integration_id": 4759595678131
+                        },
+                        "tracing": {
+                          "enabled": false,
+                          "open_type": "",
+                          "endpoint": ""
+                        },
+                        "status": "enabled",
+                        "created_by": 4441703362131,
+                        "updated_by": 3790925372131,
+                        "created_at": 1746673831462,
+                        "updated_at": 1773398630657,
+                        "links": {
+                          "enabled": true,
+                          "systems": [
+                            {
+                              "id": "s3-crash-logs",
+                              "name": "S3 Crash Logs",
+                              "icon_text": "S3",
+                              "icon_color": "#0F766E",
+                              "url": "https://s3.example.com/logs?app=${application_id}&trace=${trace_id}",
+                              "event_types": [
+                                "crash",
+                                "error"
+                              ],
+                              "enabled": true
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumApplicationInfosRequest"
+              },
+              "example": {
+                "application_ids": [
+                  "eWbr4xk3ZRnLabRa6unqwD",
+                  "WoyQQ3BohkdtPivubEvE8o"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/field/list": {
+      "post": {
+        "operationId": "rum-read-field-list",
+        "summary": "List RUM fields",
+        "description": "Return RUM field definitions, optionally filtered by scope and facet status.",
+        "tags": [
+          "RUM/Facets"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- This is the current field-model route for discovering RUM fields.\n- Use returned `field_key` values in RUM data queries and facet-count requests.\n- Set `is_facet: true` to return only fields that support value distribution queries.",
+          "href": "/en/api-reference/rum/facets/rum-read-field-list",
+          "metadata": {
+            "sidebarTitle": "List RUM fields"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumFieldListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "account_id": 0,
+                        "field_key": "error.type",
+                        "field_name": "Error type",
+                        "group": "Error",
+                        "description": "The type of the error.",
+                        "value_type": "string",
+                        "show_type": "list",
+                        "unit_family": "",
+                        "unit_name": "",
+                        "edit_able": false,
+                        "is_facet": true,
+                        "enum_values": [],
+                        "scopes": [
+                          "error"
+                        ],
+                        "status": "active",
+                        "queryable": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumFieldListRequest"
+              },
+              "example": {
+                "scopes": [
+                  "error"
+                ],
+                "is_facet": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/application/info": {
+      "post": {
+        "operationId": "rum-application-read-info",
+        "summary": "Get application detail",
+        "description": "Retrieve full details of a single RUM application by `application_id`.",
+        "tags": [
+          "RUM/Applications"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "href": "/en/api-reference/rum/applications/rum-application-read-info",
+          "metadata": {
+            "sidebarTitle": "Get application detail"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumApplicationItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "account_id": 2451002751131,
+                    "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                    "application_name": "flashcat-rum",
+                    "type": "browser",
+                    "client_token": "a3cea433a8685a398cdfd68f54a45e06131",
+                    "team_id": 2477033058131,
+                    "is_private": true,
+                    "no_ip": true,
+                    "no_geo": false,
+                    "alerting": {
+                      "enabled": true,
+                      "channel_ids": [
+                        2490121812131
+                      ],
+                      "integration_id": 4759595678131
+                    },
+                    "tracing": {
+                      "enabled": false,
+                      "open_type": "",
+                      "endpoint": ""
+                    },
+                    "status": "enabled",
+                    "created_by": 4441703362131,
+                    "updated_by": 3790925372131,
+                    "created_at": 1746673831462,
+                    "updated_at": 1773398630657,
+                    "links": {
+                      "enabled": true,
+                      "systems": [
+                        {
+                          "id": "s3-crash-logs",
+                          "name": "S3 Crash Logs",
+                          "icon_text": "S3",
+                          "icon_color": "#0F766E",
+                          "url": "https://s3.example.com/logs?app=${application_id}&trace=${trace_id}",
+                          "event_types": [
+                            "crash",
+                            "error"
+                          ],
+                          "enabled": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumApplicationIDRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/application/delete": {
+      "post": {
+        "operationId": "rum-application-write-delete",
+        "summary": "Delete application",
+        "description": "Delete a RUM application by `application_id`.",
+        "tags": [
+          "RUM/Applications"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/rum/applications/rum-application-write-delete",
+          "metadata": {
+            "sidebarTitle": "Delete application"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumApplicationIDRequest"
+              },
+              "example": {
+                "application_id": "qLpu24Dz4CAzWsESPbJYWA"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/application/create": {
+      "post": {
+        "operationId": "rum-application-write-create",
+        "summary": "Create application",
+        "description": "Create a new RUM application. Returns the generated `application_id` and `client_token`.",
+        "tags": [
+          "RUM/Applications"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- `type` must be one of: `browser`, `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`.\n- `links.systems[].url` must start with `http` or `https`; `${var}` tokens are resolved from RUM event context.\n- `links.systems[].event_types` accepts: `crash`, `error`, `view`, `action`, `resource`, `session`, `all`.\n- `client_token` is auto-generated and used to initialize the RUM SDK.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/rum/applications/rum-application-write-create",
+          "metadata": {
+            "sidebarTitle": "Create application"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumApplicationCreateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "application_id": "qLpu24Dz4CAzWsESPbJYWA",
+                    "application_name": "My Web App",
+                    "client_token": "e090078724855a4ca168c3884880dfbc131"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumApplicationCreateRequest"
+              },
+              "example": {
+                "application_name": "My Web App",
+                "type": "browser",
+                "team_id": 2477033058131,
+                "is_private": false,
+                "links": {
+                  "enabled": true,
+                  "systems": [
+                    {
+                      "id": "s3-crash-logs",
+                      "name": "S3 Crash Logs",
+                      "icon_text": "S3",
+                      "icon_color": "#0F766E",
+                      "url": "https://s3.example.com/logs?app=${application_id}&trace=${trace_id}",
+                      "event_types": [
+                        "crash",
+                        "error"
+                      ],
+                      "enabled": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/application/update": {
+      "post": {
+        "operationId": "rum-application-write-update",
+        "summary": "Update application",
+        "description": "Update an existing RUM application. All fields except `application_id` are optional — only provided fields are updated.",
+        "tags": [
+          "RUM/Applications"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- `links.systems[].url` must start with `http` or `https`; `${var}` tokens are resolved from RUM event context.\n- `links.systems[].event_types` accepts: `crash`, `error`, `view`, `action`, `resource`, `session`, `all`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/rum/applications/rum-application-write-update",
+          "metadata": {
+            "sidebarTitle": "Update application"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumApplicationUpdateRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "application_name": "My Web App v2",
+                "alerting": {
+                  "enabled": true,
+                  "channel_ids": [
+                    2490121812131
+                  ]
+                },
+                "links": {
+                  "enabled": true,
+                  "systems": [
+                    {
+                      "id": "s3-crash-logs",
+                      "name": "S3 Crash Logs",
+                      "icon_text": "S3",
+                      "icon_color": "#0F766E",
+                      "url": "https://s3.example.com/logs?app=${application_id}&trace=${trace_id}",
+                      "event_types": [
+                        "crash",
+                        "error"
+                      ],
+                      "enabled": true
+                    }
+                  ]
+                }
               }
             }
           }
@@ -23548,81 +24230,6 @@
         }
       }
     },
-    "/rum/application/webhook/test": {
-      "post": {
-        "operationId": "rum-application-webhook-test",
-        "summary": "Test application webhook",
-        "description": "Send a sample RUM alert event to verify an application's webhook URL.",
-        "tags": [
-          "RUM/Applications"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- The endpoint validates the URL before sending the sample event.\n- A failed delivery still returns HTTP 200 with `ok=false` and the delivery error in `message`.",
-          "href": "/en/api-reference/rum/applications/rum-application-webhook-test",
-          "metadata": {
-            "sidebarTitle": "Test application webhook"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/RumWebhookTestResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "ok": true,
-                    "status_code": 200,
-                    "message": "ok"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RumWebhookTestRequest"
-              },
-              "example": {
-                "application_id": "rum-app-prod",
-                "webhook_url": "https://hooks.example.com/rum-alerts"
-              }
-            }
-          }
-        }
-      }
-    },
     "/status-page/info": {
       "get": {
         "operationId": "statusPageInfo",
@@ -25426,7 +26033,7 @@
     "schemas": {
       "ErrorCode": {
         "type": "string",
-        "description": "Flashduty error code enum. Every failed API response sets `error.code` to one of these values. The value is a stable wire string — not a localized message and not a numeric status. HTTP status is informational.",
+        "description": "Flashduty error code enum. Every failed API response sets `error.code` to one of these stable wire strings. HTTP status is informational — the authoritative signal is the enum value.\n\n| Code | HTTP | Meaning |\n|---|---|---|\n| `OK` | 200 | Reserved — not returned on real errors. |\n| `InvalidParameter` | 400 | A required parameter is missing or failed validation. |\n| `BadRequest` | 400 | Generic 400 used when no more specific code fits. |\n| `InvalidContentType` | 400 | The `Content-Type` header is not `application/json`. |\n| `ResourceNotFound` | 400 | The referenced resource does not exist. Note: returned as HTTP 400, not 404 (historical choice). |\n| `NoLicense` | 400 | The feature is license-gated and no active license was found. |\n| `ReferenceExist` | 400 | Deletion blocked — other entities still reference this resource. |\n| `Unauthorized` | 401 | `app_key` is missing, invalid, or expired. |\n| `BalanceNotEnough` | 402 | Billing-gated operation with insufficient account balance. |\n| `AccessDenied` | 403 | Authenticated but lacking the permission required for this operation. |\n| `RouteNotFound` | 404 | The request URL path is not a known route. |\n| `MethodNotAllowed` | 405 | The HTTP method is not allowed on this otherwise-known path. |\n| `UndonedOrderExist` | 409 | An outstanding billing order blocks this new one. Wait and retry. |\n| `RequestLocked` | 423 | Operation temporarily locked due to repeated failures. |\n| `EntityTooLarge` | 413 | Request body exceeds the configured max size. |\n| `RequestTooFrequently` | 429 | Rate limit hit — API-global, per-account, or per-integration. |\n| `RequestVerifyRequired` | 428 | Second-factor verification required but not supplied. |\n| `DangerousOperation` | 428 | High-risk operation requires MFA verification. |\n| `InternalError` | 500 | Unhandled server-side error. Include `request_id` in the bug report. |\n| `ServiceUnavailable` | 503 | A backend dependency is unavailable. Try again later. |",
         "enum": [
           "OK",
           "InvalidParameter",
@@ -25448,7 +26055,30 @@
           "DangerousOperation",
           "InternalError",
           "ServiceUnavailable"
-        ]
+        ],
+        "x-enumDescriptions": {
+          "OK": "Reserved — not returned on real errors.",
+          "InvalidParameter": "A required parameter is missing or failed validation.",
+          "BadRequest": "Generic 400 used when no more specific code fits.",
+          "InvalidContentType": "The `Content-Type` header is not `application/json`.",
+          "ResourceNotFound": "The referenced resource does not exist. Note: returned as HTTP 400, not 404 (historical choice).",
+          "NoLicense": "The feature is license-gated and no active license was found.",
+          "ReferenceExist": "Deletion blocked — other entities still reference this resource.",
+          "Unauthorized": "`app_key` is missing, invalid, or expired.",
+          "BalanceNotEnough": "Billing-gated operation with insufficient account balance.",
+          "AccessDenied": "Authenticated but lacking the permission required for this operation.",
+          "RouteNotFound": "The request URL path is not a known route.",
+          "MethodNotAllowed": "The HTTP method is not allowed on this otherwise-known path.",
+          "UndonedOrderExist": "An outstanding billing order blocks this new one. Wait and retry.",
+          "RequestLocked": "Operation temporarily locked due to repeated failures.",
+          "EntityTooLarge": "Request body exceeds the configured max size.",
+          "RequestTooFrequently": "Rate limit hit — API-global, per-account, or per-integration.",
+          "RequestVerifyRequired": "Second-factor verification required but not supplied.",
+          "DangerousOperation": "High-risk operation requires MFA verification.",
+          "InternalError": "Unhandled server-side error. Include `request_id` in the bug report.",
+          "ServiceUnavailable": "A backend dependency is unavailable. Try again later."
+        },
+        "example": "InvalidParameter"
       },
       "DutyError": {
         "type": "object",
@@ -25459,7 +26089,8 @@
           },
           "message": {
             "type": "string",
-            "description": "Human-readable error message, localized by the caller's Accept-Language. May contain field names, IDs, or other context from the failing request."
+            "description": "Human-readable error message, localized by the caller's Accept-Language. May contain field names, IDs, or other context from the failing request.",
+            "example": "The specified parameter template_id is not valid."
           }
         },
         "required": [
@@ -26114,7 +26745,7 @@
             "items": {
               "$ref": "#/components/schemas/AlertEventItem"
             },
-            "description": "Raw alert events, populated when the caller opts in."
+            "description": "Raw alert event preview, populated only when requested. Capped at the 20 newest events per alert."
           },
           "event_cnt": {
             "type": "integer",
@@ -26739,7 +27370,7 @@
           },
           "include_events": {
             "type": "boolean",
-            "description": "When true, include raw alert events in each alert item."
+            "description": "When true, include at most the 20 newest raw events in each alert item as a preview."
           },
           "is_active": {
             "type": [
@@ -31421,18 +32052,63 @@
         "properties": {
           "alert_id": {
             "type": "string",
-            "description": "Alert ID (ObjectID hex string)."
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Alert ID (MongoDB ObjectID)."
+          },
+          "asc": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, return events oldest-first. Defaults to newest-first."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 20,
+            "description": "Page size. Defaults to 20 and cannot exceed 100."
+          },
+          "p": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "default": 1,
+            "description": "Page number starting at 1. Used when `search_after_ctx` is omitted."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Cursor returned by the previous page. When supplied, cursor pagination is used instead of page-number pagination."
           }
         }
       },
       "AlertEventListResponse": {
         "type": "object",
+        "required": [
+          "items",
+          "total",
+          "has_next_page"
+        ],
         "properties": {
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertEventItem"
-            }
+            },
+            "description": "Raw alert events in the requested order."
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total matching event count."
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "description": "Whether another page is available."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Cursor to pass as `search_after_ctx` for the next page."
           }
         }
       },
@@ -38582,6 +39258,79 @@
           }
         }
       },
+      "RumApplicationLink": {
+        "type": "object",
+        "description": "External system link rendered on matching RUM event detail pages.",
+        "required": [
+          "name",
+          "url",
+          "event_types"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable client-side identifier for this external system."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the external system."
+          },
+          "icon_text": {
+            "type": "string",
+            "description": "Short text shown in the link icon."
+          },
+          "icon_color": {
+            "type": "string",
+            "description": "Display color for the link icon."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "HTTP or HTTPS URL template. `${var}` tokens are resolved from the RUM event context."
+          },
+          "event_types": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "crash",
+                "error",
+                "view",
+                "action",
+                "resource",
+                "session",
+                "all"
+              ]
+            },
+            "description": "RUM event types where this external system link is shown."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this external system link is enabled."
+          }
+        }
+      },
+      "RumApplicationLinks": {
+        "type": "object",
+        "description": "External link integration settings for the application.",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether external link integration is enabled."
+          },
+          "systems": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/RumApplicationLink"
+            },
+            "description": "External systems whose URL templates can be opened from matching RUM events."
+          }
+        }
+      },
       "RumApplicationTracing": {
         "type": "object",
         "description": "APM tracing integration settings.",
@@ -38661,6 +39410,9 @@
           },
           "tracing": {
             "$ref": "#/components/schemas/RumApplicationTracing"
+          },
+          "links": {
+            "$ref": "#/components/schemas/RumApplicationLinks"
           },
           "status": {
             "type": "string",
@@ -38801,6 +39553,9 @@
           },
           "tracing": {
             "$ref": "#/components/schemas/RumApplicationTracing"
+          },
+          "links": {
+            "$ref": "#/components/schemas/RumApplicationLinks"
           }
         }
       },
@@ -38834,17 +39589,11 @@
             "description": "Application ID to update."
           },
           "application_name": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "New application name."
           },
           "type": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "enum": [
               "browser",
               "ios",
@@ -38857,35 +39606,26 @@
             ]
           },
           "team_id": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "format": "int64"
           },
           "is_private": {
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "type": "boolean"
           },
           "no_ip": {
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "type": "boolean"
           },
           "no_geo": {
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "type": "boolean"
           },
           "alerting": {
             "$ref": "#/components/schemas/RumApplicationAlerting"
           },
           "tracing": {
             "$ref": "#/components/schemas/RumApplicationTracing"
+          },
+          "links": {
+            "$ref": "#/components/schemas/RumApplicationLinks"
           }
         }
       },
@@ -45442,6 +46182,729 @@
           "trigger_kind",
           "status"
         ]
+      },
+      "FacetCountItem": {
+        "type": "object",
+        "description": "A facet value and its occurrence count.",
+        "required": [
+          "facet_value",
+          "count"
+        ],
+        "properties": {
+          "facet_value": {
+            "description": "The facet value. Type matches the field's `value_type`."
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of events with this facet value in the time range.",
+            "example": 1523
+          }
+        }
+      },
+      "RumDataAggregateFunction": {
+        "type": "object",
+        "description": "Aggregate function metadata used by the sampling engine.",
+        "required": [
+          "type",
+          "column_name",
+          "column_index"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Aggregate function type."
+          },
+          "column_name": {
+            "type": "string",
+            "description": "Column name used by the aggregate."
+          },
+          "column_index": {
+            "type": "integer",
+            "description": "Column index used by the aggregate."
+          }
+        }
+      },
+      "RumDataFieldMeta": {
+        "type": "object",
+        "description": "Metadata for one returned column.",
+        "required": [
+          "name",
+          "type",
+          "nullable"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Column name."
+          },
+          "type": {
+            "type": "string",
+            "description": "Backend database type name for this column."
+          },
+          "nullable": {
+            "type": "boolean",
+            "description": "Whether values in this column may be null."
+          }
+        }
+      },
+      "RumDataQueryDefinition": {
+        "type": "object",
+        "description": "One RUM data query definition.",
+        "required": [
+          "id",
+          "sql",
+          "format"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Client-supplied query ID. The same value is used as the key in the response object."
+          },
+          "sql": {
+            "type": "string",
+            "description": "RUM SQL query to execute."
+          },
+          "dql": {
+            "type": "string",
+            "description": "Optional RUM DQL filter expression used together with SQL validation."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "time_series",
+              "table"
+            ],
+            "description": "Output format. `table` returns rows; `time_series` returns bucketed time-series rows."
+          },
+          "interval": {
+            "type": "integer",
+            "format": "int64",
+            "exclusiveMinimum": 0,
+            "default": 3600,
+            "description": "Time bucket interval in seconds for `time_series` queries."
+          },
+          "max_points": {
+            "type": "integer",
+            "format": "int64",
+            "exclusiveMinimum": 0,
+            "default": 1226,
+            "description": "Maximum number of points for `time_series` queries."
+          },
+          "time_zone": {
+            "type": "string",
+            "description": "IANA time zone name used when evaluating time functions, such as `Asia/Shanghai`."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Opaque cursor returned by a previous table query for continuing pagination."
+          },
+          "disable_sampling": {
+            "type": "boolean",
+            "description": "When true, asks the query engine to avoid sampling when possible."
+          }
+        }
+      },
+      "RumDataQueryOutput": {
+        "type": "object",
+        "description": "Result for one query. Failed subqueries populate `error`; successful ones populate `data`.",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/DutyError"
+          },
+          "data": {
+            "$ref": "#/components/schemas/RumDataQueryResult"
+          }
+        }
+      },
+      "RumDataQueryRequest": {
+        "type": "object",
+        "description": "Batch of RUM data queries over a bounded time range.",
+        "required": [
+          "start_time",
+          "end_time",
+          "queries"
+        ],
+        "properties": {
+          "start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Start of the query window, Unix epoch milliseconds.",
+            "example": 1712620800000
+          },
+          "end_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "End of the query window, Unix epoch milliseconds. Maximum 31-day span.",
+            "example": 1712707200000
+          },
+          "queries": {
+            "type": "array",
+            "description": "Queries to execute concurrently. 1 to 10 queries are allowed.",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/RumDataQueryDefinition"
+            }
+          }
+        }
+      },
+      "RumDataQueryResponse": {
+        "type": "object",
+        "description": "Map from request query ID to that query's result or error.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/RumDataQueryOutput"
+        }
+      },
+      "RumDataQueryResult": {
+        "type": "object",
+        "description": "Rows and metadata returned by one RUM data query.",
+        "required": [
+          "fields",
+          "values"
+        ],
+        "properties": {
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Opaque cursor for continuing paginated table queries."
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumDataFieldMeta"
+            },
+            "description": "Column metadata for the values matrix."
+          },
+          "values": {
+            "type": "array",
+            "description": "Rows returned by the query. Each row aligns with `fields` by index.",
+            "items": {
+              "type": "array",
+              "items": {}
+            }
+          },
+          "interval": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Effective time bucket interval in seconds for time-series queries."
+          },
+          "sampling": {
+            "$ref": "#/components/schemas/RumDataSamplingDecision"
+          }
+        }
+      },
+      "RumDataSamplingDecision": {
+        "type": "object",
+        "description": "Sampling metadata when the query engine uses sampled data.",
+        "required": [
+          "enabled",
+          "scale_factor"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether sampling was applied."
+          },
+          "scale_factor": {
+            "type": "number",
+            "description": "Multiplier used to scale sampled counts back to estimated full counts."
+          },
+          "selected_tablets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Storage tablets selected for the sampled query."
+          },
+          "aggregate_funcs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumDataAggregateFunction"
+            },
+            "description": "Aggregate functions affected by sampling."
+          }
+        }
+      },
+      "RumFacetCountRequest": {
+        "type": "object",
+        "description": "Parameters for counting facet value distribution.",
+        "required": [
+          "scope",
+          "facet_key",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "description": "RUM data scope to query.",
+            "enum": [
+              "session",
+              "view",
+              "action",
+              "error",
+              "resource",
+              "long_task",
+              "vital",
+              "issue",
+              "sourcemap"
+            ]
+          },
+          "facet_key": {
+            "type": "string",
+            "description": "The field key to count value distribution for."
+          },
+          "facet_value": {
+            "description": "When set, filter events where `facet_key` equals this value before counting. Accepts string, number, or boolean."
+          },
+          "start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Start of the time range, Unix epoch milliseconds.",
+            "example": 1712620800000
+          },
+          "end_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "End of the time range, Unix epoch milliseconds. Maximum 31-day span.",
+            "example": 1712707200000
+          },
+          "dql": {
+            "type": "string",
+            "description": "RUM DQL filter expression applied before counting."
+          },
+          "sql": {
+            "type": "string",
+            "description": "SQL WHERE clause (no SELECT) for additional filtering."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of top values to return. Default 100, maximum 100.",
+            "maximum": 100,
+            "default": 100
+          }
+        }
+      },
+      "RumFacetCountResponse": {
+        "type": "object",
+        "description": "Top N facet values sorted by count descending.",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetCountItem"
+            }
+          }
+        }
+      },
+      "RumFacetListRequest": {
+        "type": "object",
+        "description": "Filter parameters for listing RUM field definitions.",
+        "properties": {
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by RUM data scopes. Valid values: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`."
+          },
+          "is_facet": {
+            "type": "boolean",
+            "description": "When true, return only facet-enabled fields. When false or omitted, return all fields."
+          }
+        }
+      },
+      "RumFacetListResponse": {
+        "type": "object",
+        "description": "List of RUM field definitions.",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumFieldItem"
+            }
+          }
+        }
+      },
+      "RumFieldItem": {
+        "type": "object",
+        "description": "A RUM field definition.",
+        "required": [
+          "account_id",
+          "field_key",
+          "field_name",
+          "group",
+          "description",
+          "value_type",
+          "show_type",
+          "unit_family",
+          "unit_name",
+          "edit_able",
+          "is_facet",
+          "enum_values",
+          "scopes",
+          "status",
+          "queryable"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Account ID. 0 for built-in fields."
+          },
+          "field_key": {
+            "type": "string",
+            "description": "Unique field key, e.g. `error.type`."
+          },
+          "field_name": {
+            "type": "string",
+            "description": "Human-readable field name."
+          },
+          "group": {
+            "type": "string",
+            "description": "Display group for this field."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of what this field captures."
+          },
+          "value_type": {
+            "type": "string",
+            "description": "Data type of the field value.",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "array<string>",
+              "array<number>",
+              "array<boolean>"
+            ]
+          },
+          "show_type": {
+            "type": "string",
+            "description": "Display type in the analytics UI.",
+            "enum": [
+              "list",
+              "range"
+            ]
+          },
+          "unit_family": {
+            "type": "string",
+            "description": "Measurement unit family, e.g. `time`, `bytes`. Empty for dimensionless fields."
+          },
+          "unit_name": {
+            "type": "string",
+            "description": "Specific measurement unit, e.g. `millisecond`, `byte`."
+          },
+          "edit_able": {
+            "type": "boolean",
+            "description": "True if this is a custom field that can be edited by the user."
+          },
+          "is_facet": {
+            "type": "boolean",
+            "description": "True if value distribution counting is supported for this field."
+          },
+          "enum_values": {
+            "type": "array",
+            "description": "Predefined enumerable values for this field. Element type matches the field's `value_type`: string for `string`, number for `number`, boolean for `boolean`. Empty when the field has no fixed set of values.",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "RUM scopes this field appears in."
+          },
+          "status": {
+            "type": "string",
+            "description": "Field status, e.g. `active`."
+          },
+          "queryable": {
+            "type": "boolean",
+            "description": "True if this field can be used in DQL/SQL queries."
+          }
+        }
+      },
+      "RumFieldListRequest": {
+        "type": "object",
+        "description": "Filter parameters for listing RUM field definitions.",
+        "properties": {
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by RUM data scopes. Valid values: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`."
+          },
+          "is_facet": {
+            "type": "boolean",
+            "description": "When true, return only facet-enabled fields. When false or omitted, return all fields."
+          }
+        }
+      },
+      "RumFieldListResponse": {
+        "type": "object",
+        "description": "List of RUM field definitions.",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumFieldItem"
+            }
+          }
+        }
+      },
+      "SourcemapBinaryImage": {
+        "type": "object",
+        "description": "Loaded binary image from a crash report.",
+        "required": [
+          "uuid",
+          "name",
+          "is_system"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "Build UUID identifying the binary or dSYM."
+          },
+          "name": {
+            "type": "string",
+            "description": "Binary image name."
+          },
+          "is_system": {
+            "type": "boolean",
+            "description": "Whether this binary belongs to the operating system."
+          },
+          "load_address": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "format": "int64"
+              }
+            ],
+            "description": "Runtime address. Accepts a hex string such as `0x100000000` or a decimal integer."
+          },
+          "max_address": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "format": "int64"
+              }
+            ],
+            "description": "Runtime address. Accepts a hex string such as `0x100000000` or a decimal integer."
+          },
+          "arch": {
+            "type": "string",
+            "description": "CPU architecture for this binary image."
+          }
+        }
+      },
+      "SourcemapCodeSnippet": {
+        "type": "object",
+        "description": "One source-code line returned around an enriched frame.",
+        "required": [
+          "line",
+          "code"
+        ],
+        "properties": {
+          "line": {
+            "type": "integer",
+            "description": "Source line number."
+          },
+          "code": {
+            "type": "string",
+            "description": "Source code on that line."
+          }
+        }
+      },
+      "SourcemapEnrichedFrame": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SourcemapStackFrame"
+          },
+          {
+            "type": "object",
+            "required": [
+              "converted"
+            ],
+            "properties": {
+              "converted": {
+                "type": "boolean",
+                "description": "Whether the frame was successfully symbolicated or deobfuscated."
+              },
+              "code_snippets": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SourcemapCodeSnippet"
+                },
+                "description": "Source-code snippets around this frame."
+              },
+              "original_frame": {
+                "$ref": "#/components/schemas/SourcemapStackFrame"
+              },
+              "third_party": {
+                "type": "boolean",
+                "description": "Whether the frame is from third-party or system libraries."
+              }
+            }
+          }
+        ]
+      },
+      "SourcemapStackEnrichRequest": {
+        "type": "object",
+        "description": "Stack trace enrichment request.",
+        "required": [
+          "service",
+          "version"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "browser",
+              "android",
+              "ios",
+              "miniprogram",
+              "harmony"
+            ],
+            "description": "Source platform. Defaults to `browser` when omitted."
+          },
+          "service": {
+            "type": "string",
+            "description": "Application or service name used when the sourcemap was uploaded."
+          },
+          "version": {
+            "type": "string",
+            "description": "Application version used when the sourcemap was uploaded."
+          },
+          "stack": {
+            "type": "string",
+            "description": "Raw stack trace to parse and enrich."
+          },
+          "near": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Number of nearby meaningful source lines to return around converted frames."
+          },
+          "no_cache": {
+            "type": "boolean",
+            "description": "Skip cached enrich results. Intended for debugging."
+          },
+          "build_id": {
+            "type": "string",
+            "description": "Android build ID for Gradle plugin 1.13.0 and later."
+          },
+          "variant": {
+            "type": "string",
+            "description": "Android build variant used by older Gradle plugin versions."
+          },
+          "arch": {
+            "type": "string",
+            "description": "Android NDK architecture such as `arm`, `arm64`, `x86`, or `x64`."
+          },
+          "source_type": {
+            "type": "string",
+            "description": "Android error source type. Use `ndk` with `arch` for native symbolication."
+          },
+          "binary_images": {
+            "type": "array",
+            "description": "Loaded binary images from an iOS crash report.",
+            "items": {
+              "$ref": "#/components/schemas/SourcemapBinaryImage"
+            }
+          }
+        }
+      },
+      "SourcemapStackEnrichResponse": {
+        "type": "object",
+        "description": "Enriched stack frames.",
+        "required": [
+          "frames"
+        ],
+        "properties": {
+          "frames": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourcemapEnrichedFrame"
+            }
+          }
+        }
+      },
+      "SourcemapStackFrame": {
+        "type": "object",
+        "description": "Parsed stack frame fields shared across platforms.",
+        "properties": {
+          "function": {
+            "type": "string",
+            "description": "Function or method name."
+          },
+          "file": {
+            "type": "string",
+            "description": "Source file, URL, or module path."
+          },
+          "line": {
+            "type": "integer",
+            "description": "Line number."
+          },
+          "column": {
+            "type": "integer",
+            "description": "Column number for JavaScript or Flutter frames."
+          },
+          "class_name": {
+            "type": "string",
+            "description": "Android Java/Kotlin class name."
+          },
+          "method_name": {
+            "type": "string",
+            "description": "Android Java/Kotlin method name without class prefix."
+          },
+          "module": {
+            "type": "string",
+            "description": "iOS Swift/Objective-C module name."
+          },
+          "address": {
+            "type": "string",
+            "description": "iOS or native memory address."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Symbol offset from function start."
+          },
+          "native_address": {
+            "type": "string",
+            "description": "Unity IL native address."
+          }
+        }
       }
     }
   }

@@ -25,7 +25,7 @@ func (e CSVFileResponse) String() string { return string(e) }
 // DataSourceListResponse is a list response payload.
 type DataSourceListResponse []DataSourceItem
 
-// ErrorCode Flashduty error code enum. Every failed API response sets `error.code` to one of these values. The value is a stable wire string — not a localized message and not a numeric status. HTTP status is informational.
+// ErrorCode Flashduty error code enum. Every failed API response sets `error.code` to one of these stable wire strings. HTTP status is informational — the authoritative signal is the enum value.
 type ErrorCode string
 
 const (
@@ -147,6 +147,9 @@ type RuleNameMessageListResponse []NameMessage
 
 // RuleStatusResponse is a list response payload.
 type RuleStatusResponse []AlertRuleStatus
+
+// RUMDataQueryResponse is a map response payload.
+type RUMDataQueryResponse map[string]RUMDataQueryOutput
 
 // SLSLogstoresResponse is a list response payload.
 type SLSLogstoresResponse []string
@@ -457,13 +460,23 @@ type AlertEventItem struct {
 
 // AlertEventListRequest is generated from the Flashduty OpenAPI schema.
 type AlertEventListRequest struct {
-	// Alert ID (ObjectID hex string).
+	ListOptions
+	// Alert ID (MongoDB ObjectID).
 	AlertID string `json:"alert_id,omitempty" toon:"alert_id,omitempty"`
+	// When true, return events oldest-first. Defaults to newest-first.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
 }
 
 // AlertEventListResponse is generated from the Flashduty OpenAPI schema.
 type AlertEventListResponse struct {
+	// Whether another page is available.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Raw alert events in the requested order.
 	Items []AlertEventItem `json:"items" toon:"items"`
+	// Cursor to pass as `search_after_ctx` for the next page.
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
+	// Total matching event count.
+	Total int64 `json:"total" toon:"total"`
 }
 
 // AlertFeedRequest is generated from the Flashduty OpenAPI schema.
@@ -529,7 +542,7 @@ type AlertInfo struct {
 	EndTime Timestamp `json:"end_time" toon:"end_time"`
 	// Total number of raw events merged into this alert.
 	EventCnt int64 `json:"event_cnt" toon:"event_cnt"`
-	// Raw alert events, populated when the caller opts in.
+	// Raw alert event preview, populated only when requested. Capped at the 20 newest events per alert.
 	Events []AlertEventItem `json:"events" toon:"events"`
 	// Whether this alert has ever been silenced.
 	EverMuted bool `json:"ever_muted" toon:"ever_muted"`
@@ -2524,6 +2537,14 @@ type ExportedStatusPageSubscriberItem struct {
 	Recipient string `json:"recipient" toon:"recipient"`
 }
 
+// FacetCountItem is generated from the Flashduty OpenAPI schema.
+type FacetCountItem struct {
+	// Number of events with this facet value in the time range.
+	Count int64 `json:"count" toon:"count"`
+	// The facet value. Type matches the field's `value_type`.
+	FacetValue any `json:"facet_value" toon:"facet_value"`
+}
+
 // FeedDetailAlertClose is generated from the Flashduty OpenAPI schema.
 type FeedDetailAlertClose struct{}
 
@@ -3514,7 +3535,7 @@ type ListIncidentAlertsRequest struct {
 	ListOptions
 	// Incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
-	// When true, include raw alert events in each alert item.
+	// When true, include at most the 20 newest raw events in each alert item as a preview.
 	IncludeEvents bool `json:"include_events,omitempty" toon:"include_events,omitempty"`
 	// When true return only active alerts (Critical/Warning/Info); when false return only recovered alerts (Ok). Omit to include all.
 	IsActive *bool `json:"is_active,omitempty" toon:"is_active,omitempty"`
@@ -5170,7 +5191,8 @@ type RUMApplicationCreateRequest struct {
 	// Application name. 1–40 characters.
 	ApplicationName string `json:"application_name,omitempty" toon:"application_name,omitempty"`
 	// Restrict access to team members only.
-	IsPrivate bool `json:"is_private,omitempty" toon:"is_private,omitempty"`
+	IsPrivate bool                `json:"is_private,omitempty" toon:"is_private,omitempty"`
+	Links     RUMApplicationLinks `json:"links,omitempty" toon:"links,omitempty"`
 	// Do not infer geographic location.
 	NoGeo bool `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
 	// Do not collect IP addresses.
@@ -5225,7 +5247,8 @@ type RUMApplicationItem struct {
 	// Creator member ID.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
 	// If `true`, the application is only accessible to team members.
-	IsPrivate bool `json:"is_private" toon:"is_private"`
+	IsPrivate bool                `json:"is_private" toon:"is_private"`
+	Links     RUMApplicationLinks `json:"links" toon:"links"`
 	// If `true`, geographic location is not inferred from IP.
 	NoGeo bool `json:"no_geo" toon:"no_geo"`
 	// If `true`, IP addresses are not collected.
@@ -5241,6 +5264,32 @@ type RUMApplicationItem struct {
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// RUMApplicationLink is generated from the Flashduty OpenAPI schema.
+type RUMApplicationLink struct {
+	// Whether this external system link is enabled.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// RUM event types where this external system link is shown.
+	EventTypes []string `json:"event_types,omitempty" toon:"event_types,omitempty"`
+	// Display color for the link icon.
+	IconColor string `json:"icon_color,omitempty" toon:"icon_color,omitempty"`
+	// Short text shown in the link icon.
+	IconText string `json:"icon_text,omitempty" toon:"icon_text,omitempty"`
+	// Stable client-side identifier for this external system.
+	ID string `json:"id,omitempty" toon:"id,omitempty"`
+	// Display name of the external system.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// HTTP or HTTPS URL template. `${var}` tokens are resolved from the RUM event context.
+	URL string `json:"url,omitempty" toon:"url,omitempty"`
+}
+
+// RUMApplicationLinks is generated from the Flashduty OpenAPI schema.
+type RUMApplicationLinks struct {
+	// Whether external link integration is enabled.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// External systems whose URL templates can be opened from matching RUM events.
+	Systems []RUMApplicationLink `json:"systems,omitempty" toon:"systems,omitempty"`
 }
 
 // RUMApplicationListRequest is generated from the Flashduty OpenAPI schema.
@@ -5281,13 +5330,182 @@ type RUMApplicationUpdateRequest struct {
 	// Application ID to update.
 	ApplicationID string `json:"application_id,omitempty" toon:"application_id,omitempty"`
 	// New application name.
-	ApplicationName *string               `json:"application_name,omitempty" toon:"application_name,omitempty"`
-	IsPrivate       *bool                 `json:"is_private,omitempty" toon:"is_private,omitempty"`
-	NoGeo           *bool                 `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
-	NoIP            *bool                 `json:"no_ip,omitempty" toon:"no_ip,omitempty"`
-	TeamID          *int64                `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	ApplicationName string                `json:"application_name,omitempty" toon:"application_name,omitempty"`
+	IsPrivate       bool                  `json:"is_private,omitempty" toon:"is_private,omitempty"`
+	Links           RUMApplicationLinks   `json:"links,omitempty" toon:"links,omitempty"`
+	NoGeo           bool                  `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
+	NoIP            bool                  `json:"no_ip,omitempty" toon:"no_ip,omitempty"`
+	TeamID          int64                 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	Tracing         RUMApplicationTracing `json:"tracing,omitempty" toon:"tracing,omitempty"`
-	Type            *string               `json:"type,omitempty" toon:"type,omitempty"`
+	Type            string                `json:"type,omitempty" toon:"type,omitempty"`
+}
+
+// RUMDataAggregateFunction is generated from the Flashduty OpenAPI schema.
+type RUMDataAggregateFunction struct {
+	// Column index used by the aggregate.
+	ColumnIndex int64 `json:"column_index" toon:"column_index"`
+	// Column name used by the aggregate.
+	ColumnName string `json:"column_name" toon:"column_name"`
+	// Aggregate function type.
+	Type string `json:"type" toon:"type"`
+}
+
+// RUMDataFieldMeta is generated from the Flashduty OpenAPI schema.
+type RUMDataFieldMeta struct {
+	// Column name.
+	Name string `json:"name" toon:"name"`
+	// Whether values in this column may be null.
+	Nullable bool `json:"nullable" toon:"nullable"`
+	// Backend database type name for this column.
+	Type string `json:"type" toon:"type"`
+}
+
+// RUMDataQueryDefinition is generated from the Flashduty OpenAPI schema.
+type RUMDataQueryDefinition struct {
+	// When true, asks the query engine to avoid sampling when possible.
+	DisableSampling bool `json:"disable_sampling,omitempty" toon:"disable_sampling,omitempty"`
+	// Optional RUM DQL filter expression used together with SQL validation.
+	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
+	// Output format. `table` returns rows; `time_series` returns bucketed time-series rows.
+	Format string `json:"format,omitempty" toon:"format,omitempty"`
+	// Client-supplied query ID. The same value is used as the key in the response object.
+	ID string `json:"id,omitempty" toon:"id,omitempty"`
+	// Time bucket interval in seconds for `time_series` queries.
+	Interval int64 `json:"interval,omitempty" toon:"interval,omitempty"`
+	// Maximum number of points for `time_series` queries.
+	MaxPoints int64 `json:"max_points,omitempty" toon:"max_points,omitempty"`
+	// Opaque cursor returned by a previous table query for continuing pagination.
+	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
+	// RUM SQL query to execute.
+	Sql string `json:"sql,omitempty" toon:"sql,omitempty"`
+	// IANA time zone name used when evaluating time functions, such as `Asia/Shanghai`.
+	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+}
+
+// RUMDataQueryOutput is generated from the Flashduty OpenAPI schema.
+type RUMDataQueryOutput struct {
+	Data  RUMDataQueryResult `json:"data" toon:"data"`
+	Error any                `json:"error" toon:"error"`
+}
+
+// RUMDataQueryRequest is generated from the Flashduty OpenAPI schema.
+type RUMDataQueryRequest struct {
+	// End of the query window, Unix epoch milliseconds. Maximum 31-day span.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Queries to execute concurrently. 1 to 10 queries are allowed.
+	Queries []RUMDataQueryDefinition `json:"queries,omitempty" toon:"queries,omitempty"`
+	// Start of the query window, Unix epoch milliseconds.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMDataQueryResult is generated from the Flashduty OpenAPI schema.
+type RUMDataQueryResult struct {
+	// Column metadata for the values matrix.
+	Fields []RUMDataFieldMeta `json:"fields" toon:"fields"`
+	// Effective time bucket interval in seconds for time-series queries.
+	Interval int64                   `json:"interval" toon:"interval"`
+	Sampling RUMDataSamplingDecision `json:"sampling" toon:"sampling"`
+	// Opaque cursor for continuing paginated table queries.
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
+	// Rows returned by the query. Each row aligns with `fields` by index.
+	Values [][]any `json:"values" toon:"values"`
+}
+
+// RUMDataSamplingDecision is generated from the Flashduty OpenAPI schema.
+type RUMDataSamplingDecision struct {
+	// Aggregate functions affected by sampling.
+	AggregateFuncs []RUMDataAggregateFunction `json:"aggregate_funcs" toon:"aggregate_funcs"`
+	// Whether sampling was applied.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// Multiplier used to scale sampled counts back to estimated full counts.
+	ScaleFactor float64 `json:"scale_factor" toon:"scale_factor"`
+	// Storage tablets selected for the sampled query.
+	SelectedTablets []string `json:"selected_tablets" toon:"selected_tablets"`
+}
+
+// RUMFacetCountRequest is generated from the Flashduty OpenAPI schema.
+type RUMFacetCountRequest struct {
+	// RUM DQL filter expression applied before counting.
+	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
+	// End of the time range, Unix epoch milliseconds. Maximum 31-day span.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// The field key to count value distribution for.
+	FacetKey string `json:"facet_key,omitempty" toon:"facet_key,omitempty"`
+	// When set, filter events where `facet_key` equals this value before counting. Accepts string, number, or boolean.
+	FacetValue any `json:"facet_value,omitempty" toon:"facet_value,omitempty"`
+	// Maximum number of top values to return. Default 100, maximum 100.
+	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
+	// RUM data scope to query.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// SQL WHERE clause (no SELECT) for additional filtering.
+	Sql string `json:"sql,omitempty" toon:"sql,omitempty"`
+	// Start of the time range, Unix epoch milliseconds.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMFacetCountResponse is generated from the Flashduty OpenAPI schema.
+type RUMFacetCountResponse struct {
+	Items []FacetCountItem `json:"items" toon:"items"`
+}
+
+// RUMFacetListRequest is generated from the Flashduty OpenAPI schema.
+type RUMFacetListRequest struct {
+	// When true, return only facet-enabled fields. When false or omitted, return all fields.
+	IsFacet bool `json:"is_facet,omitempty" toon:"is_facet,omitempty"`
+	// Filter by RUM data scopes. Valid values: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`.
+	Scopes []string `json:"scopes,omitempty" toon:"scopes,omitempty"`
+}
+
+// RUMFacetListResponse is generated from the Flashduty OpenAPI schema.
+type RUMFacetListResponse struct {
+	Items []RUMFieldItem `json:"items" toon:"items"`
+}
+
+// RUMFieldItem is generated from the Flashduty OpenAPI schema.
+type RUMFieldItem struct {
+	// Account ID. 0 for built-in fields.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Description of what this field captures.
+	Description string `json:"description" toon:"description"`
+	// True if this is a custom field that can be edited by the user.
+	EditAble bool `json:"edit_able" toon:"edit_able"`
+	// Predefined enumerable values for this field. Element type matches the field's `value_type`: string for `string`, number for `number`, boolean for `boolean`. Empty when the field has no fixed set of values.
+	EnumValues []any `json:"enum_values" toon:"enum_values"`
+	// Unique field key, e.g. `error.type`.
+	FieldKey string `json:"field_key" toon:"field_key"`
+	// Human-readable field name.
+	FieldName string `json:"field_name" toon:"field_name"`
+	// Display group for this field.
+	Group string `json:"group" toon:"group"`
+	// True if value distribution counting is supported for this field.
+	IsFacet bool `json:"is_facet" toon:"is_facet"`
+	// True if this field can be used in DQL/SQL queries.
+	Queryable bool `json:"queryable" toon:"queryable"`
+	// RUM scopes this field appears in.
+	Scopes []string `json:"scopes" toon:"scopes"`
+	// Display type in the analytics UI.
+	ShowType string `json:"show_type" toon:"show_type"`
+	// Field status, e.g. `active`.
+	Status string `json:"status" toon:"status"`
+	// Measurement unit family, e.g. `time`, `bytes`. Empty for dimensionless fields.
+	UnitFamily string `json:"unit_family" toon:"unit_family"`
+	// Specific measurement unit, e.g. `millisecond`, `byte`.
+	UnitName string `json:"unit_name" toon:"unit_name"`
+	// Data type of the field value.
+	ValueType string `json:"value_type" toon:"value_type"`
+}
+
+// RUMFieldListRequest is generated from the Flashduty OpenAPI schema.
+type RUMFieldListRequest struct {
+	// When true, return only facet-enabled fields. When false or omitted, return all fields.
+	IsFacet bool `json:"is_facet,omitempty" toon:"is_facet,omitempty"`
+	// Filter by RUM data scopes. Valid values: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`.
+	Scopes []string `json:"scopes,omitempty" toon:"scopes,omitempty"`
+}
+
+// RUMFieldListResponse is generated from the Flashduty OpenAPI schema.
+type RUMFieldListResponse struct {
+	Items []RUMFieldItem `json:"items" toon:"items"`
 }
 
 // RUMIssueIDRequest is generated from the Flashduty OpenAPI schema.
@@ -6013,6 +6231,61 @@ type SnoozeIncidentRequest struct {
 	Minutes int64 `json:"minutes,omitempty" toon:"minutes,omitempty"`
 }
 
+// SourcemapBinaryImage is generated from the Flashduty OpenAPI schema.
+type SourcemapBinaryImage struct {
+	// CPU architecture for this binary image.
+	Arch string `json:"arch,omitempty" toon:"arch,omitempty"`
+	// Whether this binary belongs to the operating system.
+	IsSystem bool `json:"is_system,omitempty" toon:"is_system,omitempty"`
+	// Runtime address. Accepts a hex string such as `0x100000000` or a decimal integer.
+	LoadAddress any `json:"load_address,omitempty" toon:"load_address,omitempty"`
+	// Runtime address. Accepts a hex string such as `0x100000000` or a decimal integer.
+	MaxAddress any `json:"max_address,omitempty" toon:"max_address,omitempty"`
+	// Binary image name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Build UUID identifying the binary or dSYM.
+	Uuid string `json:"uuid,omitempty" toon:"uuid,omitempty"`
+}
+
+// SourcemapCodeSnippet is generated from the Flashduty OpenAPI schema.
+type SourcemapCodeSnippet struct {
+	// Source code on that line.
+	Code string `json:"code" toon:"code"`
+	// Source line number.
+	Line int64 `json:"line" toon:"line"`
+}
+
+// SourcemapEnrichedFrame is generated from the Flashduty OpenAPI schema.
+type SourcemapEnrichedFrame struct {
+	// iOS or native memory address.
+	Address string `json:"address" toon:"address"`
+	// Android Java/Kotlin class name.
+	ClassName string `json:"class_name" toon:"class_name"`
+	// Source-code snippets around this frame.
+	CodeSnippets []SourcemapCodeSnippet `json:"code_snippets" toon:"code_snippets"`
+	// Column number for JavaScript or Flutter frames.
+	Column int64 `json:"column" toon:"column"`
+	// Whether the frame was successfully symbolicated or deobfuscated.
+	Converted bool `json:"converted" toon:"converted"`
+	// Source file, URL, or module path.
+	File string `json:"file" toon:"file"`
+	// Function or method name.
+	Function string `json:"function" toon:"function"`
+	// Line number.
+	Line int64 `json:"line" toon:"line"`
+	// Android Java/Kotlin method name without class prefix.
+	MethodName string `json:"method_name" toon:"method_name"`
+	// iOS Swift/Objective-C module name.
+	Module string `json:"module" toon:"module"`
+	// Unity IL native address.
+	NativeAddress string `json:"native_address" toon:"native_address"`
+	// Symbol offset from function start.
+	Offset        int64               `json:"offset" toon:"offset"`
+	OriginalFrame SourcemapStackFrame `json:"original_frame" toon:"original_frame"`
+	// Whether the frame is from third-party or system libraries.
+	ThirdParty bool `json:"third_party" toon:"third_party"`
+}
+
 // SourcemapItem is generated from the Flashduty OpenAPI schema.
 type SourcemapItem struct {
 	// Upload timestamp, Unix epoch seconds.
@@ -6067,6 +6340,61 @@ type SourcemapListResponse struct {
 	Items []SourcemapItem `json:"items" toon:"items"`
 	// Total number of matching records.
 	Total int64 `json:"total" toon:"total"`
+}
+
+// SourcemapStackEnrichRequest is generated from the Flashduty OpenAPI schema.
+type SourcemapStackEnrichRequest struct {
+	// Android NDK architecture such as `arm`, `arm64`, `x86`, or `x64`.
+	Arch string `json:"arch,omitempty" toon:"arch,omitempty"`
+	// Loaded binary images from an iOS crash report.
+	BinaryImages []SourcemapBinaryImage `json:"binary_images,omitempty" toon:"binary_images,omitempty"`
+	// Android build ID for Gradle plugin 1.13.0 and later.
+	BuildID string `json:"build_id,omitempty" toon:"build_id,omitempty"`
+	// Number of nearby meaningful source lines to return around converted frames.
+	Near int64 `json:"near,omitempty" toon:"near,omitempty"`
+	// Skip cached enrich results. Intended for debugging.
+	NoCache bool `json:"no_cache,omitempty" toon:"no_cache,omitempty"`
+	// Application or service name used when the sourcemap was uploaded.
+	Service string `json:"service,omitempty" toon:"service,omitempty"`
+	// Android error source type. Use `ndk` with `arch` for native symbolication.
+	SourceType string `json:"source_type,omitempty" toon:"source_type,omitempty"`
+	// Raw stack trace to parse and enrich.
+	Stack string `json:"stack,omitempty" toon:"stack,omitempty"`
+	// Source platform. Defaults to `browser` when omitted.
+	Type string `json:"type,omitempty" toon:"type,omitempty"`
+	// Android build variant used by older Gradle plugin versions.
+	Variant string `json:"variant,omitempty" toon:"variant,omitempty"`
+	// Application version used when the sourcemap was uploaded.
+	Version string `json:"version,omitempty" toon:"version,omitempty"`
+}
+
+// SourcemapStackEnrichResponse is generated from the Flashduty OpenAPI schema.
+type SourcemapStackEnrichResponse struct {
+	Frames []SourcemapEnrichedFrame `json:"frames" toon:"frames"`
+}
+
+// SourcemapStackFrame is generated from the Flashduty OpenAPI schema.
+type SourcemapStackFrame struct {
+	// iOS or native memory address.
+	Address string `json:"address" toon:"address"`
+	// Android Java/Kotlin class name.
+	ClassName string `json:"class_name" toon:"class_name"`
+	// Column number for JavaScript or Flutter frames.
+	Column int64 `json:"column" toon:"column"`
+	// Source file, URL, or module path.
+	File string `json:"file" toon:"file"`
+	// Function or method name.
+	Function string `json:"function" toon:"function"`
+	// Line number.
+	Line int64 `json:"line" toon:"line"`
+	// Android Java/Kotlin method name without class prefix.
+	MethodName string `json:"method_name" toon:"method_name"`
+	// iOS Swift/Objective-C module name.
+	Module string `json:"module" toon:"module"`
+	// Unity IL native address.
+	NativeAddress string `json:"native_address" toon:"native_address"`
+	// Symbol offset from function start.
+	Offset int64 `json:"offset" toon:"offset"`
 }
 
 // StatusPageChangeCreateResponse is generated from the Flashduty OpenAPI schema.
