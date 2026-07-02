@@ -23,7 +23,7 @@ func (s *AlertsService) EventReadList(ctx context.Context, req *AlertEventGlobal
 
 // List events for an alert.
 //
-// Return all raw events that have been ingested into a specific alert, in chronological order.
+// Return raw events for an alert with cursor or page-number pagination.
 //
 // API: POST /alert/event/list (alert-read-event-list).
 func (s *AlertsService) ReadEventList(ctx context.Context, req *AlertEventListRequest) (*AlertEventListResponse, *Response, error) {

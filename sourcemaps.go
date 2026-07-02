@@ -20,3 +20,17 @@ func (s *SourcemapsService) List(ctx context.Context, req *SourcemapListRequest)
 	}
 	return out, resp, nil
 }
+
+// Enrich a stack trace.
+//
+// Symbolicate or deobfuscate a browser, Android, iOS, Mini Program, or HarmonyOS stack trace.
+//
+// API: POST /sourcemap/stack/enrich (sourcemap-read-stack-enrich).
+func (s *SourcemapsService) StackEnrich(ctx context.Context, req *SourcemapStackEnrichRequest) (*SourcemapStackEnrichResponse, *Response, error) {
+	out := new(SourcemapStackEnrichResponse)
+	resp, err := s.client.do(ctx, "/sourcemap/stack/enrich", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}

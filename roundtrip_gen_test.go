@@ -137,6 +137,10 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /rum/application/infos":                func(d json.RawMessage) error { var v RUMApplicationInfosResponse; return json.Unmarshal(d, &v) },
 	"POST /rum/application/list":                 func(d json.RawMessage) error { var v RUMApplicationListResponse; return json.Unmarshal(d, &v) },
 	"POST /rum/application/webhook/test":         func(d json.RawMessage) error { var v RUMWebhookTestResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/data/query":                       func(d json.RawMessage) error { var v RUMDataQueryResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/facet/count":                      func(d json.RawMessage) error { var v RUMFacetCountResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/facet/list":                       func(d json.RawMessage) error { var v RUMFacetListResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/field/list":                       func(d json.RawMessage) error { var v RUMFieldListResponse; return json.Unmarshal(d, &v) },
 	"POST /rum/issue/info":                       func(d json.RawMessage) error { var v RUMIssueItem; return json.Unmarshal(d, &v) },
 	"POST /rum/issue/list":                       func(d json.RawMessage) error { var v RUMIssueListResponse; return json.Unmarshal(d, &v) },
 	"POST /safari/a2a-agent/create":              func(d json.RawMessage) error { var v A2aAgentCreateResponse; return json.Unmarshal(d, &v) },
@@ -177,6 +181,7 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /schedule/preview":                     func(d json.RawMessage) error { var v ScheduleItem; return json.Unmarshal(d, &v) },
 	"POST /schedule/self":                        func(d json.RawMessage) error { var v ScheduleSelfResponse; return json.Unmarshal(d, &v) },
 	"POST /sourcemap/list":                       func(d json.RawMessage) error { var v SourcemapListResponse; return json.Unmarshal(d, &v) },
+	"POST /sourcemap/stack/enrich":               func(d json.RawMessage) error { var v SourcemapStackEnrichResponse; return json.Unmarshal(d, &v) },
 	"POST /status-page/change/create":            func(d json.RawMessage) error { var v StatusPageChangeCreateResponse; return json.Unmarshal(d, &v) },
 	"POST /status-page/change/timeline/create": func(d json.RawMessage) error {
 		var v StatusPageChangeTimelineCreateResponse

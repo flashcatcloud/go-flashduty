@@ -36,6 +36,8 @@ type genServices struct {
 	RolesPermissions      *RolesPermissionsService
 	Teams                 *TeamsService
 	Applications          *ApplicationsService
+	DataQuery             *DataQueryService
+	Facets                *FacetsService
 	Issues                *IssuesService
 	Sourcemaps            *SourcemapsService
 }
@@ -71,6 +73,8 @@ func (c *Client) initServices() {
 	c.RolesPermissions = (*RolesPermissionsService)(&c.common)
 	c.Teams = (*TeamsService)(&c.common)
 	c.Applications = (*ApplicationsService)(&c.common)
+	c.DataQuery = (*DataQueryService)(&c.common)
+	c.Facets = (*FacetsService)(&c.common)
 	c.Issues = (*IssuesService)(&c.common)
 	c.Sourcemaps = (*SourcemapsService)(&c.common)
 }
