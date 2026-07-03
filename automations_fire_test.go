@@ -92,3 +92,30 @@ func TestAutomationRuleUpdateRequestCanSendFalseValues(t *testing.T) {
 		t.Fatalf("zero rotate flag should stay omitted: %s", got)
 	}
 }
+
+func TestAutomationRuleUpdateRequestPreservesOncallIncidentTriggerFields(t *testing.T) {
+	var req AutomationRuleUpdateRequest
+	if err := json.Unmarshal([]byte(`{
+		"rule_id":"auto_1",
+		"oncall_incident_trigger_enabled":false,
+		"oncall_incident_channel_ids":[],
+		"oncall_incident_severities":[]
+	}`), &req); err != nil {
+		t.Fatal(err)
+	}
+	payload, err := json.Marshal(&req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := string(payload)
+	for _, want := range []string{
+		`"rule_id":"auto_1"`,
+		`"oncall_incident_trigger_enabled":false`,
+		`"oncall_incident_channel_ids":[]`,
+		`"oncall_incident_severities":[]`,
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("payload %s missing %s", got, want)
+		}
+	}
+}

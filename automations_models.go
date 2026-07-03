@@ -26,4 +26,10 @@ type AutomationRuleUpdateRequest struct {
 	HTTPPostTriggerEnabled *bool `json:"http_post_trigger_enabled,omitempty" toon:"http_post_trigger_enabled,omitempty"`
 	// Whether to rotate the HTTP POST trigger token. The new token is returned only in this response.
 	RotateHTTPPostTriggerToken bool `json:"rotate_http_post_trigger_token,omitempty" toon:"rotate_http_post_trigger_token,omitempty"`
+	// Whether the on-call incident trigger is enabled. Sending true creates it when missing and channel/severity filters are provided.
+	OncallIncidentTriggerEnabled *bool `json:"oncall_incident_trigger_enabled,omitempty" toon:"oncall_incident_trigger_enabled,omitempty"`
+	// On-call channel IDs whose new incidents can trigger this rule.
+	OncallIncidentChannelIDs *[]int64 `json:"oncall_incident_channel_ids,omitempty" toon:"oncall_incident_channel_ids,omitempty"`
+	// Incident severities that can trigger this rule.
+	OncallIncidentSeverities *[]string `json:"oncall_incident_severities,omitempty" toon:"oncall_incident_severities,omitempty"`
 }
