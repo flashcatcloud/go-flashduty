@@ -20688,6 +20688,177 @@
         }
       }
     },
+    "/incident-trigger-subscription/upsert": {
+      "post": {
+        "operationId": "incident-trigger-subscription-write-upsert",
+        "summary": "创建或更新故障触发订阅",
+        "description": "为 AI SRE 自动化创建或更新故障触发订阅。",
+        "tags": [
+          "On-call/故障管理"
+        ],
+        "x-mint": {
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 当 AI SRE 自动化规则需要接收指定 On-call 协作空间的新故障触发事件时调用。\n- `source`、`consumer`、`consumer_ref` 共同标识订阅；省略 `subscription_id` 时会按这一组标识创建或更新。\n- 仅支持 `Critical`、`Warning`、`Info` 三种故障等级；`enabled` 省略时默认为 true。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/on-call/incidents/incident-trigger-subscription-write-upsert",
+          "metadata": {
+            "sidebarTitle": "创建或更新故障触发订阅"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/IncidentTriggerSubscription"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "subscription_id": "b8d820f2-3f41-4bce-9acc-3940f7bf2df0",
+                    "account_id": 10023,
+                    "source": "ai_sre_automation",
+                    "consumer": "fc_safari",
+                    "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
+                    "channel_ids": [
+                      2468013579
+                    ],
+                    "severities": [
+                      "Critical",
+                      "Warning"
+                    ],
+                    "enabled": true,
+                    "created_by": 80011,
+                    "updated_by": 80011,
+                    "created_at": 1780367971,
+                    "updated_at": 1780367971,
+                    "deleted_at": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncidentTriggerSubscriptionUpsertRequest"
+              },
+              "example": {
+                "source": "ai_sre_automation",
+                "consumer": "fc_safari",
+                "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
+                "channel_ids": [
+                  2468013579
+                ],
+                "severities": [
+                  "Critical",
+                  "Warning"
+                ],
+                "enabled": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident-trigger-subscription/delete": {
+      "post": {
+        "operationId": "incident-trigger-subscription-write-delete",
+        "summary": "删除故障触发订阅",
+        "description": "删除 AI SRE 自动化使用的故障触发订阅。",
+        "tags": [
+          "On-call/故障管理"
+        ],
+        "x-mint": {
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 删除由 `source`、`consumer`、`consumer_ref` 标识的订阅；不会删除消费方规则本身。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/on-call/incidents/incident-trigger-subscription-write-delete",
+          "metadata": {
+            "sidebarTitle": "删除故障触发订阅"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncidentTriggerSubscriptionDeleteRequest"
+              },
+              "example": {
+                "source": "ai_sre_automation",
+                "consumer": "fc_safari",
+                "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b"
+              }
+            }
+          }
+        }
+      }
+    },
     "/template/preview": {
       "post": {
         "operationId": "template-read-preview",
@@ -20994,7 +21165,7 @@
                 "schema": {
                   "allOf": [
                     {
-                      "$ref": "#/components/schemas/ResponseEnvelope"
+                      "$ref": "#/components/schemas/SuccessEnvelope"
                     },
                     {
                       "type": "object",
@@ -21046,7 +21217,7 @@
             "$ref": "#/components/responses/TooManyRequests"
           },
           "500": {
-            "$ref": "#/components/responses/InternalError"
+            "$ref": "#/components/responses/ServerError"
           }
         },
         "x-mint": {
@@ -25168,7 +25339,17 @@
                     "can_edit": true,
                     "created_at": 1780367971228,
                     "updated_at": 1780367971228,
-                    "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U"
+                    "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U",
+                    "schedule_next_fire_at_ms": 1780630800000,
+                    "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                    "oncall_incident_trigger_enabled": true,
+                    "oncall_incident_channel_ids": [
+                      2468013579
+                    ],
+                    "oncall_incident_severities": [
+                      "Critical",
+                      "Warning"
+                    ]
                   }
                 }
               }
@@ -25204,7 +25385,15 @@
                 "cron_expr": "0 9 * * 1",
                 "schedule_trigger_enabled": true,
                 "prompt": "Summarize last week's alert noise and escalation load.",
-                "http_post_trigger_enabled": true
+                "http_post_trigger_enabled": true,
+                "oncall_incident_trigger_enabled": true,
+                "oncall_incident_channel_ids": [
+                  2468013579
+                ],
+                "oncall_incident_severities": [
+                  "Critical",
+                  "Warning"
+                ]
               }
             }
           }
@@ -25275,7 +25464,17 @@
                         "http_post_trigger_enabled": true,
                         "can_edit": true,
                         "created_at": 1780367971228,
-                        "updated_at": 1780367971228
+                        "updated_at": 1780367971228,
+                        "schedule_next_fire_at_ms": 1780630800000,
+                        "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                        "oncall_incident_trigger_enabled": true,
+                        "oncall_incident_channel_ids": [
+                          2468013579
+                        ],
+                        "oncall_incident_severities": [
+                          "Critical",
+                          "Warning"
+                        ]
                       }
                     ]
                   }
@@ -25376,7 +25575,17 @@
                     "http_post_trigger_enabled": true,
                     "can_edit": true,
                     "created_at": 1780367971228,
-                    "updated_at": 1780367971228
+                    "updated_at": 1780367971228,
+                    "schedule_next_fire_at_ms": 1780630800000,
+                    "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                    "oncall_incident_trigger_enabled": true,
+                    "oncall_incident_channel_ids": [
+                      2468013579
+                    ],
+                    "oncall_incident_severities": [
+                      "Critical",
+                      "Warning"
+                    ]
                   }
                 }
               }
@@ -25475,7 +25684,17 @@
                     "can_edit": true,
                     "created_at": 1780367971228,
                     "updated_at": 1780367971228,
-                    "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U"
+                    "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U",
+                    "schedule_next_fire_at_ms": 1780630800000,
+                    "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                    "oncall_incident_trigger_enabled": true,
+                    "oncall_incident_channel_ids": [
+                      2468013579
+                    ],
+                    "oncall_incident_severities": [
+                      "Critical",
+                      "Warning"
+                    ]
                   }
                 }
               }
@@ -25508,7 +25727,11 @@
                 "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
                 "enabled": true,
                 "cron_expr": "15 9 * * 1",
-                "rotate_http_post_trigger_token": true
+                "rotate_http_post_trigger_token": true,
+                "oncall_incident_trigger_enabled": true,
+                "oncall_incident_severities": [
+                  "Critical"
+                ]
               }
             }
           }
@@ -25559,6 +25782,104 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleIDRequest"
+              },
+              "example": {
+                "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/automation/rule/run": {
+      "post": {
+        "operationId": "automation-rule-write-run",
+        "summary": "立即执行自动化规则",
+        "description": "为自动化规则立即启动一次手动运行。",
+        "tags": [
+          "AI SRE/Automations"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 为调用者可管理的规则启动一次手动运行，并在隐藏 AI SRE 会话启动后返回。\n- 同一规则的手动运行限频为每分钟一次；命中限频时返回 `429`。\n- `preflight` 会说明本次运行启动前使用的规则作用域和 Runner 检查结果。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/ai-sre/automations/automation-rule-write-run",
+          "metadata": {
+            "sidebarTitle": "立即执行自动化规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AutomationRuleRunResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
+                    "trigger_kind": "manual",
+                    "preflight": {
+                      "ok": true,
+                      "checks": [
+                        "rule_enabled",
+                        "runner_available",
+                        "permissions_ok"
+                      ],
+                      "scope": "team",
+                      "owner_id": 80011,
+                      "team_id": 123,
+                      "app_name": "flashcat-ai-sre",
+                      "warnings": []
+                    },
+                    "run": {
+                      "run_id": "taskrun_manual_5oDvqiG64uur6sBNsTc4u",
+                      "session_id": "sess_manual_f8oDvqiG64uur6sBNsTc4u"
+                    }
+                  }
                 }
               }
             }
@@ -45618,6 +45939,30 @@
           "http_post_trigger_enabled": {
             "type": "boolean",
             "description": "是否创建并启用 HTTP POST trigger。启用时响应里会返回一次性 token。"
+          },
+          "oncall_incident_trigger_enabled": {
+            "type": "boolean",
+            "description": "是否为此规则创建并启用 On-call 故障触发器。"
+          },
+          "oncall_incident_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "可触发此规则的 On-call 协作空间 ID。"
+          },
+          "oncall_incident_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "可触发此规则的故障等级。"
           }
         },
         "required": [
@@ -45682,6 +46027,30 @@
           "rotate_http_post_trigger_token": {
             "type": "boolean",
             "description": "是否轮换 HTTP POST trigger token。新 token 只会在本次响应中返回。"
+          },
+          "oncall_incident_trigger_enabled": {
+            "type": "boolean",
+            "description": "On-call 故障触发器是否启用。不存在时发送 true，并同时提供协作空间和等级过滤条件，会创建触发器。"
+          },
+          "oncall_incident_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "可触发此规则的 On-call 协作空间 ID。"
+          },
+          "oncall_incident_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "可触发此规则的故障等级。"
           }
         },
         "required": [
@@ -45870,6 +46239,39 @@
             "type": "integer",
             "format": "int64",
             "description": "更新时间，Unix 毫秒。"
+          },
+          "schedule_next_fire_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "下一次计划触发时间，Unix 毫秒；0 表示暂无可用的下一次计划触发。"
+          },
+          "oncall_incident_trigger_id": {
+            "type": "string",
+            "description": "On-call 故障触发器 ID。"
+          },
+          "oncall_incident_trigger_enabled": {
+            "type": "boolean",
+            "description": "On-call 故障触发器是否启用。"
+          },
+          "oncall_incident_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "故障触发器监听的 On-call 协作空间 ID。"
+          },
+          "oncall_incident_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "故障触发器监听的故障等级。"
           }
         },
         "required": [
@@ -45888,7 +46290,9 @@
           "http_post_trigger_enabled",
           "can_edit",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "schedule_next_fire_at_ms",
+          "oncall_incident_trigger_enabled"
         ]
       },
       "AutomationTemplateListRequest": {
@@ -45984,9 +46388,11 @@
             "enum": [
               "schedule",
               "debug",
-              "http_post"
+              "manual",
+              "http_post",
+              "oncall_incident"
             ],
-            "description": "触发方式过滤。"
+            "description": "触发来源过滤条件。"
           },
           "started_after_ms": {
             "type": "integer",
@@ -46048,9 +46454,11 @@
             "enum": [
               "schedule",
               "debug",
-              "http_post"
+              "manual",
+              "http_post",
+              "oncall_incident"
             ],
-            "description": "触发方式。"
+            "description": "触发来源。"
           },
           "occurrence_key": {
             "type": "string",
@@ -46896,6 +47304,271 @@
             "description": "Unity IL native 地址。"
           }
         }
+      },
+      "AutomationRuleRunPreflight": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "规则是否可以启动一次运行。"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "本次执行前检查的检查项。"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "person",
+              "team"
+            ],
+            "description": "本次运行使用的隐藏会话作用域。"
+          },
+          "owner_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "本次运行上下文使用的负责人 ID。"
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "团队作用域运行使用的团队 ID；个人运行时为 0。"
+          },
+          "app_name": {
+            "type": "string",
+            "description": "执行此规则的 AI SRE App。"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "不阻塞启动的执行前警告。"
+          }
+        },
+        "required": [
+          "ok",
+          "checks",
+          "scope",
+          "owner_id",
+          "team_id",
+          "app_name"
+        ]
+      },
+      "AutomationRuleRunView": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "description": "已创建的自动化运行 ID。"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "为本次运行启动的隐藏 AI SRE 会话 ID。"
+          }
+        },
+        "required": [
+          "run_id"
+        ]
+      },
+      "AutomationRuleRunResponse": {
+        "type": "object",
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "规则 ID。"
+          },
+          "trigger_kind": {
+            "type": "string",
+            "enum": [
+              "manual"
+            ],
+            "description": "本次运行的触发来源。"
+          },
+          "preflight": {
+            "$ref": "#/components/schemas/AutomationRuleRunPreflight"
+          },
+          "run": {
+            "$ref": "#/components/schemas/AutomationRuleRunView"
+          }
+        },
+        "required": [
+          "rule_id",
+          "trigger_kind",
+          "preflight"
+        ]
+      },
+      "IncidentTriggerSubscriptionUpsertRequest": {
+        "type": "object",
+        "description": "创建或更新故障触发订阅。",
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "description": "已有订阅 ID。省略时按 source、consumer、consumer_ref 创建或更新。"
+          },
+          "source": {
+            "type": "string",
+            "description": "订阅来源。AI SRE 自动化规则使用 `ai_sre_automation`。"
+          },
+          "consumer": {
+            "type": "string",
+            "description": "消费方系统。AI SRE 自动化规则使用 `fc_safari`。"
+          },
+          "consumer_ref": {
+            "type": "string",
+            "description": "消费方持有的引用 ID，例如自动化规则 ID。"
+          },
+          "channel_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "新故障可触发消费方的 On-call 协作空间 ID。"
+          },
+          "severities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "订阅的故障等级；不支持 `Ok`。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "订阅是否启用；省略时默认为 true。"
+          }
+        },
+        "required": [
+          "source",
+          "consumer",
+          "consumer_ref",
+          "channel_ids",
+          "severities"
+        ]
+      },
+      "IncidentTriggerSubscriptionDeleteRequest": {
+        "type": "object",
+        "description": "按消费方引用删除故障触发订阅。",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "订阅来源。"
+          },
+          "consumer": {
+            "type": "string",
+            "description": "消费方系统。"
+          },
+          "consumer_ref": {
+            "type": "string",
+            "description": "消费方持有的引用 ID，例如自动化规则 ID。"
+          }
+        },
+        "required": [
+          "source",
+          "consumer",
+          "consumer_ref"
+        ]
+      },
+      "IncidentTriggerSubscription": {
+        "type": "object",
+        "description": "On-call 存储的故障触发订阅。",
+        "properties": {
+          "subscription_id": {
+            "type": "string",
+            "description": "订阅 ID。"
+          },
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "账户 ID。"
+          },
+          "source": {
+            "type": "string",
+            "description": "订阅来源。"
+          },
+          "consumer": {
+            "type": "string",
+            "description": "消费方系统。"
+          },
+          "consumer_ref": {
+            "type": "string",
+            "description": "消费方持有的引用 ID。"
+          },
+          "channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "已订阅的协作空间 ID。"
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "已订阅的故障等级。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "订阅是否启用。"
+          },
+          "created_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建订阅的成员 ID。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最后更新订阅的成员 ID。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "订阅创建时间，Unix 秒。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "订阅最后更新时间，Unix 秒。"
+          },
+          "deleted_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "订阅删除时间，Unix 秒；0 表示仍有效。"
+          }
+        },
+        "required": [
+          "subscription_id",
+          "account_id",
+          "source",
+          "consumer",
+          "consumer_ref",
+          "channel_ids",
+          "severities",
+          "enabled",
+          "created_by",
+          "updated_by",
+          "created_at",
+          "updated_at",
+          "deleted_at"
+        ]
       }
     }
   }
