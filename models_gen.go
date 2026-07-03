@@ -1112,6 +1112,12 @@ type AutomationRuleCreateRequest struct {
 	HTTPPostTriggerEnabled bool `json:"http_post_trigger_enabled,omitempty" toon:"http_post_trigger_enabled,omitempty"`
 	// Rule name.
 	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// On-call channel IDs whose new incidents can trigger this rule.
+	OncallIncidentChannelIDs []int64 `json:"oncall_incident_channel_ids,omitempty" toon:"oncall_incident_channel_ids,omitempty"`
+	// Incident severities that can trigger this rule.
+	OncallIncidentSeverities []string `json:"oncall_incident_severities,omitempty" toon:"oncall_incident_severities,omitempty"`
+	// Whether to create and enable an on-call incident trigger for this rule.
+	OncallIncidentTriggerEnabled bool `json:"oncall_incident_trigger_enabled,omitempty" toon:"oncall_incident_trigger_enabled,omitempty"`
 	// Task prompt sent to the AI SRE agent on each run.
 	Prompt string `json:"prompt,omitempty" toon:"prompt,omitempty"`
 	// Whether the schedule trigger is enabled. Defaults to true when omitted; HTTP-POST-only rules should send false.
@@ -1152,6 +1158,14 @@ type AutomationRuleItem struct {
 	HTTPPostTriggerURL string `json:"http_post_trigger_url" toon:"http_post_trigger_url"`
 	// Rule name.
 	Name string `json:"name" toon:"name"`
+	// On-call channel IDs watched by the incident trigger.
+	OncallIncidentChannelIDs []int64 `json:"oncall_incident_channel_ids" toon:"oncall_incident_channel_ids"`
+	// Incident severities watched by the trigger.
+	OncallIncidentSeverities []string `json:"oncall_incident_severities" toon:"oncall_incident_severities"`
+	// Whether the on-call incident trigger is enabled.
+	OncallIncidentTriggerEnabled bool `json:"oncall_incident_trigger_enabled" toon:"oncall_incident_trigger_enabled"`
+	// On-call incident trigger ID.
+	OncallIncidentTriggerID string `json:"oncall_incident_trigger_id" toon:"oncall_incident_trigger_id"`
 	// Creator person ID.
 	OwnerID int64 `json:"owner_id" toon:"owner_id"`
 	// Task prompt.
@@ -1160,6 +1174,8 @@ type AutomationRuleItem struct {
 	RuleID string `json:"rule_id" toon:"rule_id"`
 	// Hidden session run scope.
 	RunScope string `json:"run_scope" toon:"run_scope"`
+	// Next scheduled fire time, Unix milliseconds. 0 means no future scheduled fire is available.
+	ScheduleNextFireAtMs TimestampMilli `json:"schedule_next_fire_at_ms" toon:"schedule_next_fire_at_ms"`
 	// Whether the schedule trigger is enabled.
 	ScheduleTriggerEnabled bool `json:"schedule_trigger_enabled" toon:"schedule_trigger_enabled"`
 	// Schedule trigger ID.
@@ -1190,6 +1206,42 @@ type AutomationRuleListResponse struct {
 	Rules []AutomationRuleItem `json:"rules" toon:"rules"`
 	// Total count.
 	Total int64 `json:"total" toon:"total"`
+}
+
+// AutomationRuleRunPreflight is generated from the Flashduty OpenAPI schema.
+type AutomationRuleRunPreflight struct {
+	// AI SRE app used to execute the rule.
+	AppName string `json:"app_name" toon:"app_name"`
+	// Preflight checks that were evaluated.
+	Checks []string `json:"checks" toon:"checks"`
+	// Whether the rule can start a run.
+	OK bool `json:"ok" toon:"ok"`
+	// Owner person ID used for the run context.
+	OwnerID int64 `json:"owner_id" toon:"owner_id"`
+	// Hidden session scope used for the run.
+	Scope string `json:"scope" toon:"scope"`
+	// Team ID used for team-scoped runs; 0 for personal runs.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Non-blocking preflight warnings.
+	Warnings []string `json:"warnings" toon:"warnings"`
+}
+
+// AutomationRuleRunResponse is generated from the Flashduty OpenAPI schema.
+type AutomationRuleRunResponse struct {
+	Preflight AutomationRuleRunPreflight `json:"preflight" toon:"preflight"`
+	// Rule ID.
+	RuleID string                `json:"rule_id" toon:"rule_id"`
+	Run    AutomationRuleRunView `json:"run" toon:"run"`
+	// Trigger kind for this run.
+	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
+}
+
+// AutomationRuleRunView is generated from the Flashduty OpenAPI schema.
+type AutomationRuleRunView struct {
+	// Created automation run ID.
+	RunID string `json:"run_id" toon:"run_id"`
+	// Hidden AI SRE session ID started for this run.
+	SessionID string `json:"session_id" toon:"session_id"`
 }
 
 // AutomationRunItem is generated from the Flashduty OpenAPI schema.
@@ -3181,6 +3233,64 @@ type IncidentShort struct {
 	Progress string `json:"progress" toon:"progress"`
 	// Incident title.
 	Title string `json:"title" toon:"title"`
+}
+
+// IncidentTriggerSubscription is generated from the Flashduty OpenAPI schema.
+type IncidentTriggerSubscription struct {
+	// Account ID.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Subscribed channel IDs.
+	ChannelIDs []int64 `json:"channel_ids" toon:"channel_ids"`
+	// Consumer system.
+	Consumer string `json:"consumer" toon:"consumer"`
+	// Consumer-owned reference.
+	ConsumerRef string `json:"consumer_ref" toon:"consumer_ref"`
+	// Unix timestamp in seconds when the subscription was created.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Member ID that created the subscription.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Unix timestamp in seconds when the subscription was deleted; 0 means active.
+	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
+	// Whether the subscription is enabled.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// Subscribed incident severities.
+	Severities []string `json:"severities" toon:"severities"`
+	// Subscription source.
+	Source string `json:"source" toon:"source"`
+	// Subscription ID.
+	SubscriptionID string `json:"subscription_id" toon:"subscription_id"`
+	// Unix timestamp in seconds when the subscription was last updated.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// Member ID that last updated the subscription.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// IncidentTriggerSubscriptionDeleteRequest is generated from the Flashduty OpenAPI schema.
+type IncidentTriggerSubscriptionDeleteRequest struct {
+	// Consumer system.
+	Consumer string `json:"consumer,omitempty" toon:"consumer,omitempty"`
+	// Consumer-owned reference, such as an Automation rule ID.
+	ConsumerRef string `json:"consumer_ref,omitempty" toon:"consumer_ref,omitempty"`
+	// Subscription source.
+	Source string `json:"source,omitempty" toon:"source,omitempty"`
+}
+
+// IncidentTriggerSubscriptionUpsertRequest is generated from the Flashduty OpenAPI schema.
+type IncidentTriggerSubscriptionUpsertRequest struct {
+	// On-call channel IDs whose new incidents should trigger the consumer.
+	ChannelIDs []int64 `json:"channel_ids,omitempty" toon:"channel_ids,omitempty"`
+	// Consumer system. Use `fc_safari` for AI SRE automation rules.
+	Consumer string `json:"consumer,omitempty" toon:"consumer,omitempty"`
+	// Consumer-owned reference, such as an Automation rule ID.
+	ConsumerRef string `json:"consumer_ref,omitempty" toon:"consumer_ref,omitempty"`
+	// Whether the subscription is enabled. Defaults to true when omitted.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Incident severities to subscribe to. `Ok` is not valid.
+	Severities []string `json:"severities,omitempty" toon:"severities,omitempty"`
+	// Subscription source. Use `ai_sre_automation` for AI SRE automation rules.
+	Source string `json:"source,omitempty" toon:"source,omitempty"`
+	// Existing subscription ID. Omit to create or upsert by source, consumer, and consumer_ref.
+	SubscriptionID string `json:"subscription_id,omitempty" toon:"subscription_id,omitempty"`
 }
 
 // InhibitRuleItem is generated from the Flashduty OpenAPI schema.

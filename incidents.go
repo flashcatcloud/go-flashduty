@@ -21,6 +21,29 @@ func (s *IncidentsService) ReadGetWarRoomDefaultObservers(ctx context.Context, r
 	return out, resp, nil
 }
 
+// Delete incident trigger subscription.
+//
+// Delete an incident trigger subscription for AI SRE automation.
+//
+// API: POST /incident-trigger-subscription/delete (incident-trigger-subscription-write-delete).
+func (s *IncidentsService) TriggerSubscriptionWriteDelete(ctx context.Context, req *IncidentTriggerSubscriptionDeleteRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident-trigger-subscription/delete", req, nil)
+}
+
+// Create or update incident trigger subscription.
+//
+// Create or update an incident trigger subscription for AI SRE automation.
+//
+// API: POST /incident-trigger-subscription/upsert (incident-trigger-subscription-write-upsert).
+func (s *IncidentsService) TriggerSubscriptionWriteUpsert(ctx context.Context, req *IncidentTriggerSubscriptionUpsertRequest) (*IncidentTriggerSubscription, *Response, error) {
+	out := new(IncidentTriggerSubscription)
+	resp, err := s.client.do(ctx, "/incident-trigger-subscription/upsert", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Add war-room member.
 //
 // Add one or more members to the IM war room bound to an incident integration.

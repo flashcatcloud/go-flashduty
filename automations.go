@@ -63,6 +63,20 @@ func (s *AutomationsService) RuleWriteDelete(ctx context.Context, req *Automatio
 	return out, resp, nil
 }
 
+// Run Automation rule now.
+//
+// Start a manual run for an Automation rule.
+//
+// API: POST /safari/automation/rule/run (automation-rule-write-run).
+func (s *AutomationsService) RuleWriteRun(ctx context.Context, req *AutomationRuleIDRequest) (*AutomationRuleRunResponse, *Response, error) {
+	out := new(AutomationRuleRunResponse)
+	resp, err := s.client.do(ctx, "/safari/automation/rule/run", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Update Automation rule.
 //
 // Update mutable fields on an Automation rule. The personal/team scope is immutable.
