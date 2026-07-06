@@ -4835,172 +4835,6 @@
         }
       }
     },
-    "/channel/escalate/webhook/robot/list": {
-      "post": {
-        "operationId": "channelEscalateWebhookRobotList",
-        "summary": "List webhook robots in escalation rules",
-        "description": "List all IM webhook robots configured in escalation rules across the account. Returns a deduplicated list of robots with references to which channels and escalation rules use them.",
-        "tags": [
-          "On-call/Channels"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Channels Read** (`on-call`) |\n\n## Usage Notes\n\nThis endpoint lists all IM webhook robots configured in escalation rules under the current account. The system iterates through all escalation rule layers, extracts webhook configurations (excluding app-type webhooks with `_app` suffix), deduplicates them by `type + token`, and returns the result.\n\nEach robot includes a `referenced_by` list indicating which channels and escalation rules reference it, making it easy to manage robots centrally and assess the impact scope of changes.\n\nUse `type` to filter by robot type (e.g. `feishu`, `dingtalk`, `wecom`, `slack`, `teams`), or `query` to fuzzy-search by alias or token.",
-          "href": "/en/api-reference/on-call/channels/channel-escalate-webhook-robot-list",
-          "metadata": {
-            "sidebarTitle": "List webhook robots"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "object",
-                          "properties": {
-                            "list": {
-                              "type": "array",
-                              "description": "Deduplicated list of webhook robots.",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "description": "Robot type, e.g. `feishu`, `dingtalk`, `wecom`, `slack`, `teams`, etc."
-                                  },
-                                  "settings": {
-                                    "type": "object",
-                                    "description": "Robot configuration, including `token` (webhook URL or secret) and `alias` (robot display name) among other fields.",
-                                    "additionalProperties": true
-                                  },
-                                  "referenced_by": {
-                                    "type": "array",
-                                    "description": "List of channels and escalation rules referencing this robot.",
-                                    "items": {
-                                      "type": "object",
-                                      "properties": {
-                                        "channel_id": {
-                                          "type": "integer",
-                                          "format": "int64",
-                                          "description": "Channel ID."
-                                        },
-                                        "channel_name": {
-                                          "type": "string",
-                                          "description": "Channel name."
-                                        },
-                                        "escalate_rule_id": {
-                                          "type": "string",
-                                          "description": "Escalation rule ID (MongoDB ObjectID)."
-                                        },
-                                        "escalate_rule_name": {
-                                          "type": "string",
-                                          "description": "Escalation rule name."
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "list": [
-                      {
-                        "type": "feishu",
-                        "settings": {
-                          "token": "https://open.feishu.cn/open-apis/bot/v2/hook/xxx",
-                          "alias": "Ops Alert Group"
-                        },
-                        "referenced_by": [
-                          {
-                            "channel_id": 6193426913131,
-                            "channel_name": "Order System",
-                            "escalate_rule_id": "69bd0ce95a238693176c1d66",
-                            "escalate_rule_name": "Default Escalation"
-                          },
-                          {
-                            "channel_id": 6193426913132,
-                            "channel_name": "Payment System",
-                            "escalate_rule_id": "69bd0ce95a238693176c1d67",
-                            "escalate_rule_name": "Critical Alerts"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "dingtalk",
-                        "settings": {
-                          "token": "https://oapi.dingtalk.com/robot/send?access_token=xxx",
-                          "alias": "DBA Group"
-                        },
-                        "referenced_by": [
-                          {
-                            "channel_id": 6193426913131,
-                            "channel_name": "Order System",
-                            "escalate_rule_id": "69bd0ce95a238693176c1d66",
-                            "escalate_rule_name": "Default Escalation"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "query": {
-                    "type": "string",
-                    "description": "Search keyword. Fuzzy matches against robot alias or token, case-insensitive."
-                  },
-                  "type": {
-                    "type": "string",
-                    "description": "Filter by robot type, e.g. `feishu`, `dingtalk`, `wecom`, `slack`, `teams`. Omit to return all types."
-                  }
-                }
-              },
-              "example": {
-                "query": "ops",
-                "type": "feishu"
-              }
-            }
-          }
-        }
-      }
-    },
     "/channel/escalate/rule/list": {
       "post": {
         "operationId": "channelEscalateRuleList",
@@ -20696,177 +20530,6 @@
         }
       }
     },
-    "/incident-trigger-subscription/upsert": {
-      "post": {
-        "operationId": "incident-trigger-subscription-write-upsert",
-        "summary": "Create or update incident trigger subscription",
-        "description": "Create or update an incident trigger subscription for AI SRE automation.",
-        "tags": [
-          "On-call/Incidents"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Use this when an AI SRE automation rule needs to receive new-incident trigger events from selected On-call channels.\n- `source`, `consumer`, and `consumer_ref` identify the subscription. Omitting `subscription_id` upserts the row for that tuple.\n- Only `Critical`, `Warning`, and `Info` severities are valid; `enabled` defaults to true.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-          "href": "/en/api-reference/on-call/incidents/incident-trigger-subscription-write-upsert",
-          "metadata": {
-            "sidebarTitle": "Create or update incident trigger subscription"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/IncidentTriggerSubscription"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "subscription_id": "b8d820f2-3f41-4bce-9acc-3940f7bf2df0",
-                    "account_id": 10023,
-                    "source": "ai_sre_automation",
-                    "consumer": "fc_safari",
-                    "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                    "channel_ids": [
-                      2468013579
-                    ],
-                    "severities": [
-                      "Critical",
-                      "Warning"
-                    ],
-                    "enabled": true,
-                    "created_by": 80011,
-                    "updated_by": 80011,
-                    "created_at": 1780367971,
-                    "updated_at": 1780367971,
-                    "deleted_at": 0
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IncidentTriggerSubscriptionUpsertRequest"
-              },
-              "example": {
-                "source": "ai_sre_automation",
-                "consumer": "fc_safari",
-                "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                "channel_ids": [
-                  2468013579
-                ],
-                "severities": [
-                  "Critical",
-                  "Warning"
-                ],
-                "enabled": true
-              }
-            }
-          }
-        }
-      }
-    },
-    "/incident-trigger-subscription/delete": {
-      "post": {
-        "operationId": "incident-trigger-subscription-write-delete",
-        "summary": "Delete incident trigger subscription",
-        "description": "Delete an incident trigger subscription for AI SRE automation.",
-        "tags": [
-          "On-call/Incidents"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Deletes the subscription identified by `source`, `consumer`, and `consumer_ref`; it does not delete the consumer rule itself.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-          "href": "/en/api-reference/on-call/incidents/incident-trigger-subscription-write-delete",
-          "metadata": {
-            "sidebarTitle": "Delete incident trigger subscription"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/EmptyResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {}
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IncidentTriggerSubscriptionDeleteRequest"
-              },
-              "example": {
-                "source": "ai_sre_automation",
-                "consumer": "fc_safari",
-                "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b"
-              }
-            }
-          }
-        }
-      }
-    },
     "/template/preview": {
       "post": {
         "operationId": "template-read-preview",
@@ -21232,7 +20895,8 @@
           "metadata": {
             "sidebarTitle": "Get account detail"
           },
-          "content": "| Permission | Description |\n| --- | --- |\n| None | None — any valid app_key can call this operation. |\n\nFind this operation in the [Platform API reference](/en/api-reference/platform/account/account-read-info)."
+          "content": "| Permission | Description |\n| --- | --- |\n| None | None — any valid app_key can call this operation. |\n\nFind this operation in the [Platform API reference](/en/api-reference/platform/account/account-read-info).",
+          "href": "/en/api-reference/platform/account/account-read-info"
         }
       }
     },
@@ -24541,7 +24205,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/EmptyResponse"
+                          "$ref": "#/components/schemas/CreateStatusPageResponse"
                         }
                       }
                     }
@@ -24576,7 +24240,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmptyRequest"
+                "$ref": "#/components/schemas/CreateStatusPageRequest"
               },
               "example": {
                 "name": "My Status Page",
@@ -25289,7 +24953,7 @@
       "post": {
         "operationId": "automation-rule-write-create",
         "summary": "Create Automation rule",
-        "description": "Create an Automation rule with a schedule trigger and, optionally, an HTTP POST trigger.",
+        "description": "Create an Automation rule with schedule, HTTP POST, and On-call incident triggers.",
         "tags": [
           "AI SRE/Automations"
         ],
@@ -25299,7 +24963,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | Valid `app_key`; management operations require the caller to manage the target rule |\n\n## Usage\n\n- A caller may create personal rules and rules for any team in the current account; `team_id` is immutable after creation.\n- List visibility follows session-list visibility: owners/admins see all rules; ordinary members see rules they created and rules for their teams.\n- `http_post_token` is returned only when creating or rotating the token. Save it immediately.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | Valid `app_key`; management operations require the caller to manage the target rule |\n\n## Usage\n\n- A caller may create personal rules and rules for any team in the current account; `team_id` is immutable after creation.\n- List visibility follows session-list visibility: owners/admins see all rules; ordinary members see rules they created and rules for their teams.\n- `http_post_token` is returned only when creating or rotating the token. Save it immediately.\n- To trigger from On-call incidents, send `oncall_incident_trigger_enabled`, `oncall_incident_channel_ids`, and `oncall_incident_severities`; matching events run with `trigger_kind=oncall_incident`.\n",
           "href": "/en/api-reference/ai-sre/automations/automation-rule-write-create",
           "metadata": {
             "sidebarTitle": "Create Automation rule"
@@ -25349,10 +25013,10 @@
                     "updated_at": 1780367971228,
                     "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U",
                     "schedule_next_fire_at_ms": 1780630800000,
-                    "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                    "oncall_incident_trigger_id": "autotrg_9cVb2mN7qKs4dEa8T1rY5p",
                     "oncall_incident_trigger_enabled": true,
                     "oncall_incident_channel_ids": [
-                      2468013579
+                      456
                     ],
                     "oncall_incident_severities": [
                       "Critical",
@@ -25396,7 +25060,7 @@
                 "http_post_trigger_enabled": true,
                 "oncall_incident_trigger_enabled": true,
                 "oncall_incident_channel_ids": [
-                  2468013579
+                  456
                 ],
                 "oncall_incident_severities": [
                   "Critical",
@@ -25634,7 +25298,7 @@
       "post": {
         "operationId": "automation-rule-write-update",
         "summary": "Update Automation rule",
-        "description": "Update mutable fields on an Automation rule. The personal/team scope is immutable.",
+        "description": "Update mutable Automation rule fields, including HTTP POST and On-call incident trigger settings.",
         "tags": [
           "AI SRE/Automations"
         ],
@@ -25644,7 +25308,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | Valid `app_key`; management operations require the caller to manage the target rule |\n\n## Usage\n\n- A caller may create personal rules and rules for any team in the current account; `team_id` is immutable after creation.\n- List visibility follows session-list visibility: owners/admins see all rules; ordinary members see rules they created and rules for their teams.\n- `http_post_token` is returned only when creating or rotating the token. Save it immediately.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | Valid `app_key`; management operations require the caller to manage the target rule |\n\n## Usage\n\n- A caller may create personal rules and rules for any team in the current account; `team_id` is immutable after creation.\n- List visibility follows session-list visibility: owners/admins see all rules; ordinary members see rules they created and rules for their teams.\n- `http_post_token` is returned only when creating or rotating the token. Save it immediately.\n- To trigger from On-call incidents, send `oncall_incident_trigger_enabled`, `oncall_incident_channel_ids`, and `oncall_incident_severities`; matching events run with `trigger_kind=oncall_incident`.\n",
           "href": "/en/api-reference/ai-sre/automations/automation-rule-write-update",
           "metadata": {
             "sidebarTitle": "Update Automation rule"
@@ -25694,10 +25358,10 @@
                     "updated_at": 1780367971228,
                     "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U",
                     "schedule_next_fire_at_ms": 1780630800000,
-                    "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                    "oncall_incident_trigger_id": "autotrg_9cVb2mN7qKs4dEa8T1rY5p",
                     "oncall_incident_trigger_enabled": true,
                     "oncall_incident_channel_ids": [
-                      2468013579
+                      456
                     ],
                     "oncall_incident_severities": [
                       "Critical",
@@ -25738,7 +25402,11 @@
                 "rotate_http_post_trigger_token": true,
                 "oncall_incident_trigger_enabled": true,
                 "oncall_incident_severities": [
-                  "Critical"
+                  "Critical",
+                  "Warning"
+                ],
+                "oncall_incident_channel_ids": [
+                  456
                 ]
               }
             }
@@ -25790,104 +25458,6 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": null
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AutomationRuleIDRequest"
-              },
-              "example": {
-                "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/safari/automation/rule/run": {
-      "post": {
-        "operationId": "automation-rule-write-run",
-        "summary": "Run Automation rule now",
-        "description": "Start a manual run for an Automation rule.",
-        "tags": [
-          "AI SRE/Automations"
-        ],
-        "security": [
-          {
-            "AppKeyAuth": []
-          }
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | Valid `app_key`; management operations require the caller to manage the target rule |\n\n## Usage\n\n- Starts a manual run for a rule the caller can manage, then returns after the hidden AI SRE session starts.\n- Manual runs are rate-limited to one start per rule per minute; rate-limited calls return `429`.\n- The `preflight` object explains the rule scope and runner checks used before the run starts.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-          "href": "/en/api-reference/ai-sre/automations/automation-rule-write-run",
-          "metadata": {
-            "sidebarTitle": "Run Automation rule now"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResponseEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/AutomationRuleRunResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                    "trigger_kind": "manual",
-                    "preflight": {
-                      "ok": true,
-                      "checks": [
-                        "rule_enabled",
-                        "runner_available",
-                        "permissions_ok"
-                      ],
-                      "scope": "team",
-                      "owner_id": 80011,
-                      "team_id": 123,
-                      "app_name": "flashcat-ai-sre",
-                      "warnings": []
-                    },
-                    "run": {
-                      "run_id": "taskrun_manual_5oDvqiG64uur6sBNsTc4u",
-                      "session_id": "sess_manual_f8oDvqiG64uur6sBNsTc4u"
-                    }
-                  }
                 }
               }
             }
@@ -26110,98 +25680,6 @@
                 "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
                 "limit": 20,
                 "trigger_kind": "schedule"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/safari/automation/triggers/{trigger_id}/fire": {
-      "post": {
-        "operationId": "automation-trigger-write-fire",
-        "summary": "Fire Automation HTTP POST trigger",
-        "description": "Trigger an Automation run through its HTTP POST trigger URL.",
-        "tags": [
-          "AI SRE/Automations"
-        ],
-        "security": [
-          {
-            "AutomationTriggerBearerAuth": []
-          }
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | HTTP POST trigger Bearer token |\n\n## Usage\n\n- This endpoint does not use `app_key`. Put the token returned on Automation creation or token rotation in `Authorization: Bearer <token>`.\n- Request body max size is 256 KiB and may be empty; `text` is passed to the agent as this run's context, and `dedup_key` provides idempotency.\n- A successful call returns `202 Accepted` with a run ID; the hidden session continues in the background.\n",
-          "href": "/en/api-reference/ai-sre/automations/automation-trigger-write-fire",
-          "metadata": {
-            "sidebarTitle": "Fire Automation HTTP POST trigger"
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResponseEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/AutomationFireAPITriggerResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "run_id": "taskrun_5oDvqiG64uur6sBNsTc4u",
-                    "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                    "trigger_kind": "http_post",
-                    "status": "running"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "trigger_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "HTTP POST trigger ID."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AutomationFireAPITriggerRequest"
-              },
-              "example": {
-                "text": "A deployment finished for checkout-api. Check whether related alerts increased.",
-                "dedup_key": "deploy-2026-06-29-001"
               }
             }
           }
@@ -29531,7 +29009,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 3600,
-                "description": "Aggregation window in seconds. 0 disables aggregation."
+                "description": "Delay window in seconds. 0 disables delay."
               },
               "template_id": {
                 "type": "string",
@@ -29814,7 +29292,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 3600,
-            "description": "Aggregation window in seconds. 0 disables aggregation."
+            "description": "Delay window in seconds. 0 disables delay."
           },
           "template_id": {
             "type": "string",
@@ -30846,7 +30324,7 @@
           },
           "aggr_window": {
             "type": "integer",
-            "description": "Aggregation window in seconds."
+            "description": "Delay window in seconds."
           },
           "rule_name": {
             "type": "string",
@@ -31598,7 +31076,7 @@
           },
           "aggr_window": {
             "type": "integer",
-            "description": "Aggregation window in seconds. 0 disables aggregation."
+            "description": "Delay window in seconds. 0 disables delay."
           },
           "template_id": {
             "type": "string",
@@ -45951,15 +45429,16 @@
           },
           "oncall_incident_trigger_enabled": {
             "type": "boolean",
-            "description": "Whether to create and enable an on-call incident trigger for this rule."
+            "description": "Whether the On-call incident trigger is enabled."
           },
           "oncall_incident_channel_ids": {
             "type": "array",
             "items": {
               "type": "integer",
-              "format": "int64"
+              "format": "int64",
+              "minimum": 1
             },
-            "description": "On-call channel IDs whose new incidents can trigger this rule."
+            "description": "On-call integration IDs to watch. Creating or enabling this trigger requires at least one valid ID."
           },
           "oncall_incident_severities": {
             "type": "array",
@@ -45971,7 +45450,7 @@
                 "Info"
               ]
             },
-            "description": "Incident severities that can trigger this rule."
+            "description": "Incident severities to watch. Supported values are Critical, Warning, and Info; creating or enabling this trigger requires at least one value."
           }
         },
         "required": [
@@ -46033,21 +45512,18 @@
             "type": "boolean",
             "description": "Whether the HTTP POST trigger is enabled. Sending true creates one when missing."
           },
-          "rotate_http_post_trigger_token": {
-            "type": "boolean",
-            "description": "Whether to rotate the HTTP POST trigger token. The new token is returned only in this response."
-          },
           "oncall_incident_trigger_enabled": {
             "type": "boolean",
-            "description": "Whether the on-call incident trigger is enabled. Sending true creates it when missing and channel/severity filters are provided."
+            "description": "Whether the On-call incident trigger is enabled."
           },
           "oncall_incident_channel_ids": {
             "type": "array",
             "items": {
               "type": "integer",
-              "format": "int64"
+              "format": "int64",
+              "minimum": 1
             },
-            "description": "On-call channel IDs whose new incidents can trigger this rule."
+            "description": "On-call integration IDs to watch. Creating or enabling this trigger requires at least one valid ID."
           },
           "oncall_incident_severities": {
             "type": "array",
@@ -46059,7 +45535,11 @@
                 "Info"
               ]
             },
-            "description": "Incident severities that can trigger this rule."
+            "description": "Incident severities to watch. Supported values are Critical, Warning, and Info; creating or enabling this trigger requires at least one value."
+          },
+          "rotate_http_post_trigger_token": {
+            "type": "boolean",
+            "description": "Whether to rotate the HTTP POST trigger token. The new token is returned only in this response."
           }
         },
         "required": [
@@ -46231,6 +45711,35 @@
             "type": "boolean",
             "description": "Whether the HTTP POST trigger is enabled."
           },
+          "oncall_incident_trigger_id": {
+            "type": "string",
+            "description": "On-call incident trigger ID."
+          },
+          "oncall_incident_trigger_enabled": {
+            "type": "boolean",
+            "description": "Whether the On-call incident trigger is enabled."
+          },
+          "oncall_incident_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "description": "On-call integration IDs to watch. Creating or enabling this trigger requires at least one valid ID."
+          },
+          "oncall_incident_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "Incident severities to watch. Supported values are Critical, Warning, and Info; creating or enabling this trigger requires at least one value."
+          },
           "http_post_token": {
             "type": "string",
             "description": "HTTP POST trigger token. Returned only on create or token rotation; save it immediately."
@@ -46253,34 +45762,6 @@
             "type": "integer",
             "format": "int64",
             "description": "Next scheduled fire time, Unix milliseconds. 0 means no future scheduled fire is available."
-          },
-          "oncall_incident_trigger_id": {
-            "type": "string",
-            "description": "On-call incident trigger ID."
-          },
-          "oncall_incident_trigger_enabled": {
-            "type": "boolean",
-            "description": "Whether the on-call incident trigger is enabled."
-          },
-          "oncall_incident_channel_ids": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "On-call channel IDs watched by the incident trigger."
-          },
-          "oncall_incident_severities": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "Critical",
-                "Warning",
-                "Info"
-              ]
-            },
-            "description": "Incident severities watched by the trigger."
           }
         },
         "required": [
@@ -46545,50 +46026,6 @@
           "duration_ms",
           "created_at",
           "updated_at"
-        ]
-      },
-      "AutomationFireAPITriggerRequest": {
-        "type": "object",
-        "description": "HTTP POST trigger body. The body may be empty; when present, fields must be strings.",
-        "properties": {
-          "text": {
-            "type": "string",
-            "description": "Context text passed to this Automation run."
-          },
-          "dedup_key": {
-            "type": "string",
-            "description": "Optional idempotency key; the same trigger + dedup_key reuses the same run."
-          }
-        }
-      },
-      "AutomationFireAPITriggerResponse": {
-        "type": "object",
-        "properties": {
-          "run_id": {
-            "type": "string",
-            "description": "Created or reused run ID."
-          },
-          "rule_id": {
-            "type": "string",
-            "description": "Rule ID."
-          },
-          "trigger_kind": {
-            "type": "string",
-            "enum": [
-              "http_post"
-            ],
-            "description": "Trigger kind."
-          },
-          "status": {
-            "type": "string",
-            "description": "Current run status."
-          }
-        },
-        "required": [
-          "run_id",
-          "rule_id",
-          "trigger_kind",
-          "status"
         ]
       },
       "FacetCountItem": {
@@ -47314,269 +46751,108 @@
           }
         }
       },
-      "AutomationRuleRunPreflight": {
+      "CreateStatusPageRequest": {
         "type": "object",
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "description": "Whether the rule can start a run."
-          },
-          "checks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Preflight checks that were evaluated."
-          },
-          "scope": {
+          "name": {
             "type": "string",
+            "description": "Display name of the status page.",
+            "maxLength": 255
+          },
+          "url_name": {
+            "type": "string",
+            "description": "URL-safe slug, unique per account and page type.",
+            "maxLength": 255
+          },
+          "type": {
+            "type": "string",
+            "description": "Visibility type of the status page.",
             "enum": [
-              "person",
-              "team"
-            ],
-            "description": "Hidden session scope used for the run."
+              "public",
+              "internal"
+            ]
           },
-          "owner_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Owner person ID used for the run context."
-          },
-          "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Team ID used for team-scoped runs; 0 for personal runs."
-          },
-          "app_name": {
+          "custom_domain": {
             "type": "string",
-            "description": "AI SRE app used to execute the rule."
+            "description": "Custom domain for a public status page.",
+            "maxLength": 255
           },
-          "warnings": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Non-blocking preflight warnings."
-          }
-        },
-        "required": [
-          "ok",
-          "checks",
-          "scope",
-          "owner_id",
-          "team_id",
-          "app_name"
-        ]
-      },
-      "AutomationRuleRunView": {
-        "type": "object",
-        "properties": {
-          "run_id": {
+          "page_title": {
             "type": "string",
-            "description": "Created automation run ID."
+            "description": "Browser title shown for the status page."
           },
-          "session_id": {
+          "page_header": {
             "type": "string",
-            "description": "Hidden AI SRE session ID started for this run."
-          }
-        },
-        "required": [
-          "run_id"
-        ]
-      },
-      "AutomationRuleRunResponse": {
-        "type": "object",
-        "properties": {
-          "rule_id": {
-            "type": "string",
-            "description": "Rule ID."
+            "description": "Header content shown on the status page."
           },
-          "trigger_kind": {
+          "page_footer": {
             "type": "string",
+            "description": "Footer content shown on the status page."
+          },
+          "date_view": {
+            "type": "string",
+            "description": "How event dates are displayed.",
             "enum": [
-              "manual"
-            ],
-            "description": "Trigger kind for this run."
+              "calendar",
+              "list"
+            ]
           },
-          "preflight": {
-            "$ref": "#/components/schemas/AutomationRuleRunPreflight"
+          "display_uptime_mode": {
+            "type": "string",
+            "description": "How uptime is displayed.",
+            "enum": [
+              "chart_and_percentage",
+              "chart",
+              "none"
+            ]
           },
-          "run": {
-            "$ref": "#/components/schemas/AutomationRuleRunView"
+          "custom_links": {
+            "type": "array",
+            "description": "Custom navigation links shown on the status page.",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "contact_info": {
+            "type": "string",
+            "description": "Get-in-touch contact, such as a mailto or website URL."
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/StatusPageSubscriptionItem"
           }
         },
         "required": [
-          "rule_id",
-          "trigger_kind",
-          "preflight"
+          "name",
+          "url_name",
+          "type",
+          "date_view",
+          "display_uptime_mode"
         ]
       },
-      "IncidentTriggerSubscriptionUpsertRequest": {
+      "CreateStatusPageResponse": {
         "type": "object",
-        "description": "Create or update an incident trigger subscription.",
         "properties": {
-          "subscription_id": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Created status page ID."
+          },
+          "page_name": {
             "type": "string",
-            "description": "Existing subscription ID. Omit to create or upsert by source, consumer, and consumer_ref."
+            "description": "Created status page name."
           },
-          "source": {
+          "page_url_name": {
             "type": "string",
-            "description": "Subscription source. Use `ai_sre_automation` for AI SRE automation rules."
-          },
-          "consumer": {
-            "type": "string",
-            "description": "Consumer system. Use `fc_safari` for AI SRE automation rules."
-          },
-          "consumer_ref": {
-            "type": "string",
-            "description": "Consumer-owned reference, such as an Automation rule ID."
-          },
-          "channel_ids": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "On-call channel IDs whose new incidents should trigger the consumer."
-          },
-          "severities": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "string",
-              "enum": [
-                "Critical",
-                "Warning",
-                "Info"
-              ]
-            },
-            "description": "Incident severities to subscribe to. `Ok` is not valid."
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the subscription is enabled. Defaults to true when omitted."
+            "description": "Final URL-safe slug assigned to the status page."
           }
         },
         "required": [
-          "source",
-          "consumer",
-          "consumer_ref",
-          "channel_ids",
-          "severities"
-        ]
-      },
-      "IncidentTriggerSubscriptionDeleteRequest": {
-        "type": "object",
-        "description": "Delete an incident trigger subscription by consumer reference.",
-        "properties": {
-          "source": {
-            "type": "string",
-            "description": "Subscription source."
-          },
-          "consumer": {
-            "type": "string",
-            "description": "Consumer system."
-          },
-          "consumer_ref": {
-            "type": "string",
-            "description": "Consumer-owned reference, such as an Automation rule ID."
-          }
-        },
-        "required": [
-          "source",
-          "consumer",
-          "consumer_ref"
-        ]
-      },
-      "IncidentTriggerSubscription": {
-        "type": "object",
-        "description": "Incident trigger subscription stored by On-call.",
-        "properties": {
-          "subscription_id": {
-            "type": "string",
-            "description": "Subscription ID."
-          },
-          "account_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Account ID."
-          },
-          "source": {
-            "type": "string",
-            "description": "Subscription source."
-          },
-          "consumer": {
-            "type": "string",
-            "description": "Consumer system."
-          },
-          "consumer_ref": {
-            "type": "string",
-            "description": "Consumer-owned reference."
-          },
-          "channel_ids": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Subscribed channel IDs."
-          },
-          "severities": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "Critical",
-                "Warning",
-                "Info"
-              ]
-            },
-            "description": "Subscribed incident severities."
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the subscription is enabled."
-          },
-          "created_by": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Member ID that created the subscription."
-          },
-          "updated_by": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Member ID that last updated the subscription."
-          },
-          "created_at": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unix timestamp in seconds when the subscription was created."
-          },
-          "updated_at": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unix timestamp in seconds when the subscription was last updated."
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unix timestamp in seconds when the subscription was deleted; 0 means active."
-          }
-        },
-        "required": [
-          "subscription_id",
-          "account_id",
-          "source",
-          "consumer",
-          "consumer_ref",
-          "channel_ids",
-          "severities",
-          "enabled",
-          "created_by",
-          "updated_by",
-          "created_at",
-          "updated_at",
-          "deleted_at"
+          "page_id",
+          "page_name",
+          "page_url_name"
         ]
       }
     }
