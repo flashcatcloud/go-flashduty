@@ -122,7 +122,7 @@
       "description": "监控服务开通及数据预览工具。"
     },
     {
-      "name": "AI SRE/Automations"
+      "name": "AI SRE/自动化"
     },
     {
       "name": "RUM/应用管理",
@@ -4829,172 +4829,6 @@
               "example": {
                 "channel_id": 1001,
                 "rule_id": "6621b23f4a2c5e0012ab34d0"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/escalate/webhook/robot/list": {
-      "post": {
-        "operationId": "channelEscalateWebhookRobotList",
-        "summary": "查询分派策略中的群聊机器人列表",
-        "description": "查询当前账户下所有分派策略中配置的群聊机器人（Webhook），返回去重后的机器人列表及其被哪些协作空间/分派策略引用。",
-        "tags": [
-          "On-call/协作空间"
-        ],
-        "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **协作空间查看**（`on-call`） |\n\n## 使用说明\n\n该接口用于查询当前账户下所有分派策略中配置的 IM 群聊机器人。系统会遍历所有分派策略的所有环节，提取其中配置的 Webhook 机器人（排除应用类型 `_app` 后缀的），按 `type + token` 去重后返回。\n\n每个机器人附带 `referenced_by` 列表，标明该机器人被哪些协作空间和分派策略引用，便于进行机器人的统一管理和影响范围评估。\n\n支持通过 `type` 筛选特定类型的机器人（如 `feishu`、`dingtalk`、`wecom`、`slack`、`teams` 等），也支持通过 `query` 对机器人的别名或 token 进行模糊搜索。",
-          "href": "/zh/api-reference/on-call/channels/channel-escalate-webhook-robot-list",
-          "metadata": {
-            "sidebarTitle": "查询群聊机器人列表"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "object",
-                          "properties": {
-                            "list": {
-                              "type": "array",
-                              "description": "去重后的群聊机器人列表。",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "description": "机器人类型，如 `feishu`、`dingtalk`、`wecom`、`slack`、`teams` 等。"
-                                  },
-                                  "settings": {
-                                    "type": "object",
-                                    "description": "机器人配置，包含 `token`（Webhook 地址或密钥）和 `alias`（机器人别名）等字段。",
-                                    "additionalProperties": true
-                                  },
-                                  "referenced_by": {
-                                    "type": "array",
-                                    "description": "引用该机器人的协作空间和分派策略列表。",
-                                    "items": {
-                                      "type": "object",
-                                      "properties": {
-                                        "channel_id": {
-                                          "type": "integer",
-                                          "format": "int64",
-                                          "description": "协作空间 ID。"
-                                        },
-                                        "channel_name": {
-                                          "type": "string",
-                                          "description": "协作空间名称。"
-                                        },
-                                        "escalate_rule_id": {
-                                          "type": "string",
-                                          "description": "分派策略 ID（MongoDB ObjectID）。"
-                                        },
-                                        "escalate_rule_name": {
-                                          "type": "string",
-                                          "description": "分派策略名称。"
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "list": [
-                      {
-                        "type": "feishu",
-                        "settings": {
-                          "token": "https://open.feishu.cn/open-apis/bot/v2/hook/xxx",
-                          "alias": "运维告警群"
-                        },
-                        "referenced_by": [
-                          {
-                            "channel_id": 6193426913131,
-                            "channel_name": "订单系统",
-                            "escalate_rule_id": "69bd0ce95a238693176c1d66",
-                            "escalate_rule_name": "默认分派策略"
-                          },
-                          {
-                            "channel_id": 6193426913132,
-                            "channel_name": "支付系统",
-                            "escalate_rule_id": "69bd0ce95a238693176c1d67",
-                            "escalate_rule_name": "核心告警"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "dingtalk",
-                        "settings": {
-                          "token": "https://oapi.dingtalk.com/robot/send?access_token=xxx",
-                          "alias": "DBA 群"
-                        },
-                        "referenced_by": [
-                          {
-                            "channel_id": 6193426913131,
-                            "channel_name": "订单系统",
-                            "escalate_rule_id": "69bd0ce95a238693176c1d66",
-                            "escalate_rule_name": "默认分派策略"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "query": {
-                    "type": "string",
-                    "description": "搜索关键词，按机器人别名（alias）或 token 模糊匹配，不区分大小写。"
-                  },
-                  "type": {
-                    "type": "string",
-                    "description": "按机器人类型过滤，如 `feishu`、`dingtalk`、`wecom`、`slack`、`teams` 等。不传则返回所有类型。"
-                  }
-                }
-              },
-              "example": {
-                "query": "运维",
-                "type": "feishu"
               }
             }
           }
@@ -20688,177 +20522,6 @@
         }
       }
     },
-    "/incident-trigger-subscription/upsert": {
-      "post": {
-        "operationId": "incident-trigger-subscription-write-upsert",
-        "summary": "创建或更新故障触发订阅",
-        "description": "为 AI SRE 自动化创建或更新故障触发订阅。",
-        "tags": [
-          "On-call/故障管理"
-        ],
-        "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 当 AI SRE 自动化规则需要接收指定 On-call 协作空间的新故障触发事件时调用。\n- `source`、`consumer`、`consumer_ref` 共同标识订阅；省略 `subscription_id` 时会按这一组标识创建或更新。\n- 仅支持 `Critical`、`Warning`、`Info` 三种故障等级；`enabled` 省略时默认为 true。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
-          "href": "/zh/api-reference/on-call/incidents/incident-trigger-subscription-write-upsert",
-          "metadata": {
-            "sidebarTitle": "创建或更新故障触发订阅"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/IncidentTriggerSubscription"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "subscription_id": "b8d820f2-3f41-4bce-9acc-3940f7bf2df0",
-                    "account_id": 10023,
-                    "source": "ai_sre_automation",
-                    "consumer": "fc_safari",
-                    "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                    "channel_ids": [
-                      2468013579
-                    ],
-                    "severities": [
-                      "Critical",
-                      "Warning"
-                    ],
-                    "enabled": true,
-                    "created_by": 80011,
-                    "updated_by": 80011,
-                    "created_at": 1780367971,
-                    "updated_at": 1780367971,
-                    "deleted_at": 0
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IncidentTriggerSubscriptionUpsertRequest"
-              },
-              "example": {
-                "source": "ai_sre_automation",
-                "consumer": "fc_safari",
-                "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                "channel_ids": [
-                  2468013579
-                ],
-                "severities": [
-                  "Critical",
-                  "Warning"
-                ],
-                "enabled": true
-              }
-            }
-          }
-        }
-      }
-    },
-    "/incident-trigger-subscription/delete": {
-      "post": {
-        "operationId": "incident-trigger-subscription-write-delete",
-        "summary": "删除故障触发订阅",
-        "description": "删除 AI SRE 自动化使用的故障触发订阅。",
-        "tags": [
-          "On-call/故障管理"
-        ],
-        "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 删除由 `source`、`consumer`、`consumer_ref` 标识的订阅；不会删除消费方规则本身。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
-          "href": "/zh/api-reference/on-call/incidents/incident-trigger-subscription-write-delete",
-          "metadata": {
-            "sidebarTitle": "删除故障触发订阅"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/EmptyResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {}
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IncidentTriggerSubscriptionDeleteRequest"
-              },
-              "example": {
-                "source": "ai_sre_automation",
-                "consumer": "fc_safari",
-                "consumer_ref": "auto_7NnLzY2Qp8xS4kUaV3mR6b"
-              }
-            }
-          }
-        }
-      }
-    },
     "/template/preview": {
       "post": {
         "operationId": "template-read-preview",
@@ -21224,7 +20887,8 @@
           "metadata": {
             "sidebarTitle": "查看主体信息"
           },
-          "content": "| 权限 | 描述 |\n| --- | --- |\n| 无 | 无 — 任意有效的 app_key 均可调用此操作。 |\n\n在 [平台 API 参考](/zh/api-reference/platform/account/account-read-info) 中查看此操作。"
+          "content": "| 权限 | 描述 |\n| --- | --- |\n| 无 | 无 — 任意有效的 app_key 均可调用此操作。 |\n\n在 [平台 API 参考](/zh/api-reference/platform/account/account-read-info) 中查看此操作。",
+          "href": "/zh/api-reference/platform/account/account-read-info"
         }
       }
     },
@@ -24533,7 +24197,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/EmptyResponse"
+                          "$ref": "#/components/schemas/CreateStatusPageResponse"
                         }
                       }
                     }
@@ -24568,7 +24232,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmptyRequest"
+                "$ref": "#/components/schemas/CreateStatusPageRequest"
               },
               "example": {
                 "name": "My Status Page",
@@ -25281,9 +24945,9 @@
       "post": {
         "operationId": "automation-rule-write-create",
         "summary": "创建自动化规则",
-        "description": "创建自动化规则，包含 schedule trigger，并可选启用 HTTP POST trigger。",
+        "description": "创建自动化规则，支持 schedule、HTTP POST 和 On-call 故障触发器。",
         "tags": [
-          "AI SRE/Automations"
+          "AI SRE/自动化"
         ],
         "security": [
           {
@@ -25291,7 +24955,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 可以创建个人规则，也可以创建当前 account 下任意团队规则；`team_id` 创建后不可修改。\n- 列表可见性与 Session 列表对齐：Owner / 管理员可见全部；普通成员可见自己创建的规则和自己团队的规则。\n- `http_post_token` 只在创建或轮换 token 的响应中返回，请立即保存。\n",
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 可以创建个人规则，也可以创建当前 account 下任意团队规则；`team_id` 创建后不可修改。\n- 列表可见性与 Session 列表对齐：Owner / 管理员可见全部；普通成员可见自己创建的规则和自己团队的规则。\n- `http_post_token` 只在创建或轮换 token 的响应中返回，请立即保存。\n- 如需由 On-call 故障触发，传入 `oncall_incident_trigger_enabled`、`oncall_incident_channel_ids` 与 `oncall_incident_severities`；匹配事件会以 `oncall_incident` 运行。\n",
           "href": "/zh/api-reference/ai-sre/automations/automation-rule-write-create",
           "metadata": {
             "sidebarTitle": "创建自动化规则"
@@ -25341,10 +25005,10 @@
                     "updated_at": 1780367971228,
                     "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U",
                     "schedule_next_fire_at_ms": 1780630800000,
-                    "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                    "oncall_incident_trigger_id": "autotrg_9cVb2mN7qKs4dEa8T1rY5p",
                     "oncall_incident_trigger_enabled": true,
                     "oncall_incident_channel_ids": [
-                      2468013579
+                      456
                     ],
                     "oncall_incident_severities": [
                       "Critical",
@@ -25388,7 +25052,7 @@
                 "http_post_trigger_enabled": true,
                 "oncall_incident_trigger_enabled": true,
                 "oncall_incident_channel_ids": [
-                  2468013579
+                  456
                 ],
                 "oncall_incident_severities": [
                   "Critical",
@@ -25406,7 +25070,7 @@
         "summary": "列出自动化规则",
         "description": "列出当前调用者可见的自动化规则。",
         "tags": [
-          "AI SRE/Automations"
+          "AI SRE/自动化"
         ],
         "security": [
           {
@@ -25520,7 +25184,7 @@
         "summary": "查看自动化规则",
         "description": "按 ID 查看一条自动化规则。",
         "tags": [
-          "AI SRE/Automations"
+          "AI SRE/自动化"
         ],
         "security": [
           {
@@ -25626,9 +25290,9 @@
       "post": {
         "operationId": "automation-rule-write-update",
         "summary": "更新自动化规则",
-        "description": "更新自动化规则的可变字段。personal / team scope 创建后不可修改。",
+        "description": "更新自动化规则的可变字段，包括 HTTP POST 与 On-call 故障触发器配置。",
         "tags": [
-          "AI SRE/Automations"
+          "AI SRE/自动化"
         ],
         "security": [
           {
@@ -25636,7 +25300,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 可以创建个人规则，也可以创建当前 account 下任意团队规则；`team_id` 创建后不可修改。\n- 列表可见性与 Session 列表对齐：Owner / 管理员可见全部；普通成员可见自己创建的规则和自己团队的规则。\n- `http_post_token` 只在创建或轮换 token 的响应中返回，请立即保存。\n",
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 可以创建个人规则，也可以创建当前 account 下任意团队规则；`team_id` 创建后不可修改。\n- 列表可见性与 Session 列表对齐：Owner / 管理员可见全部；普通成员可见自己创建的规则和自己团队的规则。\n- `http_post_token` 只在创建或轮换 token 的响应中返回，请立即保存。\n- 如需由 On-call 故障触发，传入 `oncall_incident_trigger_enabled`、`oncall_incident_channel_ids` 与 `oncall_incident_severities`；匹配事件会以 `oncall_incident` 运行。\n",
           "href": "/zh/api-reference/ai-sre/automations/automation-rule-write-update",
           "metadata": {
             "sidebarTitle": "更新自动化规则"
@@ -25686,10 +25350,10 @@
                     "updated_at": 1780367971228,
                     "http_post_token": "sat_yQ9p8V7n6M5k4J3h2G1f0E9d8C7b6A5z4Y3x2W1v0U",
                     "schedule_next_fire_at_ms": 1780630800000,
-                    "oncall_incident_trigger_id": "autotrg_9cFr2kLm8qNv5pXs4dWy7a",
+                    "oncall_incident_trigger_id": "autotrg_9cVb2mN7qKs4dEa8T1rY5p",
                     "oncall_incident_trigger_enabled": true,
                     "oncall_incident_channel_ids": [
-                      2468013579
+                      456
                     ],
                     "oncall_incident_severities": [
                       "Critical",
@@ -25730,7 +25394,11 @@
                 "rotate_http_post_trigger_token": true,
                 "oncall_incident_trigger_enabled": true,
                 "oncall_incident_severities": [
-                  "Critical"
+                  "Critical",
+                  "Warning"
+                ],
+                "oncall_incident_channel_ids": [
+                  456
                 ]
               }
             }
@@ -25744,7 +25412,7 @@
         "summary": "删除自动化规则",
         "description": "删除一条自动化规则。",
         "tags": [
-          "AI SRE/Automations"
+          "AI SRE/自动化"
         ],
         "security": [
           {
@@ -25817,111 +25485,13 @@
         }
       }
     },
-    "/safari/automation/rule/run": {
-      "post": {
-        "operationId": "automation-rule-write-run",
-        "summary": "立即执行自动化规则",
-        "description": "为自动化规则立即启动一次手动运行。",
-        "tags": [
-          "AI SRE/Automations"
-        ],
-        "security": [
-          {
-            "AppKeyAuth": []
-          }
-        ],
-        "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 为调用者可管理的规则启动一次手动运行，并在隐藏 AI SRE 会话启动后返回。\n- 同一规则的手动运行限频为每分钟一次；命中限频时返回 `429`。\n- `preflight` 会说明本次运行启动前使用的规则作用域和 Runner 检查结果。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
-          "href": "/zh/api-reference/ai-sre/automations/automation-rule-write-run",
-          "metadata": {
-            "sidebarTitle": "立即执行自动化规则"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResponseEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/AutomationRuleRunResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                    "trigger_kind": "manual",
-                    "preflight": {
-                      "ok": true,
-                      "checks": [
-                        "rule_enabled",
-                        "runner_available",
-                        "permissions_ok"
-                      ],
-                      "scope": "team",
-                      "owner_id": 80011,
-                      "team_id": 123,
-                      "app_name": "flashcat-ai-sre",
-                      "warnings": []
-                    },
-                    "run": {
-                      "run_id": "taskrun_manual_5oDvqiG64uur6sBNsTc4u",
-                      "session_id": "sess_manual_f8oDvqiG64uur6sBNsTc4u"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AutomationRuleIDRequest"
-              },
-              "example": {
-                "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b"
-              }
-            }
-          }
-        }
-      }
-    },
     "/safari/automation/template/list": {
       "post": {
         "operationId": "automation-template-read-list",
         "summary": "列出自动化模板",
         "description": "按语言列出自动化预设模板。",
         "tags": [
-          "AI SRE/Automations"
+          "AI SRE/自动化"
         ],
         "security": [
           {
@@ -26009,7 +25579,7 @@
         "summary": "列出自动化运行历史",
         "description": "列出调用者可管理规则的运行历史。",
         "tags": [
-          "AI SRE/Automations"
+          "AI SRE/自动化"
         ],
         "security": [
           {
@@ -26102,98 +25672,6 @@
                 "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
                 "limit": 20,
                 "trigger_kind": "schedule"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/safari/automation/triggers/{trigger_id}/fire": {
-      "post": {
-        "operationId": "automation-trigger-write-fire",
-        "summary": "触发自动化 HTTP POST trigger",
-        "description": "通过 HTTP POST trigger URL 触发一次自动化运行。",
-        "tags": [
-          "AI SRE/Automations"
-        ],
-        "security": [
-          {
-            "AutomationTriggerBearerAuth": []
-          }
-        ],
-        "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **1,000 次/分钟**；**50 次/秒** 每账户 |\n| 权限 | HTTP POST trigger Bearer Token |\n\n## 使用说明\n\n- 此接口不使用 `app_key`。将自动化创建或 token 轮换时返回的 token 放在 `Authorization: Bearer <token>` 请求头中。\n- 请求体最大 256 KiB，可为空；`text` 会作为本次运行上下文传给 Agent，`dedup_key` 用于幂等。\n- 成功后立即返回 `202 Accepted` 和 run ID，实际会话在后台运行。\n",
-          "href": "/zh/api-reference/ai-sre/automations/automation-trigger-write-fire",
-          "metadata": {
-            "sidebarTitle": "触发自动化 HTTP POST trigger"
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ResponseEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/AutomationFireAPITriggerResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "run_id": "taskrun_5oDvqiG64uur6sBNsTc4u",
-                    "rule_id": "auto_7NnLzY2Qp8xS4kUaV3mR6b",
-                    "trigger_kind": "http_post",
-                    "status": "running"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "trigger_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "HTTP POST trigger ID。"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AutomationFireAPITriggerRequest"
-              },
-              "example": {
-                "text": "A deployment finished for checkout-api. Check whether related alerts increased.",
-                "dedup_key": "deploy-2026-06-29-001"
               }
             }
           }
@@ -29522,7 +29000,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 3600,
-                "description": "聚合窗口,单位秒,0 表示不聚合。"
+                "description": "延迟窗口,单位秒,0 表示不延迟。"
               },
               "template_id": {
                 "type": "string",
@@ -29805,7 +29283,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 3600,
-            "description": "聚合窗口,单位秒,0 表示不聚合。"
+            "description": "延迟窗口,单位秒,0 表示不延迟。"
           },
           "template_id": {
             "type": "string",
@@ -30837,7 +30315,7 @@
           },
           "aggr_window": {
             "type": "integer",
-            "description": "聚合窗口，单位秒。"
+            "description": "延迟窗口，单位秒。"
           },
           "rule_name": {
             "type": "string",
@@ -31589,7 +31067,7 @@
           },
           "aggr_window": {
             "type": "integer",
-            "description": "聚合窗口，单位秒，0 表示不聚合。"
+            "description": "延迟窗口，单位秒，0 表示不延迟。"
           },
           "template_id": {
             "type": "string",
@@ -45942,15 +45420,16 @@
           },
           "oncall_incident_trigger_enabled": {
             "type": "boolean",
-            "description": "是否为此规则创建并启用 On-call 故障触发器。"
+            "description": "是否启用 On-call 故障触发器。"
           },
           "oncall_incident_channel_ids": {
             "type": "array",
             "items": {
               "type": "integer",
-              "format": "int64"
+              "format": "int64",
+              "minimum": 1
             },
-            "description": "可触发此规则的 On-call 协作空间 ID。"
+            "description": "监听的 On-call 集成 ID 列表；创建或启用该触发器时至少需要一个有效 ID。"
           },
           "oncall_incident_severities": {
             "type": "array",
@@ -45962,7 +45441,7 @@
                 "Info"
               ]
             },
-            "description": "可触发此规则的故障等级。"
+            "description": "监听的故障严重程度，支持 Critical、Warning 和 Info；创建或启用该触发器时至少需要一个值。"
           }
         },
         "required": [
@@ -46024,21 +45503,18 @@
             "type": "boolean",
             "description": "是否启用 HTTP POST trigger。不存在时设为 true 会创建。"
           },
-          "rotate_http_post_trigger_token": {
-            "type": "boolean",
-            "description": "是否轮换 HTTP POST trigger token。新 token 只会在本次响应中返回。"
-          },
           "oncall_incident_trigger_enabled": {
             "type": "boolean",
-            "description": "On-call 故障触发器是否启用。不存在时发送 true，并同时提供协作空间和等级过滤条件，会创建触发器。"
+            "description": "是否启用 On-call 故障触发器。"
           },
           "oncall_incident_channel_ids": {
             "type": "array",
             "items": {
               "type": "integer",
-              "format": "int64"
+              "format": "int64",
+              "minimum": 1
             },
-            "description": "可触发此规则的 On-call 协作空间 ID。"
+            "description": "监听的 On-call 集成 ID 列表；创建或启用该触发器时至少需要一个有效 ID。"
           },
           "oncall_incident_severities": {
             "type": "array",
@@ -46050,7 +45526,11 @@
                 "Info"
               ]
             },
-            "description": "可触发此规则的故障等级。"
+            "description": "监听的故障严重程度，支持 Critical、Warning 和 Info；创建或启用该触发器时至少需要一个值。"
+          },
+          "rotate_http_post_trigger_token": {
+            "type": "boolean",
+            "description": "是否轮换 HTTP POST trigger token。新 token 只会在本次响应中返回。"
           }
         },
         "required": [
@@ -46222,6 +45702,35 @@
             "type": "boolean",
             "description": "HTTP POST trigger 是否启用。"
           },
+          "oncall_incident_trigger_id": {
+            "type": "string",
+            "description": "On-call 故障触发器 ID。"
+          },
+          "oncall_incident_trigger_enabled": {
+            "type": "boolean",
+            "description": "是否启用 On-call 故障触发器。"
+          },
+          "oncall_incident_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "description": "监听的 On-call 集成 ID 列表；创建或启用该触发器时至少需要一个有效 ID。"
+          },
+          "oncall_incident_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "监听的故障严重程度，支持 Critical、Warning 和 Info；创建或启用该触发器时至少需要一个值。"
+          },
           "http_post_token": {
             "type": "string",
             "description": "HTTP POST trigger token。只在创建或轮换 token 的响应中返回；请立即保存。"
@@ -46244,34 +45753,6 @@
             "type": "integer",
             "format": "int64",
             "description": "下一次计划触发时间，Unix 毫秒；0 表示暂无可用的下一次计划触发。"
-          },
-          "oncall_incident_trigger_id": {
-            "type": "string",
-            "description": "On-call 故障触发器 ID。"
-          },
-          "oncall_incident_trigger_enabled": {
-            "type": "boolean",
-            "description": "On-call 故障触发器是否启用。"
-          },
-          "oncall_incident_channel_ids": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "故障触发器监听的 On-call 协作空间 ID。"
-          },
-          "oncall_incident_severities": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "Critical",
-                "Warning",
-                "Info"
-              ]
-            },
-            "description": "故障触发器监听的故障等级。"
           }
         },
         "required": [
@@ -46536,50 +46017,6 @@
           "duration_ms",
           "created_at",
           "updated_at"
-        ]
-      },
-      "AutomationFireAPITriggerRequest": {
-        "type": "object",
-        "description": "HTTP POST trigger 请求体。请求体可为空；字段存在时必须是字符串。",
-        "properties": {
-          "text": {
-            "type": "string",
-            "description": "传给本次自动化运行的上下文文本。"
-          },
-          "dedup_key": {
-            "type": "string",
-            "description": "可选幂等键；相同 trigger + dedup_key 会复用同一次运行。"
-          }
-        }
-      },
-      "AutomationFireAPITriggerResponse": {
-        "type": "object",
-        "properties": {
-          "run_id": {
-            "type": "string",
-            "description": "已创建或复用的运行 ID。"
-          },
-          "rule_id": {
-            "type": "string",
-            "description": "规则 ID。"
-          },
-          "trigger_kind": {
-            "type": "string",
-            "enum": [
-              "http_post"
-            ],
-            "description": "触发方式。"
-          },
-          "status": {
-            "type": "string",
-            "description": "运行当前状态。"
-          }
-        },
-        "required": [
-          "run_id",
-          "rule_id",
-          "trigger_kind",
-          "status"
         ]
       },
       "FacetCountItem": {
@@ -47305,269 +46742,108 @@
           }
         }
       },
-      "AutomationRuleRunPreflight": {
+      "CreateStatusPageRequest": {
         "type": "object",
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "description": "规则是否可以启动一次运行。"
-          },
-          "checks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "本次执行前检查的检查项。"
-          },
-          "scope": {
+          "name": {
             "type": "string",
+            "description": "状态页展示名称。",
+            "maxLength": 255
+          },
+          "url_name": {
+            "type": "string",
+            "description": "URL 安全的状态页路径，在账户和状态页类型内唯一。",
+            "maxLength": 255
+          },
+          "type": {
+            "type": "string",
+            "description": "状态页可见性类型。",
             "enum": [
-              "person",
-              "team"
-            ],
-            "description": "本次运行使用的隐藏会话作用域。"
+              "public",
+              "internal"
+            ]
           },
-          "owner_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "本次运行上下文使用的负责人 ID。"
-          },
-          "team_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "团队作用域运行使用的团队 ID；个人运行时为 0。"
-          },
-          "app_name": {
+          "custom_domain": {
             "type": "string",
-            "description": "执行此规则的 AI SRE App。"
+            "description": "公开状态页使用的自定义域名。",
+            "maxLength": 255
           },
-          "warnings": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "不阻塞启动的执行前警告。"
-          }
-        },
-        "required": [
-          "ok",
-          "checks",
-          "scope",
-          "owner_id",
-          "team_id",
-          "app_name"
-        ]
-      },
-      "AutomationRuleRunView": {
-        "type": "object",
-        "properties": {
-          "run_id": {
+          "page_title": {
             "type": "string",
-            "description": "已创建的自动化运行 ID。"
+            "description": "状态页浏览器标题。"
           },
-          "session_id": {
+          "page_header": {
             "type": "string",
-            "description": "为本次运行启动的隐藏 AI SRE 会话 ID。"
-          }
-        },
-        "required": [
-          "run_id"
-        ]
-      },
-      "AutomationRuleRunResponse": {
-        "type": "object",
-        "properties": {
-          "rule_id": {
-            "type": "string",
-            "description": "规则 ID。"
+            "description": "状态页页头内容。"
           },
-          "trigger_kind": {
+          "page_footer": {
             "type": "string",
+            "description": "状态页页脚内容。"
+          },
+          "date_view": {
+            "type": "string",
+            "description": "事件日期展示方式。",
             "enum": [
-              "manual"
-            ],
-            "description": "本次运行的触发来源。"
+              "calendar",
+              "list"
+            ]
           },
-          "preflight": {
-            "$ref": "#/components/schemas/AutomationRuleRunPreflight"
+          "display_uptime_mode": {
+            "type": "string",
+            "description": "可用率展示方式。",
+            "enum": [
+              "chart_and_percentage",
+              "chart",
+              "none"
+            ]
           },
-          "run": {
-            "$ref": "#/components/schemas/AutomationRuleRunView"
+          "custom_links": {
+            "type": "array",
+            "description": "状态页展示的自定义导航链接。",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "contact_info": {
+            "type": "string",
+            "description": "联系信息，例如 mailto 或网站 URL。"
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/StatusPageSubscriptionItem"
           }
         },
         "required": [
-          "rule_id",
-          "trigger_kind",
-          "preflight"
+          "name",
+          "url_name",
+          "type",
+          "date_view",
+          "display_uptime_mode"
         ]
       },
-      "IncidentTriggerSubscriptionUpsertRequest": {
+      "CreateStatusPageResponse": {
         "type": "object",
-        "description": "创建或更新故障触发订阅。",
         "properties": {
-          "subscription_id": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建的状态页 ID。"
+          },
+          "page_name": {
             "type": "string",
-            "description": "已有订阅 ID。省略时按 source、consumer、consumer_ref 创建或更新。"
+            "description": "创建的状态页名称。"
           },
-          "source": {
+          "page_url_name": {
             "type": "string",
-            "description": "订阅来源。AI SRE 自动化规则使用 `ai_sre_automation`。"
-          },
-          "consumer": {
-            "type": "string",
-            "description": "消费方系统。AI SRE 自动化规则使用 `fc_safari`。"
-          },
-          "consumer_ref": {
-            "type": "string",
-            "description": "消费方持有的引用 ID，例如自动化规则 ID。"
-          },
-          "channel_ids": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "新故障可触发消费方的 On-call 协作空间 ID。"
-          },
-          "severities": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "string",
-              "enum": [
-                "Critical",
-                "Warning",
-                "Info"
-              ]
-            },
-            "description": "订阅的故障等级；不支持 `Ok`。"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "订阅是否启用；省略时默认为 true。"
+            "description": "最终分配给状态页的 URL 安全路径。"
           }
         },
         "required": [
-          "source",
-          "consumer",
-          "consumer_ref",
-          "channel_ids",
-          "severities"
-        ]
-      },
-      "IncidentTriggerSubscriptionDeleteRequest": {
-        "type": "object",
-        "description": "按消费方引用删除故障触发订阅。",
-        "properties": {
-          "source": {
-            "type": "string",
-            "description": "订阅来源。"
-          },
-          "consumer": {
-            "type": "string",
-            "description": "消费方系统。"
-          },
-          "consumer_ref": {
-            "type": "string",
-            "description": "消费方持有的引用 ID，例如自动化规则 ID。"
-          }
-        },
-        "required": [
-          "source",
-          "consumer",
-          "consumer_ref"
-        ]
-      },
-      "IncidentTriggerSubscription": {
-        "type": "object",
-        "description": "On-call 存储的故障触发订阅。",
-        "properties": {
-          "subscription_id": {
-            "type": "string",
-            "description": "订阅 ID。"
-          },
-          "account_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "账户 ID。"
-          },
-          "source": {
-            "type": "string",
-            "description": "订阅来源。"
-          },
-          "consumer": {
-            "type": "string",
-            "description": "消费方系统。"
-          },
-          "consumer_ref": {
-            "type": "string",
-            "description": "消费方持有的引用 ID。"
-          },
-          "channel_ids": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "已订阅的协作空间 ID。"
-          },
-          "severities": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "Critical",
-                "Warning",
-                "Info"
-              ]
-            },
-            "description": "已订阅的故障等级。"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "订阅是否启用。"
-          },
-          "created_by": {
-            "type": "integer",
-            "format": "int64",
-            "description": "创建订阅的成员 ID。"
-          },
-          "updated_by": {
-            "type": "integer",
-            "format": "int64",
-            "description": "最后更新订阅的成员 ID。"
-          },
-          "created_at": {
-            "type": "integer",
-            "format": "int64",
-            "description": "订阅创建时间，Unix 秒。"
-          },
-          "updated_at": {
-            "type": "integer",
-            "format": "int64",
-            "description": "订阅最后更新时间，Unix 秒。"
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64",
-            "description": "订阅删除时间，Unix 秒；0 表示仍有效。"
-          }
-        },
-        "required": [
-          "subscription_id",
-          "account_id",
-          "source",
-          "consumer",
-          "consumer_ref",
-          "channel_ids",
-          "severities",
-          "enabled",
-          "created_by",
-          "updated_by",
-          "created_at",
-          "updated_at",
-          "deleted_at"
+          "page_id",
+          "page_name",
+          "page_url_name"
         ]
       }
     }

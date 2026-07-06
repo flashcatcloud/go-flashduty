@@ -94,11 +94,10 @@ func run() error {
 		schemas:    asMap(asMap(spec["components"])["schemas"]),
 		emptyTypes: map[string]bool{},
 		skip: map[string]bool{
-			"SuccessEnvelope":                          true,
-			"ErrorResponse":                            true,
-			"DutyError":                                true,
-			"AutomationRuleUpdateRequest":              true, // hand-written to preserve partial-update pointer semantics.
-			"IncidentTriggerSubscriptionUpsertRequest": true, // hand-written to preserve enabled=false.
+			"SuccessEnvelope":             true,
+			"ErrorResponse":               true,
+			"DutyError":                   true,
+			"AutomationRuleUpdateRequest": true, // hand-written to preserve partial-update pointer semantics.
 		},
 		queued:   map[string]bool{},
 		synth:    map[string]any{},
