@@ -726,11 +726,28 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		// (--json/--toon), so omitempty would silently swallow the false/0/[]/{}
 		// state fields the help advertises as present (e.g. rule.enabled=false on a
 		// disabled rule). Render them faithfully.
-		tag := k
+		jsonTag, toonTag := k, k
 		if inReq {
-			tag = k + ",omitempty"
+			toonTag = k + ",omitempty"
+			if g.isStructSchema(pv) {
+				// stdlib encoding/json's `,omitempty` never fires for a bare
+				// struct value (only false/0/""/nil-slice/nil-map/nil-pointer
+				// count as "empty"), so an unset optional object field was
+				// always sent on the wire as `{}` — silently turning an
+				// absent field into a present-but-empty one and breaking
+				// backend validation that branches on the field's presence
+				// (e.g. CreateSilenceRuleRequest.TimeFilter vs TimeFilters).
+				// `,omitzero` (Go 1.24+) checks the type's actual zero value
+				// instead and correctly drops it. The `toon` tag keeps
+				// `,omitempty` unchanged: toon-go's structmeta only
+				// recognizes that literal option string, so switching it too
+				// would silently stop omitting these fields from TOON output.
+				jsonTag = k + ",omitzero"
+			} else {
+				jsonTag = k + ",omitempty"
+			}
 		}
-		fmt.Fprintf(&b, "\t%s %s `json:%q toon:%q`\n", field, gt, tag, tag)
+		fmt.Fprintf(&b, "\t%s %s `json:%q toon:%q`\n", field, gt, jsonTag, toonTag)
 	}
 	b.WriteString("}\n\n")
 	return b.String()
@@ -975,12 +992,49 @@ func isNullable(s map[string]any) bool {
 }
 
 // pointerizableScalar reports whether gt is a scalar Go type that should be
-// pointer-wrapped when nullable. Slices/maps/structs are already nil-able and
-// carry no omitempty-drops-zero hazard, so they are left as-is.
+// pointer-wrapped when nullable. Slices/maps are already nil-able and carry no
+// omitempty-drops-zero hazard; structs have their own hazard (see
+// isStructSchema) handled via `,omitzero` instead of pointer-wrapping.
 func pointerizableScalar(gt string) bool {
 	switch gt {
 	case "bool", "int", "int64", "uint64", "float64", "string":
 		return true
+	default:
+		return false
+	}
+}
+
+// isStructSchema reports whether property schema s is emitted as a Go struct
+// (as opposed to a scalar, enum, alias, slice, or map). It resolves s the same
+// way emitModels' top-level classification switch does (following $ref and
+// allOf). encoding/json's `,omitempty` never drops a bare struct value —
+// struct is not one of the "empty" kinds it recognizes — so request fields in
+// this category need `,omitzero` instead (see emitStruct).
+func (g *Gen) isStructSchema(s map[string]any) bool {
+	if s == nil {
+		return false
+	}
+	if ref := refName(s); ref != "" {
+		return g.isStructSchema(asMap(g.schemas[ref]))
+	}
+	if len(asSlice(s["allOf"])) > 0 {
+		s = g.mergeAllOf(s)
+	}
+	if len(asSlice(s["oneOf"])) > 0 || len(asSlice(s["anyOf"])) > 0 {
+		return false
+	}
+	switch {
+	case s["enum"] != nil && typeStr(s) == "string":
+		return false
+	case typeStr(s) == "array":
+		return false
+	case typeStr(s) == "string", typeStr(s) == "integer", typeStr(s) == "number", typeStr(s) == "boolean":
+		return false
+	case typeStr(s) == "object", typeStr(s) == "":
+		if ap, ok := s["additionalProperties"]; ok && ap != nil {
+			return false // map payload, mirrors goTypeOf's additionalProperties branch
+		}
+		return len(asMap(s["properties"])) > 0
 	default:
 		return false
 	}

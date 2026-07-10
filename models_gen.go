@@ -336,7 +336,7 @@ type AddIncidentResponderRequest struct {
 	// Incident ID (MongoDB ObjectID).
 	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
 	// Optional notification override. Defaults to following each person's personal preference.
-	Notify AddIncidentResponderRequestNotify `json:"notify,omitempty" toon:"notify,omitempty"`
+	Notify AddIncidentResponderRequestNotify `json:"notify,omitzero" toon:"notify,omitempty"`
 	// Member IDs to add as responders.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
 }
@@ -789,7 +789,7 @@ type AlertRule struct {
 	RepeatInterval int64 `json:"repeat_interval,omitempty" toon:"repeat_interval,omitempty"`
 	// Max number of repeat notifications.
 	RepeatTotal int64       `json:"repeat_total,omitempty" toon:"repeat_total,omitempty"`
-	RuleConfigs RuleConfigs `json:"rule_configs,omitempty" toon:"rule_configs,omitempty"`
+	RuleConfigs RuleConfigs `json:"rule_configs,omitzero" toon:"rule_configs,omitempty"`
 	UpdatedAt   int64       `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
 	UpdaterID   uint64      `json:"updater_id,omitempty" toon:"updater_id,omitempty"`
 	UpdaterName string      `json:"updater_name,omitempty" toon:"updater_name,omitempty"`
@@ -955,7 +955,7 @@ type ApTitleReset struct {
 
 // AssignIncidentRequest is generated from the Flashduty OpenAPI schema.
 type AssignIncidentRequest struct {
-	AssignedTo AssignedTo `json:"assigned_to,omitempty" toon:"assigned_to,omitempty"`
+	AssignedTo AssignedTo `json:"assigned_to,omitzero" toon:"assigned_to,omitempty"`
 	// Single incident ID. Ignored when `incident_ids` is also provided.
 	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
 	// Batch incident IDs.
@@ -1665,11 +1665,11 @@ type CreateChannelRequest struct {
 	// Disable outlier incident detection.
 	DisableOutlierDetection bool `json:"disable_outlier_detection,omitempty" toon:"disable_outlier_detection,omitempty"`
 	// Default escalation rule applied to the channel. Omit to skip default escalation.
-	EscalateRule CreateChannelRequestEscalateRule `json:"escalate_rule,omitempty" toon:"escalate_rule,omitempty"`
+	EscalateRule CreateChannelRequestEscalateRule `json:"escalate_rule,omitzero" toon:"escalate_rule,omitempty"`
 	// Flapping detection configuration.
-	Flapping CreateChannelRequestFlapping `json:"flapping,omitempty" toon:"flapping,omitempty"`
+	Flapping CreateChannelRequestFlapping `json:"flapping,omitzero" toon:"flapping,omitempty"`
 	// Alert grouping configuration.
-	Group CreateChannelRequestGroup `json:"group,omitempty" toon:"group,omitempty"`
+	Group CreateChannelRequestGroup `json:"group,omitzero" toon:"group,omitempty"`
 	// Allow external reporters to file incidents into this channel.
 	IsExternalReportEnabled bool `json:"is_external_report_enabled,omitempty" toon:"is_external_report_enabled,omitempty"`
 	// When true, the channel is visible only to its managing teams.
@@ -1747,7 +1747,7 @@ type CreateFieldResponse struct {
 // CreateIncidentRequest is generated from the Flashduty OpenAPI schema.
 type CreateIncidentRequest struct {
 	// Incident assignment target. Either `person_ids` or `escalate_rule_id` must be provided.
-	AssignedTo CreateIncidentRequestAssignedTo `json:"assigned_to,omitempty" toon:"assigned_to,omitempty"`
+	AssignedTo CreateIncidentRequestAssignedTo `json:"assigned_to,omitzero" toon:"assigned_to,omitempty"`
 	// Channel to file the incident into. Optional; leave unset for a standalone incident.
 	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
 	// Incident description, up to 1024 characters.
@@ -1805,7 +1805,7 @@ type CreateSilenceRuleRequest struct {
 	// Rule name, 1 to 39 characters.
 	RuleName string `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
 	// One-off time window defined by unix seconds.
-	TimeFilter CreateSilenceRuleRequestTimeFilter `json:"time_filter,omitempty" toon:"time_filter,omitempty"`
+	TimeFilter CreateSilenceRuleRequestTimeFilter `json:"time_filter,omitzero" toon:"time_filter,omitempty"`
 	// Recurring time windows during which silencing applies. Mutually exclusive with `time_filter`.
 	TimeFilters []CreateSilenceRuleRequestTimeFiltersItem `json:"time_filters,omitempty" toon:"time_filters,omitempty"`
 }
@@ -1876,7 +1876,7 @@ type CreateStatusPageRequest struct {
 	PageHeader string `json:"page_header,omitempty" toon:"page_header,omitempty"`
 	// Browser title shown for the status page.
 	PageTitle    string                     `json:"page_title,omitempty" toon:"page_title,omitempty"`
-	Subscription StatusPageSubscriptionItem `json:"subscription,omitempty" toon:"subscription,omitempty"`
+	Subscription StatusPageSubscriptionItem `json:"subscription,omitzero" toon:"subscription,omitempty"`
 	// Visibility type of the status page.
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 	// URL-safe slug, unique per account and page type.
@@ -2002,15 +2002,15 @@ type DsOracleConfig struct {
 
 // DsPayload is generated from the Flashduty OpenAPI schema.
 type DsPayload struct {
-	Clickhouse    DsClickHouseConfig    `json:"clickhouse,omitempty" toon:"clickhouse,omitempty"`
-	Elasticsearch DsElasticSearchConfig `json:"elasticsearch,omitempty" toon:"elasticsearch,omitempty"`
-	Loki          DsLokiConfig          `json:"loki,omitempty" toon:"loki,omitempty"`
-	Mysql         DsMySqlConfig         `json:"mysql,omitempty" toon:"mysql,omitempty"`
-	Oracle        DsOracleConfig        `json:"oracle,omitempty" toon:"oracle,omitempty"`
-	Postgres      DsPostgresConfig      `json:"postgres,omitempty" toon:"postgres,omitempty"`
-	Prometheus    DsPrometheusConfig    `json:"prometheus,omitempty" toon:"prometheus,omitempty"`
-	SLS           DsslsConfig           `json:"sls,omitempty" toon:"sls,omitempty"`
-	Victorialogs  DsVictoriaLogsConfig  `json:"victorialogs,omitempty" toon:"victorialogs,omitempty"`
+	Clickhouse    DsClickHouseConfig    `json:"clickhouse,omitzero" toon:"clickhouse,omitempty"`
+	Elasticsearch DsElasticSearchConfig `json:"elasticsearch,omitzero" toon:"elasticsearch,omitempty"`
+	Loki          DsLokiConfig          `json:"loki,omitzero" toon:"loki,omitempty"`
+	Mysql         DsMySqlConfig         `json:"mysql,omitzero" toon:"mysql,omitempty"`
+	Oracle        DsOracleConfig        `json:"oracle,omitzero" toon:"oracle,omitempty"`
+	Postgres      DsPostgresConfig      `json:"postgres,omitzero" toon:"postgres,omitempty"`
+	Prometheus    DsPrometheusConfig    `json:"prometheus,omitzero" toon:"prometheus,omitempty"`
+	SLS           DsslsConfig           `json:"sls,omitzero" toon:"sls,omitempty"`
+	Victorialogs  DsVictoriaLogsConfig  `json:"victorialogs,omitzero" toon:"victorialogs,omitempty"`
 }
 
 // DsPostgresConfig is generated from the Flashduty OpenAPI schema.
@@ -2130,7 +2130,7 @@ type DataSourceUpsertRequest struct {
 	// Optional description.
 	Note string `json:"note,omitempty" toon:"note,omitempty"`
 	// Type-specific configuration block. Must include the key matching `type_ident`.
-	Payload DsPayload `json:"payload,omitempty" toon:"payload,omitempty"`
+	Payload DsPayload `json:"payload,omitzero" toon:"payload,omitempty"`
 	// Datasource type identifier. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.
 	TypeIdent string `json:"type_ident,omitempty" toon:"type_ident,omitempty"`
 }
@@ -2213,15 +2213,15 @@ type DiagnoseRequest struct {
 	DsName string `json:"ds_name,omitempty" toon:"ds_name,omitempty"`
 	// Data source type. `log_patterns` supports `loki` and `victorialogs`; `metric_trends` supports `prometheus`.
 	DsType string               `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
-	Input  DiagnoseRequestInput `json:"input,omitempty" toon:"input,omitempty"`
+	Input  DiagnoseRequestInput `json:"input,omitzero" toon:"input,omitempty"`
 	// Diagnostic methods to run. When omitted, `log_patterns` defaults to `pattern_snapshot + pattern_compare(previous_window)` and `metric_trends` defaults to `single_window_shape + window_compare(previous_window)`.
 	Methods []DiagnoseRequestMethodsItem `json:"methods,omitempty" toon:"methods,omitempty"`
 	// Diagnostic operation. When omitted, inferred from `ds_type` (loki / victorialogs → `log_patterns`, prometheus → `metric_trends`). Other sources must specify explicitly.
 	Operation string `json:"operation,omitempty" toon:"operation,omitempty"`
 	// Execution options, all upper-bounded by monit-edge.
-	Options DiagnoseRequestOptions `json:"options,omitempty" toon:"options,omitempty"`
+	Options DiagnoseRequestOptions `json:"options,omitzero" toon:"options,omitempty"`
 	// Diagnostic window in Unix seconds. Defaults to the last 15 minutes when missing or invalid; windows wider than 6 hours are rejected.
-	TimeRange DiagnoseRequestTimeRange `json:"time_range,omitempty" toon:"time_range,omitempty"`
+	TimeRange DiagnoseRequestTimeRange `json:"time_range,omitzero" toon:"time_range,omitempty"`
 }
 
 // DiagnoseResponse is generated from the Flashduty OpenAPI schema.
@@ -2446,7 +2446,7 @@ type EscalateLayer struct {
 	MaxTimes int64 `json:"max_times,omitempty" toon:"max_times,omitempty"`
 	// Repeat interval in minutes.
 	NotifyStep float64        `json:"notify_step,omitempty" toon:"notify_step,omitempty"`
-	Target     EscalateTarget `json:"target,omitempty" toon:"target,omitempty"`
+	Target     EscalateTarget `json:"target,omitzero" toon:"target,omitempty"`
 }
 
 // EscalateRuleItem is generated from the Flashduty OpenAPI schema.
@@ -2489,7 +2489,7 @@ type EscalateRuleItem struct {
 // EscalateTarget is generated from the Flashduty OpenAPI schema.
 type EscalateTarget struct {
 	// Per-severity personal notification channels. Required unless `webhooks` is provided.
-	By EscalateTargetBy `json:"by,omitempty" toon:"by,omitempty"`
+	By EscalateTargetBy `json:"by,omitzero" toon:"by,omitempty"`
 	// Email addresses to notify (push-only scenarios).
 	Emails []string `json:"emails,omitempty" toon:"emails,omitempty"`
 	// Member IDs to notify directly.
@@ -5116,11 +5116,11 @@ type RouteSection struct {
 // RuleConfigs is generated from the Flashduty OpenAPI schema.
 type RuleConfigs struct {
 	// Any-data check configuration. Fires when the query returns any data rows.
-	CheckAnydata RuleConfigsCheckAnydata `json:"check_anydata,omitempty" toon:"check_anydata,omitempty"`
+	CheckAnydata RuleConfigsCheckAnydata `json:"check_anydata,omitzero" toon:"check_anydata,omitempty"`
 	// No-data check configuration.
-	CheckNodata RuleConfigsCheckNodata `json:"check_nodata,omitempty" toon:"check_nodata,omitempty"`
+	CheckNodata RuleConfigsCheckNodata `json:"check_nodata,omitzero" toon:"check_nodata,omitempty"`
 	// Threshold check configuration.
-	CheckThreshold RuleConfigsCheckThreshold `json:"check_threshold,omitempty" toon:"check_threshold,omitempty"`
+	CheckThreshold RuleConfigsCheckThreshold `json:"check_threshold,omitzero" toon:"check_threshold,omitempty"`
 	Queries        []RuleConfigsQueriesItem  `json:"queries,omitempty" toon:"queries,omitempty"`
 	// Optional auxiliary queries whose results are attached to alert events as context. Each entry must have a unique `name` (not duplicating any query name) and a non-empty `expr`.
 	RelateQueries []RuleConfigsRelateQueriesItem `json:"relate_queries,omitempty" toon:"relate_queries,omitempty"`
@@ -5206,19 +5206,19 @@ type RUMApplicationAlerting struct {
 
 // RUMApplicationCreateRequest is generated from the Flashduty OpenAPI schema.
 type RUMApplicationCreateRequest struct {
-	Alerting RUMApplicationAlerting `json:"alerting,omitempty" toon:"alerting,omitempty"`
+	Alerting RUMApplicationAlerting `json:"alerting,omitzero" toon:"alerting,omitempty"`
 	// Application name. 1–40 characters.
 	ApplicationName string `json:"application_name,omitempty" toon:"application_name,omitempty"`
 	// Restrict access to team members only.
 	IsPrivate bool                `json:"is_private,omitempty" toon:"is_private,omitempty"`
-	Links     RUMApplicationLinks `json:"links,omitempty" toon:"links,omitempty"`
+	Links     RUMApplicationLinks `json:"links,omitzero" toon:"links,omitempty"`
 	// Do not infer geographic location.
 	NoGeo bool `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
 	// Do not collect IP addresses.
 	NoIP bool `json:"no_ip,omitempty" toon:"no_ip,omitempty"`
 	// Owning team ID.
 	TeamID  int64                 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	Tracing RUMApplicationTracing `json:"tracing,omitempty" toon:"tracing,omitempty"`
+	Tracing RUMApplicationTracing `json:"tracing,omitzero" toon:"tracing,omitempty"`
 	// Application type.
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
@@ -5345,17 +5345,17 @@ type RUMApplicationTracing struct {
 
 // RUMApplicationUpdateRequest is generated from the Flashduty OpenAPI schema.
 type RUMApplicationUpdateRequest struct {
-	Alerting RUMApplicationAlerting `json:"alerting,omitempty" toon:"alerting,omitempty"`
+	Alerting RUMApplicationAlerting `json:"alerting,omitzero" toon:"alerting,omitempty"`
 	// Application ID to update.
 	ApplicationID string `json:"application_id,omitempty" toon:"application_id,omitempty"`
 	// New application name.
 	ApplicationName string                `json:"application_name,omitempty" toon:"application_name,omitempty"`
 	IsPrivate       bool                  `json:"is_private,omitempty" toon:"is_private,omitempty"`
-	Links           RUMApplicationLinks   `json:"links,omitempty" toon:"links,omitempty"`
+	Links           RUMApplicationLinks   `json:"links,omitzero" toon:"links,omitempty"`
 	NoGeo           bool                  `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
 	NoIP            bool                  `json:"no_ip,omitempty" toon:"no_ip,omitempty"`
 	TeamID          int64                 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	Tracing         RUMApplicationTracing `json:"tracing,omitempty" toon:"tracing,omitempty"`
+	Tracing         RUMApplicationTracing `json:"tracing,omitzero" toon:"tracing,omitempty"`
 	Type            string                `json:"type,omitempty" toon:"type,omitempty"`
 }
 
@@ -5723,7 +5723,7 @@ type ScheduleIDsRequest struct {
 
 // ScheduleImNotify is generated from the Flashduty OpenAPI schema.
 type ScheduleImNotify struct {
-	Settings ScheduleImNotifySettings `json:"settings,omitempty" toon:"settings,omitempty"`
+	Settings ScheduleImNotifySettings `json:"settings,omitzero" toon:"settings,omitempty"`
 	// IM provider type (for example feishu_app, dingtalk_app, wecom_app, teams_app, slack_app).
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
@@ -5814,7 +5814,7 @@ type ScheduleLayer struct {
 	// Creator person ID.
 	CreateBy int64 `json:"create_by,omitempty" toon:"create_by,omitempty"`
 	// Day-of-week mask.
-	DayMask ScheduleDayMask `json:"day_mask,omitempty" toon:"day_mask,omitempty"`
+	DayMask ScheduleDayMask `json:"day_mask,omitzero" toon:"day_mask,omitempty"`
 	// When the layer becomes effective (Unix seconds).
 	EnableTime int64 `json:"enable_time,omitempty" toon:"enable_time,omitempty"`
 	// When the layer expires (Unix seconds, 0 means never).
@@ -5900,8 +5900,8 @@ type ScheduleMember struct {
 type ScheduleNotify struct {
 	// Advance notification lead time (seconds).
 	AdvanceInTime int64                       `json:"advance_in_time,omitempty" toon:"advance_in_time,omitempty"`
-	By            ScheduleNotifyBy            `json:"by,omitempty" toon:"by,omitempty"`
-	FixedTime     ScheduleFixedTimeNotifyInfo `json:"fixed_time,omitempty" toon:"fixed_time,omitempty"`
+	By            ScheduleNotifyBy            `json:"by,omitzero" toon:"by,omitempty"`
+	FixedTime     ScheduleFixedTimeNotifyInfo `json:"fixed_time,omitzero" toon:"fixed_time,omitempty"`
 	// Legacy IM-type to token map.
 	Im map[string]string `json:"im,omitempty" toon:"im,omitempty"`
 	// IM webhook notification channels.
@@ -5963,7 +5963,7 @@ type ScheduleUpsertRequest struct {
 	Layers []ScheduleLayer `json:"layers,omitempty" toon:"layers,omitempty"`
 	// Legacy schedule name field. Used when schedule_name is empty.
 	Name   *string        `json:"name,omitempty" toon:"name,omitempty"`
-	Notify ScheduleNotify `json:"notify,omitempty" toon:"notify,omitempty"`
+	Notify ScheduleNotify `json:"notify,omitzero" toon:"notify,omitempty"`
 	// Schedule ID. Required on update.
 	ScheduleID *int64 `json:"schedule_id,omitempty" toon:"schedule_id,omitempty"`
 	// Schedule display name. Max 40 characters.
@@ -7109,8 +7109,8 @@ type UpdateChannelRequest struct {
 	DisableAutoClose *bool `json:"disable_auto_close,omitempty" toon:"disable_auto_close,omitempty"`
 	// Disable outlier incident detection.
 	DisableOutlierDetection *bool    `json:"disable_outlier_detection,omitempty" toon:"disable_outlier_detection,omitempty"`
-	Flapping                Flapping `json:"flapping,omitempty" toon:"flapping,omitempty"`
-	Group                   Group    `json:"group,omitempty" toon:"group,omitempty"`
+	Flapping                Flapping `json:"flapping,omitzero" toon:"flapping,omitempty"`
+	Group                   Group    `json:"group,omitzero" toon:"group,omitempty"`
 	// Allow external reporters to file incidents into this channel.
 	IsExternalReportEnabled *bool `json:"is_external_report_enabled,omitempty" toon:"is_external_report_enabled,omitempty"`
 	// When true, the channel is visible only to its managing teams.
@@ -7234,7 +7234,7 @@ type UpdateSilenceRuleRequest struct {
 	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
 	// Rule name, 1 to 39 characters.
 	RuleName   string         `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
-	TimeFilter OnceTimeFilter `json:"time_filter,omitempty" toon:"time_filter,omitempty"`
+	TimeFilter OnceTimeFilter `json:"time_filter,omitzero" toon:"time_filter,omitempty"`
 	// Recurring time windows. Mutually exclusive with `time_filter`.
 	TimeFilters []TimeFilter `json:"time_filters,omitempty" toon:"time_filters,omitempty"`
 }
@@ -7287,7 +7287,7 @@ type UpsertPostMortemTemplateRequest struct {
 type UpsertRouteRequest struct {
 	// Ordered list of case branches. Cases are evaluated top to bottom.
 	Cases   []RouteCase  `json:"cases,omitempty" toon:"cases,omitempty"`
-	Default RouteDefault `json:"default,omitempty" toon:"default,omitempty"`
+	Default RouteDefault `json:"default,omitzero" toon:"default,omitempty"`
 	// Integration the rule belongs to.
 	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
 	// Optional sections that group consecutive cases for display.
@@ -7329,7 +7329,7 @@ type UpsertStatusPageTemplateRequest struct {
 	// Status page ID.
 	PageID int64 `json:"page_id,omitempty" toon:"page_id,omitempty"`
 	// Template content.
-	Template UpsertStatusPageTemplateRequestTemplate `json:"template,omitempty" toon:"template,omitempty"`
+	Template UpsertStatusPageTemplateRequestTemplate `json:"template,omitzero" toon:"template,omitempty"`
 	// Template category. `pre_defined` for predefined event templates; `message` for notification message templates.
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
@@ -7577,7 +7577,7 @@ type CreateChannelRequestEscalateRule struct {
 	// Delay window in seconds. 0 disables delay.
 	AggrWindow int64 `json:"aggr_window,omitempty" toon:"aggr_window,omitempty"`
 	// Notification target. At least one of `person_ids`, `team_ids`, `schedule_to_role_ids`, or `emails` must be set, together with either `by` or `webhooks`.
-	Target CreateChannelRequestEscalateRuleTarget `json:"target,omitempty" toon:"target,omitempty"`
+	Target CreateChannelRequestEscalateRuleTarget `json:"target,omitzero" toon:"target,omitempty"`
 	// Notification template ID (MongoDB ObjectID).
 	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
 }
@@ -7649,7 +7649,7 @@ type CreateEscalationRuleRequestLayersItem struct {
 	// Repeat interval in minutes.
 	NotifyStep float64 `json:"notify_step,omitempty" toon:"notify_step,omitempty"`
 	// Notification target. At least one of `person_ids`, `team_ids`, `schedule_to_role_ids`, or `emails` must be set, together with either `by` or `webhooks`.
-	Target CreateEscalationRuleRequestLayersItemTarget `json:"target,omitempty" toon:"target,omitempty"`
+	Target CreateEscalationRuleRequestLayersItemTarget `json:"target,omitzero" toon:"target,omitempty"`
 }
 
 // CreateEscalationRuleRequestTimeFiltersItem is generated from the Flashduty OpenAPI schema.
@@ -7675,7 +7675,7 @@ type CreateIncidentRequestAssignedTo struct {
 	// Starting layer index when using an escalation rule.
 	LayerIdx int64 `json:"layer_idx,omitempty" toon:"layer_idx,omitempty"`
 	// Override the notification channels used for this assignment.
-	Notify CreateIncidentRequestAssignedToNotify `json:"notify,omitempty" toon:"notify,omitempty"`
+	Notify CreateIncidentRequestAssignedToNotify `json:"notify,omitzero" toon:"notify,omitempty"`
 	// Member IDs to assign directly.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
 	// Assignment type.
@@ -7885,7 +7885,7 @@ type RuleConfigsCheckAnydata struct {
 	Enabled            bool  `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	PushRecoveryEvent  bool  `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
 	// Recovery condition for any-data check. If omitted or `mode` is empty, treated as `nodata`.
-	Recovery           RuleConfigsCheckAnydataRecovery `json:"recovery,omitempty" toon:"recovery,omitempty"`
+	Recovery           RuleConfigsCheckAnydataRecovery `json:"recovery,omitzero" toon:"recovery,omitempty"`
 	RecoveryCheckTimes int64                           `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
 	Severity           string                          `json:"severity,omitempty" toon:"severity,omitempty"`
 }
@@ -7908,7 +7908,7 @@ type RuleConfigsCheckThreshold struct {
 	Enabled            bool                              `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	Info               string                            `json:"info,omitempty" toon:"info,omitempty"`
 	PushRecoveryEvent  bool                              `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
-	Recovery           RuleConfigsCheckThresholdRecovery `json:"recovery,omitempty" toon:"recovery,omitempty"`
+	Recovery           RuleConfigsCheckThresholdRecovery `json:"recovery,omitzero" toon:"recovery,omitempty"`
 	RecoveryCheckTimes int64                             `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
 	Warning            string                            `json:"warning,omitempty" toon:"warning,omitempty"`
 }
@@ -8100,7 +8100,7 @@ type UpsertStatusPageTemplateRequestTemplate struct {
 // CreateChannelRequestEscalateRuleTarget is generated from the Flashduty OpenAPI schema.
 type CreateChannelRequestEscalateRuleTarget struct {
 	// Per-severity personal notification channels. Required unless `webhooks` is provided.
-	By CreateChannelRequestEscalateRuleTargetBy `json:"by,omitempty" toon:"by,omitempty"`
+	By CreateChannelRequestEscalateRuleTargetBy `json:"by,omitzero" toon:"by,omitempty"`
 	// Email addresses to notify (push-only scenarios).
 	Emails []string `json:"emails,omitempty" toon:"emails,omitempty"`
 	// Member IDs to notify directly.
@@ -8116,7 +8116,7 @@ type CreateChannelRequestEscalateRuleTarget struct {
 // CreateEscalationRuleRequestLayersItemTarget is generated from the Flashduty OpenAPI schema.
 type CreateEscalationRuleRequestLayersItemTarget struct {
 	// Per-severity personal notification channels. Required unless `webhooks` is provided.
-	By CreateEscalationRuleRequestLayersItemTargetBy `json:"by,omitempty" toon:"by,omitempty"`
+	By CreateEscalationRuleRequestLayersItemTargetBy `json:"by,omitzero" toon:"by,omitempty"`
 	// Email addresses to notify (push-only scenarios).
 	Emails []string `json:"emails,omitempty" toon:"emails,omitempty"`
 	// Member IDs to notify directly.

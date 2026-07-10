@@ -54,6 +54,48 @@ func TestNewRequestBuildsPostWithAppKeyAndJSON(t *testing.T) {
 	}
 }
 
+// TestOptionalObjectRequestFieldOmitsWhenUnset guards against a codegen
+// regression: encoding/json's `,omitempty` never drops a bare struct value
+// (only false/0/""/nil-slice/nil-map/nil-pointer count as "empty"), so an
+// unset optional object request field used to always be sent as `{}`. For
+// CreateSilenceRuleRequest.TimeFilter this made a recurring-only silence rule
+// (TimeFilters set, TimeFilter unset) impossible: the server's binding
+// validates StartTime/EndTime with `gt=0` whenever "time_filter" is present
+// in the payload at all. The generator now emits `,omitzero` for optional
+// struct-typed request fields, which correctly drops the zero value.
+func TestOptionalObjectRequestFieldOmitsWhenUnset(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+
+	req, err := c.newRequest(context.Background(), http.MethodPost, "/silence-rule/create", &CreateSilenceRuleRequest{
+		RuleName: "recurring only",
+		TimeFilters: []CreateSilenceRuleRequestTimeFiltersItem{
+			{Start: "09:00", End: "18:00"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(req.Body)
+	if strings.Contains(string(body), `"time_filter"`) {
+		t.Fatalf("unset TimeFilter must be omitted from the wire, got body = %s", body)
+	}
+	if !strings.Contains(string(body), `"time_filters"`) {
+		t.Fatalf("TimeFilters must be present, got body = %s", body)
+	}
+
+	req, err = c.newRequest(context.Background(), http.MethodPost, "/silence-rule/create", &CreateSilenceRuleRequest{
+		RuleName:   "one-off only",
+		TimeFilter: CreateSilenceRuleRequestTimeFilter{StartTime: 1000, EndTime: 2000},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(req.Body)
+	if !strings.Contains(string(body), `"time_filter"`) {
+		t.Fatalf("set TimeFilter must be present on the wire, got body = %s", body)
+	}
+}
+
 func TestNewRequestAppliesHookAndHeaders(t *testing.T) {
 	c, _ := NewClient("KEY",
 		WithRequestHeaders(map[string][]string{"X-Static": {"s"}}),
