@@ -25707,6 +25707,105 @@
           }
         }
       }
+    },
+    "/safari/automation/rule/run": {
+      "post": {
+        "operationId": "automation-rule-write-run",
+        "summary": "运行自动化规则",
+        "description": "立即手动运行一次自动化规则，不受其计划触发时间限制。",
+        "tags": [
+          "AI SRE/自动化"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **100 次/分钟**；**5 次/秒** |\n| 权限要求 | 有效 `app_key`；调用者必须可管理目标规则 |\n\n## 使用说明\n\n- 同一规则的手动运行限速为每分钟最多一次；在此窗口内的第二次调用会返回 `429`，`code` 为 `\"RequestTooFrequently\"`。\n- 只有已启用的规则才能手动运行；已禁用或配置无效的规则会在创建运行前以 `400` 错误未通过预检。\n- 调用在底层 Agent 会话启动后即返回，而非等待运行结束；运行会继续异步执行——可使用列出自动化运行历史查询完成状态。\n- 以此方式发起的运行，`trigger_kind` 固定为 `manual`，在运行历史中与 `schedule`、`http_post`、`oncall_incident` 区分开来。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/automations/automation-rule-write-run",
+          "metadata": {
+            "sidebarTitle": "运行自动化规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ManualRunRuleResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "rule_id": "arule_7NnLzY2Qp8xS4kUaV3mR6b",
+                    "trigger_kind": "manual",
+                    "preflight": {
+                      "ok": true,
+                      "checks": [
+                        "rule_loaded",
+                        "actor_authorized",
+                        "app_allowed",
+                        "runtime_scope_resolved",
+                        "rule_config_valid"
+                      ],
+                      "scope": "team",
+                      "owner_id": 80011,
+                      "team_id": 123,
+                      "app_name": "ai-sre"
+                    },
+                    "run": {
+                      "run_id": "trun_5oDvqiG64uur6sBNsTc4u",
+                      "session_id": "sess_f8oDvqiG64uur6sBNsTc4u"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleIDRequest"
+              },
+              "example": {
+                "rule_id": "arule_7NnLzY2Qp8xS4kUaV3mR6b"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -47452,6 +47551,105 @@
           "window",
           "results",
           "data_handling"
+        ]
+      },
+      "ManualRunRuleResult": {
+        "type": "object",
+        "description": "手动运行一次自动化规则（跳过其计划触发时间）的结果。",
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "被运行的规则 ID。"
+          },
+          "trigger_kind": {
+            "type": "string",
+            "enum": [
+              "manual"
+            ],
+            "description": "该操作固定为 manual。"
+          },
+          "preflight": {
+            "$ref": "#/components/schemas/PreflightResult"
+          },
+          "run": {
+            "$ref": "#/components/schemas/AutomationRunView"
+          }
+        },
+        "required": [
+          "rule_id",
+          "trigger_kind",
+          "preflight"
+        ]
+      },
+      "PreflightResult": {
+        "type": "object",
+        "description": "在允许发起手动运行前计算出的就绪检查结果。",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "全部就绪检查是否通过。凡是能返回给调用者的响应中该值恒为 true——预检失败会直接返回 400/403 错误，而不是 ok=false 的响应体。"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "按执行顺序列出的就绪检查项名称。当前固定为：rule_loaded、actor_authorized、app_allowed、runtime_scope_resolved、rule_config_valid。"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "person",
+              "team"
+            ],
+            "description": "本次运行解析出的作用域，与规则的 run_scope 一致。"
+          },
+          "owner_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则所有者 person ID。"
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则的作用域团队 ID；0 表示个人规则。"
+          },
+          "app_name": {
+            "type": "string",
+            "description": "规则所属的 App。当前始终为 ai-sre；手动运行目前仅支持该 App。"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "预检过程中给出的非致命警告。没有警告时省略或为空数组。"
+          }
+        },
+        "required": [
+          "ok",
+          "checks",
+          "scope",
+          "owner_id",
+          "team_id",
+          "app_name"
+        ]
+      },
+      "AutomationRunView": {
+        "type": "object",
+        "description": "手动触发所创建运行的引用。",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "description": "运行 ID，运行创建后始终会有值。"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "本次运行对应的 AI SRE 会话 ID。由于调用只会在会话启动后才返回，因此在 200 响应中始终会有值。"
+          }
+        },
+        "required": [
+          "run_id"
         ]
       }
     }

@@ -25715,6 +25715,105 @@
           }
         }
       }
+    },
+    "/safari/automation/rule/run": {
+      "post": {
+        "operationId": "automation-rule-write-run",
+        "summary": "Run Automation rule",
+        "description": "Manually run an Automation rule immediately, outside its schedule.",
+        "tags": [
+          "AI SRE/Automations"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **100 requests/minute**; **5 requests/second** per account |\n| Permissions | Valid `app_key`; caller must manage the target rule |\n\n## Usage\n\n- Rate-limited to at most once per minute per rule; a second call within that window returns `429` with `code: \"RequestTooFrequently\"`.\n- Only enabled rules can run manually; a disabled or misconfigured rule fails preflight with a `400` error before any run is created.\n- The call returns once the underlying agent session starts, not once the run finishes; the run continues asynchronously — use List Automation runs to check completion status.\n- `trigger_kind` is always `manual` for runs started this way, distinguishing them from `schedule`, `http_post`, and `oncall_incident` runs in run history.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/automations/automation-rule-write-run",
+          "metadata": {
+            "sidebarTitle": "Run Automation rule"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ManualRunRuleResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "rule_id": "arule_7NnLzY2Qp8xS4kUaV3mR6b",
+                    "trigger_kind": "manual",
+                    "preflight": {
+                      "ok": true,
+                      "checks": [
+                        "rule_loaded",
+                        "actor_authorized",
+                        "app_allowed",
+                        "runtime_scope_resolved",
+                        "rule_config_valid"
+                      ],
+                      "scope": "team",
+                      "owner_id": 80011,
+                      "team_id": 123,
+                      "app_name": "ai-sre"
+                    },
+                    "run": {
+                      "run_id": "trun_5oDvqiG64uur6sBNsTc4u",
+                      "session_id": "sess_f8oDvqiG64uur6sBNsTc4u"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationRuleIDRequest"
+              },
+              "example": {
+                "rule_id": "arule_7NnLzY2Qp8xS4kUaV3mR6b"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -47461,6 +47560,105 @@
           "window",
           "results",
           "data_handling"
+        ]
+      },
+      "ManualRunRuleResult": {
+        "type": "object",
+        "description": "Result of manually running an Automation rule outside its schedule.",
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "Rule ID that was run."
+          },
+          "trigger_kind": {
+            "type": "string",
+            "enum": [
+              "manual"
+            ],
+            "description": "Always manual for this operation."
+          },
+          "preflight": {
+            "$ref": "#/components/schemas/PreflightResult"
+          },
+          "run": {
+            "$ref": "#/components/schemas/AutomationRunView"
+          }
+        },
+        "required": [
+          "rule_id",
+          "trigger_kind",
+          "preflight"
+        ]
+      },
+      "PreflightResult": {
+        "type": "object",
+        "description": "Readiness checks computed before a manual run is allowed to start.",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether all readiness checks passed. Always true in a response that reaches the caller — a failed preflight returns a 400/403 error instead of a payload with ok=false."
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of the readiness checks performed, in order. Current fixed set: rule_loaded, actor_authorized, app_allowed, runtime_scope_resolved, rule_config_valid."
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "person",
+              "team"
+            ],
+            "description": "Resolved run scope for this run; mirrors the rule's run_scope."
+          },
+          "owner_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Rule owner person ID."
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Rule's scope team ID; 0 means a personal rule."
+          },
+          "app_name": {
+            "type": "string",
+            "description": "App the rule is scoped to. Currently always ai-sre; manual runs are only supported for that app."
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Non-fatal warnings surfaced during preflight. Omitted or empty when there are none."
+          }
+        },
+        "required": [
+          "ok",
+          "checks",
+          "scope",
+          "owner_id",
+          "team_id",
+          "app_name"
+        ]
+      },
+      "AutomationRunView": {
+        "type": "object",
+        "description": "Reference to the run started by a manual trigger.",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "description": "Run ID, always populated once a run is created."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "AI SRE session ID for this run. Always populated in a 200 response, since the call only returns after the session has started."
+          }
+        },
+        "required": [
+          "run_id"
         ]
       }
     }

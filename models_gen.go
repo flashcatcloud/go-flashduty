@@ -1234,6 +1234,14 @@ type AutomationRunListResponse struct {
 	Total int64 `json:"total" toon:"total"`
 }
 
+// AutomationRunView is generated from the Flashduty OpenAPI schema.
+type AutomationRunView struct {
+	// Run ID, always populated once a run is created.
+	RunID string `json:"run_id" toon:"run_id"`
+	// AI SRE session ID for this run. Always populated in a 200 response, since the call only returns after the session has started.
+	SessionID string `json:"session_id" toon:"session_id"`
+}
+
 // AutomationTemplateItem is generated from the Flashduty OpenAPI schema.
 type AutomationTemplateItem struct {
 	// Template description.
@@ -4177,6 +4185,16 @@ type McpToolInfo struct {
 	Name string `json:"name" toon:"name"`
 }
 
+// ManualRunRuleResult is generated from the Flashduty OpenAPI schema.
+type ManualRunRuleResult struct {
+	Preflight PreflightResult `json:"preflight" toon:"preflight"`
+	// Rule ID that was run.
+	RuleID string            `json:"rule_id" toon:"rule_id"`
+	Run    AutomationRunView `json:"run" toon:"run"`
+	// Always manual for this operation.
+	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
+}
+
 // MappingAPICreateRequest is generated from the Flashduty OpenAPI schema.
 type MappingAPICreateRequest struct {
 	// Unique API name (max 199 chars).
@@ -5033,6 +5051,24 @@ type PostMortemTemplate struct {
 	TemplateID string `json:"template_id" toon:"template_id"`
 	// Unix timestamp in seconds when the template was last updated.
 	UpdatedAtSeconds Timestamp `json:"updated_at_seconds" toon:"updated_at_seconds"`
+}
+
+// PreflightResult is generated from the Flashduty OpenAPI schema.
+type PreflightResult struct {
+	// App the rule is scoped to. Currently always ai-sre; manual runs are only supported for that app.
+	AppName string `json:"app_name" toon:"app_name"`
+	// Names of the readiness checks performed, in order. Current fixed set: rule_loaded, actor_authorized, app_allowed, runtime_scope_resolved, rule_config_valid.
+	Checks []string `json:"checks" toon:"checks"`
+	// Whether all readiness checks passed. Always true in a response that reaches the caller — a failed preflight returns a 400/403 error instead of a payload with ok=false.
+	OK bool `json:"ok" toon:"ok"`
+	// Rule owner person ID.
+	OwnerID int64 `json:"owner_id" toon:"owner_id"`
+	// Resolved run scope for this run; mirrors the rule's run_scope.
+	Scope string `json:"scope" toon:"scope"`
+	// Rule's scope team ID; 0 means a personal rule.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Non-fatal warnings surfaced during preflight. Omitted or empty when there are none.
+	Warnings []string `json:"warnings" toon:"warnings"`
 }
 
 // PreviewSyncRequest is generated from the Flashduty OpenAPI schema.
