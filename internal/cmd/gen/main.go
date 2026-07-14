@@ -466,7 +466,7 @@ func (g *Gen) detectEmpty() {
 	}
 }
 
-// resolveObject merges allOf parts of a named schema into a single object map.
+// resolveObject merges object-composition parts of a named schema into a single object map.
 func (g *Gen) resolveObject(name string) map[string]any {
 	s := asMap(g.schemas[name])
 	return g.mergeAllOf(s)
@@ -476,13 +476,40 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 	if s == nil {
 		return nil
 	}
-	allOf := asSlice(s["allOf"])
-	if len(allOf) == 0 {
+	parts := asSlice(s["allOf"])
+	oneOf := asSlice(s["oneOf"])
+	if len(parts) == 0 && len(oneOf) == 0 {
 		return s
 	}
+	var oneOfRequired map[string]bool
+	for _, part := range oneOf {
+		pm := asMap(part)
+		if ref := refName(pm); ref != "" {
+			pm = g.resolveObject(ref)
+		}
+		if typeStr(pm) != "object" && len(asMap(pm["properties"])) == 0 && len(asSlice(pm["allOf"])) == 0 {
+			return s
+		}
+		required := map[string]bool{}
+		for _, raw := range asSlice(pm["required"]) {
+			if name, ok := raw.(string); ok {
+				required[name] = true
+			}
+		}
+		if oneOfRequired == nil {
+			oneOfRequired = required
+			continue
+		}
+		for name := range oneOfRequired {
+			if !required[name] {
+				delete(oneOfRequired, name)
+			}
+		}
+	}
+	parts = append(parts, oneOf...)
 	merged := map[string]any{"type": "object"}
 	props := map[string]any{}
-	for _, part := range allOf {
+	for _, part := range parts {
 		pm := asMap(part)
 		if ref := refName(pm); ref != "" {
 			pm = g.resolveObject(ref)
@@ -496,6 +523,15 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 		props[k] = v
 	}
 	merged["properties"] = props
+	if len(oneOf) > 0 {
+		required := make([]any, 0, len(oneOfRequired))
+		for name := range oneOfRequired {
+			required = append(required, name)
+		}
+		sort.Slice(required, func(i, j int) bool { return required[i].(string) < required[j].(string) })
+		merged["required"] = required
+		merged["x-generator-optional-response"] = true
+	}
 	return merged
 }
 
@@ -671,6 +707,14 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 	// only response-side structs render timestamps as Timestamp/TimestampMilli.
 	inReq := g.reqGoNames[name] || g.reqSynth[name]
 	g.reqCtx = inReq
+	required := map[string]bool{}
+	for _, raw := range asSlice(s["required"]) {
+		if field, ok := raw.(string); ok {
+			required[field] = true
+		}
+	}
+	optionalUnionField, _ := s["x-generator-optional-response"].(bool)
+	optionalUnionField = !inReq && optionalUnionField
 
 	fmt.Fprintf(&b, "type %s struct {\n", name)
 	usedField := map[string]bool{}
@@ -706,6 +750,12 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		if inReq && isNullable(pv) && pointerizableScalar(gt) {
 			gt = "*" + gt
 		}
+		isOptionalUnionField := optionalUnionField && !required[k]
+		preserveAbsence, _ := pv["x-flashduty-preserve-absence"].(bool)
+		isOptionalResponseField := isOptionalUnionField || (!inReq && preserveAbsence)
+		if isOptionalResponseField && (pointerizableScalar(gt) || g.isStructSchema(pv) || strings.HasPrefix(gt, "[]") || strings.HasPrefix(gt, "map[")) {
+			gt = "*" + gt
+		}
 		if desc != "" {
 			for _, l := range wrapText(desc) {
 				b.WriteString("\t// " + l + "\n")
@@ -725,7 +775,10 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		// returns the field and the CLI re-serializes the decoded struct
 		// (--json/--toon), so omitempty would silently swallow the false/0/[]/{}
 		// state fields the help advertises as present (e.g. rule.enabled=false on a
-		// disabled rule). Render them faithfully.
+		// disabled rule). Render them faithfully. A flattened object `oneOf` is
+		// the exception: a field not required by every branch is absent on some
+		// valid responses. Explicit response properties marked to preserve absence
+		// need the same treatment. In both cases, use pointers and `omitempty`.
 		jsonTag, toonTag := k, k
 		if inReq {
 			toonTag = k + ",omitempty"
@@ -746,6 +799,9 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 			} else {
 				jsonTag = k + ",omitempty"
 			}
+		} else if isOptionalResponseField {
+			jsonTag = k + ",omitempty"
+			toonTag = k + ",omitempty"
 		}
 		fmt.Fprintf(&b, "\t%s %s `json:%q toon:%q`\n", field, gt, jsonTag, toonTag)
 	}
