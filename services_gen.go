@@ -27,6 +27,7 @@ type genServices struct {
 	ImIntegrations        *ImIntegrationsService
 	Incidents             *IncidentsService
 	Integrations          *IntegrationsService
+	Licenses              *LicensesService
 	NotificationTemplates *NotificationTemplatesService
 	Schedules             *SchedulesService
 	StatusPages           *StatusPagesService
@@ -39,6 +40,7 @@ type genServices struct {
 	DataQuery             *DataQueryService
 	Facets                *FacetsService
 	Issues                *IssuesService
+	SessionReplay         *SessionReplayService
 	Sourcemaps            *SourcemapsService
 }
 
@@ -64,6 +66,7 @@ func (c *Client) initServices() {
 	c.ImIntegrations = (*ImIntegrationsService)(&c.common)
 	c.Incidents = (*IncidentsService)(&c.common)
 	c.Integrations = (*IntegrationsService)(&c.common)
+	c.Licenses = (*LicensesService)(&c.common)
 	c.NotificationTemplates = (*NotificationTemplatesService)(&c.common)
 	c.Schedules = (*SchedulesService)(&c.common)
 	c.StatusPages = (*StatusPagesService)(&c.common)
@@ -76,5 +79,6 @@ func (c *Client) initServices() {
 	c.DataQuery = (*DataQueryService)(&c.common)
 	c.Facets = (*FacetsService)(&c.common)
 	c.Issues = (*IssuesService)(&c.common)
+	c.SessionReplay = (*SessionReplayService)(&c.common)
 	c.Sourcemaps = (*SourcemapsService)(&c.common)
 }
