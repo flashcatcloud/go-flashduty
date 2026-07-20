@@ -42676,7 +42676,7 @@
           },
           "args": {
             "type": "object",
-            "description": "Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings. Semantics depend on `ds_type`: SLS requires `sls.project` + `sls.logstore`; Loki / VictoriaLogs raw mode requires a time range via `<source>.start`/`<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit`; Prometheus and SQL sources ignore it. Always namespace keys by source (e.g. `sls.project`, `loki.type`).",
+            "description": "Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings, and keys are always namespaced by source (e.g. `sls.project`, `loki.type`). Validation depends on `ds_type`: SLS requires `sls.project` + `sls.logstore`. Elasticsearch accepts `es.type` of `sql`, or omitted — any other value is rejected. Loki and VictoriaLogs accept `<source>.type` of `stats`, `raw`, or omitted; `raw` additionally requires a time range, either `<source>.start` + `<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit` (unit one of `s`, `m`, `h`, `d`). Prometheus and the remaining SQL sources ignore `args` entirely.",
             "additionalProperties": {
               "type": "string"
             }

@@ -5278,7 +5278,7 @@ type QueryRow struct {
 type QueryRowsRequest struct {
 	// Optional consistency check. Must equal the authenticated account when supplied; mismatched values are rejected. Business execution always uses the authenticated account.
 	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings. Semantics depend on `ds_type`: SLS requires `sls.project` + `sls.logstore`; Loki / VictoriaLogs raw mode requires a time range via `<source>.start`/`<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit`; Prometheus and SQL sources ignore it. Always namespace keys by source (e.g. `sls.project`, `loki.type`).
+	// Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings, and keys are always namespaced by source (e.g. `sls.project`, `loki.type`). Validation depends on `ds_type`: SLS requires `sls.project` + `sls.logstore`. Elasticsearch accepts `es.type` of `sql`, or omitted — any other value is rejected. Loki and VictoriaLogs accept `<source>.type` of `stats`, `raw`, or omitted; `raw` additionally requires a time range, either `<source>.start` + `<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit` (unit one of `s`, `m`, `h`, `d`). Prometheus and the remaining SQL sources ignore `args` entirely.
 	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
 	// Look-back offset in seconds applied to point-in-time queries (Prometheus, Loki stats, VictoriaLogs stats). Ignored for raw / detail queries.
 	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`

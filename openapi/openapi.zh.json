@@ -42667,7 +42667,7 @@
           },
           "args": {
             "type": "object",
-            "description": "多态键值扩展参数,原样转发给 monit-edge。所有值必须为字符串。语义取决于 `ds_type`:SLS 需要 `sls.project` + `sls.logstore`;Loki / VictoriaLogs 原始模式需要通过 `<source>.start`/`<source>.end` 或 `<source>.timespan.value` + `<source>.timespan.unit` 指定时间范围;Prometheus 与 SQL 类数据源忽略该字段。键务必按数据源命名空间区分(如 `sls.project`、`loki.type`)。",
+            "description": "透传给 monit-edge 的多态键值扩展参数。所有值必须是字符串，键一律按数据源加前缀（如 `sls.project`、`loki.type`）。校验规则取决于 `ds_type`：SLS 必须提供 `sls.project` 与 `sls.logstore`；Elasticsearch 的 `es.type` 只接受 `sql` 或不传，其他值一律拒绝；Loki 与 VictoriaLogs 的 `<source>.type` 接受 `stats`、`raw` 或不传，其中 `raw` 还必须给出时间范围——`<source>.start` + `<source>.end`，或 `<source>.timespan.value` + `<source>.timespan.unit`（单位取 `s`/`m`/`h`/`d`）。Prometheus 及其余 SQL 类数据源完全忽略 `args`。",
             "additionalProperties": {
               "type": "string"
             }
