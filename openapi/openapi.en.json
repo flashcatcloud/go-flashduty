@@ -42684,7 +42684,8 @@
               "locator": {
                 "type": "string"
               }
-            }
+            },
+            "x-flashduty-preserve-absence": true
           },
           "tools": {
             "type": "array",
@@ -42710,7 +42711,8 @@
                 },
                 "output_shape": {
                   "type": "object",
-                  "description": "JSON Schema of the tool result. Returned only when the request set `include_output_shape` to true."
+                  "description": "JSON Schema of the tool result. Returned only when the request set `include_output_shape` to true.",
+                  "x-flashduty-preserve-absence": true
                 }
               }
             }
@@ -42737,7 +42739,8 @@
                 },
                 "description": "Returned for `ambiguous_target_kind`; lists the candidate kinds."
               }
-            }
+            },
+            "x-flashduty-preserve-absence": true
           }
         }
       },
@@ -42799,7 +42802,8 @@
               "locator": {
                 "type": "string"
               }
-            }
+            },
+            "x-flashduty-preserve-absence": true
           },
           "results": {
             "type": "array",
@@ -42818,15 +42822,18 @@
                 },
                 "tool_version": {
                   "type": "string",
-                  "description": "Agent-executed tool version. Omitted when the failure occurred before the agent picked a version."
+                  "description": "Agent-executed tool version. Omitted when the failure occurred before the agent picked a version.",
+                  "x-flashduty-preserve-absence": true
                 },
                 "data": {
                   "type": "object",
-                  "description": "Tool business payload. Present only on success. Webapi already unwraps the monit-agent result envelope, so there is no nested `data.data`."
+                  "description": "Tool business payload. Present only on success. Webapi already unwraps the monit-agent result envelope, so there is no nested `data.data`.",
+                  "x-flashduty-preserve-absence": true
                 },
                 "summary": {
                   "type": "string",
-                  "description": "Human/LLM-readable one-line distillation of the result. Present only when non-empty."
+                  "description": "Human/LLM-readable one-line distillation of the result. Present only when non-empty.",
+                  "x-flashduty-preserve-absence": true
                 },
                 "truncated": {
                   "type": "object",
@@ -42836,7 +42843,8 @@
                       "type": "string",
                       "description": "Why the result was truncated."
                     }
-                  }
+                  },
+                  "x-flashduty-preserve-absence": true
                 },
                 "error": {
                   "type": "object",
@@ -42849,7 +42857,8 @@
                     "message": {
                       "type": "string"
                     }
-                  }
+                  },
+                  "x-flashduty-preserve-absence": true
                 },
                 "agent_elapsed_ms": {
                   "type": "integer",
@@ -42887,7 +42896,8 @@
                   "type": "string"
                 }
               }
-            }
+            },
+            "x-flashduty-preserve-absence": true
           }
         }
       },

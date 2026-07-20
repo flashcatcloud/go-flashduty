@@ -7646,9 +7646,9 @@ type ToolCatalogRequest struct {
 // ToolCatalogResponse is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponse struct {
 	// Request-level business error. Omitted on success. Returned with HTTP 200 — do not rely on the status code alone.
-	Error ToolCatalogResponseError `json:"error" toon:"error"`
+	Error *ToolCatalogResponseError `json:"error,omitempty" toon:"error,omitempty"`
 	// Resolved target. Omitted when `target_kind` was not supplied and the locator could not be uniquely inferred.
-	Target ToolCatalogResponseTarget `json:"target" toon:"target"`
+	Target *ToolCatalogResponseTarget `json:"target,omitempty" toon:"target,omitempty"`
 	// Tool metadata advertised by the target's agent. Always present; an empty array when `error` is set.
 	Tools []ToolCatalogResponseToolsItem `json:"tools" toon:"tools"`
 }
@@ -7668,11 +7668,11 @@ type ToolInvokeRequest struct {
 // ToolInvokeResponse is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponse struct {
 	// Request-level business error. Omitted on success. Returned with HTTP 200 — do not rely on the status code alone.
-	Error ToolInvokeResponseError `json:"error" toon:"error"`
+	Error *ToolInvokeResponseError `json:"error,omitempty" toon:"error,omitempty"`
 	// Per-tool results, aligned with the request `tools[]` order. Empty when a request-level `error` is present.
 	Results []ToolInvokeResponseResultsItem `json:"results" toon:"results"`
 	// Resolved target. Omitted when `target_kind` was not supplied and the locator could not be uniquely inferred.
-	Target ToolInvokeResponseTarget `json:"target" toon:"target"`
+	Target *ToolInvokeResponseTarget `json:"target,omitempty" toon:"target,omitempty"`
 }
 
 // TryLinkPersonRequest is generated from the Flashduty OpenAPI schema.
@@ -8604,7 +8604,7 @@ type ToolCatalogResponseToolsItem struct {
 	// Tool name; pass into `/monit/tools/invoke` as `tools[].tool`.
 	Name string `json:"name" toon:"name"`
 	// JSON Schema of the tool result. Returned only when the request set `include_output_shape` to true.
-	OutputShape map[string]any `json:"output_shape" toon:"output_shape"`
+	OutputShape *map[string]any `json:"output_shape,omitempty" toon:"output_shape,omitempty"`
 	// Target kind this tool applies to.
 	TargetKind string `json:"target_kind" toon:"target_kind"`
 }
@@ -8629,21 +8629,21 @@ type ToolInvokeResponseResultsItem struct {
 	// Agent-self-reported tool execution time in milliseconds, excluding network round-trips. May be 0 when the failure occurred before execution started.
 	AgentElapsedMs int64 `json:"agent_elapsed_ms" toon:"agent_elapsed_ms"`
 	// Tool business payload. Present only on success. Webapi already unwraps the monit-agent result envelope, so there is no nested `data.data`.
-	Data map[string]any `json:"data" toon:"data"`
+	Data *map[string]any `json:"data,omitempty" toon:"data,omitempty"`
 	// Webapi-observed end-to-end time in milliseconds (webapi → ws → edge → agent → ws → webapi). A large gap versus `agent_elapsed_ms` indicates network / edge slowness, not a slow tool.
 	E2eElapsedMs int64 `json:"e2e_elapsed_ms" toon:"e2e_elapsed_ms"`
 	// Per-tool failure. Present only on failure, and mutually exclusive with `data` / `summary` / `truncated`.
-	Error ToolInvokeResponseResultsItemError `json:"error" toon:"error"`
+	Error *ToolInvokeResponseResultsItemError `json:"error,omitempty" toon:"error,omitempty"`
 	// Request params echoed back by webapi. Normalized to `{}` when the request omitted them or sent null.
 	Params map[string]any `json:"params" toon:"params"`
 	// Human/LLM-readable one-line distillation of the result. Present only when non-empty.
-	Summary string `json:"summary" toon:"summary"`
+	Summary *string `json:"summary,omitempty" toon:"summary,omitempty"`
 	// Tool name, aligned one-to-one with the request `tools[]` order.
 	Tool string `json:"tool" toon:"tool"`
 	// Agent-executed tool version. Omitted when the failure occurred before the agent picked a version.
-	ToolVersion string `json:"tool_version" toon:"tool_version"`
+	ToolVersion *string `json:"tool_version,omitempty" toon:"tool_version,omitempty"`
 	// Present only when the result was actually truncated — the field's presence is the signal, so there is no redundant `truncated: true`.
-	Truncated ToolInvokeResponseResultsItemTruncated `json:"truncated" toon:"truncated"`
+	Truncated *ToolInvokeResponseResultsItemTruncated `json:"truncated,omitempty" toon:"truncated,omitempty"`
 }
 
 // ToolInvokeResponseTarget is generated from the Flashduty OpenAPI schema.
