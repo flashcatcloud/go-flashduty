@@ -20454,15 +20454,16 @@
                       {
                         "tool": "net.tcp_ping",
                         "params": {
-                          "host": "10.0.0.10",
+                          "host": "10.255.255.1",
                           "port": 3306
                         },
+                        "tool_version": "0.1.0",
                         "error": {
-                          "code": "target_unreachable",
-                          "message": "dial tcp 10.0.0.10:3306: i/o timeout"
+                          "code": "timeout",
+                          "message": "tool \"net.tcp_ping\" exceeded 8000ms"
                         },
-                        "agent_elapsed_ms": 0,
-                        "e2e_elapsed_ms": 2008
+                        "agent_elapsed_ms": 8048,
+                        "e2e_elapsed_ms": 8217
                       }
                     ]
                   }
