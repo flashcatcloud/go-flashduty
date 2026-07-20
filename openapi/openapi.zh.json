@@ -43157,7 +43157,8 @@
           },
           "next_cursor": {
             "type": "string",
-            "description": "下一页的不透明游标。缺失 / 为空表示已到末页。"
+            "description": "下一页的不透明游标。缺失 / 为空表示已到末页。",
+            "x-flashduty-preserve-absence": true
           }
         }
       },

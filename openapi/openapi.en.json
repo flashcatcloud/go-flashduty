@@ -43166,7 +43166,8 @@
           },
           "next_cursor": {
             "type": "string",
-            "description": "Opaque cursor for the next page. Absent / empty means this is the last page."
+            "description": "Opaque cursor for the next page. Absent / empty means this is the last page.",
+            "x-flashduty-preserve-absence": true
           }
         }
       },

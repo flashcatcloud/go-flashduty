@@ -7321,7 +7321,7 @@ type TargetsListRequest struct {
 type TargetsListResponse struct {
 	Items []TargetsListResponseItemsItem `json:"items" toon:"items"`
 	// Opaque cursor for the next page. Absent / empty means this is the last page.
-	NextCursor string `json:"next_cursor" toon:"next_cursor"`
+	NextCursor *string `json:"next_cursor,omitempty" toon:"next_cursor,omitempty"`
 	// Total matches for the current `(account_id, keyword)` pair, independent of `cursor`.
 	Total int64 `json:"total" toon:"total"`
 }
