@@ -8586,7 +8586,7 @@ type ToolCatalogResponseError struct {
 	Code    string `json:"code" toon:"code"`
 	Message string `json:"message" toon:"message"`
 	// Returned for `ambiguous_target_kind`; lists the candidate kinds.
-	TargetKinds []string `json:"target_kinds" toon:"target_kinds"`
+	TargetKinds *[]string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
 }
 
 // ToolCatalogResponseTarget is generated from the Flashduty OpenAPI schema.
@@ -8619,9 +8619,9 @@ type ToolInvokeRequestToolsItem struct {
 
 // ToolInvokeResponseError is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseError struct {
-	Code        string   `json:"code" toon:"code"`
-	Message     string   `json:"message" toon:"message"`
-	TargetKinds []string `json:"target_kinds" toon:"target_kinds"`
+	Code        string    `json:"code" toon:"code"`
+	Message     string    `json:"message" toon:"message"`
+	TargetKinds *[]string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
 }
 
 // ToolInvokeResponseResultsItem is generated from the Flashduty OpenAPI schema.

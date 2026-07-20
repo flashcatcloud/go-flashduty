@@ -19992,7 +19992,7 @@
                           "aggregated_pattern_evidence_total": 20,
                           "pattern_evidence_returned": 1,
                           "pattern_evidence_truncated_by_max_patterns": true,
-                          "evidence_summary": "10 of 20 pattern evidence items are returned."
+                          "evidence_summary": "1 of 20 pattern evidence items are returned."
                         },
                         "pattern_evidence": [
                           {
@@ -20114,6 +20114,144 @@
                           "type": "object",
                           "additionalProperties": false,
                           "properties": {}
+                        },
+                        "output_shape": {
+                          "properties": {
+                            "data": {
+                              "properties": {
+                                "cpu": {
+                                  "type": "object"
+                                },
+                                "degradation_reasons": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "minItems": 1,
+                                  "type": "array"
+                                },
+                                "disk": {
+                                  "description": "Filesystems sorted by used_pct desc; rootfs always present; capped at host.disk.top_n. Sizes are in GB; used_pct/inode_used_pct in percent.",
+                                  "type": "array"
+                                },
+                                "disk_errors": {
+                                  "description": "Mount points whose statfs returned a syscall error (EACCES / ENOENT / EIO / stale, etc.); each entry is `<mount>: <errno>`.",
+                                  "type": "array"
+                                },
+                                "disk_io": {
+                                  "description": "Per-device disk I/O rates (util_pct, IOPS, throughput, await). Sorted by util_pct desc; capped at host.disk_io.top_n. Only whole-disk devices shown.",
+                                  "type": "object"
+                                },
+                                "disk_timeouts": {
+                                  "description": "Mount points whose statfs hit per-mount timeout.",
+                                  "type": "array"
+                                },
+                                "load": {
+                                  "type": "object"
+                                },
+                                "memory": {
+                                  "description": "Memory and swap sizes are in MB; percentages are 0..100. Swap fields are always present when memory collection succeeds, including zero when swap is not configured.",
+                                  "properties": {
+                                    "available_mb": {
+                                      "type": "integer"
+                                    },
+                                    "swap_configured": {
+                                      "description": "True when the kernel reports a non-zero SwapTotal.",
+                                      "type": "boolean"
+                                    },
+                                    "swap_total_mb": {
+                                      "type": "integer"
+                                    },
+                                    "swap_used_mb": {
+                                      "type": "integer"
+                                    },
+                                    "swap_used_pct": {
+                                      "type": "number"
+                                    },
+                                    "total_mb": {
+                                      "type": "integer"
+                                    },
+                                    "used_mb": {
+                                      "type": "integer"
+                                    },
+                                    "used_pct": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "total_mb",
+                                    "available_mb",
+                                    "used_mb",
+                                    "used_pct",
+                                    "swap_configured",
+                                    "swap_total_mb",
+                                    "swap_used_mb",
+                                    "swap_used_pct"
+                                  ],
+                                  "type": "object"
+                                },
+                                "network_io": {
+                                  "description": "Per-interface network throughput and error rates. Sorted by total traffic desc; capped at host.network_io.top_n. Virtual/container interfaces excluded by default.",
+                                  "type": "object"
+                                },
+                                "procs": {
+                                  "type": "object"
+                                },
+                                "sample_interval_sec": {
+                                  "description": "Shared sampling interval for CPU, disk_io, network_io counter-diff calculations.",
+                                  "type": "number"
+                                },
+                                "tcp_connections": {
+                                  "description": "TCP connection state distribution via netlink SOCK_DIAG. Shows counts per state (established, time_wait, close_wait, listen, syn_recv, other, total).",
+                                  "type": "object"
+                                },
+                                "uptime_sec": {
+                                  "type": "number"
+                                },
+                                "vmstat": {
+                                  "description": "Sparse cumulative counters since the current boot; use them as historical clues, not current rates.",
+                                  "properties": {
+                                    "oom_kill_since_boot": {
+                                      "description": "OOM kills accumulated since boot; omitted when this kernel does not expose the counter.",
+                                      "type": "integer"
+                                    },
+                                    "pgmajfault_since_boot": {
+                                      "description": "Major page faults accumulated since boot.",
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": [
+                                    "pgmajfault_since_boot"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "sample_interval_sec"
+                              ],
+                              "type": "object"
+                            },
+                            "summary": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "truncated": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "reason": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "reason"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "data"
+                          ],
+                          "type": "object"
                         }
                       },
                       {
@@ -20135,6 +20273,65 @@
                               "type": "integer"
                             }
                           }
+                        },
+                        "output_shape": {
+                          "properties": {
+                            "data": {
+                              "properties": {
+                                "avg_ms": {
+                                  "type": "number"
+                                },
+                                "max_ms": {
+                                  "type": "number"
+                                },
+                                "min_ms": {
+                                  "type": "number"
+                                },
+                                "probes": {
+                                  "items": {
+                                    "properties": {
+                                      "error": {
+                                        "type": "string"
+                                      },
+                                      "latency_ms": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "reachable": {
+                                  "type": "boolean"
+                                },
+                                "resolved_ip": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "summary": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "truncated": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "reason": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "reason"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "data"
+                          ],
+                          "type": "object"
                         }
                       }
                     ]
@@ -42728,7 +42925,8 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "在 `ambiguous_target_kind` 时返回;列出候选的 kind。"
+                "description": "在 `ambiguous_target_kind` 时返回;列出候选的 kind。",
+                "x-flashduty-preserve-absence": true
               }
             },
             "x-flashduty-preserve-absence": true
@@ -42808,7 +43006,6 @@
                 },
                 "params": {
                   "type": "object",
-                  "nullable": true,
                   "description": "WebAPI 从原始请求回填的调用参数。请求中缺省或为 null 时规范化为 `{}`。"
                 },
                 "tool_version": {
@@ -42874,7 +43071,6 @@
                   "target_unavailable",
                   "unknown_toolset_hash",
                   "forward_failed",
-                  "invalid_tool_result",
                   "ambiguous_target_kind"
                 ]
               },
@@ -42885,7 +43081,8 @@
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
+                },
+                "x-flashduty-preserve-absence": true
               }
             },
             "x-flashduty-preserve-absence": true
