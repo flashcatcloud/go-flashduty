@@ -79,7 +79,7 @@ func (s *SkillsService) WriteDisable(ctx context.Context, req *SkillStatusReques
 
 // Update skill.
 //
-// Update a skill's description or reassign its team scope.
+// Update a skill's descriptions or reassign its team scope.
 //
 // API: POST /safari/skill/update (skill-write-update).
 func (s *SkillsService) WriteUpdate(ctx context.Context, req *SkillUpdateRequest) (*SkillItem, *Response, error) {

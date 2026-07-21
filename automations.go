@@ -63,6 +63,20 @@ func (s *AutomationsService) RuleWriteDelete(ctx context.Context, req *Automatio
 	return out, resp, nil
 }
 
+// Run Automation rule.
+//
+// Manually run an Automation rule immediately, outside its schedule.
+//
+// API: POST /safari/automation/rule/run (automation-rule-write-run).
+func (s *AutomationsService) RuleWriteRun(ctx context.Context, req *AutomationRuleIDRequest) (*ManualRunRuleResult, *Response, error) {
+	out := new(ManualRunRuleResult)
+	resp, err := s.client.do(ctx, "/safari/automation/rule/run", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Update Automation rule.
 //
 // Update mutable Automation rule fields, including HTTP POST and On-call incident trigger settings.

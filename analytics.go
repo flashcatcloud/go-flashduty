@@ -65,7 +65,7 @@ func (s *AnalyticsService) ByTeam(ctx context.Context, req *InsightQueryRequest)
 
 // Export channel insight.
 //
-// Export channel insight metrics as a CSV file. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
+// Export channel insight metrics as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
 //
 // API: POST /insight/channel/export (insightChannelExport).
 func (s *AnalyticsService) ChannelExport(ctx context.Context, req *InsightQueryRequest) (*Response, error) {
@@ -74,7 +74,7 @@ func (s *AnalyticsService) ChannelExport(ctx context.Context, req *InsightQueryR
 
 // Export insight incidents.
 //
-// Export the filtered incident analytics list as a CSV file. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
+// Export the filtered incident analytics list as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
 //
 // API: POST /insight/incident/export (insightIncidentExport).
 func (s *AnalyticsService) IncidentExport(ctx context.Context, req *InsightIncidentExportRequest) (*Response, error) {
@@ -97,7 +97,7 @@ func (s *AnalyticsService) IncidentList(ctx context.Context, req *InsightInciden
 
 // Export responder insight.
 //
-// Export responder insight metrics as a CSV file. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
+// Export responder insight metrics as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
 //
 // API: POST /insight/responder/export (insightResponderExport).
 func (s *AnalyticsService) ResponderExport(ctx context.Context, req *InsightQueryRequest) (*Response, error) {
@@ -106,7 +106,7 @@ func (s *AnalyticsService) ResponderExport(ctx context.Context, req *InsightQuer
 
 // Export team insight.
 //
-// Export team insight metrics as a CSV file. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
+// Export team insight metrics as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
 //
 // API: POST /insight/team/export (insightTeamExport).
 func (s *AnalyticsService) TeamExport(ctx context.Context, req *InsightQueryRequest) (*Response, error) {
