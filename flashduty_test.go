@@ -182,6 +182,66 @@ func TestDoTreatsOKCodeAsSuccess(t *testing.T) {
 	}
 }
 
+// TestDoReportsIntermediaryOnNon2xxNonJSONBody guards a prod incident: an ALB
+// timed out a long-running request and returned an HTML 504 page with no
+// Flashcat-Request-Id header. The error must name the status, say the
+// response came from an intermediary rather than the Flashduty API, note the
+// missing request id, hint at retry/splitting the batch, and echo a body
+// snippet — not the old "malformed response" wording, which reads like an
+// API bug.
+func TestDoReportsIntermediaryOnNon2xxNonJSONBody(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, "<html><body>504 Gateway Time-out</body></html>")
+	})
+	_, err := c.do(context.Background(), "/incident/list", map[string]any{}, nil)
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+	msg := err.Error()
+	for _, want := range []string{"HTTP 504", "intermediary", "no request id", "gateway/proxy timeout", "504 Gateway Time-out"} {
+		if !strings.Contains(msg, want) {
+			t.Fatalf("error message = %q, want it to contain %q", msg, want)
+		}
+	}
+	if strings.Contains(msg, "malformed response") {
+		t.Fatalf("error message = %q, must not use the old malformed-response wording", msg)
+	}
+}
+
+// TestDoReportsIntermediaryWithRequestID covers the case where the
+// intermediary (or an upstream hop before it) did forward a request id.
+func TestDoReportsIntermediaryWithRequestID(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Flashcat-Request-Id", "RID-504")
+		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, "<html>timeout</html>")
+	})
+	_, err := c.do(context.Background(), "/incident/list", map[string]any{}, nil)
+	if err == nil || !strings.Contains(err.Error(), "request id RID-504") {
+		t.Fatalf("expected error to include the forwarded request id, got %v", err)
+	}
+}
+
+// TestDoMapsNon2xxJSONEnvelopeUnaffectedByGatewaySplit confirms a real 504
+// bearing a normal JSON error envelope is completely unaffected by the new
+// non-JSON/intermediary branch: it still maps to *ErrorResponse as before.
+func TestDoMapsNon2xxJSONEnvelopeUnaffectedByGatewaySplit(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Flashcat-Request-Id", "RID4")
+		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, `{"request_id":"RID4","error":{"code":"timeout","message":"upstream took too long"}}`)
+	})
+	_, err := c.do(context.Background(), "/incident/list", map[string]any{}, nil)
+	var apiErr *ErrorResponse
+	if !errors.As(err, &apiErr) || apiErr.Code != "timeout" || apiErr.Response.StatusCode != http.StatusGatewayTimeout || apiErr.RequestID != "RID4" {
+		t.Fatalf("expected mapped ErrorResponse for JSON envelope, got %v", err)
+	}
+}
+
+// TestDoExposesNonJSONBodyAsRaw also guards the 2xx branch against the
+// non-2xx/intermediary-error split above: a non-JSON body on success must
+// keep returning Response.Raw with no error, never the new gateway message.
 func TestDoExposesNonJSONBodyAsRaw(t *testing.T) {
 	const csv = "id,title\n1,boom\n2,bam\n"
 	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
