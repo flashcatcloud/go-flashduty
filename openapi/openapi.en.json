@@ -14644,12 +14644,12 @@
       "post": {
         "operationId": "monit-datasource-read-info",
         "summary": "Get datasource detail",
-        "description": "Retrieve full details of a single data source by its ID, including the `payload` configuration.",
+        "description": "Retrieve full details of a single data source by its ID, including the `payload` configuration, with credential fields masked as `******`.",
         "tags": [
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-read-info",
           "metadata": {
             "sidebarTitle": "Get datasource detail"
@@ -14737,7 +14737,7 @@
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- `type_ident` must be one of: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.\n- `edge_cluster_name` specifies which Monitors edge cluster evaluates rules using this datasource.\n- For `elasticsearch`, set `payload.elasticsearch.deployment` to `cloud` or `self-managed`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- `type_ident` must be one of: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.\n- `edge_cluster_name` specifies which Monitors edge cluster evaluates rules using this datasource.\n- For `elasticsearch`, set `payload.elasticsearch.deployment` to `cloud` or `self-managed`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-write-create",
           "metadata": {
             "sidebarTitle": "Create datasource"
@@ -14823,7 +14823,7 @@
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "Update datasource"
@@ -20372,7 +20372,7 @@
           "Monitors/Diagnostics"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- Up to **8** tools per call (`MaxToolsPerInvoke`); larger batches must be split client-side. The 8-tool cap aligns with the per-target agent concurrency.\n- Tools execute in parallel on the agent; webapi returns `results[]` aligned with the request `tools[]` order.\n- Long-running: set client timeouts to **at least 35 s**. The endpoint is intended for AI-SRE / human-RCA flows, not interactive UI.\n- Request-level errors (`target_unavailable`, `ambiguous_target_kind`, `unknown_toolset_hash`, `forward_failed`) appear as HTTP 200 with `data.error` set and `data.results = []`.\n- Per-tool failures appear as HTTP 200 with `data.error` absent and `results[i].error` populated — always check **all three** layers (outer envelope `error`, `data.error`, then each `results[i].error`).\n- The response uses **sparse fields**: absent means empty. On success `error` is omitted entirely rather than sent as `null`; on failure `data`, `summary` and `truncated` are omitted. Do not key logic off placeholder `null` fields, and do not expect `target` when the locator could not be uniquely resolved.\n- `results[i].data` is the tool payload with the monit-agent result envelope **already unwrapped** — there is no nested `data.data`. The one-line distillation is `results[i].summary`, and `results[i].truncated` (carrying a `reason`) appears only when the result was genuinely truncated.\n- `results[i].params` echoes the params webapi received for that tool, so batched calls stay correlatable even when an individual tool fails.\n- Each result carries two latency fields: `agent_elapsed_ms` (agent-self-reported, excludes network) and `e2e_elapsed_ms` (webapi-observed end-to-end). A large gap between them indicates network / edge slowness rather than slow tool execution.\n- Construct `tools[].params` against the `input_schema` returned by `/monit/tools/catalog`. For no-arg tools always pass `params: {}` explicitly.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- Up to **8** tools per call (`MaxToolsPerInvoke`); larger batches must be split client-side. The 8-tool cap aligns with the per-target agent concurrency.\n- Tools execute in parallel on the agent; webapi returns `results[]` aligned with the request `tools[]` order.\n- Long-running: set client timeouts to **at least 35 s**. The endpoint is intended for AI-SRE / human-RCA flows, not interactive UI.\n- Request-level errors (`target_unavailable`, `ambiguous_target_kind`, `unknown_toolset_hash`, `forward_failed`) appear as HTTP 200 with `data.error` set and `data.results = []`.\n- Per-tool failures appear as HTTP 200 with `data.error` absent and `results[i].error` populated — always check **all three** layers (outer envelope `error`, `data.error`, then each `results[i].error`).\n- The response uses **sparse fields**: absent means empty. On success `error` is omitted entirely rather than sent as `null`; on failure `data`, `summary` and `truncated` are omitted. Do not key logic off placeholder `null` fields, and do not expect `target` when the locator could not be uniquely resolved.\n- `results[i].data` is the tool payload with the monit-agent result envelope **already unwrapped** — there is no nested `data.data`. The one-line distillation is `results[i].summary`, and `results[i].truncated` (carrying a `reason`) appears only when the result was genuinely truncated.\n- `results[i].params` echoes the params webapi received for that tool, so batched calls stay correlatable even when an individual tool fails.\n- Construct `tools[].params` against the `input_schema` returned by `/monit/tools/catalog`. For no-arg tools always pass `params: {}` explicitly.",
           "href": "/en/api-reference/monitors/diagnostics/monit-read-tools-invoke",
           "metadata": {
             "sidebarTitle": "Invoke target tools"
@@ -20455,9 +20455,7 @@
                             "total_procs": 1036
                           }
                         },
-                        "summary": "os.overview cpu=32.66% mem=74.46% swap=not_configured oom_kill_since_boot=2 load1=1.79",
-                        "agent_elapsed_ms": 3120,
-                        "e2e_elapsed_ms": 3188
+                        "summary": "os.overview cpu=32.66% mem=74.46% swap=not_configured oom_kill_since_boot=2 load1=1.79"
                       },
                       {
                         "tool": "net.tcp_ping",
@@ -20469,9 +20467,7 @@
                         "error": {
                           "code": "timeout",
                           "message": "tool \"net.tcp_ping\" exceeded 8000ms"
-                        },
-                        "agent_elapsed_ms": 8048,
-                        "e2e_elapsed_ms": 8217
+                        }
                       }
                     ]
                   }
@@ -43057,16 +43053,6 @@
                     }
                   },
                   "x-flashduty-preserve-absence": true
-                },
-                "agent_elapsed_ms": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Agent-self-reported tool execution time in milliseconds, excluding network round-trips. May be 0 when the failure occurred before execution started."
-                },
-                "e2e_elapsed_ms": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Webapi-observed end-to-end time in milliseconds (webapi → ws → edge → agent → ws → webapi). A large gap versus `agent_elapsed_ms` indicates network / edge slowness, not a slow tool."
                 }
               }
             }
