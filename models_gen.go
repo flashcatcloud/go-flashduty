@@ -8626,12 +8626,8 @@ type ToolInvokeResponseError struct {
 
 // ToolInvokeResponseResultsItem is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseResultsItem struct {
-	// Agent-self-reported tool execution time in milliseconds, excluding network round-trips. May be 0 when the failure occurred before execution started.
-	AgentElapsedMs int64 `json:"agent_elapsed_ms" toon:"agent_elapsed_ms"`
 	// Tool business payload. Present only on success. Webapi already unwraps the monit-agent result envelope, so there is no nested `data.data`.
 	Data *map[string]any `json:"data,omitempty" toon:"data,omitempty"`
-	// Webapi-observed end-to-end time in milliseconds (webapi → ws → edge → agent → ws → webapi). A large gap versus `agent_elapsed_ms` indicates network / edge slowness, not a slow tool.
-	E2eElapsedMs int64 `json:"e2e_elapsed_ms" toon:"e2e_elapsed_ms"`
 	// Per-tool failure. Present only on failure, and mutually exclusive with `data` / `summary` / `truncated`.
 	Error *ToolInvokeResponseResultsItemError `json:"error,omitempty" toon:"error,omitempty"`
 	// Request params echoed back by webapi. Normalized to `{}` when the request omitted them or sent null.
