@@ -805,6 +805,7 @@ type AlertRule struct {
 	DebugLogEnabled bool   `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
 	DelaySeconds    int64  `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
 	Description     string `json:"description,omitempty" toon:"description,omitempty"`
+	// Format for the description. Defaults to `text` when omitted or empty.
 	DescriptionType string `json:"description_type,omitempty" toon:"description_type,omitempty"`
 	// Specific data source IDs.
 	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
@@ -813,7 +814,7 @@ type AlertRule struct {
 	// Data source type.
 	DsType  string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
 	Enabled bool   `json:"enabled,omitempty" toon:"enabled,omitempty"`
-	// Time windows when the rule is active.
+	// Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.
 	EnabledTimes []AlertRuleEnabledTimesItem `json:"enabled_times,omitempty" toon:"enabled_times,omitempty"`
 	// Folder the rule belongs to.
 	FolderID uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
@@ -924,6 +925,7 @@ type AlertRuleInfoResponse struct {
 	DebugLogEnabled bool   `json:"debug_log_enabled" toon:"debug_log_enabled"`
 	DelaySeconds    int64  `json:"delay_seconds" toon:"delay_seconds"`
 	Description     string `json:"description" toon:"description"`
+	// Format for the description. Defaults to `text` when omitted or empty.
 	DescriptionType string `json:"description_type" toon:"description_type"`
 	// Specific data source IDs.
 	DsIDs []uint64 `json:"ds_ids" toon:"ds_ids"`
@@ -932,7 +934,7 @@ type AlertRuleInfoResponse struct {
 	// Data source type.
 	DsType  string `json:"ds_type" toon:"ds_type"`
 	Enabled bool   `json:"enabled" toon:"enabled"`
-	// Time windows when the rule is active.
+	// Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.
 	EnabledTimes []AlertRuleInfoResponseEnabledTimesItem `json:"enabled_times" toon:"enabled_times"`
 	// Folder the rule belongs to.
 	FolderID uint64 `json:"folder_id" toon:"folder_id"`
@@ -6552,6 +6554,63 @@ type ScheduleUpsertRequest struct {
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
+// ServiceDeskPlusRequestListRequest is generated from the Flashduty OpenAPI schema.
+type ServiceDeskPlusRequestListRequest struct {
+	ListOptions
+	// When `true`, sort by internal record ID ascending; otherwise descending.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Channel IDs to filter by.
+	ChannelIDs []int64 `json:"channel_ids,omitempty" toon:"channel_ids,omitempty"`
+	// Window end, Unix seconds. Must be greater than or equal to `start_time`. Optional when `incident_id` is provided.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Flashduty incident ID. When set, the time window can be omitted.
+	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	// ServiceDeskPlus integration ID.
+	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+	// ServiceDeskPlus request ID.
+	RequestID string `json:"request_id,omitempty" toon:"request_id,omitempty"`
+	// Window start, Unix seconds. Optional when `incident_id` is provided.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	// Synchronization status filter.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+}
+
+// ServiceDeskPlusRequestListResponse is generated from the Flashduty OpenAPI schema.
+type ServiceDeskPlusRequestListResponse struct {
+	// True when more results are available.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Synchronization records on the current page.
+	Items []ServiceDeskPlusRequestMappingItem `json:"items" toon:"items"`
+	// Cursor for the next page. Empty when no more data is available.
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
+	// Total number of matching records, capped at 1,000 for counting.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// ServiceDeskPlusRequestMappingItem is generated from the Flashduty OpenAPI schema.
+type ServiceDeskPlusRequestMappingItem struct {
+	// Channel ID for the incident.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Channel name for the incident.
+	ChannelName string `json:"channel_name" toon:"channel_name"`
+	// Mapping record creation time, Unix seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Error message when synchronization failed. Usually absent on successful records.
+	ErrorMessage string `json:"error_message" toon:"error_message"`
+	// Associated Flashduty incident ID.
+	IncidentID string `json:"incident_id" toon:"incident_id"`
+	// Associated incident title.
+	IncidentTitle string `json:"incident_title" toon:"incident_title"`
+	// ServiceDeskPlus integration ID.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// ServiceDeskPlus request ID.
+	RequestID string `json:"request_id" toon:"request_id"`
+	// ServiceDeskPlus request detail URL.
+	RequestLink string `json:"request_link" toon:"request_link"`
+	// Synchronization status.
+	Status string `json:"status" toon:"status"`
+}
+
 // SessionDeleteRequest is generated from the Flashduty OpenAPI schema.
 type SessionDeleteRequest struct {
 	// Target session ID.
@@ -7459,6 +7518,8 @@ type TemplateCreateRequest struct {
 	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	// Render alert labels as a table in Feishu app cards.
+	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.
@@ -7519,6 +7580,8 @@ type TemplateItem struct {
 	Feishu string `json:"feishu" toon:"feishu"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app" toon:"feishu_app"`
+	// Whether alert labels use table rendering in Feishu app cards.
+	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled" toon:"feishu_app_card_table_enabled"`
 	// Slack robot message template source.
 	Slack string `json:"slack" toon:"slack"`
 	// Slack app message template source.
@@ -7591,6 +7654,8 @@ type TemplateUpdateRequest struct {
 	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	// When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting.
+	FeishuAppCardTableEnabled *bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.
@@ -7635,9 +7700,7 @@ type TimeFilter struct {
 type ToolCatalogRequest struct {
 	// Optional consistency check. Must equal the authenticated account when supplied.
 	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// When true, each tool entry includes its `output_shape` JSON Schema. Defaults to false to keep responses small for LLM consumption.
-	IncludeOutputShape bool `json:"include_output_shape,omitempty" toon:"include_output_shape,omitempty"`
-	// Optional target kind. When omitted webapi auto-infers across currently known kinds. Built-in kinds: `host`, `mysql`. Required on retry when the previous call returned `ambiguous_target_kind`.
+	// Optional target kind. When omitted, webapi infers it from current target routing. If the call returns `ambiguous_target_kind`, retry with a value from `target_kinds`.
 	TargetKind string `json:"target_kind,omitempty" toon:"target_kind,omitempty"`
 	// Target identifier (host name, MySQL address, …). Max 256 bytes; no whitespace, control characters, or `|`.
 	TargetLocator string `json:"target_locator,omitempty" toon:"target_locator,omitempty"`
@@ -8603,8 +8666,6 @@ type ToolCatalogResponseToolsItem struct {
 	InputSchema map[string]any `json:"input_schema" toon:"input_schema"`
 	// Tool name; pass into `/monit/tools/invoke` as `tools[].tool`.
 	Name string `json:"name" toon:"name"`
-	// JSON Schema of the tool result. Returned only when the request set `include_output_shape` to true.
-	OutputShape *map[string]any `json:"output_shape,omitempty" toon:"output_shape,omitempty"`
 	// Target kind this tool applies to.
 	TargetKind string `json:"target_kind" toon:"target_kind"`
 }
@@ -8626,12 +8687,8 @@ type ToolInvokeResponseError struct {
 
 // ToolInvokeResponseResultsItem is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseResultsItem struct {
-	// Agent-self-reported tool execution time in milliseconds, excluding network round-trips. May be 0 when the failure occurred before execution started.
-	AgentElapsedMs int64 `json:"agent_elapsed_ms" toon:"agent_elapsed_ms"`
 	// Tool business payload. Present only on success. Webapi already unwraps the monit-agent result envelope, so there is no nested `data.data`.
 	Data *map[string]any `json:"data,omitempty" toon:"data,omitempty"`
-	// Webapi-observed end-to-end time in milliseconds (webapi → ws → edge → agent → ws → webapi). A large gap versus `agent_elapsed_ms` indicates network / edge slowness, not a slow tool.
-	E2eElapsedMs int64 `json:"e2e_elapsed_ms" toon:"e2e_elapsed_ms"`
 	// Per-tool failure. Present only on failure, and mutually exclusive with `data` / `summary` / `truncated`.
 	Error *ToolInvokeResponseResultsItemError `json:"error,omitempty" toon:"error,omitempty"`
 	// Request params echoed back by webapi. Normalized to `{}` when the request omitted them or sent null.
@@ -8767,7 +8824,7 @@ type RuleConfigsCheckThresholdRecovery struct {
 
 // ToolInvokeResponseResultsItemError is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseResultsItemError struct {
-	// Common values: `timeout`, `target_unavailable`, `edge_unsupported`, `invalid_tool_result`, `internal`, `invalid_args`, `unknown_tool`, `unknown_tool_version`, `unknown_toolset_hash`, `target_not_owned`, `wrong_agent`, `overloaded`, `denied`, `permission_denied`, `credential_unavailable`, `target_unreachable`.
+	// Common WebAPI codes: `timeout`, `target_unavailable`, `invalid_tool_result`, `internal`, `invalid_args`, `unsupported_syntax`, `path_not_found`, and `catalog_changed`. Agent-specific tool errors may also be returned unchanged.
 	Code    string `json:"code" toon:"code"`
 	Message string `json:"message" toon:"message"`
 }
