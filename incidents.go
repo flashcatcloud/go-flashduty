@@ -21,6 +21,20 @@ func (s *IncidentsService) ReadGetWarRoomDefaultObservers(ctx context.Context, r
 	return out, resp, nil
 }
 
+// Get ServiceDeskPlus linked incidents.
+//
+// List synchronization mappings between ServiceDeskPlus requests and Flashduty incidents.
+//
+// API: POST /incident/sdp/request/list (incident-service-desk-plus-request-read-list).
+func (s *IncidentsService) ServiceDeskPlusRequestReadList(ctx context.Context, req *ServiceDeskPlusRequestListRequest) (*ServiceDeskPlusRequestListResponse, *Response, error) {
+	out := new(ServiceDeskPlusRequestListResponse)
+	resp, err := s.client.do(ctx, "/incident/sdp/request/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Add war-room member.
 //
 // Add one or more members to the IM war room bound to an incident integration.

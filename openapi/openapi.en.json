@@ -316,6 +316,99 @@
         }
       }
     },
+    "/incident/sdp/request/list": {
+      "post": {
+        "operationId": "incident-service-desk-plus-request-read-list",
+        "summary": "Get ServiceDeskPlus linked incidents",
+        "description": "List synchronization mappings between ServiceDeskPlus requests and Flashduty incidents.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Read** (`on-call`) |\n\n## Usage\n\n- Use this endpoint to inspect synchronization mappings between ServiceDeskPlus requests and Flashduty incidents, including the external request link and sync status.\n- When `incident_id` is not provided, `start_time` and `end_time` are required Unix-second timestamps; the time window cannot exceed 30 days.\n- `status` accepts only `success` and `failed`, representing successful and failed synchronization records.\n- Results are sorted by the internal record ID. Set `asc` to `true` for ascending order; otherwise records are returned descending. Pass the returned `search_after_ctx` to continue pagination.",
+          "href": "/en/api-reference/on-call/incidents/incident-service-desk-plus-request-read-list",
+          "metadata": {
+            "sidebarTitle": "Get ServiceDeskPlus linked incidents"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ServiceDeskPlusRequestListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "created_at": 1779514631,
+                        "status": "success",
+                        "request_id": "100000000001",
+                        "request_link": "https://servicedesk.example.com/app/itdesk/ui/requests/100000000001/details",
+                        "integration_id": 98765,
+                        "incident_id": "685d7f4e51b9a9a6d4d0c123",
+                        "incident_title": "Checkout API 5xx rate increased",
+                        "channel_id": 12345,
+                        "channel_name": "Payments"
+                      }
+                    ],
+                    "total": 1,
+                    "has_next_page": false,
+                    "search_after_ctx": ""
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceDeskPlusRequestListRequest"
+              },
+              "example": {
+                "start_time": 1779513600,
+                "end_time": 1779600000,
+                "status": "success",
+                "channel_ids": [
+                  12345
+                ],
+                "limit": 20
+              }
+            }
+          }
+        }
+      }
+    },
     "/incident/info": {
       "post": {
         "operationId": "incidentInfo",
@@ -11784,12 +11877,12 @@
       "get": {
         "operationId": "statusPageChangeList",
         "summary": "List status page events",
-        "description": "List events (incidents and maintenances) for a status page.",
+        "description": "List status page events with only publicly visible affected components.",
         "tags": [
           "On-call/Status pages"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Hidden affected components are omitted. Events remain in the result when none are visible, with an empty `affected_components` array.",
           "href": "/en/api-reference/on-call/status-pages/status-page-change-list",
           "metadata": {
             "sidebarTitle": "List status page events"
@@ -14644,12 +14737,12 @@
       "post": {
         "operationId": "monit-datasource-read-info",
         "summary": "Get datasource detail",
-        "description": "Retrieve full details of a single data source by its ID, including the `payload` configuration.",
+        "description": "Retrieve full details of a single data source by its ID, including the `payload` configuration, with credential fields masked as `******`.",
         "tags": [
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-read-info",
           "metadata": {
             "sidebarTitle": "Get datasource detail"
@@ -14737,7 +14830,7 @@
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- `type_ident` must be one of: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.\n- `edge_cluster_name` specifies which Monitors edge cluster evaluates rules using this datasource.\n- For `elasticsearch`, set `payload.elasticsearch.deployment` to `cloud` or `self-managed`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- `type_ident` must be one of: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.\n- `edge_cluster_name` specifies which Monitors edge cluster evaluates rules using this datasource.\n- For `elasticsearch`, set `payload.elasticsearch.deployment` to `cloud` or `self-managed`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-write-create",
           "metadata": {
             "sidebarTitle": "Create datasource"
@@ -14823,7 +14916,7 @@
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "Update datasource"
@@ -20065,7 +20158,7 @@
           "Monitors/Diagnostics"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- Use `target_locator` to identify the target; `target_kind` is optional and is auto-inferred when omitted. Built-in target kinds are `host` and `mysql`.\n- If multiple kinds match the same locator, the response is HTTP 200 with `data.error.code = \"ambiguous_target_kind\"` and a `target_kinds` list — retry with an explicit `target_kind`.\n- The catalog is a *candidate capability* view, not an execution guarantee. The target Agent may go offline between catalog and invoke, or local Agent policy may block individual tools at invoke time.\n- Set `include_output_shape: true` to additionally receive each tool's `output_shape`. Default is `false` to keep the response small for LLM consumption.\n- Business errors (`target_unavailable`, `unknown_toolset_hash`, `ambiguous_target_kind`) come back as HTTP 200 with `data.error` present and `data.tools = []`. Only protocol / auth / internal errors use the standard error envelope.\n- The response uses **sparse fields**: on success `error` is omitted rather than sent as `null`, and `target` is omitted when the locator could not be uniquely resolved. `tools` is always present.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- Use `target_locator` to identify the target; `target_kind` is optional and is inferred from current target routing when omitted.\n- If multiple kinds match the same locator, the response is HTTP 200 with `data.error.code = \"ambiguous_target_kind\"` and a `target_kinds` list — retry with an explicit `target_kind`.\n- The catalog is a candidate capability view, not an execution guarantee. The target Agent may go offline between catalog and invoke, or local Agent policy may block individual tools at invoke time.\n- Each tool entry exposes only `name`, `target_kind`, `description`, and `input_schema`. It does not expose tool versions, output contracts, catalog revisions, or execution limits.\n- Business errors (`target_unavailable`, `timeout`, `forward_failed`, `invalid_tool_result`, `ambiguous_target_kind`) return HTTP 200 with `data.error` present and `data.tools = []`. Only protocol, authentication, and internal errors use the standard error envelope.\n- The response uses **sparse fields**: on success `error` is omitted rather than sent as `null`, and `target` is omitted when the locator could not be uniquely resolved. `tools` is always present.",
           "href": "/en/api-reference/monitors/diagnostics/monit-read-tools-catalog",
           "metadata": {
             "sidebarTitle": "List target tool catalog"
@@ -20080,8 +20173,7 @@
               },
               "example": {
                 "account_id": 10001,
-                "target_locator": "web-01",
-                "include_output_shape": true
+                "target_locator": "web-01"
               }
             }
           }
@@ -20122,144 +20214,6 @@
                           "type": "object",
                           "additionalProperties": false,
                           "properties": {}
-                        },
-                        "output_shape": {
-                          "properties": {
-                            "data": {
-                              "properties": {
-                                "cpu": {
-                                  "type": "object"
-                                },
-                                "degradation_reasons": {
-                                  "items": {
-                                    "type": "string"
-                                  },
-                                  "minItems": 1,
-                                  "type": "array"
-                                },
-                                "disk": {
-                                  "description": "Filesystems sorted by used_pct desc; rootfs always present; capped at host.disk.top_n. Sizes are in GB; used_pct/inode_used_pct in percent.",
-                                  "type": "array"
-                                },
-                                "disk_errors": {
-                                  "description": "Mount points whose statfs returned a syscall error (EACCES / ENOENT / EIO / stale, etc.); each entry is `<mount>: <errno>`.",
-                                  "type": "array"
-                                },
-                                "disk_io": {
-                                  "description": "Per-device disk I/O rates (util_pct, IOPS, throughput, await). Sorted by util_pct desc; capped at host.disk_io.top_n. Only whole-disk devices shown.",
-                                  "type": "object"
-                                },
-                                "disk_timeouts": {
-                                  "description": "Mount points whose statfs hit per-mount timeout.",
-                                  "type": "array"
-                                },
-                                "load": {
-                                  "type": "object"
-                                },
-                                "memory": {
-                                  "description": "Memory and swap sizes are in MB; percentages are 0..100. Swap fields are always present when memory collection succeeds, including zero when swap is not configured.",
-                                  "properties": {
-                                    "available_mb": {
-                                      "type": "integer"
-                                    },
-                                    "swap_configured": {
-                                      "description": "True when the kernel reports a non-zero SwapTotal.",
-                                      "type": "boolean"
-                                    },
-                                    "swap_total_mb": {
-                                      "type": "integer"
-                                    },
-                                    "swap_used_mb": {
-                                      "type": "integer"
-                                    },
-                                    "swap_used_pct": {
-                                      "type": "number"
-                                    },
-                                    "total_mb": {
-                                      "type": "integer"
-                                    },
-                                    "used_mb": {
-                                      "type": "integer"
-                                    },
-                                    "used_pct": {
-                                      "type": "number"
-                                    }
-                                  },
-                                  "required": [
-                                    "total_mb",
-                                    "available_mb",
-                                    "used_mb",
-                                    "used_pct",
-                                    "swap_configured",
-                                    "swap_total_mb",
-                                    "swap_used_mb",
-                                    "swap_used_pct"
-                                  ],
-                                  "type": "object"
-                                },
-                                "network_io": {
-                                  "description": "Per-interface network throughput and error rates. Sorted by total traffic desc; capped at host.network_io.top_n. Virtual/container interfaces excluded by default.",
-                                  "type": "object"
-                                },
-                                "procs": {
-                                  "type": "object"
-                                },
-                                "sample_interval_sec": {
-                                  "description": "Shared sampling interval for CPU, disk_io, network_io counter-diff calculations.",
-                                  "type": "number"
-                                },
-                                "tcp_connections": {
-                                  "description": "TCP connection state distribution via netlink SOCK_DIAG. Shows counts per state (established, time_wait, close_wait, listen, syn_recv, other, total).",
-                                  "type": "object"
-                                },
-                                "uptime_sec": {
-                                  "type": "number"
-                                },
-                                "vmstat": {
-                                  "description": "Sparse cumulative counters since the current boot; use them as historical clues, not current rates.",
-                                  "properties": {
-                                    "oom_kill_since_boot": {
-                                      "description": "OOM kills accumulated since boot; omitted when this kernel does not expose the counter.",
-                                      "type": "integer"
-                                    },
-                                    "pgmajfault_since_boot": {
-                                      "description": "Major page faults accumulated since boot.",
-                                      "type": "integer"
-                                    }
-                                  },
-                                  "required": [
-                                    "pgmajfault_since_boot"
-                                  ],
-                                  "type": "object"
-                                }
-                              },
-                              "required": [
-                                "sample_interval_sec"
-                              ],
-                              "type": "object"
-                            },
-                            "summary": {
-                              "minLength": 1,
-                              "type": "string"
-                            },
-                            "truncated": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "reason": {
-                                  "minLength": 1,
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "reason"
-                              ],
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "data"
-                          ],
-                          "type": "object"
                         }
                       },
                       {
@@ -20281,65 +20235,6 @@
                               "type": "integer"
                             }
                           }
-                        },
-                        "output_shape": {
-                          "properties": {
-                            "data": {
-                              "properties": {
-                                "avg_ms": {
-                                  "type": "number"
-                                },
-                                "max_ms": {
-                                  "type": "number"
-                                },
-                                "min_ms": {
-                                  "type": "number"
-                                },
-                                "probes": {
-                                  "items": {
-                                    "properties": {
-                                      "error": {
-                                        "type": "string"
-                                      },
-                                      "latency_ms": {
-                                        "type": "number"
-                                      }
-                                    },
-                                    "type": "object"
-                                  },
-                                  "type": "array"
-                                },
-                                "reachable": {
-                                  "type": "boolean"
-                                },
-                                "resolved_ip": {
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            },
-                            "summary": {
-                              "minLength": 1,
-                              "type": "string"
-                            },
-                            "truncated": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "reason": {
-                                  "minLength": 1,
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "reason"
-                              ],
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "data"
-                          ],
-                          "type": "object"
                         }
                       }
                     ]
@@ -20372,7 +20267,7 @@
           "Monitors/Diagnostics"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- Up to **8** tools per call (`MaxToolsPerInvoke`); larger batches must be split client-side. The 8-tool cap aligns with the per-target agent concurrency.\n- Tools execute in parallel on the agent; webapi returns `results[]` aligned with the request `tools[]` order.\n- Long-running: set client timeouts to **at least 35 s**. The endpoint is intended for AI-SRE / human-RCA flows, not interactive UI.\n- Request-level errors (`target_unavailable`, `ambiguous_target_kind`, `unknown_toolset_hash`, `forward_failed`) appear as HTTP 200 with `data.error` set and `data.results = []`.\n- Per-tool failures appear as HTTP 200 with `data.error` absent and `results[i].error` populated — always check **all three** layers (outer envelope `error`, `data.error`, then each `results[i].error`).\n- The response uses **sparse fields**: absent means empty. On success `error` is omitted entirely rather than sent as `null`; on failure `data`, `summary` and `truncated` are omitted. Do not key logic off placeholder `null` fields, and do not expect `target` when the locator could not be uniquely resolved.\n- `results[i].data` is the tool payload with the monit-agent result envelope **already unwrapped** — there is no nested `data.data`. The one-line distillation is `results[i].summary`, and `results[i].truncated` (carrying a `reason`) appears only when the result was genuinely truncated.\n- `results[i].params` echoes the params webapi received for that tool, so batched calls stay correlatable even when an individual tool fails.\n- Each result carries two latency fields: `agent_elapsed_ms` (agent-self-reported, excludes network) and `e2e_elapsed_ms` (webapi-observed end-to-end). A large gap between them indicates network / edge slowness rather than slow tool execution.\n- Construct `tools[].params` against the `input_schema` returned by `/monit/tools/catalog`. For no-arg tools always pass `params: {}` explicitly.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- Up to **8** tools per call (`MaxToolsPerInvoke`); larger batches must be split client-side. The 8-tool cap aligns with the per-target agent concurrency.\n- Tools execute in parallel on the agent; webapi returns `results[]` aligned with the request `tools[]` order.\n- Long-running: set client timeouts to **at least 35 s**. The endpoint is intended for AI-SRE / human-RCA flows, not interactive UI.\n- Request-level errors (`target_unavailable`, `ambiguous_target_kind`, `forward_failed`) appear as HTTP 200 with `data.error` set and `data.results = []`.\n- Per-tool failures appear as HTTP 200 with `data.error` absent and `results[i].error` populated — always check **all three** layers (outer envelope `error`, `data.error`, then each `results[i].error`).\n- The response uses **sparse fields**: absent means empty. On success `error` is omitted entirely rather than sent as `null`; on failure `data`, `summary` and `truncated` are omitted. Do not key logic off placeholder `null` fields, and do not expect `target` when the locator could not be uniquely resolved.\n- `results[i].data` is the tool payload with the monit-agent result envelope **already unwrapped** — there is no nested `data.data`. The one-line distillation is `results[i].summary`, and `results[i].truncated` (carrying a `reason`) appears only when the result was genuinely truncated.\n- `results[i].params` echoes the params webapi received for that tool, so batched calls stay correlatable even when an individual tool fails.\n- Construct `tools[].params` against the `input_schema` returned by `/monit/tools/catalog`. For no-arg tools always pass `params: {}` explicitly.",
           "href": "/en/api-reference/monitors/diagnostics/monit-read-tools-invoke",
           "metadata": {
             "sidebarTitle": "Invoke target tools"
@@ -20455,9 +20350,7 @@
                             "total_procs": 1036
                           }
                         },
-                        "summary": "os.overview cpu=32.66% mem=74.46% swap=not_configured oom_kill_since_boot=2 load1=1.79",
-                        "agent_elapsed_ms": 3120,
-                        "e2e_elapsed_ms": 3188
+                        "summary": "os.overview cpu=32.66% mem=74.46% swap=not_configured oom_kill_since_boot=2 load1=1.79"
                       },
                       {
                         "tool": "net.tcp_ping",
@@ -20469,9 +20362,7 @@
                         "error": {
                           "code": "timeout",
                           "message": "tool \"net.tcp_ping\" exceeded 8000ms"
-                        },
-                        "agent_elapsed_ms": 8048,
-                        "e2e_elapsed_ms": 8217
+                        }
                       }
                     ]
                   }
@@ -34981,6 +34872,7 @@
           "wecom",
           "feishu",
           "feishu_app",
+          "feishu_app_card_table_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -35046,6 +34938,10 @@
           "feishu_app": {
             "type": "string",
             "description": "Feishu app message template source."
+          },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "description": "Whether alert labels use table rendering in Feishu app cards."
           },
           "dingtalk_app": {
             "type": "string",
@@ -35265,6 +35161,11 @@
             "type": "string",
             "description": "Feishu app message template source."
           },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Render alert labels as a table in Feishu app cards."
+          },
           "dingtalk_app": {
             "type": "string",
             "description": "DingTalk app message template source."
@@ -35373,6 +35274,13 @@
           "feishu_app": {
             "type": "string",
             "description": "Feishu app message template source."
+          },
+          "feishu_app_card_table_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting."
           },
           "dingtalk_app": {
             "type": "string",
@@ -38478,7 +38386,22 @@
           },
           "enabled_times": {
             "type": "array",
-            "description": "Time windows when the rule is active.",
+            "description": "Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.",
+            "default": [
+              {
+                "days": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  0
+                ],
+                "stime": "00:00",
+                "etime": "23:59"
+              }
+            ],
             "items": {
               "type": "object",
               "properties": {
@@ -38511,7 +38434,9 @@
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "default": "text",
+            "description": "Format for the description. Defaults to `text` when omitted or empty."
           },
           "description": {
             "type": "string"
@@ -42860,12 +42785,7 @@
           },
           "target_kind": {
             "type": "string",
-            "description": "Optional target kind. When omitted webapi auto-infers across currently known kinds. Built-in kinds: `host`, `mysql`. Required on retry when the previous call returned `ambiguous_target_kind`."
-          },
-          "include_output_shape": {
-            "type": "boolean",
-            "description": "When true, each tool entry includes its `output_shape` JSON Schema. Defaults to false to keep responses small for LLM consumption.",
-            "default": false
+            "description": "Optional target kind. When omitted, webapi infers it from current target routing. If the call returns `ambiguous_target_kind`, retry with a value from `target_kinds`."
           }
         }
       },
@@ -42906,11 +42826,6 @@
                 "input_schema": {
                   "type": "object",
                   "description": "JSON Schema for `tools[].params`."
-                },
-                "output_shape": {
-                  "type": "object",
-                  "description": "JSON Schema of the tool result. Returned only when the request set `include_output_shape` to true.",
-                  "x-flashduty-preserve-absence": true
                 }
               }
             }
@@ -42923,7 +42838,9 @@
                 "type": "string",
                 "enum": [
                   "target_unavailable",
-                  "unknown_toolset_hash",
+                  "timeout",
+                  "forward_failed",
+                  "invalid_tool_result",
                   "ambiguous_target_kind"
                 ]
               },
@@ -43050,23 +42967,13 @@
                   "properties": {
                     "code": {
                       "type": "string",
-                      "description": "Common values: `timeout`, `target_unavailable`, `edge_unsupported`, `invalid_tool_result`, `internal`, `invalid_args`, `unknown_tool`, `unknown_tool_version`, `unknown_toolset_hash`, `target_not_owned`, `wrong_agent`, `overloaded`, `denied`, `permission_denied`, `credential_unavailable`, `target_unreachable`."
+                      "description": "Common WebAPI codes: `timeout`, `target_unavailable`, `invalid_tool_result`, `internal`, `invalid_args`, `unsupported_syntax`, `path_not_found`, and `catalog_changed`. Agent-specific tool errors may also be returned unchanged."
                     },
                     "message": {
                       "type": "string"
                     }
                   },
                   "x-flashduty-preserve-absence": true
-                },
-                "agent_elapsed_ms": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Agent-self-reported tool execution time in milliseconds, excluding network round-trips. May be 0 when the failure occurred before execution started."
-                },
-                "e2e_elapsed_ms": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Webapi-observed end-to-end time in milliseconds (webapi → ws → edge → agent → ws → webapi). A large gap versus `agent_elapsed_ms` indicates network / edge slowness, not a slow tool."
                 }
               }
             }
@@ -43079,7 +42986,6 @@
                 "type": "string",
                 "enum": [
                   "target_unavailable",
-                  "unknown_toolset_hash",
                   "forward_failed",
                   "ambiguous_target_kind"
                 ]
@@ -49218,6 +49124,173 @@
           "p95",
           "max"
         ]
+      },
+      "ServiceDeskPlusRequestListRequest": {
+        "type": "object",
+        "description": "Filters for listing ServiceDeskPlus request synchronization records. A time window is optional when querying by incident ID; otherwise provide a Unix-second window no longer than 30 days.",
+        "properties": {
+          "start_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Window start, Unix seconds. Optional when `incident_id` is provided."
+          },
+          "end_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Window end, Unix seconds. Must be greater than or equal to `start_time`. Optional when `incident_id` is provided."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "failed"
+            ],
+            "description": "Synchronization status filter."
+          },
+          "channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Channel IDs to filter by."
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "ServiceDeskPlus integration ID."
+          },
+          "incident_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Flashduty incident ID. When set, the time window can be omitted."
+          },
+          "request_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "ServiceDeskPlus request ID."
+          },
+          "asc": {
+            "type": "boolean",
+            "description": "When `true`, sort by internal record ID ascending; otherwise descending."
+          },
+          "p": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Page number starting at 1. Ignored when `search_after_ctx` is set."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 20,
+            "description": "Page size. Defaults to 20; maximum 100."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Cursor returned by the previous page."
+          }
+        }
+      },
+      "ServiceDeskPlusRequestMappingItem": {
+        "type": "object",
+        "description": "A synchronization mapping between a ServiceDeskPlus request and a Flashduty incident.",
+        "required": [
+          "created_at",
+          "status",
+          "request_id",
+          "request_link",
+          "integration_id",
+          "incident_id",
+          "incident_title",
+          "channel_id",
+          "channel_name"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Mapping record creation time, Unix seconds."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "failed"
+            ],
+            "description": "Synchronization status."
+          },
+          "request_id": {
+            "type": "string",
+            "description": "ServiceDeskPlus request ID."
+          },
+          "request_link": {
+            "type": "string",
+            "description": "ServiceDeskPlus request detail URL."
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ServiceDeskPlus integration ID."
+          },
+          "incident_id": {
+            "type": "string",
+            "description": "Associated Flashduty incident ID."
+          },
+          "incident_title": {
+            "type": "string",
+            "description": "Associated incident title."
+          },
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Channel ID for the incident."
+          },
+          "channel_name": {
+            "type": "string",
+            "description": "Channel name for the incident."
+          },
+          "error_message": {
+            "type": "string",
+            "description": "Error message when synchronization failed. Usually absent on successful records."
+          }
+        }
+      },
+      "ServiceDeskPlusRequestListResponse": {
+        "type": "object",
+        "description": "Paginated list of ServiceDeskPlus request synchronization records.",
+        "required": [
+          "items",
+          "total",
+          "has_next_page"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceDeskPlusRequestMappingItem"
+            },
+            "description": "Synchronization records on the current page."
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of matching records, capped at 1,000 for counting."
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "description": "True when more results are available."
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "Cursor for the next page. Empty when no more data is available."
+          }
+        }
       }
     }
   }

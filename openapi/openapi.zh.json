@@ -316,6 +316,99 @@
         }
       }
     },
+    "/incident/sdp/request/list": {
+      "post": {
+        "operationId": "incident-service-desk-plus-request-read-list",
+        "summary": "获取 ServiceDeskPlus 关联故障",
+        "description": "分页查询 ServiceDeskPlus 请求与 Flashduty 故障的同步映射记录。",
+        "tags": [
+          "On-call/故障管理"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- 查询 ServiceDeskPlus 请求与 Flashduty 故障之间的同步映射记录，用于排查 ITSM 同步状态或定位外部请求链接。\n- 不按 `incident_id` 查询时，`start_time` 和 `end_time` 必填，均为 Unix 秒时间戳；时间范围不能超过 30 天。\n- `status` 仅支持 `success` 和 `failed`，分别表示同步成功和同步失败。\n- 响应按内部记录 ID 排序；`asc` 为 `true` 时升序，否则降序。继续翻页时传入上次响应的 `search_after_ctx`。",
+          "href": "/zh/api-reference/on-call/incidents/incident-service-desk-plus-request-read-list",
+          "metadata": {
+            "sidebarTitle": "获取 ServiceDeskPlus 关联故障"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ServiceDeskPlusRequestListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "created_at": 1779514631,
+                        "status": "success",
+                        "request_id": "100000000001",
+                        "request_link": "https://servicedesk.example.com/app/itdesk/ui/requests/100000000001/details",
+                        "integration_id": 98765,
+                        "incident_id": "685d7f4e51b9a9a6d4d0c123",
+                        "incident_title": "Checkout API 5xx rate increased",
+                        "channel_id": 12345,
+                        "channel_name": "Payments"
+                      }
+                    ],
+                    "total": 1,
+                    "has_next_page": false,
+                    "search_after_ctx": ""
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceDeskPlusRequestListRequest"
+              },
+              "example": {
+                "start_time": 1779513600,
+                "end_time": 1779600000,
+                "status": "success",
+                "channel_ids": [
+                  12345
+                ],
+                "limit": 20
+              }
+            }
+          }
+        }
+      }
+    },
     "/incident/info": {
       "post": {
         "operationId": "incidentInfo",
@@ -11776,12 +11869,12 @@
       "get": {
         "operationId": "statusPageChangeList",
         "summary": "查询状态页事件列表",
-        "description": "查询状态页的事件列表（故障和维护）。",
+        "description": "查询状态页事件列表；响应仅包含对外可见的受影响组件。",
         "tags": [
           "On-call/状态页"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 响应会过滤隐藏的受影响组件。若事件没有任何可见组件，事件仍会保留，但 `affected_components` 为空数组。",
           "href": "/zh/api-reference/on-call/status-pages/status-page-change-list",
           "metadata": {
             "sidebarTitle": "查询状态页事件列表"
@@ -14636,12 +14729,12 @@
       "post": {
         "operationId": "monit-datasource-read-info",
         "summary": "查看数据源详情",
-        "description": "通过 ID 获取单个数据源的完整信息，包括 `payload` 配置。",
+        "description": "通过 ID 获取单个数据源的完整信息，包括 `payload` 配置（凭据字段以 `******` 脱敏返回）。",
         "tags": [
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应不返回凭据明文。`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段一律以 `******` 占位返回；原本就没配置的字段仍返回空字符串。`sls.access_key_id` 是标识而非凭据，照常返回真实值。\n\n更新时把 `******` 原样提交表示**沿用已存值**，留空同样按沿用处理；要轮换凭据就直接提交新值。\n\n创建时没有可沿用的旧值——若把从别处读来的 `******` 当作真实口令提交，存下来的就是字面量 `******`，数据源会连不上。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-read-info",
           "metadata": {
             "sidebarTitle": "查看数据源详情"
@@ -14729,7 +14822,7 @@
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- `type_ident` 必须为以下之一：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`victorialogs`。\n- `edge_cluster_name` 指定使用该数据源进行规则评估的 Monitors Edge 集群。\n- 对于 `elasticsearch`，`payload.elasticsearch.deployment` 须设为 `cloud` 或 `self-managed`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- `type_ident` 必须为以下之一：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`victorialogs`。\n- `edge_cluster_name` 指定使用该数据源进行规则评估的 Monitors Edge 集群。\n- 对于 `elasticsearch`，`payload.elasticsearch.deployment` 须设为 `cloud` 或 `self-managed`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应不返回凭据明文。`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段一律以 `******` 占位返回；原本就没配置的字段仍返回空字符串。`sls.access_key_id` 是标识而非凭据，照常返回真实值。\n\n更新时把 `******` 原样提交表示**沿用已存值**，留空同样按沿用处理；要轮换凭据就直接提交新值。\n\n创建时没有可沿用的旧值——若把从别处读来的 `******` 当作真实口令提交，存下来的就是字面量 `******`，数据源会连不上。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-write-create",
           "metadata": {
             "sidebarTitle": "创建数据源"
@@ -14815,7 +14908,7 @@
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应不返回凭据明文。`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段一律以 `******` 占位返回；原本就没配置的字段仍返回空字符串。`sls.access_key_id` 是标识而非凭据，照常返回真实值。\n\n更新时把 `******` 原样提交表示**沿用已存值**，留空同样按沿用处理；要轮换凭据就直接提交新值。\n\n创建时没有可沿用的旧值——若把从别处读来的 `******` 当作真实口令提交，存下来的就是字面量 `******`，数据源会连不上。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "更新数据源"
@@ -20057,7 +20150,7 @@
           "Monitors/诊断分析"
         ],
         "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **600 次/分钟**;**10 次/秒** 每账户 |\n| 权限 | 任意有效的 `app_key`(只读;不受特定权限分类约束) |\n\n## 使用说明\n\n- 使用 `target_locator` 标识监控对象;`target_kind` 可选,省略时自动推断。内置的 target kind 包括 `host` 与 `mysql`。\n- 若同一 locator 匹配多个 kind,响应为 HTTP 200,`data.error.code = \"ambiguous_target_kind\"`,并附带 `target_kinds` 列表——请带上显式的 `target_kind` 重试。\n- 工具能力清单是*候选能力*视图,并非执行保证。目标 Agent 可能在拿到清单与发起调用之间下线,本地 Agent 策略也可能在调用时拦截某些工具。\n- 设置 `include_output_shape: true` 可额外返回每个工具的 `output_shape`。默认为 `false`,以便为 LLM 消费保持响应精简。\n- 业务错误(`target_unavailable`、`unknown_toolset_hash`、`ambiguous_target_kind`)以 HTTP 200 返回,`data.error` 存在且 `data.tools = []`。只有协议 / 鉴权 / 内部错误才使用标准错误信封。\n- 响应采用**稀疏字段**:成功时 `error` 直接省略而非返回 `null`;当 locator 无法唯一解析时 `target` 不输出。`tools` 字段恒存在。",
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **600 次/分钟**；**10 次/秒** 每账户 |\n| 权限 | 任意有效的 `app_key`（只读；不受特定权限分类约束） |\n\n## 使用说明\n\n- 使用 `target_locator` 标识监控对象；`target_kind` 可选，省略时按当前监控对象路由自动推断。\n- 若同一 locator 匹配多个 kind，响应为 HTTP 200，`data.error.code = \"ambiguous_target_kind\"`，并附带 `target_kinds` 列表——请带上显式的 `target_kind` 重试。\n- 工具能力清单是候选能力视图，并非执行保证。目标 Agent 可能在拿到清单与发起调用之间下线，本地 Agent 策略也可能在调用时拦截某些工具。\n- 每个工具条目只返回 `name`、`target_kind`、`description` 和 `input_schema`，不会暴露工具版本、输出契约、目录版本或执行限制。\n- 业务错误（`target_unavailable`、`timeout`、`forward_failed`、`invalid_tool_result`、`ambiguous_target_kind`）以 HTTP 200 返回，`data.error` 存在且 `data.tools = []`。只有协议、鉴权和内部错误才使用标准错误信封。\n- 响应采用**稀疏字段**：成功时 `error` 直接省略而非返回 `null`；当 locator 无法唯一解析时，`target` 不输出。`tools` 字段恒存在。",
           "href": "/zh/api-reference/monitors/diagnostics/monit-read-tools-catalog",
           "metadata": {
             "sidebarTitle": "查询监控对象工具能力清单"
@@ -20072,8 +20165,7 @@
               },
               "example": {
                 "account_id": 10001,
-                "target_locator": "web-01",
-                "include_output_shape": true
+                "target_locator": "web-01"
               }
             }
           }
@@ -20114,144 +20206,6 @@
                           "type": "object",
                           "additionalProperties": false,
                           "properties": {}
-                        },
-                        "output_shape": {
-                          "properties": {
-                            "data": {
-                              "properties": {
-                                "cpu": {
-                                  "type": "object"
-                                },
-                                "degradation_reasons": {
-                                  "items": {
-                                    "type": "string"
-                                  },
-                                  "minItems": 1,
-                                  "type": "array"
-                                },
-                                "disk": {
-                                  "description": "Filesystems sorted by used_pct desc; rootfs always present; capped at host.disk.top_n. Sizes are in GB; used_pct/inode_used_pct in percent.",
-                                  "type": "array"
-                                },
-                                "disk_errors": {
-                                  "description": "Mount points whose statfs returned a syscall error (EACCES / ENOENT / EIO / stale, etc.); each entry is `<mount>: <errno>`.",
-                                  "type": "array"
-                                },
-                                "disk_io": {
-                                  "description": "Per-device disk I/O rates (util_pct, IOPS, throughput, await). Sorted by util_pct desc; capped at host.disk_io.top_n. Only whole-disk devices shown.",
-                                  "type": "object"
-                                },
-                                "disk_timeouts": {
-                                  "description": "Mount points whose statfs hit per-mount timeout.",
-                                  "type": "array"
-                                },
-                                "load": {
-                                  "type": "object"
-                                },
-                                "memory": {
-                                  "description": "Memory and swap sizes are in MB; percentages are 0..100. Swap fields are always present when memory collection succeeds, including zero when swap is not configured.",
-                                  "properties": {
-                                    "available_mb": {
-                                      "type": "integer"
-                                    },
-                                    "swap_configured": {
-                                      "description": "True when the kernel reports a non-zero SwapTotal.",
-                                      "type": "boolean"
-                                    },
-                                    "swap_total_mb": {
-                                      "type": "integer"
-                                    },
-                                    "swap_used_mb": {
-                                      "type": "integer"
-                                    },
-                                    "swap_used_pct": {
-                                      "type": "number"
-                                    },
-                                    "total_mb": {
-                                      "type": "integer"
-                                    },
-                                    "used_mb": {
-                                      "type": "integer"
-                                    },
-                                    "used_pct": {
-                                      "type": "number"
-                                    }
-                                  },
-                                  "required": [
-                                    "total_mb",
-                                    "available_mb",
-                                    "used_mb",
-                                    "used_pct",
-                                    "swap_configured",
-                                    "swap_total_mb",
-                                    "swap_used_mb",
-                                    "swap_used_pct"
-                                  ],
-                                  "type": "object"
-                                },
-                                "network_io": {
-                                  "description": "Per-interface network throughput and error rates. Sorted by total traffic desc; capped at host.network_io.top_n. Virtual/container interfaces excluded by default.",
-                                  "type": "object"
-                                },
-                                "procs": {
-                                  "type": "object"
-                                },
-                                "sample_interval_sec": {
-                                  "description": "Shared sampling interval for CPU, disk_io, network_io counter-diff calculations.",
-                                  "type": "number"
-                                },
-                                "tcp_connections": {
-                                  "description": "TCP connection state distribution via netlink SOCK_DIAG. Shows counts per state (established, time_wait, close_wait, listen, syn_recv, other, total).",
-                                  "type": "object"
-                                },
-                                "uptime_sec": {
-                                  "type": "number"
-                                },
-                                "vmstat": {
-                                  "description": "Sparse cumulative counters since the current boot; use them as historical clues, not current rates.",
-                                  "properties": {
-                                    "oom_kill_since_boot": {
-                                      "description": "OOM kills accumulated since boot; omitted when this kernel does not expose the counter.",
-                                      "type": "integer"
-                                    },
-                                    "pgmajfault_since_boot": {
-                                      "description": "Major page faults accumulated since boot.",
-                                      "type": "integer"
-                                    }
-                                  },
-                                  "required": [
-                                    "pgmajfault_since_boot"
-                                  ],
-                                  "type": "object"
-                                }
-                              },
-                              "required": [
-                                "sample_interval_sec"
-                              ],
-                              "type": "object"
-                            },
-                            "summary": {
-                              "minLength": 1,
-                              "type": "string"
-                            },
-                            "truncated": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "reason": {
-                                  "minLength": 1,
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "reason"
-                              ],
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "data"
-                          ],
-                          "type": "object"
                         }
                       },
                       {
@@ -20273,65 +20227,6 @@
                               "type": "integer"
                             }
                           }
-                        },
-                        "output_shape": {
-                          "properties": {
-                            "data": {
-                              "properties": {
-                                "avg_ms": {
-                                  "type": "number"
-                                },
-                                "max_ms": {
-                                  "type": "number"
-                                },
-                                "min_ms": {
-                                  "type": "number"
-                                },
-                                "probes": {
-                                  "items": {
-                                    "properties": {
-                                      "error": {
-                                        "type": "string"
-                                      },
-                                      "latency_ms": {
-                                        "type": "number"
-                                      }
-                                    },
-                                    "type": "object"
-                                  },
-                                  "type": "array"
-                                },
-                                "reachable": {
-                                  "type": "boolean"
-                                },
-                                "resolved_ip": {
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            },
-                            "summary": {
-                              "minLength": 1,
-                              "type": "string"
-                            },
-                            "truncated": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "reason": {
-                                  "minLength": 1,
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "reason"
-                              ],
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "data"
-                          ],
-                          "type": "object"
                         }
                       }
                     ]
@@ -20364,7 +20259,7 @@
           "Monitors/诊断分析"
         ],
         "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **600 次/分钟**;**10 次/秒** 每账户 |\n| 权限 | 任意有效的 `app_key`(只读;不受特定权限分类约束) |\n\n## 使用说明\n\n- 单次调用至多 **8** 个工具(`MaxToolsPerInvoke`);超出需在客户端拆分。8 个工具的上限与单监控对象 Agent 的并发能力对齐。\n- 工具在 Agent 上并行执行;webapi 返回的 `results[]` 与请求中的 `tools[]` 顺序对齐。\n- 长耗时:客户端超时至少设置 **35 秒**。该接口面向 AI-SRE / 人工排障流程,不适用于交互式 UI。\n- 请求级错误(`target_unavailable`、`ambiguous_target_kind`、`unknown_toolset_hash`、`forward_failed`)以 HTTP 200 返回,`data.error` 不为空,`data.results = []`。\n- 单工具失败以 HTTP 200 返回,`data.error` 不输出,`results[i].error` 被填充——务必同时检查**三层**(外层信封 `error`、`data.error`、再到每个 `results[i].error`)。\n- 响应采用**稀疏字段**:字段不存在即表示为空。成功时 `error` 直接省略而非返回 `null`;失败时 `data`、`summary`、`truncated` 均不输出。不要依赖占位的 `null` 字段做判断;当 locator 无法唯一解析时,`target` 同样不会出现。\n- `results[i].data` 是 Tool 的业务数据,monit-agent 的 result envelope **已被解开**——不会出现嵌套的 `data.data`。一行摘要位于 `results[i].summary`;`results[i].truncated`(内含 `reason`)仅在结果确实被截断时出现。\n- `results[i].params` 回显 webapi 收到的该 Tool 调用参数,便于在批量调用中关联结果——即使其中某个 Tool 失败也能对上号。\n- 每条结果带两个耗时字段:`agent_elapsed_ms`(Agent 自报,不含网络)与 `e2e_elapsed_ms`(webapi 观测的端到端)。两者差距较大表示网络 / 边缘侧慢,而非工具执行慢。\n- 按 `/monit/tools/catalog` 返回的 `input_schema` 构造 `tools[].params`。对于无参工具,务必显式传 `params: {}`。",
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **600 次/分钟**；**10 次/秒** 每账户 |\n| 权限 | 任意有效的 `app_key`（只读；不受特定权限分类约束） |\n\n## 使用说明\n\n- 单次调用至多 **8** 个工具（`MaxToolsPerInvoke`）；超出需在客户端拆分。8 个工具的上限与单监控对象 Agent 的并发能力对齐。\n- 工具在 Agent 上并行执行；webapi 返回的 `results[]` 与请求中的 `tools[]` 顺序对齐。\n- 长耗时：客户端超时至少设置 **35 秒**。该接口面向 AI-SRE / 人工排障流程，不适用于交互式 UI。\n- 请求级错误（`target_unavailable`、`ambiguous_target_kind`、`forward_failed`）以 HTTP 200 返回，`data.error` 不为空，`data.results = []`。\n- 单工具失败以 HTTP 200 返回，`data.error` 不输出，`results[i].error` 被填充——务必同时检查**三层**（外层信封 `error`、`data.error`、再到每个 `results[i].error`）。\n- 响应采用**稀疏字段**：字段不存在即表示为空。成功时 `error` 直接省略而非返回 `null`；失败时 `data`、`summary`、`truncated` 均不输出。不要依赖占位的 `null` 字段做判断；当 locator 无法唯一解析时，`target` 同样不会出现。\n- `results[i].data` 是 Tool 的业务数据，monit-agent 的 result envelope **已被解开**——不会出现嵌套的 `data.data`。一行摘要位于 `results[i].summary`；`results[i].truncated`（内含 `reason`）仅在结果确实被截断时出现。\n- `results[i].params` 回显 webapi 收到的该 Tool 调用参数，便于在批量调用中关联结果——即使其中某个 Tool 失败也能对上号。\n- 按 `/monit/tools/catalog` 返回的 `input_schema` 构造 `tools[].params`。对于无参工具，务必显式传 `params: {}`。",
           "href": "/zh/api-reference/monitors/diagnostics/monit-read-tools-invoke",
           "metadata": {
             "sidebarTitle": "调用监控对象工具"
@@ -20447,9 +20342,7 @@
                             "total_procs": 1036
                           }
                         },
-                        "summary": "os.overview cpu=32.66% mem=74.46% swap=not_configured oom_kill_since_boot=2 load1=1.79",
-                        "agent_elapsed_ms": 3120,
-                        "e2e_elapsed_ms": 3188
+                        "summary": "os.overview cpu=32.66% mem=74.46% swap=not_configured oom_kill_since_boot=2 load1=1.79"
                       },
                       {
                         "tool": "net.tcp_ping",
@@ -20461,9 +20354,7 @@
                         "error": {
                           "code": "timeout",
                           "message": "tool \"net.tcp_ping\" exceeded 8000ms"
-                        },
-                        "agent_elapsed_ms": 8048,
-                        "e2e_elapsed_ms": 8217
+                        }
                       }
                     ]
                   }
@@ -34972,6 +34863,7 @@
           "wecom",
           "feishu",
           "feishu_app",
+          "feishu_app_card_table_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -35037,6 +34929,10 @@
           "feishu_app": {
             "type": "string",
             "description": "飞书应用消息模板源。"
+          },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "description": "是否在飞书应用卡片中以表格渲染告警标签。"
           },
           "dingtalk_app": {
             "type": "string",
@@ -35256,6 +35152,11 @@
             "type": "string",
             "description": "飞书应用消息模板源。"
           },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "是否在飞书应用卡片中以表格渲染告警标签，默认关闭。"
+          },
           "dingtalk_app": {
             "type": "string",
             "description": "钉钉应用消息模板源。"
@@ -35364,6 +35265,13 @@
           "feishu_app": {
             "type": "string",
             "description": "飞书应用消息模板源。"
+          },
+          "feishu_app_card_table_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "设置后开启或关闭飞书应用卡片中的告警标签表格渲染；省略时保持当前设置。"
           },
           "dingtalk_app": {
             "type": "string",
@@ -38469,7 +38377,22 @@
           },
           "enabled_times": {
             "type": "array",
-            "description": "规则生效的时间窗口。",
+            "description": "规则生效的时间窗口。省略或传空数组时，默认每天 00:00–23:59 生效。",
+            "default": [
+              {
+                "days": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  0
+                ],
+                "stime": "00:00",
+                "etime": "23:59"
+              }
+            ],
             "items": {
               "type": "object",
               "properties": {
@@ -38502,7 +38425,9 @@
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "default": "text",
+            "description": "描述内容的格式。省略或为空时默认使用 `text`。"
           },
           "description": {
             "type": "string"
@@ -42851,12 +42776,7 @@
           },
           "target_kind": {
             "type": "string",
-            "description": "可选的 target kind。省略时 webapi 在当前已知的 kind 中自动推断。内置 kind:`host`、`mysql`。上次返回 `ambiguous_target_kind` 时,重试必须传入此字段。"
-          },
-          "include_output_shape": {
-            "type": "boolean",
-            "description": "为 true 时,每个工具条目额外返回其 `output_shape` JSON Schema。默认 false,以便为 LLM 消费保持响应精简。",
-            "default": false
+            "description": "可选的 target kind。省略时 webapi 会按当前监控对象路由自动推断。若返回 `ambiguous_target_kind`，请从 `target_kinds` 中选择一个值重试。"
           }
         }
       },
@@ -42897,11 +42817,6 @@
                 "input_schema": {
                   "type": "object",
                   "description": "用于 `tools[].params` 的 JSON Schema。"
-                },
-                "output_shape": {
-                  "type": "object",
-                  "description": "Tool 结果的 JSON Schema。仅当请求将 `include_output_shape` 置为 true 时返回。",
-                  "x-flashduty-preserve-absence": true
                 }
               }
             }
@@ -42914,7 +42829,9 @@
                 "type": "string",
                 "enum": [
                   "target_unavailable",
-                  "unknown_toolset_hash",
+                  "timeout",
+                  "forward_failed",
+                  "invalid_tool_result",
                   "ambiguous_target_kind"
                 ]
               },
@@ -43041,23 +42958,13 @@
                   "properties": {
                     "code": {
                       "type": "string",
-                      "description": "常见取值：`timeout`、`target_unavailable`、`edge_unsupported`、`invalid_tool_result`、`internal`、`invalid_args`、`unknown_tool`、`unknown_tool_version`、`unknown_toolset_hash`、`target_not_owned`、`wrong_agent`、`overloaded`、`denied`、`permission_denied`、`credential_unavailable`、`target_unreachable`。"
+                      "description": "常见 WebAPI 错误码：`timeout`、`target_unavailable`、`invalid_tool_result`、`internal`、`invalid_args`、`unsupported_syntax`、`path_not_found` 和 `catalog_changed`。Agent 特有的工具错误也可能原样返回。"
                     },
                     "message": {
                       "type": "string"
                     }
                   },
                   "x-flashduty-preserve-absence": true
-                },
-                "agent_elapsed_ms": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Agent 自报的 Tool 执行耗时（毫秒），不含网络往返。若失败发生在执行开始之前，可能为 0。"
-                },
-                "e2e_elapsed_ms": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "WebAPI 观测到的端到端耗时（毫秒，webapi → ws → edge → agent → ws → webapi）。与 `agent_elapsed_ms` 差距很大说明是链路慢，而非 Tool 慢。"
                 }
               }
             }
@@ -43070,7 +42977,6 @@
                 "type": "string",
                 "enum": [
                   "target_unavailable",
-                  "unknown_toolset_hash",
                   "forward_failed",
                   "ambiguous_target_kind"
                 ]
@@ -49209,6 +49115,173 @@
           "p95",
           "max"
         ]
+      },
+      "ServiceDeskPlusRequestListRequest": {
+        "type": "object",
+        "description": "查询 ServiceDeskPlus 请求同步记录的过滤条件。按故障 ID 查询时可不传时间窗口；否则必须传入不超过 30 天的 Unix 秒时间窗口。",
+        "properties": {
+          "start_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "时间窗口起点（Unix 秒）。按 `incident_id` 查询时可省略。"
+          },
+          "end_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "时间窗口终点（Unix 秒），必须大于等于 `start_time`。按 `incident_id` 查询时可省略。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "failed"
+            ],
+            "description": "同步状态过滤。"
+          },
+          "channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "协作空间 ID 列表。"
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "ServiceDeskPlus 集成 ID。"
+          },
+          "incident_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Flashduty 故障 ID。提供后可不传时间窗口。"
+          },
+          "request_id": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "ServiceDeskPlus 请求 ID。"
+          },
+          "asc": {
+            "type": "boolean",
+            "description": "为 `true` 时按内部记录 ID 升序返回；否则降序。"
+          },
+          "p": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "页码，从 1 开始。使用 `search_after_ctx` 时忽略。"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 20,
+            "description": "分页大小，默认 20，最大 100。"
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "上一页返回的翻页游标。"
+          }
+        }
+      },
+      "ServiceDeskPlusRequestMappingItem": {
+        "type": "object",
+        "description": "ServiceDeskPlus 请求与 Flashduty 故障之间的一条同步映射记录。",
+        "required": [
+          "created_at",
+          "status",
+          "request_id",
+          "request_link",
+          "integration_id",
+          "incident_id",
+          "incident_title",
+          "channel_id",
+          "channel_name"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "映射记录创建时间（Unix 秒）。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "failed"
+            ],
+            "description": "同步状态。"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "ServiceDeskPlus 请求 ID。"
+          },
+          "request_link": {
+            "type": "string",
+            "description": "ServiceDeskPlus 请求详情链接。"
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ServiceDeskPlus 集成 ID。"
+          },
+          "incident_id": {
+            "type": "string",
+            "description": "关联的 Flashduty 故障 ID。"
+          },
+          "incident_title": {
+            "type": "string",
+            "description": "关联故障标题。"
+          },
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "故障所属协作空间 ID。"
+          },
+          "channel_name": {
+            "type": "string",
+            "description": "故障所属协作空间名称。"
+          },
+          "error_message": {
+            "type": "string",
+            "description": "同步失败时的错误信息。成功记录通常不返回该字段。"
+          }
+        }
+      },
+      "ServiceDeskPlusRequestListResponse": {
+        "type": "object",
+        "description": "分页的 ServiceDeskPlus 请求同步记录列表。",
+        "required": [
+          "items",
+          "total",
+          "has_next_page"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceDeskPlusRequestMappingItem"
+            },
+            "description": "当前页同步记录。"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "匹配记录总数，最多统计 1000 条。"
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "description": "是否还有更多页。"
+          },
+          "search_after_ctx": {
+            "type": "string",
+            "description": "下一页翻页游标。无更多数据时为空。"
+          }
+        }
       }
     }
   }
