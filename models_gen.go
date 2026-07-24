@@ -805,6 +805,7 @@ type AlertRule struct {
 	DebugLogEnabled bool   `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
 	DelaySeconds    int64  `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
 	Description     string `json:"description,omitempty" toon:"description,omitempty"`
+	// Format for the description. Defaults to `text` when omitted or empty.
 	DescriptionType string `json:"description_type,omitempty" toon:"description_type,omitempty"`
 	// Specific data source IDs.
 	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
@@ -813,7 +814,7 @@ type AlertRule struct {
 	// Data source type.
 	DsType  string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
 	Enabled bool   `json:"enabled,omitempty" toon:"enabled,omitempty"`
-	// Time windows when the rule is active.
+	// Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.
 	EnabledTimes []AlertRuleEnabledTimesItem `json:"enabled_times,omitempty" toon:"enabled_times,omitempty"`
 	// Folder the rule belongs to.
 	FolderID uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
@@ -924,6 +925,7 @@ type AlertRuleInfoResponse struct {
 	DebugLogEnabled bool   `json:"debug_log_enabled" toon:"debug_log_enabled"`
 	DelaySeconds    int64  `json:"delay_seconds" toon:"delay_seconds"`
 	Description     string `json:"description" toon:"description"`
+	// Format for the description. Defaults to `text` when omitted or empty.
 	DescriptionType string `json:"description_type" toon:"description_type"`
 	// Specific data source IDs.
 	DsIDs []uint64 `json:"ds_ids" toon:"ds_ids"`
@@ -932,7 +934,7 @@ type AlertRuleInfoResponse struct {
 	// Data source type.
 	DsType  string `json:"ds_type" toon:"ds_type"`
 	Enabled bool   `json:"enabled" toon:"enabled"`
-	// Time windows when the rule is active.
+	// Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.
 	EnabledTimes []AlertRuleInfoResponseEnabledTimesItem `json:"enabled_times" toon:"enabled_times"`
 	// Folder the rule belongs to.
 	FolderID uint64 `json:"folder_id" toon:"folder_id"`
@@ -7516,6 +7518,8 @@ type TemplateCreateRequest struct {
 	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	// Render alert labels as a table in Feishu app cards.
+	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.
@@ -7576,6 +7580,8 @@ type TemplateItem struct {
 	Feishu string `json:"feishu" toon:"feishu"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app" toon:"feishu_app"`
+	// Whether alert labels use table rendering in Feishu app cards.
+	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled" toon:"feishu_app_card_table_enabled"`
 	// Slack robot message template source.
 	Slack string `json:"slack" toon:"slack"`
 	// Slack app message template source.
@@ -7648,6 +7654,8 @@ type TemplateUpdateRequest struct {
 	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	// When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting.
+	FeishuAppCardTableEnabled *bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.

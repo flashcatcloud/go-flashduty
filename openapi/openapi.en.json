@@ -11877,12 +11877,12 @@
       "get": {
         "operationId": "statusPageChangeList",
         "summary": "List status page events",
-        "description": "List events (incidents and maintenances) for a status page.",
+        "description": "List status page events with only publicly visible affected components.",
         "tags": [
           "On-call/Status pages"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Hidden affected components are omitted. Events remain in the result when none are visible, with an empty `affected_components` array.",
           "href": "/en/api-reference/on-call/status-pages/status-page-change-list",
           "metadata": {
             "sidebarTitle": "List status page events"
@@ -34872,6 +34872,7 @@
           "wecom",
           "feishu",
           "feishu_app",
+          "feishu_app_card_table_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -34937,6 +34938,10 @@
           "feishu_app": {
             "type": "string",
             "description": "Feishu app message template source."
+          },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "description": "Whether alert labels use table rendering in Feishu app cards."
           },
           "dingtalk_app": {
             "type": "string",
@@ -35156,6 +35161,11 @@
             "type": "string",
             "description": "Feishu app message template source."
           },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Render alert labels as a table in Feishu app cards."
+          },
           "dingtalk_app": {
             "type": "string",
             "description": "DingTalk app message template source."
@@ -35264,6 +35274,13 @@
           "feishu_app": {
             "type": "string",
             "description": "Feishu app message template source."
+          },
+          "feishu_app_card_table_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting."
           },
           "dingtalk_app": {
             "type": "string",
@@ -38369,7 +38386,22 @@
           },
           "enabled_times": {
             "type": "array",
-            "description": "Time windows when the rule is active.",
+            "description": "Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.",
+            "default": [
+              {
+                "days": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  0
+                ],
+                "stime": "00:00",
+                "etime": "23:59"
+              }
+            ],
             "items": {
               "type": "object",
               "properties": {
@@ -38402,7 +38434,9 @@
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "default": "text",
+            "description": "Format for the description. Defaults to `text` when omitted or empty."
           },
           "description": {
             "type": "string"

@@ -11869,12 +11869,12 @@
       "get": {
         "operationId": "statusPageChangeList",
         "summary": "查询状态页事件列表",
-        "description": "查询状态页的事件列表（故障和维护）。",
+        "description": "查询状态页事件列表；响应仅包含对外可见的受影响组件。",
         "tags": [
           "On-call/状态页"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 响应会过滤隐藏的受影响组件。若事件没有任何可见组件，事件仍会保留，但 `affected_components` 为空数组。",
           "href": "/zh/api-reference/on-call/status-pages/status-page-change-list",
           "metadata": {
             "sidebarTitle": "查询状态页事件列表"
@@ -34863,6 +34863,7 @@
           "wecom",
           "feishu",
           "feishu_app",
+          "feishu_app_card_table_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -34928,6 +34929,10 @@
           "feishu_app": {
             "type": "string",
             "description": "飞书应用消息模板源。"
+          },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "description": "是否在飞书应用卡片中以表格渲染告警标签。"
           },
           "dingtalk_app": {
             "type": "string",
@@ -35147,6 +35152,11 @@
             "type": "string",
             "description": "飞书应用消息模板源。"
           },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "是否在飞书应用卡片中以表格渲染告警标签，默认关闭。"
+          },
           "dingtalk_app": {
             "type": "string",
             "description": "钉钉应用消息模板源。"
@@ -35255,6 +35265,13 @@
           "feishu_app": {
             "type": "string",
             "description": "飞书应用消息模板源。"
+          },
+          "feishu_app_card_table_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "设置后开启或关闭飞书应用卡片中的告警标签表格渲染；省略时保持当前设置。"
           },
           "dingtalk_app": {
             "type": "string",
@@ -38360,7 +38377,22 @@
           },
           "enabled_times": {
             "type": "array",
-            "description": "规则生效的时间窗口。",
+            "description": "规则生效的时间窗口。省略或传空数组时，默认每天 00:00–23:59 生效。",
+            "default": [
+              {
+                "days": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  0
+                ],
+                "stime": "00:00",
+                "etime": "23:59"
+              }
+            ],
             "items": {
               "type": "object",
               "properties": {
@@ -38393,7 +38425,9 @@
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "default": "text",
+            "description": "描述内容的格式。省略或为空时默认使用 `text`。"
           },
           "description": {
             "type": "string"
