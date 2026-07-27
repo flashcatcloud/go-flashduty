@@ -6683,9 +6683,9 @@ type ToolCatalogRequest struct {
 // ToolCatalogResponse is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponse struct {
 	// Business error. `null` on success.
-	Error ToolCatalogResponseError `json:"error" toon:"error"`
+	Error *ToolCatalogResponseError `json:"error" toon:"error"`
 	// Resolved target. `null` when locator could not be uniquely resolved.
-	Target ToolCatalogResponseTarget `json:"target" toon:"target"`
+	Target *ToolCatalogResponseTarget `json:"target" toon:"target"`
 	// Tool catalog entries. Empty when `error` is non-null.
 	Tools []ToolCatalogResponseToolsItem `json:"tools" toon:"tools"`
 }
@@ -6705,11 +6705,11 @@ type ToolInvokeRequest struct {
 // ToolInvokeResponse is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponse struct {
 	// Request-level business error. `null` on success.
-	Error ToolInvokeResponseError `json:"error" toon:"error"`
+	Error *ToolInvokeResponseError `json:"error" toon:"error"`
 	// Per-tool results aligned with the request `tools[]` order. Empty when `error` is non-null.
 	Results []ToolInvokeResponseResultsItem `json:"results" toon:"results"`
 	// Resolved target.
-	Target ToolInvokeResponseTarget `json:"target" toon:"target"`
+	Target *ToolInvokeResponseTarget `json:"target" toon:"target"`
 }
 
 // TryLinkPersonRequest is generated from the Flashduty OpenAPI schema.
@@ -7700,8 +7700,8 @@ type ToolInvokeResponseResultsItem struct {
 	// Webapi-observed end-to-end time in milliseconds (webapi → ws → edge → agent → ws → webapi). A large gap vs `agent_elapsed_ms` indicates network / edge slowness.
 	E2eElapsedMs int64 `json:"e2e_elapsed_ms" toon:"e2e_elapsed_ms"`
 	// Per-tool error. Mutually exclusive with `data`.
-	Error ToolInvokeResponseResultsItemError `json:"error" toon:"error"`
-	Tool  string                             `json:"tool" toon:"tool"`
+	Error *ToolInvokeResponseResultsItemError `json:"error" toon:"error"`
+	Tool  string                              `json:"tool" toon:"tool"`
 	// Agent-executed tool version. Empty when execution failed before the agent picked a version.
 	ToolVersion string `json:"tool_version" toon:"tool_version"`
 }

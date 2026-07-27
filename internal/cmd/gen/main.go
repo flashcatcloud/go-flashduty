@@ -706,6 +706,20 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		if inReq && isNullable(pv) && pointerizableScalar(gt) {
 			gt = "*" + gt
 		}
+		// A nullable object/struct-shaped field (`nullable: true` beside a
+		// `$ref` or inline object — the only spelling this org's OpenAPI can
+		// give a struct field, since `type: [T, "null"]` has no "T" to name
+		// a $ref) pointer-wraps in both directions, unlike a nullable
+		// scalar. encoding/json's null-handling only nils out
+		// pointers/maps/slices; a bare struct value has no zero state that
+		// means "absent", so e.g. a `null` ToolCatalogResponse.target
+		// decoded silently into ToolCatalogResponseTarget{} —
+		// indistinguishable from a real (if nonsensical) all-zero target.
+		// Pointer-wrapping makes that representable: nil after decode means
+		// the server sent null.
+		if isNullable(pv) && g.isStructSchema(pv) {
+			gt = "*" + gt
+		}
 		if desc != "" {
 			for _, l := range wrapText(desc) {
 				b.WriteString("\t// " + l + "\n")
@@ -958,10 +972,18 @@ func typeStr(s map[string]any) string {
 	return ""
 }
 
-// isNullable reports whether a property schema uses the OpenAPI 3.1 nullable
-// union form `type: ["T", "null"]`. A nullable request scalar is emitted as a
-// Go pointer so the zero value can be sent on the wire (see the field loop).
+// isNullable reports whether a property schema marks itself nullable, in
+// either spec dialect this org's OpenAPI uses: the JSON Schema / OpenAPI 3.1
+// union form `type: ["T", "null"]` (the convention for every nullable scalar
+// field), or the OpenAPI 3.0 boolean form `nullable: true` (used for object
+// fields, since `$ref`/inline-object siblings can't carry a `type` array). A
+// nullable request scalar is emitted as a Go pointer so the zero value can be
+// sent on the wire (see the field loop); a nullable struct-shaped field is
+// pointer-wrapped in both directions (see isStructSchema's caller).
 func isNullable(s map[string]any) bool {
+	if b, ok := s["nullable"].(bool); ok && b {
+		return true
+	}
 	t, ok := s["type"].([]any)
 	if !ok {
 		return false
@@ -975,12 +997,53 @@ func isNullable(s map[string]any) bool {
 }
 
 // pointerizableScalar reports whether gt is a scalar Go type that should be
-// pointer-wrapped when nullable. Slices/maps/structs are already nil-able and
-// carry no omitempty-drops-zero hazard, so they are left as-is.
+// pointer-wrapped when nullable. Slices/maps are already nil-able and carry
+// no omitempty-drops-zero hazard; a nullable struct-shaped field is handled
+// separately by isStructSchema, since a bare struct value has no such
+// nil-able zero state.
 func pointerizableScalar(gt string) bool {
 	switch gt {
 	case "bool", "int", "int64", "uint64", "float64", "string":
 		return true
+	default:
+		return false
+	}
+}
+
+// isStructSchema reports whether property schema s resolves to a Go struct
+// (as opposed to a scalar, enum, alias, slice, or map), following $ref and
+// allOf the same way goTypeOf's object branch does. encoding/json's
+// null-handling only nils out pointers/maps/slices; a bare struct value has
+// no such state, so a nullable struct-shaped field needs pointer-wrapping to
+// make "the API sent null" representable at all (see the field loop).
+func (g *Gen) isStructSchema(s map[string]any) bool {
+	if s == nil {
+		return false
+	}
+	if ref := refName(s); ref != "" {
+		if g.skip[ref] {
+			return false
+		}
+		return g.isStructSchema(asMap(g.schemas[ref]))
+	}
+	if len(asSlice(s["allOf"])) > 0 {
+		s = g.mergeAllOf(s)
+	}
+	if len(asSlice(s["oneOf"])) > 0 || len(asSlice(s["anyOf"])) > 0 {
+		return false
+	}
+	switch {
+	case s["enum"] != nil && typeStr(s) == "string":
+		return false
+	case typeStr(s) == "array":
+		return false
+	case typeStr(s) == "string", typeStr(s) == "integer", typeStr(s) == "number", typeStr(s) == "boolean":
+		return false
+	case typeStr(s) == "object", typeStr(s) == "":
+		if ap, ok := s["additionalProperties"]; ok && ap != nil {
+			return false // map payload, mirrors goTypeOf's additionalProperties branch
+		}
+		return len(asMap(s["properties"])) > 0
 	default:
 		return false
 	}
