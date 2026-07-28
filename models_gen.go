@@ -5178,6 +5178,8 @@ type PostMortemMeta struct {
 	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Creation timestamp (seconds).
 	CreatedAtSeconds Timestamp `json:"created_at_seconds" toon:"created_at_seconds"`
+	// Collaboration document generation. Incremented by each full content reset; 0 for legacy documents.
+	Generation int64 `json:"generation" toon:"generation"`
 	// Linked incident IDs.
 	IncidentIDs []string `json:"incident_ids" toon:"incident_ids"`
 	// When true, only team members and admins can view.
@@ -5186,6 +5188,8 @@ type PostMortemMeta struct {
 	MediaCount int64 `json:"media_count" toon:"media_count"`
 	// Deterministic post-mortem ID derived from account and incident IDs.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Content revision for optimistic concurrency. Monotonically increases on collaborative saves and full content resets.
+	Revision int64 `json:"revision" toon:"revision"`
 	// Report status.
 	Status string `json:"status" toon:"status"`
 	// Owning team ID. 0 if none.
