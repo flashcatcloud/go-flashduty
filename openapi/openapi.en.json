@@ -29596,6 +29596,8 @@
           "team_id",
           "channel_id",
           "is_private",
+          "generation",
+          "revision",
           "channel_name",
           "created_at_seconds",
           "updated_at_seconds"
@@ -29658,6 +29660,16 @@
           "is_private": {
             "type": "boolean",
             "description": "When true, only team members and admins can view."
+          },
+          "generation": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Collaboration document generation. Incremented by each full content reset; 0 for legacy documents."
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Content revision for optimistic concurrency. Monotonically increases on collaborative saves and full content resets."
           },
           "channel_name": {
             "type": "string",
@@ -44308,10 +44320,13 @@
             "description": "Replacement Markdown content. Limited to 4 MiB."
           },
           "expected_revision": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "minimum": 0,
-            "description": "Current content revision expected by the caller."
+            "description": "Current content revision expected by the caller. Pass 0 for the first write to a document that has never been saved."
           },
           "idempotency_key": {
             "type": "string",

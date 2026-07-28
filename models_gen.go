@@ -1375,7 +1375,7 @@ type CalEventUpsertRequest struct {
 	// Event ID. Omit when creating.
 	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
 	// Whether the event marks a non-working day. true = day off, false = working day override.
-	IsOff *bool `json:"is_off" toon:"is_off"`
+	IsOff *bool `json:"is_off,omitempty" toon:"is_off,omitempty"`
 	// Event start date in YYYY-MM-DD.
 	StartAt string `json:"start_at" toon:"start_at"`
 	// Event summary.
@@ -5178,6 +5178,8 @@ type PostMortemMeta struct {
 	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Creation timestamp (seconds).
 	CreatedAtSeconds Timestamp `json:"created_at_seconds" toon:"created_at_seconds"`
+	// Collaboration document generation. Incremented by each full content reset; 0 for legacy documents.
+	Generation int64 `json:"generation" toon:"generation"`
 	// Linked incident IDs.
 	IncidentIDs []string `json:"incident_ids" toon:"incident_ids"`
 	// When true, only team members and admins can view.
@@ -5186,6 +5188,8 @@ type PostMortemMeta struct {
 	MediaCount int64 `json:"media_count" toon:"media_count"`
 	// Deterministic post-mortem ID derived from account and incident IDs.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Content revision for optimistic concurrency. Monotonically increases on collaborative saves and full content resets.
+	Revision int64 `json:"revision" toon:"revision"`
 	// Report status.
 	Status string `json:"status" toon:"status"`
 	// Owning team ID. 0 if none.
@@ -5352,8 +5356,8 @@ type ResetPostMortemBasicsRequest struct {
 
 // ResetPostMortemContentRequest is generated from the Flashduty OpenAPI schema.
 type ResetPostMortemContentRequest struct {
-	// Current content revision expected by the caller.
-	ExpectedRevision int64 `json:"expected_revision" toon:"expected_revision"`
+	// Current content revision expected by the caller. Pass 0 for the first write to a document that has never been saved.
+	ExpectedRevision *int64 `json:"expected_revision,omitempty" toon:"expected_revision,omitempty"`
 	// Non-blank key for safely retrying this exact reset request.
 	IdempotencyKey string `json:"idempotency_key" toon:"idempotency_key"`
 	// Replacement Markdown content. Limited to 4 MiB.

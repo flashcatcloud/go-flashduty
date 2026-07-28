@@ -793,14 +793,20 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		// (AccountID) while `--json` and the spec-derived help use snake_case
 		// (account_id); an agent that reads field names off a toon dump and pipes
 		// them into `--json | jq '.account_id'` hits all-null. Keep both tags.
-		// Omission policy follows the schema. Required request fields never omit
-		// zero values: zero may be valid (for example an expected revision of 0),
-		// and the server must still see the required key. Optional request fields
-		// use omitempty, with omitzero for bare structs. Response structs normally
-		// render every field faithfully; flattened oneOf fields and properties
-		// explicitly marked to preserve absence use pointers and omitempty.
+		// Omission policy follows the generated Go representation. Required
+		// non-nullable request fields never omit zero values: zero may be valid,
+		// and the server must still see the required key. Nullable request fields
+		// use pointers and omitempty so nil stays absent while a non-nil pointer
+		// still sends false/0/"". Other optional request fields use omitempty,
+		// with omitzero for bare structs. Response structs normally render every
+		// field faithfully; flattened oneOf fields and properties explicitly
+		// marked to preserve absence use pointers and omitempty.
 		jsonTag, toonTag := k, k
-		if inReq && !required[k] {
+		switch {
+		case inReq && needsPointer && isNullable(pv):
+			jsonTag = k + ",omitempty"
+			toonTag = k + ",omitempty"
+		case inReq && !required[k]:
 			toonTag = k + ",omitempty"
 			if isStructField {
 				// stdlib encoding/json's `,omitempty` never fires for a bare
@@ -819,7 +825,7 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 			} else {
 				jsonTag = k + ",omitempty"
 			}
-		} else if isOptionalResponseField {
+		case isOptionalResponseField:
 			jsonTag = k + ",omitempty"
 			toonTag = k + ",omitempty"
 		}

@@ -96,6 +96,43 @@ func TestOptionalObjectRequestFieldOmitsWhenUnset(t *testing.T) {
 	}
 }
 
+// TestResetPostMortemContentSendsZeroExpectedRevision guards a codegen
+// contract: expected_revision is a required field where 0 is a valid value
+// (first write to a never-saved document, per the spec's minimum: 0), so it
+// must reach the wire even when zero. The spec models it as
+// type: ["integer", "null"], which the generator rewrites to a pointer — a
+// nil pointer means "unset" and is omitted, while Int64(0) is sent.
+func TestResetPostMortemContentSendsZeroExpectedRevision(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+
+	req, err := c.newRequest(context.Background(), http.MethodPost, "/incident/post-mortem/content/reset", &ResetPostMortemContentRequest{
+		PostMortemID:     "pm_x",
+		Markdown:         "## impact",
+		ExpectedRevision: Int64(0),
+		IdempotencyKey:   "key-1",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(req.Body)
+	if !strings.Contains(string(body), `"expected_revision":0`) {
+		t.Fatalf("ExpectedRevision=Int64(0) must be sent on the wire, got body = %s", body)
+	}
+
+	req, err = c.newRequest(context.Background(), http.MethodPost, "/incident/post-mortem/content/reset", &ResetPostMortemContentRequest{
+		PostMortemID:   "pm_x",
+		Markdown:       "## impact",
+		IdempotencyKey: "key-1",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(req.Body)
+	if strings.Contains(string(body), `"expected_revision"`) {
+		t.Fatalf("nil ExpectedRevision must be omitted from the wire, got body = %s", body)
+	}
+}
+
 func TestNewRequestAppliesHookAndHeaders(t *testing.T) {
 	c, _ := NewClient("KEY",
 		WithRequestHeaders(map[string][]string{"X-Static": {"s"}}),
