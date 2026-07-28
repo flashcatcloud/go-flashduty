@@ -481,15 +481,39 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 	if len(parts) == 0 && len(oneOf) == 0 {
 		return s
 	}
+	requiredSet := map[string]bool{}
+	for _, raw := range asSlice(s["required"]) {
+		if name, ok := raw.(string); ok {
+			requiredSet[name] = true
+		}
+	}
+	resolvedParts := make([]map[string]any, 0, len(parts)+len(oneOf))
+	for _, part := range parts {
+		pm := asMap(part)
+		if ref := refName(pm); ref != "" {
+			pm = g.resolveObject(ref)
+		} else if len(asSlice(pm["allOf"])) > 0 {
+			pm = g.mergeAllOf(pm)
+		}
+		resolvedParts = append(resolvedParts, pm)
+		for _, raw := range asSlice(pm["required"]) {
+			if name, ok := raw.(string); ok {
+				requiredSet[name] = true
+			}
+		}
+	}
 	var oneOfRequired map[string]bool
 	for _, part := range oneOf {
 		pm := asMap(part)
 		if ref := refName(pm); ref != "" {
 			pm = g.resolveObject(ref)
+		} else if len(asSlice(pm["allOf"])) > 0 {
+			pm = g.mergeAllOf(pm)
 		}
 		if typeStr(pm) != "object" && len(asMap(pm["properties"])) == 0 && len(asSlice(pm["allOf"])) == 0 {
 			return s
 		}
+		resolvedParts = append(resolvedParts, pm)
 		required := map[string]bool{}
 		for _, raw := range asSlice(pm["required"]) {
 			if name, ok := raw.(string); ok {
@@ -506,14 +530,9 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 			}
 		}
 	}
-	parts = append(parts, oneOf...)
 	merged := map[string]any{"type": "object"}
 	props := map[string]any{}
-	for _, part := range parts {
-		pm := asMap(part)
-		if ref := refName(pm); ref != "" {
-			pm = g.resolveObject(ref)
-		}
+	for _, pm := range resolvedParts {
 		for k, v := range asMap(pm["properties"]) {
 			props[k] = v
 		}
@@ -524,13 +543,18 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 	}
 	merged["properties"] = props
 	if len(oneOf) > 0 {
-		required := make([]any, 0, len(oneOfRequired))
 		for name := range oneOfRequired {
+			requiredSet[name] = true
+		}
+		merged["x-generator-optional-response"] = true
+	}
+	if len(requiredSet) > 0 {
+		required := make([]any, 0, len(requiredSet))
+		for name := range requiredSet {
 			required = append(required, name)
 		}
 		sort.Slice(required, func(i, j int) bool { return required[i].(string) < required[j].(string) })
 		merged["required"] = required
-		merged["x-generator-optional-response"] = true
 	}
 	return merged
 }
@@ -741,19 +765,20 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 				gt = ts
 			}
 		}
+		isStructField := g.isStructSchema(pv)
 		// A nullable scalar in a request struct becomes a pointer so the zero
 		// value (false/0/"") can be sent on the wire; a bare value type with
 		// `,omitempty` would drop the zero value, silently no-op'ing a tri-state
-		// filter or a partial-update "set to zero". The backend models these as
-		// pointers and api-review marks them `type: [T, "null"]`. Response
-		// structs keep value types (decoding null yields the zero value).
-		if inReq && isNullable(pv) && pointerizableScalar(gt) {
-			gt = "*" + gt
-		}
+		// filter or a partial-update "set to zero". Nullable struct-shaped
+		// fields become pointers in both directions because a bare struct cannot
+		// represent a JSON null. Response scalars keep value types.
+		needsPointer := inReq && isNullable(pv) && pointerizableScalar(gt)
+		needsPointer = needsPointer || (isNullable(pv) && isStructField)
 		isOptionalUnionField := optionalUnionField && !required[k]
 		preserveAbsence, _ := pv["x-flashduty-preserve-absence"].(bool)
 		isOptionalResponseField := isOptionalUnionField || (!inReq && preserveAbsence)
-		if isOptionalResponseField && (pointerizableScalar(gt) || g.isStructSchema(pv) || strings.HasPrefix(gt, "[]") || strings.HasPrefix(gt, "map[")) {
+		needsPointer = needsPointer || (isOptionalResponseField && (pointerizableScalar(gt) || isStructField || strings.HasPrefix(gt, "[]") || strings.HasPrefix(gt, "map[")))
+		if needsPointer {
 			gt = "*" + gt
 		}
 		if desc != "" {
@@ -768,21 +793,22 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		// (AccountID) while `--json` and the spec-derived help use snake_case
 		// (account_id); an agent that reads field names off a toon dump and pipes
 		// them into `--json | jq '.account_id'` hits all-null. Keep both tags.
-		// omitempty policy splits by direction: request structs KEEP ,omitempty
-		// (with the nullable→pointer rewrite above, a nil pointer is omitted while
-		// &false/&0 is still sent — tri-state; a non-nullable zero is genuinely
-		// "unset" and correctly dropped). Response structs DROP ,omitempty: the API
-		// returns the field and the CLI re-serializes the decoded struct
-		// (--json/--toon), so omitempty would silently swallow the false/0/[]/{}
-		// state fields the help advertises as present (e.g. rule.enabled=false on a
-		// disabled rule). Render them faithfully. A flattened object `oneOf` is
-		// the exception: a field not required by every branch is absent on some
-		// valid responses. Explicit response properties marked to preserve absence
-		// need the same treatment. In both cases, use pointers and `omitempty`.
+		// Omission policy follows the generated Go representation. Required
+		// non-nullable request fields never omit zero values: zero may be valid,
+		// and the server must still see the required key. Nullable request fields
+		// use pointers and omitempty so nil stays absent while a non-nil pointer
+		// still sends false/0/"". Other optional request fields use omitempty,
+		// with omitzero for bare structs. Response structs normally render every
+		// field faithfully; flattened oneOf fields and properties explicitly
+		// marked to preserve absence use pointers and omitempty.
 		jsonTag, toonTag := k, k
-		if inReq {
+		switch {
+		case inReq && needsPointer && isNullable(pv):
+			jsonTag = k + ",omitempty"
 			toonTag = k + ",omitempty"
-			if g.isStructSchema(pv) {
+		case inReq && !required[k]:
+			toonTag = k + ",omitempty"
+			if isStructField {
 				// stdlib encoding/json's `,omitempty` never fires for a bare
 				// struct value (only false/0/""/nil-slice/nil-map/nil-pointer
 				// count as "empty"), so an unset optional object field was
@@ -799,7 +825,7 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 			} else {
 				jsonTag = k + ",omitempty"
 			}
-		} else if isOptionalResponseField {
+		case isOptionalResponseField:
 			jsonTag = k + ",omitempty"
 			toonTag = k + ",omitempty"
 		}
@@ -1031,10 +1057,18 @@ func typeStr(s map[string]any) string {
 	return ""
 }
 
-// isNullable reports whether a property schema uses the OpenAPI 3.1 nullable
-// union form `type: ["T", "null"]`. A nullable request scalar is emitted as a
-// Go pointer so the zero value can be sent on the wire (see the field loop).
+// isNullable reports whether a property schema marks itself nullable, in
+// either spec dialect this org's OpenAPI uses: the JSON Schema / OpenAPI 3.1
+// union form `type: ["T", "null"]` (the convention for every nullable scalar
+// field), or the OpenAPI 3.0 boolean form `nullable: true` (used for object
+// fields, since `$ref`/inline-object siblings can't carry a `type` array). A
+// nullable request scalar is emitted as a Go pointer so the zero value can be
+// sent on the wire (see the field loop); a nullable struct-shaped field is
+// pointer-wrapped in both directions (see isStructSchema's caller).
 func isNullable(s map[string]any) bool {
+	if b, ok := s["nullable"].(bool); ok && b {
+		return true
+	}
 	t, ok := s["type"].([]any)
 	if !ok {
 		return false
@@ -1048,9 +1082,8 @@ func isNullable(s map[string]any) bool {
 }
 
 // pointerizableScalar reports whether gt is a scalar Go type that should be
-// pointer-wrapped when nullable. Slices/maps are already nil-able and carry no
-// omitempty-drops-zero hazard; structs have their own hazard (see
-// isStructSchema) handled via `,omitzero` instead of pointer-wrapping.
+// pointer-wrapped when nullable. Slices/maps are already nil-able; struct
+// fields are handled separately by isStructSchema.
 func pointerizableScalar(gt string) bool {
 	switch gt {
 	case "bool", "int", "int64", "uint64", "float64", "string":
@@ -1063,14 +1096,16 @@ func pointerizableScalar(gt string) bool {
 // isStructSchema reports whether property schema s is emitted as a Go struct
 // (as opposed to a scalar, enum, alias, slice, or map). It resolves s the same
 // way emitModels' top-level classification switch does (following $ref and
-// allOf). encoding/json's `,omitempty` never drops a bare struct value —
-// struct is not one of the "empty" kinds it recognizes — so request fields in
-// this category need `,omitzero` instead (see emitStruct).
+// allOf). Callers use this both to emit `,omitzero` for request values and to
+// pointer-wrap nullable or absence-preserving fields.
 func (g *Gen) isStructSchema(s map[string]any) bool {
 	if s == nil {
 		return false
 	}
 	if ref := refName(s); ref != "" {
+		if g.skip[ref] {
+			return false
+		}
 		return g.isStructSchema(asMap(g.schemas[ref]))
 	}
 	if len(asSlice(s["allOf"])) > 0 {

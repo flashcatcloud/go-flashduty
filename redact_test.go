@@ -31,3 +31,11 @@ func TestSanitizeBodyRedactsSecrets(t *testing.T) {
 		t.Fatalf("non-secret field dropped: %s", got)
 	}
 }
+
+func TestSanitizeBodyDoesNotLogUnstructuredContent(t *testing.T) {
+	marker := strings.Repeat("sensitive-", 2)
+	got := sanitizeBody(`<html>request /incident/list?app_key=` + marker + ` timed out</html>`)
+	if got != "[NON_JSON_BODY]" {
+		t.Fatalf("sanitizeBody(non-JSON) = %q, want fixed marker", got)
+	}
+}

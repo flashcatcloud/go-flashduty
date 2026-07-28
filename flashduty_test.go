@@ -219,27 +219,27 @@ func TestDoTreatsOKCodeAsSuccess(t *testing.T) {
 	}
 }
 
-// TestDoReportsIntermediaryOnNon2xxNonJSONBody guards a prod incident: an ALB
-// timed out a long-running request and returned an HTML 504 page with no
-// Flashcat-Request-Id header. The error must name the status, say the
-// response came from an intermediary rather than the Flashduty API, note the
-// missing request id, hint at retry/splitting the batch, and echo a body
-// snippet — not the old "malformed response" wording, which reads like an
-// API bug.
+// TestDoReportsIntermediaryOnNon2xxNonJSONBody verifies that a non-JSON
+// gateway timeout returns actionable diagnostics without echoing the
+// untrusted response body.
 func TestDoReportsIntermediaryOnNon2xxNonJSONBody(t *testing.T) {
+	marker := strings.Repeat("sensitive-", 2)
 	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusGatewayTimeout)
-		_, _ = io.WriteString(w, "<html><body>504 Gateway Time-out</body></html>")
+		_, _ = io.WriteString(w, `<html><body>request /incident/list?app_key=`+marker+` timed out</body></html>`)
 	})
 	_, err := c.do(context.Background(), "/incident/list", map[string]any{}, nil)
 	if err == nil {
 		t.Fatal("expected an error")
 	}
 	msg := err.Error()
-	for _, want := range []string{"HTTP 504", "intermediary", "no request id", "gateway/proxy timeout", "504 Gateway Time-out"} {
+	for _, want := range []string{"HTTP 504", "intermediary", "no request id", "gateway/proxy timeout"} {
 		if !strings.Contains(msg, want) {
 			t.Fatalf("error message = %q, want it to contain %q", msg, want)
 		}
+	}
+	if strings.Contains(msg, marker) || strings.Contains(msg, "incident/list") {
+		t.Fatalf("error message exposed the untrusted response body: %q", msg)
 	}
 	if strings.Contains(msg, "malformed response") {
 		t.Fatalf("error message = %q, must not use the old malformed-response wording", msg)

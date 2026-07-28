@@ -219,8 +219,12 @@ func (c *Client) doMethodWithAppKey(ctx context.Context, method, path string, bo
 			// request off, most often on its own timeout, and returning an
 			// HTML/plaintext error page instead. Report that distinctly so it
 			// isn't mistaken for a Flashduty API contract violation.
-			return resp, fmt.Errorf("flashduty: HTTP %d returned by an intermediary, not the Flashduty API (non-JSON body, %s) — the request likely exceeded a gateway/proxy timeout; retry, or split long-running requests into smaller batches. body: %s",
-				httpResp.StatusCode, requestIDNote(resp.RequestID), bodySnippet(raw))
+			requestIDNote := "no request id"
+			if resp.RequestID != "" {
+				requestIDNote = "request id " + resp.RequestID
+			}
+			return resp, fmt.Errorf("flashduty: HTTP %d returned by an intermediary, not the Flashduty API (non-JSON body, %s) — the request likely exceeded a gateway/proxy timeout; retry, or split long-running requests into smaller batches",
+				httpResp.StatusCode, requestIDNote)
 		}
 	}
 	if env.RequestID != "" {
@@ -248,30 +252,6 @@ func (c *Client) doMethodWithAppKey(ctx context.Context, method, path string, bo
 		}
 	}
 	return resp, nil
-}
-
-// errorBodySnippetSize bounds how much of a non-JSON error body is echoed
-// back in an error message.
-const errorBodySnippetSize = 120
-
-// bodySnippet renders up to the first errorBodySnippetSize bytes of a
-// non-JSON response body, quoted, so the underlying error page (e.g. an ALB
-// or nginx timeout page) is visible in the error message.
-func bodySnippet(raw []byte) string {
-	if len(raw) > errorBodySnippetSize {
-		raw = raw[:errorBodySnippetSize]
-	}
-	return fmt.Sprintf("%q", raw)
-}
-
-// requestIDNote renders the request id for an error message, or notes its
-// absence — an empty Flashcat-Request-Id header is itself evidence that the
-// response didn't come from the Flashduty API.
-func requestIDNote(requestID string) string {
-	if requestID == "" {
-		return "no request id"
-	}
-	return "request id " + requestID
 }
 
 // isFailureCode reports whether an envelope error.code denotes a real failure.
