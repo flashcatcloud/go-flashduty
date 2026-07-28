@@ -11877,12 +11877,12 @@
       "get": {
         "operationId": "statusPageChangeList",
         "summary": "List status page events",
-        "description": "List events (incidents and maintenances) for a status page.",
+        "description": "List status page events with only publicly visible affected components.",
         "tags": [
           "On-call/Status pages"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Hidden affected components are omitted. Events remain in the result when none are visible, with an empty `affected_components` array.",
           "href": "/en/api-reference/on-call/status-pages/status-page-change-list",
           "metadata": {
             "sidebarTitle": "List status page events"
@@ -21377,8 +21377,153 @@
           }
         }
       }
-    },
-    "/incident/post-mortem/status/reset": {
+      },
+      "/incident/post-mortem/content/reset": {
+        "post": {
+          "operationId": "incident-post-mortem-write-reset-content",
+          "summary": "Reset post-mortem content",
+          "description": "Replace the body of a drafting post-mortem report with Markdown.",
+          "tags": [
+            "On-call/Incidents"
+          ],
+          "x-mint": {
+            "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | Edit access to the target report is required. |\n\n## Usage\n\n- The report must be drafting and its current revision must equal `expected_revision`; otherwise the API returns `409 Conflict`.\n- Reuse an `idempotency_key` only for the same report, revision, and Markdown content; different reuse returns `409 Conflict`.\n- A successful reset disconnects the previous collaboration (Yjs) room. Reconnect to the new generation room `post-mortem-{accountId}-{postMortemId}-g{N}` (generation 0 has no `-g` suffix). The reset cannot be rolled back.\n- Markdown content is limited to 4 MiB.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+            "href": "/en/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
+            "metadata": {
+              "sidebarTitle": "Reset post-mortem content"
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Success",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SuccessEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "$ref": "#/components/schemas/PostMortemContentResetResponse"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "example": {
+                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                    "data": {
+                      "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                      "generation": 2,
+                      "revision": 12,
+                      "previous_generation": 1,
+                      "previous_revision": 11,
+                      "markdown_bytes": 88,
+                      "markdown_sha256": "70d764e77e68f8fbfa14d72a235ac07b0110768b8380c8e3436459ebaf02a7c0"
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "409": {
+              "description": "The report is not drafting, the revision is stale, or the idempotency key was reused for a different request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "request_id",
+                      "error"
+                    ],
+                    "properties": {
+                      "request_id": {
+                        "type": "string"
+                      },
+                      "error": {
+                        "type": "object",
+                        "required": [
+                          "code",
+                          "message"
+                        ],
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "Conflict"
+                            ]
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                    "error": {
+                      "code": "Conflict",
+                      "message": "expected_revision conflict: request has 11 but current revision is 12"
+                    }
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Markdown content exceeds the 4 MiB limit.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "example": {
+                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                    "error": {
+                      "code": "EntityTooLarge",
+                      "message": "markdown exceeds maximum size"
+                    }
+                  }
+                }
+              }
+            },
+            "429": {
+              "$ref": "#/components/responses/TooManyRequests"
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          },
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPostMortemContentRequest"
+                },
+                "example": {
+                  "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                  "markdown": "# Database saturation incident\n\nThe database pool was exhausted; added saturation alert.",
+                  "expected_revision": 11,
+                  "idempotency_key": "postmortem-reset-8104935102-11"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/incident/post-mortem/status/reset": {
       "post": {
         "operationId": "postmortem-write-reset-status",
         "summary": "Update post-mortem status",
@@ -29561,6 +29706,54 @@
           }
         }
       },
+      "PostMortemContentResetResponse": {
+        "type": "object",
+        "description": "Result of a successful full post-mortem content reset.",
+        "required": [
+          "post_mortem_id",
+          "generation",
+          "revision",
+          "previous_generation",
+          "previous_revision",
+          "markdown_bytes",
+          "markdown_sha256"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "ID of the reset post-mortem report."
+          },
+          "generation": {
+            "type": "integer",
+            "format": "int64",
+            "description": "New collaboration document generation after the reset."
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "description": "New content revision after the reset."
+          },
+          "previous_generation": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Collaboration document generation before the reset."
+          },
+          "previous_revision": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Content revision before the reset."
+          },
+          "markdown_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "UTF-8 byte length of the accepted Markdown content."
+          },
+          "markdown_sha256": {
+            "type": "string",
+            "description": "SHA-256 hex digest of the accepted Markdown content."
+          }
+        }
+      },
       "PostMortemItem": {
         "type": "object",
         "description": "Full post-mortem report including basics, content and follow-ups.",
@@ -34872,6 +35065,7 @@
           "wecom",
           "feishu",
           "feishu_app",
+          "feishu_app_card_table_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -34937,6 +35131,10 @@
           "feishu_app": {
             "type": "string",
             "description": "Feishu app message template source."
+          },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "description": "Whether alert labels use table rendering in Feishu app cards."
           },
           "dingtalk_app": {
             "type": "string",
@@ -35156,6 +35354,11 @@
             "type": "string",
             "description": "Feishu app message template source."
           },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Render alert labels as a table in Feishu app cards."
+          },
           "dingtalk_app": {
             "type": "string",
             "description": "DingTalk app message template source."
@@ -35264,6 +35467,13 @@
           "feishu_app": {
             "type": "string",
             "description": "Feishu app message template source."
+          },
+          "feishu_app_card_table_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting."
           },
           "dingtalk_app": {
             "type": "string",
@@ -38369,7 +38579,22 @@
           },
           "enabled_times": {
             "type": "array",
-            "description": "Time windows when the rule is active.",
+            "description": "Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.",
+            "default": [
+              {
+                "days": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  0
+                ],
+                "stime": "00:00",
+                "etime": "23:59"
+              }
+            ],
             "items": {
               "type": "object",
               "properties": {
@@ -38402,7 +38627,9 @@
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "default": "text",
+            "description": "Format for the description. Defaults to `text` when omitted or empty."
           },
           "description": {
             "type": "string"
@@ -44059,6 +44286,38 @@
               "format": "int64"
             },
             "description": "Responder member IDs to store on the report."
+          }
+        }
+      },
+      "ResetPostMortemContentRequest": {
+        "type": "object",
+        "description": "Parameters for fully replacing a drafting post-mortem report body.",
+        "required": [
+          "post_mortem_id",
+          "markdown",
+          "expected_revision",
+          "idempotency_key"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "Post-mortem ID to reset."
+          },
+          "markdown": {
+            "type": "string",
+            "description": "Replacement Markdown content. Limited to 4 MiB."
+          },
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Current content revision expected by the caller."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Non-blank key for safely retrying this exact reset request."
           }
         }
       },

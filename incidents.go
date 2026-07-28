@@ -7,6 +7,20 @@ import "context"
 // IncidentsService handles the "On-call/Incidents" API resource.
 type IncidentsService service
 
+// Reset post-mortem content.
+//
+// Replace the body of a drafting post-mortem report with Markdown.
+//
+// API: POST /incident/post-mortem/content/reset (incident-post-mortem-write-reset-content).
+func (s *IncidentsService) PostMortemWriteResetContent(ctx context.Context, req *ResetPostMortemContentRequest) (*PostMortemContentResetResponse, *Response, error) {
+	out := new(PostMortemContentResetResponse)
+	resp, err := s.client.do(ctx, "/incident/post-mortem/content/reset", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get war-room default observers.
 //
 // Return historical responders suggested as default observers when opening a war room.

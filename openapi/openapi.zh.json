@@ -11869,12 +11869,12 @@
       "get": {
         "operationId": "statusPageChangeList",
         "summary": "查询状态页事件列表",
-        "description": "查询状态页的事件列表（故障和维护）。",
+        "description": "查询状态页事件列表；响应仅包含对外可见的受影响组件。",
         "tags": [
           "On-call/状态页"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 响应会过滤隐藏的受影响组件。若事件没有任何可见组件，事件仍会保留，但 `affected_components` 为空数组。",
           "href": "/zh/api-reference/on-call/status-pages/status-page-change-list",
           "metadata": {
             "sidebarTitle": "查询状态页事件列表"
@@ -21369,8 +21369,153 @@
           }
         }
       }
-    },
-    "/incident/post-mortem/status/reset": {
+      },
+      "/incident/post-mortem/content/reset": {
+        "post": {
+          "operationId": "incident-post-mortem-write-reset-content",
+          "summary": "重置故障复盘正文",
+          "description": "用 Markdown 完整替换草稿状态故障复盘的正文。",
+          "tags": [
+            "On-call/故障管理"
+          ],
+          "x-mint": {
+            "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 调用方须拥有目标复盘的编辑权限。 |\n\n## 使用说明\n\n- 仅草稿状态的报告可重置，且当前修订版本必须等于 `expected_revision`；否则返回 `409 Conflict`。\n- 同一 `idempotency_key` 只能重试相同的复盘、修订版本和 Markdown 正文；复用到不同请求会返回 `409 Conflict`。\n- 重置成功后旧的协作（Yjs）房间会被断开，客户端需切换到新 generation 的房间 `post-mortem-{accountId}-{postMortemId}-g{N}`（generation 0 无 `-g` 后缀）。重置不可回滚。\n- Markdown 正文最大为 4 MiB。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+            "href": "/zh/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
+            "metadata": {
+              "sidebarTitle": "重置故障复盘正文"
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SuccessEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "$ref": "#/components/schemas/PostMortemContentResetResponse"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "example": {
+                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                    "data": {
+                      "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                      "generation": 2,
+                      "revision": 12,
+                      "previous_generation": 1,
+                      "previous_revision": 11,
+                      "markdown_bytes": 88,
+                      "markdown_sha256": "70d764e77e68f8fbfa14d72a235ac07b0110768b8380c8e3436459ebaf02a7c0"
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "409": {
+              "description": "报告不是草稿状态、修订版本已过期，或幂等键被复用到不同请求。",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "request_id",
+                      "error"
+                    ],
+                    "properties": {
+                      "request_id": {
+                        "type": "string"
+                      },
+                      "error": {
+                        "type": "object",
+                        "required": [
+                          "code",
+                          "message"
+                        ],
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "Conflict"
+                            ]
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                    "error": {
+                      "code": "Conflict",
+                      "message": "expected_revision conflict: request has 11 but current revision is 12"
+                    }
+                  }
+                }
+              }
+            },
+            "413": {
+              "description": "Markdown 正文超过 4 MiB 限制。",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "example": {
+                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                    "error": {
+                      "code": "EntityTooLarge",
+                      "message": "markdown exceeds maximum size"
+                    }
+                  }
+                }
+              }
+            },
+            "429": {
+              "$ref": "#/components/responses/TooManyRequests"
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          },
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPostMortemContentRequest"
+                },
+                "example": {
+                  "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                  "markdown": "# Database saturation incident\n\nThe database pool was exhausted; added saturation alert.",
+                  "expected_revision": 11,
+                  "idempotency_key": "postmortem-reset-8104935102-11"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/incident/post-mortem/status/reset": {
       "post": {
         "operationId": "postmortem-write-reset-status",
         "summary": "更新故障复盘状态",
@@ -29552,6 +29697,54 @@
           }
         }
       },
+      "PostMortemContentResetResponse": {
+        "type": "object",
+        "description": "故障复盘正文完整重置成功后的结果。",
+        "required": [
+          "post_mortem_id",
+          "generation",
+          "revision",
+          "previous_generation",
+          "previous_revision",
+          "markdown_bytes",
+          "markdown_sha256"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "已重置的故障复盘报告 ID。"
+          },
+          "generation": {
+            "type": "integer",
+            "format": "int64",
+            "description": "重置后的协作文档新 generation。"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "description": "重置后的正文新修订版本。"
+          },
+          "previous_generation": {
+            "type": "integer",
+            "format": "int64",
+            "description": "重置前的协作文档 generation。"
+          },
+          "previous_revision": {
+            "type": "integer",
+            "format": "int64",
+            "description": "重置前的正文修订版本。"
+          },
+          "markdown_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "服务端接受的 Markdown 内容 UTF-8 字节数。"
+          },
+          "markdown_sha256": {
+            "type": "string",
+            "description": "服务端接受的 Markdown 内容 SHA-256 十六进制摘要。"
+          }
+        }
+      },
       "PostMortemItem": {
         "type": "object",
         "description": "完整复盘报告，包含基础信息、正文与跟进项。",
@@ -34863,6 +35056,7 @@
           "wecom",
           "feishu",
           "feishu_app",
+          "feishu_app_card_table_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -34928,6 +35122,10 @@
           "feishu_app": {
             "type": "string",
             "description": "飞书应用消息模板源。"
+          },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "description": "是否在飞书应用卡片中以表格渲染告警标签。"
           },
           "dingtalk_app": {
             "type": "string",
@@ -35147,6 +35345,11 @@
             "type": "string",
             "description": "飞书应用消息模板源。"
           },
+          "feishu_app_card_table_enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "是否在飞书应用卡片中以表格渲染告警标签，默认关闭。"
+          },
           "dingtalk_app": {
             "type": "string",
             "description": "钉钉应用消息模板源。"
@@ -35255,6 +35458,13 @@
           "feishu_app": {
             "type": "string",
             "description": "飞书应用消息模板源。"
+          },
+          "feishu_app_card_table_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "设置后开启或关闭飞书应用卡片中的告警标签表格渲染；省略时保持当前设置。"
           },
           "dingtalk_app": {
             "type": "string",
@@ -38360,7 +38570,22 @@
           },
           "enabled_times": {
             "type": "array",
-            "description": "规则生效的时间窗口。",
+            "description": "规则生效的时间窗口。省略或传空数组时，默认每天 00:00–23:59 生效。",
+            "default": [
+              {
+                "days": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  0
+                ],
+                "stime": "00:00",
+                "etime": "23:59"
+              }
+            ],
             "items": {
               "type": "object",
               "properties": {
@@ -38393,7 +38618,9 @@
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "default": "text",
+            "description": "描述内容的格式。省略或为空时默认使用 `text`。"
           },
           "description": {
             "type": "string"
@@ -44050,6 +44277,38 @@
               "format": "int64"
             },
             "description": "写入报告的响应人成员 ID。"
+          }
+        }
+      },
+      "ResetPostMortemContentRequest": {
+        "type": "object",
+        "description": "完整替换草稿状态故障复盘正文的参数。",
+        "required": [
+          "post_mortem_id",
+          "markdown",
+          "expected_revision",
+          "idempotency_key"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "要重置的故障复盘 ID。"
+          },
+          "markdown": {
+            "type": "string",
+            "description": "替换后的 Markdown 正文，最大 4 MiB。"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "调用方预期的当前正文修订版本。"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "用于安全重试这一次相同重置请求的非空键。"
           }
         }
       },
