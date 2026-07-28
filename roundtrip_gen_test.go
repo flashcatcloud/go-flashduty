@@ -71,6 +71,7 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /incident/list":                        func(d json.RawMessage) error { var v IncidentListResponse; return json.Unmarshal(d, &v) },
 	"POST /incident/list-by-ids":                 func(d json.RawMessage) error { var v IncidentListResponse; return json.Unmarshal(d, &v) },
 	"POST /incident/past/list":                   func(d json.RawMessage) error { var v ListPastIncidentsResponse; return json.Unmarshal(d, &v) },
+	"POST /incident/post-mortem/content/reset":   func(d json.RawMessage) error { var v PostMortemContentResetResponse; return json.Unmarshal(d, &v) },
 	"POST /incident/post-mortem/init":            func(d json.RawMessage) error { var v PostMortemItem; return json.Unmarshal(d, &v) },
 	"POST /incident/post-mortem/list":            func(d json.RawMessage) error { var v ListPostMortemsResponse; return json.Unmarshal(d, &v) },
 	"POST /incident/post-mortem/template/list":   func(d json.RawMessage) error { var v ListPostMortemTemplatesResponse; return json.Unmarshal(d, &v) },

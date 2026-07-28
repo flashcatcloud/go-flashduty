@@ -805,6 +805,7 @@ type AlertRule struct {
 	DebugLogEnabled bool   `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
 	DelaySeconds    int64  `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
 	Description     string `json:"description,omitempty" toon:"description,omitempty"`
+	// Format for the description. Defaults to `text` when omitted or empty.
 	DescriptionType string `json:"description_type,omitempty" toon:"description_type,omitempty"`
 	// Specific data source IDs.
 	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
@@ -813,7 +814,7 @@ type AlertRule struct {
 	// Data source type.
 	DsType  string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
 	Enabled bool   `json:"enabled,omitempty" toon:"enabled,omitempty"`
-	// Time windows when the rule is active.
+	// Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.
 	EnabledTimes []AlertRuleEnabledTimesItem `json:"enabled_times,omitempty" toon:"enabled_times,omitempty"`
 	// Folder the rule belongs to.
 	FolderID uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
@@ -924,6 +925,7 @@ type AlertRuleInfoResponse struct {
 	DebugLogEnabled bool   `json:"debug_log_enabled" toon:"debug_log_enabled"`
 	DelaySeconds    int64  `json:"delay_seconds" toon:"delay_seconds"`
 	Description     string `json:"description" toon:"description"`
+	// Format for the description. Defaults to `text` when omitted or empty.
 	DescriptionType string `json:"description_type" toon:"description_type"`
 	// Specific data source IDs.
 	DsIDs []uint64 `json:"ds_ids" toon:"ds_ids"`
@@ -932,7 +934,7 @@ type AlertRuleInfoResponse struct {
 	// Data source type.
 	DsType  string `json:"ds_type" toon:"ds_type"`
 	Enabled bool   `json:"enabled" toon:"enabled"`
-	// Time windows when the rule is active.
+	// Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.
 	EnabledTimes []AlertRuleInfoResponseEnabledTimesItem `json:"enabled_times" toon:"enabled_times"`
 	// Folder the rule belongs to.
 	FolderID uint64 `json:"folder_id" toon:"folder_id"`
@@ -5137,6 +5139,24 @@ type PersonShort struct {
 // PlatformEmptyObject is generated from the Flashduty OpenAPI schema.
 type PlatformEmptyObject struct{}
 
+// PostMortemContentResetResponse is generated from the Flashduty OpenAPI schema.
+type PostMortemContentResetResponse struct {
+	// New collaboration document generation after the reset.
+	Generation int64 `json:"generation" toon:"generation"`
+	// UTF-8 byte length of the accepted Markdown content.
+	MarkdownBytes int64 `json:"markdown_bytes" toon:"markdown_bytes"`
+	// SHA-256 hex digest of the accepted Markdown content.
+	MarkdownSha256 string `json:"markdown_sha256" toon:"markdown_sha256"`
+	// ID of the reset post-mortem report.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Collaboration document generation before the reset.
+	PreviousGeneration int64 `json:"previous_generation" toon:"previous_generation"`
+	// Content revision before the reset.
+	PreviousRevision int64 `json:"previous_revision" toon:"previous_revision"`
+	// New content revision after the reset.
+	Revision int64 `json:"revision" toon:"revision"`
+}
+
 // PostMortemItem is generated from the Flashduty OpenAPI schema.
 type PostMortemItem struct {
 	Basics  PostMortemItemBasics  `json:"basics" toon:"basics"`
@@ -5328,6 +5348,18 @@ type ResetPostMortemBasicsRequest struct {
 	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
 	// Responder member IDs to store on the report.
 	ResponderIDs []int64 `json:"responder_ids,omitempty" toon:"responder_ids,omitempty"`
+}
+
+// ResetPostMortemContentRequest is generated from the Flashduty OpenAPI schema.
+type ResetPostMortemContentRequest struct {
+	// Current content revision expected by the caller. Pass 0 for the first write to a document that has never been saved.
+	ExpectedRevision *int64 `json:"expected_revision,omitempty" toon:"expected_revision,omitempty"`
+	// Non-blank key for safely retrying this exact reset request.
+	IdempotencyKey string `json:"idempotency_key,omitempty" toon:"idempotency_key,omitempty"`
+	// Replacement Markdown content. Limited to 4 MiB.
+	Markdown string `json:"markdown,omitempty" toon:"markdown,omitempty"`
+	// Post-mortem ID to reset.
+	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
 }
 
 // ResetPostMortemFollowUpsRequest is generated from the Flashduty OpenAPI schema.
@@ -7516,6 +7548,8 @@ type TemplateCreateRequest struct {
 	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	// Render alert labels as a table in Feishu app cards.
+	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.
@@ -7576,6 +7610,8 @@ type TemplateItem struct {
 	Feishu string `json:"feishu" toon:"feishu"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app" toon:"feishu_app"`
+	// Whether alert labels use table rendering in Feishu app cards.
+	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled" toon:"feishu_app_card_table_enabled"`
 	// Slack robot message template source.
 	Slack string `json:"slack" toon:"slack"`
 	// Slack app message template source.
@@ -7648,6 +7684,8 @@ type TemplateUpdateRequest struct {
 	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	// When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting.
+	FeishuAppCardTableEnabled *bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.
