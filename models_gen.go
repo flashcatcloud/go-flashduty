@@ -5352,8 +5352,8 @@ type ResetPostMortemBasicsRequest struct {
 
 // ResetPostMortemContentRequest is generated from the Flashduty OpenAPI schema.
 type ResetPostMortemContentRequest struct {
-	// Current content revision expected by the caller.
-	ExpectedRevision int64 `json:"expected_revision,omitempty" toon:"expected_revision,omitempty"`
+	// Current content revision expected by the caller. Pass 0 for the first write to a document that has never been saved.
+	ExpectedRevision *int64 `json:"expected_revision,omitempty" toon:"expected_revision,omitempty"`
 	// Non-blank key for safely retrying this exact reset request.
 	IdempotencyKey string `json:"idempotency_key,omitempty" toon:"idempotency_key,omitempty"`
 	// Replacement Markdown content. Limited to 4 MiB.

@@ -44308,10 +44308,13 @@
             "description": "Replacement Markdown content. Limited to 4 MiB."
           },
           "expected_revision": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "minimum": 0,
-            "description": "Current content revision expected by the caller."
+            "description": "Current content revision expected by the caller. Pass 0 for the first write to a document that has never been saved."
           },
           "idempotency_key": {
             "type": "string",

@@ -44299,10 +44299,13 @@
             "description": "替换后的 Markdown 正文，最大 4 MiB。"
           },
           "expected_revision": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "minimum": 0,
-            "description": "调用方预期的当前正文修订版本。"
+            "description": "调用方预期的当前正文修订版本。首次写入从未保存过的文档时传 0。"
           },
           "idempotency_key": {
             "type": "string",
