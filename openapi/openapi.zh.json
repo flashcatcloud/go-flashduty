@@ -21379,7 +21379,7 @@
             "On-call/故障管理"
           ],
           "x-mint": {
-            "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 调用方须拥有目标复盘的编辑权限。 |\n\n## 使用说明\n\n- 仅草稿状态的报告可重置，且当前修订版本必须等于 `expected_revision`；否则返回 `409 Conflict`。\n- 同一 `idempotency_key` 只能重试相同的复盘、修订版本和 Markdown 正文；复用到不同请求会返回 `409 Conflict`。\n- Markdown 正文最大为 4 MiB。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+            "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 调用方须拥有目标复盘的编辑权限。 |\n\n## 使用说明\n\n- 仅草稿状态的报告可重置，且当前修订版本必须等于 `expected_revision`；否则返回 `409 Conflict`。\n- 同一 `idempotency_key` 只能重试相同的复盘、修订版本和 Markdown 正文；复用到不同请求会返回 `409 Conflict`。\n- 重置成功后旧的协作（Yjs）房间会被断开，客户端需切换到新 generation 的房间 `post-mortem-{accountId}-{postMortemId}-g{N}`（generation 0 无 `-g` 后缀）。重置不可回滚。\n- Markdown 正文最大为 4 MiB。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
             "href": "/zh/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
             "metadata": {
               "sidebarTitle": "重置故障复盘正文"
@@ -29736,7 +29736,7 @@
           },
           "markdown_bytes": {
             "type": "integer",
-            "format": "int32",
+            "format": "int64",
             "description": "服务端接受的 Markdown 内容 UTF-8 字节数。"
           },
           "markdown_sha256": {
