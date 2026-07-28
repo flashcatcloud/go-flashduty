@@ -23635,7 +23635,7 @@
           }
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 可以创建个人规则，也可以创建当前账户下任意团队的规则；`team_id` 创建后不可修改。\n- `cron_expr` 按 `timezone`（如提供）计算；未提供时依次回退到调用者的成员时区、账户时区，最后是 UTC。\n- `http_post_trigger_enabled=true` 会创建并启用 HTTP POST 触发器；响应中的 `http_post_token` 是仅在创建时返回的一次性值，请立即保存。\n- `oncall_incident_trigger_enabled=true` 时，`oncall_incident_channel_ids` 和 `oncall_incident_severities` 至少各需一项；匹配的故障会以 `trigger_kind=oncall_incident` 运行。\n- 每次调用都会记录到账户审计日志。\n",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 有效 `app_key`；管理操作要求调用者可管理目标规则 |\n\n## 使用说明\n\n- 可以创建个人规则，也可以创建当前账户下任意团队的规则；`team_id` 创建后不可修改。\n- `cron_expr` 按 `timezone`（如提供）计算；未提供时依次回退到调用者的成员时区、账户时区，最后是服务端默认时区（Asia/Shanghai）。\n- `http_post_trigger_enabled=true` 会创建并启用 HTTP POST 触发器；响应中的 `http_post_token` 是仅在创建时返回的一次性值，请立即保存。\n- `oncall_incident_trigger_enabled=true` 时，`oncall_incident_channel_ids` 和 `oncall_incident_severities` 至少各需一项；匹配的故障会以 `trigger_kind=oncall_incident` 运行。\n- 每次调用都会记录到账户审计日志。\n",
           "href": "/zh/api-reference/ai-sre/automations/automation-rule-write-create",
           "metadata": {
             "sidebarTitle": "创建自动化规则"
@@ -30088,7 +30088,7 @@
               "time_window": {
                 "type": "integer",
                 "minimum": 0,
-                "description": "聚合时间窗口,单位秒。"
+                "description": "聚合时间窗口，单位分钟。默认最大值为 1440 分钟（24 小时）；开启扩展功能的账号最大可设置 43200 分钟（30 天）。"
               },
               "window_type": {
                 "type": "string",
@@ -46074,7 +46074,7 @@
           },
           "timezone": {
             "type": "string",
-            "description": "`cron_expr` 计算所用的 IANA 时区，例如 `Asia/Shanghai`。必须是服务端可加载的合法时区名，非法值会被拒绝。省略时依次回退到调用者的成员时区、账户时区，最后是 UTC。"
+            "description": "`cron_expr` 计算所用的 IANA 时区，例如 `Asia/Shanghai`。必须是服务端可加载的合法时区名，非法值会被拒绝。省略时依次回退到调用者的成员时区、账户时区，最后是服务端默认时区（Asia/Shanghai）。"
           },
           "schedule_trigger_enabled": {
             "type": [

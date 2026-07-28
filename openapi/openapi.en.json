@@ -23643,7 +23643,7 @@
           }
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | Valid `app_key`; management operations require the caller to manage the target rule |\n\n## Usage\n\n- A caller may create personal rules and rules for any team in the current account; `team_id` is immutable after creation.\n- `cron_expr` is evaluated in `timezone` if provided, else the caller's member timezone, else the account timezone, else UTC.\n- `http_post_trigger_enabled=true` creates and enables an HTTP POST trigger; the response's `http_post_token` is a one-time value returned only on creation — save it immediately.\n- `oncall_incident_trigger_enabled=true` requires at least one `oncall_incident_channel_ids` entry and one `oncall_incident_severities` value; matching incidents run with `trigger_kind=oncall_incident`.\n- Every call is recorded in the account audit log.\n",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | Valid `app_key`; management operations require the caller to manage the target rule |\n\n## Usage\n\n- A caller may create personal rules and rules for any team in the current account; `team_id` is immutable after creation.\n- `cron_expr` is evaluated in `timezone` if provided, else the caller's member timezone, else the account timezone, else the server default (Asia/Shanghai).\n- `http_post_trigger_enabled=true` creates and enables an HTTP POST trigger; the response's `http_post_token` is a one-time value returned only on creation — save it immediately.\n- `oncall_incident_trigger_enabled=true` requires at least one `oncall_incident_channel_ids` entry and one `oncall_incident_severities` value; matching incidents run with `trigger_kind=oncall_incident`.\n- Every call is recorded in the account audit log.\n",
           "href": "/en/api-reference/ai-sre/automations/automation-rule-write-create",
           "metadata": {
             "sidebarTitle": "Create Automation rule"
@@ -30097,7 +30097,7 @@
               "time_window": {
                 "type": "integer",
                 "minimum": 0,
-                "description": "Grouping time window in seconds."
+                "description": "Grouping time window in minutes. Default max is 1440 minutes (24 h); extended accounts may allow up to 43200 minutes (30 days)."
               },
               "window_type": {
                 "type": "string",
@@ -46083,7 +46083,7 @@
           },
           "timezone": {
             "type": "string",
-            "description": "IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then UTC when omitted."
+            "description": "IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then the server default (Asia/Shanghai) when omitted."
           },
           "schedule_trigger_enabled": {
             "type": [
