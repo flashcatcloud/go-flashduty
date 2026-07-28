@@ -8,6 +8,24 @@ import (
 	"strings"
 )
 
+// AutomationFireAPITriggerRequest is the payload accepted by an Automation
+// HTTP POST trigger.
+type AutomationFireAPITriggerRequest struct {
+	// Context text passed to this Automation run.
+	Text string `json:"text,omitempty" toon:"text,omitempty"`
+}
+
+// AutomationFireAPITriggerResponse is the result returned by an Automation
+// HTTP POST trigger.
+type AutomationFireAPITriggerResponse struct {
+	// Result type. The API-trigger success path returns routine_fire.
+	Type string `json:"type" toon:"type"`
+	// Started session ID returned by the API-trigger success path.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Console URL for the started session.
+	SessionURL string `json:"session_url" toon:"session_url"`
+}
+
 // TriggerWriteFire triggers an Automation run through its HTTP POST trigger URL.
 //
 // This endpoint authenticates with the trigger's one-time bearer token rather

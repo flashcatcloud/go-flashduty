@@ -46,15 +46,16 @@ var redactChildrenKeys = map[string]struct{}{
 }
 
 // sanitizeBody redacts values of well-known sensitive JSON keys so that secrets
-// do not appear in request/response logs. It is best-effort: empty or non-JSON
-// bodies pass through unchanged.
+// do not appear in request/response logs. Unstructured bodies are never logged:
+// without field boundaries, their sensitive content cannot be identified
+// reliably.
 func sanitizeBody(body string) string {
 	if body == "" {
 		return body
 	}
 	var v any
 	if err := json.Unmarshal([]byte(body), &v); err != nil {
-		return body
+		return "[NON_JSON_BODY]"
 	}
 	sanitized, redacted := sanitizeJSONValue(v)
 	if !redacted {

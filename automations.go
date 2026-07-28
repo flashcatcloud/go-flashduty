@@ -37,7 +37,7 @@ func (s *AutomationsService) RuleReadList(ctx context.Context, req *AutomationRu
 
 // Create Automation rule.
 //
-// Create an Automation rule with a schedule trigger and, optionally, an HTTP POST trigger.
+// Create an Automation rule with schedule, HTTP POST, and On-call incident triggers.
 //
 // API: POST /safari/automation/rule/create (automation-rule-write-create).
 func (s *AutomationsService) RuleWriteCreate(ctx context.Context, req *AutomationRuleCreateRequest) (*AutomationRuleItem, *Response, error) {
@@ -63,9 +63,23 @@ func (s *AutomationsService) RuleWriteDelete(ctx context.Context, req *Automatio
 	return out, resp, nil
 }
 
+// Run Automation rule.
+//
+// Manually run an Automation rule immediately, outside its schedule.
+//
+// API: POST /safari/automation/rule/run (automation-rule-write-run).
+func (s *AutomationsService) RuleWriteRun(ctx context.Context, req *AutomationRuleIDRequest) (*ManualRunRuleResult, *Response, error) {
+	out := new(ManualRunRuleResult)
+	resp, err := s.client.do(ctx, "/safari/automation/rule/run", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Update Automation rule.
 //
-// Update mutable fields on an Automation rule. The personal/team scope is immutable.
+// Update mutable Automation rule fields, including HTTP POST and On-call incident trigger settings.
 //
 // API: POST /safari/automation/rule/update (automation-rule-write-update).
 func (s *AutomationsService) RuleWriteUpdate(ctx context.Context, req *AutomationRuleUpdateRequest) (*AutomationRuleItem, *Response, error) {

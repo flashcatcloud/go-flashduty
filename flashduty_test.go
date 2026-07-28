@@ -54,6 +54,48 @@ func TestNewRequestBuildsPostWithAppKeyAndJSON(t *testing.T) {
 	}
 }
 
+// TestOptionalObjectRequestFieldOmitsWhenUnset guards against a codegen
+// regression: encoding/json's `,omitempty` never drops a bare struct value
+// (only false/0/""/nil-slice/nil-map/nil-pointer count as "empty"), so an
+// unset optional object request field used to always be sent as `{}`. For
+// CreateSilenceRuleRequest.TimeFilter this made a recurring-only silence rule
+// (TimeFilters set, TimeFilter unset) impossible: the server's binding
+// validates StartTime/EndTime with `gt=0` whenever "time_filter" is present
+// in the payload at all. The generator now emits `,omitzero` for optional
+// struct-typed request fields, which correctly drops the zero value.
+func TestOptionalObjectRequestFieldOmitsWhenUnset(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+
+	req, err := c.newRequest(context.Background(), http.MethodPost, "/silence-rule/create", &CreateSilenceRuleRequest{
+		RuleName: "recurring only",
+		TimeFilters: []CreateSilenceRuleRequestTimeFiltersItem{
+			{Start: "09:00", End: "18:00"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(req.Body)
+	if strings.Contains(string(body), `"time_filter"`) {
+		t.Fatalf("unset TimeFilter must be omitted from the wire, got body = %s", body)
+	}
+	if !strings.Contains(string(body), `"time_filters"`) {
+		t.Fatalf("TimeFilters must be present, got body = %s", body)
+	}
+
+	req, err = c.newRequest(context.Background(), http.MethodPost, "/silence-rule/create", &CreateSilenceRuleRequest{
+		RuleName:   "one-off only",
+		TimeFilter: CreateSilenceRuleRequestTimeFilter{StartTime: 1000, EndTime: 2000},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(req.Body)
+	if !strings.Contains(string(body), `"time_filter"`) {
+		t.Fatalf("set TimeFilter must be present on the wire, got body = %s", body)
+	}
+}
+
 func TestNewRequestAppliesHookAndHeaders(t *testing.T) {
 	c, _ := NewClient("KEY",
 		WithRequestHeaders(map[string][]string{"X-Static": {"s"}}),
@@ -140,6 +182,66 @@ func TestDoTreatsOKCodeAsSuccess(t *testing.T) {
 	}
 }
 
+// TestDoReportsIntermediaryOnNon2xxNonJSONBody verifies that a non-JSON
+// gateway timeout returns actionable diagnostics without echoing the
+// untrusted response body.
+func TestDoReportsIntermediaryOnNon2xxNonJSONBody(t *testing.T) {
+	marker := strings.Repeat("sensitive-", 2)
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, `<html><body>request /incident/list?app_key=`+marker+` timed out</body></html>`)
+	})
+	_, err := c.do(context.Background(), "/incident/list", map[string]any{}, nil)
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+	msg := err.Error()
+	for _, want := range []string{"HTTP 504", "intermediary", "no request id", "gateway/proxy timeout"} {
+		if !strings.Contains(msg, want) {
+			t.Fatalf("error message = %q, want it to contain %q", msg, want)
+		}
+	}
+	if strings.Contains(msg, marker) || strings.Contains(msg, "incident/list") {
+		t.Fatalf("error message exposed the untrusted response body: %q", msg)
+	}
+	if strings.Contains(msg, "malformed response") {
+		t.Fatalf("error message = %q, must not use the old malformed-response wording", msg)
+	}
+}
+
+// TestDoReportsIntermediaryWithRequestID covers the case where the
+// intermediary (or an upstream hop before it) did forward a request id.
+func TestDoReportsIntermediaryWithRequestID(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Flashcat-Request-Id", "RID-504")
+		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, "<html>timeout</html>")
+	})
+	_, err := c.do(context.Background(), "/incident/list", map[string]any{}, nil)
+	if err == nil || !strings.Contains(err.Error(), "request id RID-504") {
+		t.Fatalf("expected error to include the forwarded request id, got %v", err)
+	}
+}
+
+// TestDoMapsNon2xxJSONEnvelopeUnaffectedByGatewaySplit confirms a real 504
+// bearing a normal JSON error envelope is completely unaffected by the new
+// non-JSON/intermediary branch: it still maps to *ErrorResponse as before.
+func TestDoMapsNon2xxJSONEnvelopeUnaffectedByGatewaySplit(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Flashcat-Request-Id", "RID4")
+		w.WriteHeader(http.StatusGatewayTimeout)
+		_, _ = io.WriteString(w, `{"request_id":"RID4","error":{"code":"timeout","message":"upstream took too long"}}`)
+	})
+	_, err := c.do(context.Background(), "/incident/list", map[string]any{}, nil)
+	var apiErr *ErrorResponse
+	if !errors.As(err, &apiErr) || apiErr.Code != "timeout" || apiErr.Response.StatusCode != http.StatusGatewayTimeout || apiErr.RequestID != "RID4" {
+		t.Fatalf("expected mapped ErrorResponse for JSON envelope, got %v", err)
+	}
+}
+
+// TestDoExposesNonJSONBodyAsRaw also guards the 2xx branch against the
+// non-2xx/intermediary-error split above: a non-JSON body on success must
+// keep returning Response.Raw with no error, never the new gateway message.
 func TestDoExposesNonJSONBodyAsRaw(t *testing.T) {
 	const csv = "id,title\n1,boom\n2,bam\n"
 	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {

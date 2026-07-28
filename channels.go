@@ -126,20 +126,6 @@ func (s *ChannelsService) ChannelEscalateRuleUpdate(ctx context.Context, req *Up
 	return s.client.do(ctx, "/channel/escalate/rule/update", req, nil)
 }
 
-// List webhook robots in escalation rules.
-//
-// List all IM webhook robots configured in escalation rules across the account. Returns a deduplicated list of robots with references to which channels and escalation rules use them.
-//
-// API: POST /channel/escalate/webhook/robot/list (channelEscalateWebhookRobotList).
-func (s *ChannelsService) ChannelEscalateWebhookRobotList(ctx context.Context, req *ChannelsChannelEscalateWebhookRobotListRequest) (*ChannelsChannelEscalateWebhookRobotListResponse, *Response, error) {
-	out := new(ChannelsChannelEscalateWebhookRobotListResponse)
-	resp, err := s.client.do(ctx, "/channel/escalate/webhook/robot/list", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // Get channel detail.
 //
 // Retrieve detailed information for a specific channel.
