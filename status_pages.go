@@ -74,7 +74,7 @@ func (s *StatusPagesService) ChangeInfo(ctx context.Context, req *StatusPagesCha
 
 // List status page events.
 //
-// List events (incidents and maintenances) for a status page.
+// List status page events with only publicly visible affected components.
 //
 // API: GET /status-page/change/list (statusPageChangeList).
 func (s *StatusPagesService) ChangeList(ctx context.Context, req *StatusPagesChangeListRequest) (*StatusPageChangeListResponse, *Response, error) {
@@ -155,8 +155,13 @@ func (s *StatusPagesService) ComponentUpsert(ctx context.Context, req *UpsertSta
 // Create a new status page.
 //
 // API: POST /status-page/create (statusPageCreate).
-func (s *StatusPagesService) Create(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/status-page/create", nil, nil)
+func (s *StatusPagesService) Create(ctx context.Context, req *CreateStatusPageRequest) (*CreateStatusPageResponse, *Response, error) {
+	out := new(CreateStatusPageResponse)
+	resp, err := s.client.do(ctx, "/status-page/create", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
 }
 
 // Delete status page.
