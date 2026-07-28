@@ -21387,7 +21387,7 @@
             "On-call/Incidents"
           ],
           "x-mint": {
-            "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | Edit access to the target report is required. |\n\n## Usage\n\n- The report must be drafting and its current revision must equal `expected_revision`; otherwise the API returns `409 Conflict`.\n- Reuse an `idempotency_key` only for the same report, revision, and Markdown content; different reuse returns `409 Conflict`.\n- Markdown content is limited to 4 MiB.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+            "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | Edit access to the target report is required. |\n\n## Usage\n\n- The report must be drafting and its current revision must equal `expected_revision`; otherwise the API returns `409 Conflict`.\n- Reuse an `idempotency_key` only for the same report, revision, and Markdown content; different reuse returns `409 Conflict`.\n- A successful reset disconnects the previous collaboration (Yjs) room. Reconnect to the new generation room `post-mortem-{accountId}-{postMortemId}-g{N}` (generation 0 has no `-g` suffix). The reset cannot be rolled back.\n- Markdown content is limited to 4 MiB.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
             "href": "/en/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
             "metadata": {
               "sidebarTitle": "Reset post-mortem content"
@@ -29745,7 +29745,7 @@
           },
           "markdown_bytes": {
             "type": "integer",
-            "format": "int32",
+            "format": "int64",
             "description": "UTF-8 byte length of the accepted Markdown content."
           },
           "markdown_sha256": {
