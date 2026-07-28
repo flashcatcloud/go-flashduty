@@ -1129,7 +1129,7 @@ type AutomationRuleCreateRequest struct {
 	ScheduleTriggerEnabled *bool `json:"schedule_trigger_enabled,omitempty" toon:"schedule_trigger_enabled,omitempty"`
 	// Scope team ID. 0 or omitted means a personal rule; >0 means a team in the account. Immutable after creation.
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	// IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then UTC when omitted.
+	// IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then the server default (Asia/Shanghai) when omitted.
 	Timezone string `json:"timezone,omitempty" toon:"timezone,omitempty"`
 }
 
@@ -8325,7 +8325,7 @@ type CreateChannelRequestGroup struct {
 	StormThreshold int64 `json:"storm_threshold,omitempty" toon:"storm_threshold,omitempty"`
 	// Multi-level storm thresholds.
 	StormThresholds []int64 `json:"storm_thresholds,omitempty" toon:"storm_thresholds,omitempty"`
-	// Grouping time window in seconds.
+	// Grouping time window in minutes. Default max is 1440 minutes (24 h); extended accounts may allow up to 43200 minutes (30 days).
 	TimeWindow int64 `json:"time_window,omitempty" toon:"time_window,omitempty"`
 	// Window type. Defaults to `tumbling`.
 	WindowType string `json:"window_type,omitempty" toon:"window_type,omitempty"`
