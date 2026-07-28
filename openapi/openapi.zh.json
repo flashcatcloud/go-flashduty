@@ -29587,6 +29587,8 @@
           "team_id",
           "channel_id",
           "is_private",
+          "generation",
+          "revision",
           "channel_name",
           "created_at_seconds",
           "updated_at_seconds"
@@ -29649,6 +29651,16 @@
           "is_private": {
             "type": "boolean",
             "description": "为 true 时仅团队成员和管理员可查看。"
+          },
+          "generation": {
+            "type": "integer",
+            "format": "int64",
+            "description": "协作文档代次。每次正文完整重置（content/reset）+1；存量旧文档为 0。"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int64",
+            "description": "正文乐观并发修订号，全局单调递增；协作保存和正文重置都会使其递增。"
           },
           "channel_name": {
             "type": "string",
@@ -44299,10 +44311,13 @@
             "description": "替换后的 Markdown 正文，最大 4 MiB。"
           },
           "expected_revision": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "minimum": 0,
-            "description": "调用方预期的当前正文修订版本。"
+            "description": "调用方预期的当前正文修订版本。首次写入从未保存过的文档时传 0。"
           },
           "idempotency_key": {
             "type": "string",

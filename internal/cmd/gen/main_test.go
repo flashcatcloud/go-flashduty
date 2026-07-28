@@ -179,6 +179,27 @@ func TestEmitStructRequiredRequestScalarDoesNotOmitZero(t *testing.T) {
 	}
 }
 
+func TestEmitStructRequiredNullableRequestScalarOmitsNil(t *testing.T) {
+	g := newTestGen(map[string]any{})
+	g.reqGoNames["ResetRequest"] = true
+
+	schema := map[string]any{
+		"type":     "object",
+		"required": []any{"expected_revision"},
+		"properties": map[string]any{
+			"expected_revision": map[string]any{
+				"type":    []any{"integer", "null"},
+				"minimum": 0,
+			},
+		},
+	}
+
+	src := g.emitStruct("ResetRequest", schema)
+	if !strings.Contains(src, `ExpectedRevision *int64 `+"`"+`json:"expected_revision,omitempty" toon:"expected_revision,omitempty"`+"`") {
+		t.Fatalf("required nullable request scalar must distinguish nil from a present zero; got:\n%s", src)
+	}
+}
+
 func TestMergeAllOfKeepsRequiredRequestFields(t *testing.T) {
 	g := newTestGen(map[string]any{
 		"BaseRequest": map[string]any{
