@@ -158,6 +158,63 @@ func TestEmitStructNullableOptionalResponseFieldUsesSinglePointer(t *testing.T) 
 	}
 }
 
+func TestEmitStructRequiredRequestScalarDoesNotOmitZero(t *testing.T) {
+	g := newTestGen(map[string]any{})
+	g.reqGoNames["ResetRequest"] = true
+
+	schema := map[string]any{
+		"type":     "object",
+		"required": []any{"expected_revision"},
+		"properties": map[string]any{
+			"expected_revision": map[string]any{
+				"type":    "integer",
+				"minimum": 0,
+			},
+		},
+	}
+
+	src := g.emitStruct("ResetRequest", schema)
+	if !strings.Contains(src, `ExpectedRevision int64 `+"`"+`json:"expected_revision" toon:"expected_revision"`+"`") {
+		t.Fatalf("required request scalar must keep its zero value on the wire; got:\n%s", src)
+	}
+}
+
+func TestMergeAllOfKeepsRequiredRequestFields(t *testing.T) {
+	g := newTestGen(map[string]any{
+		"BaseRequest": map[string]any{
+			"type":     "object",
+			"required": []any{"base_count"},
+			"properties": map[string]any{
+				"base_count": map[string]any{"type": "integer"},
+			},
+		},
+	})
+	g.reqGoNames["CombinedRequest"] = true
+
+	merged := g.mergeAllOf(map[string]any{
+		"allOf": []any{
+			map[string]any{"$ref": "#/components/schemas/BaseRequest"},
+			map[string]any{
+				"type":     "object",
+				"required": []any{"label"},
+				"properties": map[string]any{
+					"label": map[string]any{"type": "string"},
+				},
+			},
+		},
+	})
+
+	src := g.emitStruct("CombinedRequest", merged)
+	for _, want := range []string{
+		`BaseCount int64 ` + "`" + `json:"base_count" toon:"base_count"` + "`",
+		`Label string ` + "`" + `json:"label" toon:"label"` + "`",
+	} {
+		if !strings.Contains(src, want) {
+			t.Fatalf("allOf required request field missing its wire requirement %q; got:\n%s", want, src)
+		}
+	}
+}
+
 func TestMergeAllOfMergesObjectOneOfBranches(t *testing.T) {
 	g := &Gen{schemas: map[string]any{
 		"LogResult": map[string]any{

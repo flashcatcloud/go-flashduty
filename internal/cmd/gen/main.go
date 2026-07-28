@@ -481,15 +481,39 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 	if len(parts) == 0 && len(oneOf) == 0 {
 		return s
 	}
+	requiredSet := map[string]bool{}
+	for _, raw := range asSlice(s["required"]) {
+		if name, ok := raw.(string); ok {
+			requiredSet[name] = true
+		}
+	}
+	resolvedParts := make([]map[string]any, 0, len(parts)+len(oneOf))
+	for _, part := range parts {
+		pm := asMap(part)
+		if ref := refName(pm); ref != "" {
+			pm = g.resolveObject(ref)
+		} else if len(asSlice(pm["allOf"])) > 0 {
+			pm = g.mergeAllOf(pm)
+		}
+		resolvedParts = append(resolvedParts, pm)
+		for _, raw := range asSlice(pm["required"]) {
+			if name, ok := raw.(string); ok {
+				requiredSet[name] = true
+			}
+		}
+	}
 	var oneOfRequired map[string]bool
 	for _, part := range oneOf {
 		pm := asMap(part)
 		if ref := refName(pm); ref != "" {
 			pm = g.resolveObject(ref)
+		} else if len(asSlice(pm["allOf"])) > 0 {
+			pm = g.mergeAllOf(pm)
 		}
 		if typeStr(pm) != "object" && len(asMap(pm["properties"])) == 0 && len(asSlice(pm["allOf"])) == 0 {
 			return s
 		}
+		resolvedParts = append(resolvedParts, pm)
 		required := map[string]bool{}
 		for _, raw := range asSlice(pm["required"]) {
 			if name, ok := raw.(string); ok {
@@ -506,14 +530,9 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 			}
 		}
 	}
-	parts = append(parts, oneOf...)
 	merged := map[string]any{"type": "object"}
 	props := map[string]any{}
-	for _, part := range parts {
-		pm := asMap(part)
-		if ref := refName(pm); ref != "" {
-			pm = g.resolveObject(ref)
-		}
+	for _, pm := range resolvedParts {
 		for k, v := range asMap(pm["properties"]) {
 			props[k] = v
 		}
@@ -524,13 +543,18 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 	}
 	merged["properties"] = props
 	if len(oneOf) > 0 {
-		required := make([]any, 0, len(oneOfRequired))
 		for name := range oneOfRequired {
+			requiredSet[name] = true
+		}
+		merged["x-generator-optional-response"] = true
+	}
+	if len(requiredSet) > 0 {
+		required := make([]any, 0, len(requiredSet))
+		for name := range requiredSet {
 			required = append(required, name)
 		}
 		sort.Slice(required, func(i, j int) bool { return required[i].(string) < required[j].(string) })
 		merged["required"] = required
-		merged["x-generator-optional-response"] = true
 	}
 	return merged
 }
@@ -769,21 +793,16 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		// (AccountID) while `--json` and the spec-derived help use snake_case
 		// (account_id); an agent that reads field names off a toon dump and pipes
 		// them into `--json | jq '.account_id'` hits all-null. Keep both tags.
-		// omitempty policy splits by direction: request structs KEEP ,omitempty
-		// (with the nullable→pointer rewrite above, a nil pointer is omitted while
-		// &false/&0 is still sent — tri-state; a non-nullable zero is genuinely
-		// "unset" and correctly dropped). Response structs DROP ,omitempty: the API
-		// returns the field and the CLI re-serializes the decoded struct
-		// (--json/--toon), so omitempty would silently swallow the false/0/[]/{}
-		// state fields the help advertises as present (e.g. rule.enabled=false on a
-		// disabled rule). Render them faithfully. A flattened object `oneOf` is
-		// the exception: a field not required by every branch is absent on some
-		// valid responses. Explicit response properties marked to preserve absence
-		// need the same treatment. In both cases, use pointers and `omitempty`.
+		// Omission policy follows the schema. Required request fields never omit
+		// zero values: zero may be valid (for example an expected revision of 0),
+		// and the server must still see the required key. Optional request fields
+		// use omitempty, with omitzero for bare structs. Response structs normally
+		// render every field faithfully; flattened oneOf fields and properties
+		// explicitly marked to preserve absence use pointers and omitempty.
 		jsonTag, toonTag := k, k
-		if inReq {
+		if inReq && !required[k] {
 			toonTag = k + ",omitempty"
-			if g.isStructSchema(pv) {
+			if isStructField {
 				// stdlib encoding/json's `,omitempty` never fires for a bare
 				// struct value (only false/0/""/nil-slice/nil-map/nil-pointer
 				// count as "empty"), so an unset optional object field was
