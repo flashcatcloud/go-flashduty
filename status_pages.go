@@ -169,8 +169,8 @@ func (s *StatusPagesService) Create(ctx context.Context, req *CreateStatusPageRe
 // Delete a status page.
 //
 // API: POST /status-page/delete (statusPageDelete).
-func (s *StatusPagesService) Delete(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/status-page/delete", nil, nil)
+func (s *StatusPagesService) Delete(ctx context.Context, req *DeleteStatusPageRequest) (*Response, error) {
+	return s.client.do(ctx, "/status-page/delete", req, nil)
 }
 
 // Get status page detail.
@@ -330,6 +330,6 @@ func (s *StatusPagesService) TemplateUpsert(ctx context.Context, req *UpsertStat
 // Update an existing status page configuration.
 //
 // API: POST /status-page/update (statusPageUpdate).
-func (s *StatusPagesService) Update(ctx context.Context) (*Response, error) {
-	return s.client.do(ctx, "/status-page/update", nil, nil)
+func (s *StatusPagesService) Update(ctx context.Context, req *UpdateStatusPageRequest) (*Response, error) {
+	return s.client.do(ctx, "/status-page/update", req, nil)
 }

@@ -9,7 +9,7 @@ type DataSourcesService service
 
 // Get datasource detail.
 //
-// Retrieve full details of a single data source by its ID, including the `payload` configuration, with credential fields masked as `******`.
+// Retrieve full details of a single data source by its ID, including the `payload` configuration with its configured connection and authentication settings; treat the response as sensitive and avoid logging or forwarding it.
 //
 // API: POST /monit/datasource/info (monit-datasource-read-info).
 func (s *DataSourcesService) ReadInfo(ctx context.Context, req *IDRequest) (*DataSourceItem, *Response, error) {

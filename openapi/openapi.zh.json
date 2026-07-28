@@ -14729,12 +14729,12 @@
       "post": {
         "operationId": "monit-datasource-read-info",
         "summary": "查看数据源详情",
-        "description": "通过 ID 获取单个数据源的完整信息，包括 `payload` 配置（凭据字段以 `******` 脱敏返回）。",
+        "description": "通过 ID 获取单个数据源的完整信息，包括 `payload` 配置及其中配置的连接与鉴权信息；请将该响应视为敏感信息，避免记录或转发。",
         "tags": [
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应不返回凭据明文。`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段一律以 `******` 占位返回；原本就没配置的字段仍返回空字符串。`sls.access_key_id` 是标识而非凭据，照常返回真实值。\n\n更新时把 `******` 原样提交表示**沿用已存值**，留空同样按沿用处理；要轮换凭据就直接提交新值。\n\n创建时没有可沿用的旧值——若把从别处读来的 `******` 当作真实口令提交，存下来的就是字面量 `******`，数据源会连不上。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应会按原样返回 `payload` 配置——`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段均如实返回，不做脱敏。请将这些响应视为敏感信息：避免记录日志或转发给第三方。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-read-info",
           "metadata": {
             "sidebarTitle": "查看数据源详情"
@@ -14822,7 +14822,7 @@
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- `type_ident` 必须为以下之一：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`victorialogs`。\n- `edge_cluster_name` 指定使用该数据源进行规则评估的 Monitors Edge 集群。\n- 对于 `elasticsearch`，`payload.elasticsearch.deployment` 须设为 `cloud` 或 `self-managed`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应不返回凭据明文。`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段一律以 `******` 占位返回；原本就没配置的字段仍返回空字符串。`sls.access_key_id` 是标识而非凭据，照常返回真实值。\n\n更新时把 `******` 原样提交表示**沿用已存值**，留空同样按沿用处理；要轮换凭据就直接提交新值。\n\n创建时没有可沿用的旧值——若把从别处读来的 `******` 当作真实口令提交，存下来的就是字面量 `******`，数据源会连不上。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- `type_ident` 必须为以下之一：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`victorialogs`。\n- `edge_cluster_name` 指定使用该数据源进行规则评估的 Monitors Edge 集群。\n- 对于 `elasticsearch`，`payload.elasticsearch.deployment` 须设为 `cloud` 或 `self-managed`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应会按原样返回 `payload` 配置——`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段均如实返回，不做脱敏。请将这些响应视为敏感信息：避免记录日志或转发给第三方。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-write-create",
           "metadata": {
             "sidebarTitle": "创建数据源"
@@ -14908,7 +14908,7 @@
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应不返回凭据明文。`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段一律以 `******` 占位返回；原本就没配置的字段仍返回空字符串。`sls.access_key_id` 是标识而非凭据，照常返回真实值。\n\n更新时把 `******` 原样提交表示**沿用已存值**，留空同样按沿用处理；要轮换凭据就直接提交新值。\n\n创建时没有可沿用的旧值——若把从别处读来的 `******` 当作真实口令提交，存下来的就是字面量 `******`，数据源会连不上。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应会按原样返回 `payload` 配置——`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段均如实返回，不做脱敏。请将这些响应视为敏感信息：避免记录日志或转发给第三方。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "更新数据源"
@@ -22377,7 +22377,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmptyRequest"
+                "$ref": "#/components/schemas/UpdateStatusPageRequest"
               },
               "example": {
                 "page_id": 5750613685214,
@@ -22450,7 +22450,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmptyRequest"
+                "$ref": "#/components/schemas/DeleteStatusPageRequest"
               },
               "example": {
                 "page_id": 5750613685214
@@ -45611,6 +45611,115 @@
           "page_name",
           "page_url_name"
         ]
+      },
+      "UpdateStatusPageRequest": {
+        "type": "object",
+        "description": "更新已有状态页所需的参数。除 `page_id` 外均为可选字段；省略某字段表示保持其原值。",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "状态页 ID。"
+          },
+          "name": {
+            "type": "string",
+            "description": "状态页展示名称。留空表示保持原值。",
+            "maxLength": 255
+          },
+          "url_name": {
+            "type": "string",
+            "description": "URL 安全的状态页路径，在账户和状态页类型内唯一。留空表示保持原值。",
+            "maxLength": 255
+          },
+          "custom_domain": {
+            "type": "string",
+            "description": "公开状态页使用的自定义域名。留空表示保持原值。",
+            "maxLength": 255
+          },
+          "page_title": {
+            "type": "string",
+            "description": "状态页浏览器标题。留空表示保持原值。"
+          },
+          "logo": {
+            "type": "string",
+            "description": "状态页 Logo 图片。留空表示保持原值。"
+          },
+          "dark_logo": {
+            "type": "string",
+            "description": "状态页暗色模式 Logo 图片。留空表示保持原值。"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "点击 Logo 时跳转的 URL。留空表示保持原值。"
+          },
+          "favicon": {
+            "type": "string",
+            "description": "状态页的网站图标。留空表示保持原值。"
+          },
+          "page_header": {
+            "type": "string",
+            "description": "状态页页头内容。留空表示保持原值。"
+          },
+          "page_footer": {
+            "type": "string",
+            "description": "状态页页脚内容。留空表示保持原值。"
+          },
+          "date_view": {
+            "type": "string",
+            "description": "事件日期展示方式。留空表示保持原值。",
+            "enum": [
+              "calendar",
+              "list"
+            ]
+          },
+          "display_uptime_mode": {
+            "type": "string",
+            "description": "可用率展示方式。留空表示保持原值。",
+            "enum": [
+              "chart_and_percentage",
+              "chart",
+              "none"
+            ]
+          },
+          "custom_links": {
+            "type": "array",
+            "description": "状态页展示的自定义导航链接。留空表示保持原值。",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "contact_info": {
+            "type": "string",
+            "description": "联系信息，例如 mailto 或网站 URL。留空表示保持原值。"
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/StatusPageSubscriptionItem"
+          },
+          "template_preference": {
+            "type": "string",
+            "description": "偏好的变更事件模板类型。留空表示保持原值。"
+          }
+        }
+      },
+      "DeleteStatusPageRequest": {
+        "type": "object",
+        "description": "删除状态页所需的参数。",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "状态页 ID。"
+          }
+        }
       },
       "A2AAgentCreateRequest": {
         "type": "object",
