@@ -14737,12 +14737,12 @@
       "post": {
         "operationId": "monit-datasource-read-info",
         "summary": "Get datasource detail",
-        "description": "Retrieve full details of a single data source by its ID, including the `payload` configuration, with credential fields masked as `******`.",
+        "description": "Retrieve full details of a single data source by its ID, including the `payload` configuration with its configured connection and authentication settings; treat the response as sensitive and avoid logging or forwarding it.",
         "tags": [
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |\n\n## Credential fields\n\nThe `info` / `create` / `update` responses include the `payload` configuration exactly as stored — `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and similar fields are returned as-is, not masked. Treat these responses as sensitive: avoid logging them or forwarding them to third parties.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-read-info",
           "metadata": {
             "sidebarTitle": "Get datasource detail"
@@ -14830,7 +14830,7 @@
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- `type_ident` must be one of: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.\n- `edge_cluster_name` specifies which Monitors edge cluster evaluates rules using this datasource.\n- For `elasticsearch`, set `payload.elasticsearch.deployment` to `cloud` or `self-managed`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- `type_ident` must be one of: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `victorialogs`.\n- `edge_cluster_name` specifies which Monitors edge cluster evaluates rules using this datasource.\n- For `elasticsearch`, set `payload.elasticsearch.deployment` to `cloud` or `self-managed`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses include the `payload` configuration exactly as stored — `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and similar fields are returned as-is, not masked. Treat these responses as sensitive: avoid logging them or forwarding them to third parties.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-write-create",
           "metadata": {
             "sidebarTitle": "Create datasource"
@@ -14916,7 +14916,7 @@
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses never return credentials in cleartext. `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and their siblings come back as the placeholder `******`; a field that was never configured still comes back as an empty string. `sls.access_key_id` is an identifier rather than a credential and is returned as-is.\n\nOn update, submitting `******` unchanged means **keep the stored value**, and an empty string is treated the same way. To rotate a credential, submit the new value directly.\n\nOn create there is no stored value to keep — submitting a `******` copied from another response stores the literal string `******`, and the data source will fail to connect.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Datasources Manage** (`monit`) |\n\n## Usage\n\n- Every call is recorded in the account audit log. Don't put secrets in request fields.\n\n## Credential fields\n\nThe `info` / `create` / `update` responses include the `payload` configuration exactly as stored — `password`, `basic_auth_password`, `api_key`, `service_token`, `access_key_secret`, `tls_key`, `tls_key_pwd` and similar fields are returned as-is, not masked. Treat these responses as sensitive: avoid logging them or forwarding them to third parties.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "Update datasource"
@@ -22385,7 +22385,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmptyRequest"
+                "$ref": "#/components/schemas/UpdateStatusPageRequest"
               },
               "example": {
                 "page_id": 5750613685214,
@@ -22458,7 +22458,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmptyRequest"
+                "$ref": "#/components/schemas/DeleteStatusPageRequest"
               },
               "example": {
                 "page_id": 5750613685214
@@ -45620,6 +45620,115 @@
           "page_name",
           "page_url_name"
         ]
+      },
+      "UpdateStatusPageRequest": {
+        "type": "object",
+        "description": "Parameters for updating an existing status page. All fields except `page_id` are optional; omit a field to keep its existing value.",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the status page. Omit to keep the existing value.",
+            "maxLength": 255
+          },
+          "url_name": {
+            "type": "string",
+            "description": "URL-safe slug, unique per account and page type. Omit to keep the existing value.",
+            "maxLength": 255
+          },
+          "custom_domain": {
+            "type": "string",
+            "description": "Custom domain for a public status page. Omit to keep the existing value.",
+            "maxLength": 255
+          },
+          "page_title": {
+            "type": "string",
+            "description": "Browser title shown for the status page. Omit to keep the existing value."
+          },
+          "logo": {
+            "type": "string",
+            "description": "Logo image of the status page. Omit to keep the existing value."
+          },
+          "dark_logo": {
+            "type": "string",
+            "description": "Dark-mode logo image of the status page. Omit to keep the existing value."
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL opened when the logo is clicked. Omit to keep the existing value."
+          },
+          "favicon": {
+            "type": "string",
+            "description": "Favicon of the status page. Omit to keep the existing value."
+          },
+          "page_header": {
+            "type": "string",
+            "description": "Header content shown on the status page. Omit to keep the existing value."
+          },
+          "page_footer": {
+            "type": "string",
+            "description": "Footer content shown on the status page. Omit to keep the existing value."
+          },
+          "date_view": {
+            "type": "string",
+            "description": "How event dates are displayed. Omit to keep the existing value.",
+            "enum": [
+              "calendar",
+              "list"
+            ]
+          },
+          "display_uptime_mode": {
+            "type": "string",
+            "description": "How uptime is displayed. Omit to keep the existing value.",
+            "enum": [
+              "chart_and_percentage",
+              "chart",
+              "none"
+            ]
+          },
+          "custom_links": {
+            "type": "array",
+            "description": "Custom navigation links shown on the status page. Omit to keep the existing value.",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "contact_info": {
+            "type": "string",
+            "description": "Get-in-touch contact, such as a mailto or website URL. Omit to keep the existing value."
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/StatusPageSubscriptionItem"
+          },
+          "template_preference": {
+            "type": "string",
+            "description": "Preferred change-event template type. Omit to keep the existing value."
+          }
+        }
+      },
+      "DeleteStatusPageRequest": {
+        "type": "object",
+        "description": "Parameters for deleting a status page.",
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Status page ID."
+          }
+        }
       },
       "A2AAgentCreateRequest": {
         "type": "object",

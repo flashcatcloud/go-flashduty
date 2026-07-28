@@ -2235,6 +2235,12 @@ type DeleteStatusPageComponentRequest struct {
 	PageID int64 `json:"page_id" toon:"page_id"`
 }
 
+// DeleteStatusPageRequest is generated from the Flashduty OpenAPI schema.
+type DeleteStatusPageRequest struct {
+	// Status page ID.
+	PageID int64 `json:"page_id" toon:"page_id"`
+}
+
 // DeleteStatusPageSectionRequest is generated from the Flashduty OpenAPI schema.
 type DeleteStatusPageSectionRequest struct {
 	// Status page ID.
@@ -7978,6 +7984,43 @@ type UpdateStatusPageChangeTimelineRequest struct {
 	PageID int64 `json:"page_id" toon:"page_id"`
 	// Target timeline update ID.
 	UpdateID string `json:"update_id" toon:"update_id"`
+}
+
+// UpdateStatusPageRequest is generated from the Flashduty OpenAPI schema.
+type UpdateStatusPageRequest struct {
+	// Get-in-touch contact, such as a mailto or website URL. Omit to keep the existing value.
+	ContactInfo string `json:"contact_info,omitempty" toon:"contact_info,omitempty"`
+	// Custom domain for a public status page. Omit to keep the existing value.
+	CustomDomain string `json:"custom_domain,omitempty" toon:"custom_domain,omitempty"`
+	// Custom navigation links shown on the status page. Omit to keep the existing value.
+	CustomLinks []map[string]string `json:"custom_links,omitempty" toon:"custom_links,omitempty"`
+	// Dark-mode logo image of the status page. Omit to keep the existing value.
+	DarkLogo string `json:"dark_logo,omitempty" toon:"dark_logo,omitempty"`
+	// How event dates are displayed. Omit to keep the existing value.
+	DateView string `json:"date_view,omitempty" toon:"date_view,omitempty"`
+	// How uptime is displayed. Omit to keep the existing value.
+	DisplayUptimeMode string `json:"display_uptime_mode,omitempty" toon:"display_uptime_mode,omitempty"`
+	// Favicon of the status page. Omit to keep the existing value.
+	Favicon string `json:"favicon,omitempty" toon:"favicon,omitempty"`
+	// Logo image of the status page. Omit to keep the existing value.
+	Logo string `json:"logo,omitempty" toon:"logo,omitempty"`
+	// URL opened when the logo is clicked. Omit to keep the existing value.
+	LogoURL string `json:"logo_url,omitempty" toon:"logo_url,omitempty"`
+	// Display name of the status page. Omit to keep the existing value.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Footer content shown on the status page. Omit to keep the existing value.
+	PageFooter string `json:"page_footer,omitempty" toon:"page_footer,omitempty"`
+	// Header content shown on the status page. Omit to keep the existing value.
+	PageHeader string `json:"page_header,omitempty" toon:"page_header,omitempty"`
+	// Status page ID.
+	PageID int64 `json:"page_id" toon:"page_id"`
+	// Browser title shown for the status page. Omit to keep the existing value.
+	PageTitle    string                     `json:"page_title,omitempty" toon:"page_title,omitempty"`
+	Subscription StatusPageSubscriptionItem `json:"subscription,omitzero" toon:"subscription,omitempty"`
+	// Preferred change-event template type. Omit to keep the existing value.
+	TemplatePreference string `json:"template_preference,omitempty" toon:"template_preference,omitempty"`
+	// URL-safe slug, unique per account and page type. Omit to keep the existing value.
+	URLName string `json:"url_name,omitempty" toon:"url_name,omitempty"`
 }
 
 // UpsertPostMortemTemplateRequest is generated from the Flashduty OpenAPI schema.
