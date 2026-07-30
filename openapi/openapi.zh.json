@@ -21369,153 +21369,153 @@
           }
         }
       }
-      },
-      "/incident/post-mortem/content/reset": {
-        "post": {
-          "operationId": "incident-post-mortem-write-reset-content",
-          "summary": "重置故障复盘正文",
-          "description": "用 Markdown 完整替换草稿状态故障复盘的正文。",
-          "tags": [
-            "On-call/故障管理"
-          ],
-          "x-mint": {
-            "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 调用方须拥有目标复盘的编辑权限。 |\n\n## 使用说明\n\n- 仅草稿状态的报告可重置，且当前修订版本必须等于 `expected_revision`；否则返回 `409 Conflict`。\n- 同一 `idempotency_key` 只能重试相同的复盘、修订版本和 Markdown 正文；复用到不同请求会返回 `409 Conflict`。\n- 重置成功后旧的协作（Yjs）房间会被断开，客户端需切换到新 generation 的房间 `post-mortem-{accountId}-{postMortemId}-g{N}`（generation 0 无 `-g` 后缀）。重置不可回滚。\n- Markdown 正文最大为 4 MiB。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
-            "href": "/zh/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
-            "metadata": {
-              "sidebarTitle": "重置故障复盘正文"
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "成功",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/SuccessEnvelope"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "data": {
-                            "$ref": "#/components/schemas/PostMortemContentResetResponse"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "example": {
-                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                    "data": {
-                      "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
-                      "generation": 2,
-                      "revision": 12,
-                      "previous_generation": 1,
-                      "previous_revision": 11,
-                      "markdown_bytes": 88,
-                      "markdown_sha256": "70d764e77e68f8fbfa14d72a235ac07b0110768b8380c8e3436459ebaf02a7c0"
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "$ref": "#/components/responses/BadRequest"
-            },
-            "401": {
-              "$ref": "#/components/responses/Unauthorized"
-            },
-            "403": {
-              "$ref": "#/components/responses/Forbidden"
-            },
-            "409": {
-              "description": "报告不是草稿状态、修订版本已过期，或幂等键被复用到不同请求。",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "required": [
-                      "request_id",
-                      "error"
-                    ],
-                    "properties": {
-                      "request_id": {
-                        "type": "string"
-                      },
-                      "error": {
-                        "type": "object",
-                        "required": [
-                          "code",
-                          "message"
-                        ],
-                        "properties": {
-                          "code": {
-                            "type": "string",
-                            "enum": [
-                              "Conflict"
-                            ]
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "example": {
-                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                    "error": {
-                      "code": "Conflict",
-                      "message": "expected_revision conflict: request has 11 but current revision is 12"
-                    }
-                  }
-                }
-              }
-            },
-            "413": {
-              "description": "Markdown 正文超过 4 MiB 限制。",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/ErrorResponse"
-                  },
-                  "example": {
-                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                    "error": {
-                      "code": "EntityTooLarge",
-                      "message": "markdown exceeds maximum size"
-                    }
-                  }
-                }
-              }
-            },
-            "429": {
-              "$ref": "#/components/responses/TooManyRequests"
-            },
-            "500": {
-              "$ref": "#/components/responses/ServerError"
-            }
-          },
-          "requestBody": {
-            "required": true,
+    },
+    "/incident/post-mortem/content/reset": {
+      "post": {
+        "operationId": "incident-post-mortem-write-reset-content",
+        "summary": "重置故障复盘正文",
+        "description": "用 Markdown 完整替换草稿状态故障复盘的正文。",
+        "tags": [
+          "On-call/故障管理"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 调用方须拥有目标复盘的编辑权限。 |\n\n## 使用说明\n\n- 仅草稿状态的报告可重置，且当前修订版本必须等于 `expected_revision`；否则返回 `409 Conflict`。\n- 同一 `idempotency_key` 只能重试相同的复盘、修订版本和 Markdown 正文；复用到不同请求会返回 `409 Conflict`。\n- 重置成功后旧的协作（Yjs）房间会被断开，客户端需切换到新 generation 的房间 `post-mortem-{accountId}-{postMortemId}-g{N}`（generation 0 无 `-g` 后缀）。重置不可回滚。\n- Markdown 正文最大为 4 MiB。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
+          "metadata": {
+            "sidebarTitle": "重置故障复盘正文"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResetPostMortemContentRequest"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PostMortemContentResetResponse"
+                        }
+                      }
+                    }
+                  ]
                 },
                 "example": {
-                  "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
-                  "markdown": "# Database saturation incident\n\nThe database pool was exhausted; added saturation alert.",
-                  "expected_revision": 11,
-                  "idempotency_key": "postmortem-reset-8104935102-11"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                    "generation": 2,
+                    "revision": 12,
+                    "previous_generation": 1,
+                    "previous_revision": 11,
+                    "markdown_bytes": 88,
+                    "markdown_sha256": "70d764e77e68f8fbfa14d72a235ac07b0110768b8380c8e3436459ebaf02a7c0"
+                  }
                 }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "报告不是草稿状态、修订版本已过期，或幂等键被复用到不同请求。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "request_id",
+                    "error"
+                  ],
+                  "properties": {
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "Conflict"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "Conflict",
+                    "message": "expected_revision conflict: request has 11 but current revision is 12"
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Markdown 正文超过 4 MiB 限制。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "EntityTooLarge",
+                    "message": "markdown exceeds maximum size"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPostMortemContentRequest"
+              },
+              "example": {
+                "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                "markdown": "# Database saturation incident\n\nThe database pool was exhausted; added saturation alert.",
+                "expected_revision": 11,
+                "idempotency_key": "postmortem-reset-8104935102-11"
               }
             }
           }
         }
-      },
-      "/incident/post-mortem/status/reset": {
+      }
+    },
+    "/incident/post-mortem/status/reset": {
       "post": {
         "operationId": "postmortem-write-reset-status",
         "summary": "更新故障复盘状态",
@@ -35167,6 +35167,9 @@
             "type": "string",
             "description": "Zoom 机器人消息模板源。"
           },
+          "incident_card_hidden_fields": {
+            "$ref": "#/components/schemas/IncidentCardHiddenFields"
+          },
           "status": {
             "type": "string",
             "description": "模板生命周期状态。",
@@ -35389,6 +35392,9 @@
           "zoom": {
             "type": "string",
             "description": "Zoom 机器人消息模板源。"
+          },
+          "incident_card_hidden_fields": {
+            "$ref": "#/components/schemas/IncidentCardHiddenFields"
           }
         }
       },
@@ -35505,6 +35511,9 @@
           "zoom": {
             "type": "string",
             "description": "Zoom 机器人消息模板源。"
+          },
+          "incident_card_hidden_fields": {
+            "$ref": "#/components/schemas/IncidentCardHiddenFields"
           }
         }
       },
@@ -39291,9 +39300,6 @@
           "tls_key": {
             "type": "string"
           },
-          "tls_key_pwd": {
-            "type": "string"
-          },
           "tls_skip_verify": {
             "type": "boolean"
           },
@@ -39342,9 +39348,6 @@
           "tls_key": {
             "type": "string"
           },
-          "tls_key_pwd": {
-            "type": "string"
-          },
           "tls_skip_verify": {
             "type": "boolean"
           },
@@ -39387,6 +39390,15 @@
             "format": "int64",
             "description": "查询超时时间（毫秒）。"
           },
+          "tls_mode": {
+            "type": "string",
+            "enum": [
+              "disable",
+              "require",
+              "verify-full"
+            ],
+            "description": "MySQL 连接的 TLS 模式。留空则保持旧的逐字段 TLS 行为。"
+          },
           "tls_ca": {
             "type": "string"
           },
@@ -39394,9 +39406,6 @@
             "type": "string"
           },
           "tls_key": {
-            "type": "string"
-          },
-          "tls_key_pwd": {
             "type": "string"
           },
           "tls_skip_verify": {
@@ -39470,6 +39479,16 @@
             "type": "integer",
             "format": "int64"
           },
+          "ssl_mode": {
+            "type": "string",
+            "enum": [
+              "disable",
+              "require",
+              "verify-ca",
+              "verify-full"
+            ],
+            "description": "PostgreSQL 连接的 SSL 模式。留空则保持由 `tls_ca` 推断的旧行为。"
+          },
           "tls_ca": {
             "type": "string"
           },
@@ -39529,9 +39548,6 @@
             "type": "string"
           },
           "tls_key": {
-            "type": "string"
-          },
-          "tls_key_pwd": {
             "type": "string"
           },
           "tls_skip_verify": {
@@ -39650,9 +39666,6 @@
             "type": "string"
           },
           "tls_key": {
-            "type": "string"
-          },
-          "tls_key_pwd": {
             "type": "string"
           },
           "tls_skip_verify": {
@@ -48693,7 +48706,7 @@
       },
       "IncidentCardHiddenFields": {
         "type": "object",
-        "description": "预览故障卡片时，按 IM 应用隐藏的字段。只接受受支持的 IM 应用类型和字段名。",
+        "description": "按 IM 应用类型隐藏的故障卡片字段。只接受受支持的 IM 应用类型和字段名。",
         "propertyNames": {
           "type": "string",
           "enum": [
@@ -48714,7 +48727,9 @@
               "snoozed_before",
               "severity",
               "responders",
-              "aggregate_alert_count"
+              "aggregate_alert_count",
+              "detail",
+              "ai_analysis"
             ]
           }
         }

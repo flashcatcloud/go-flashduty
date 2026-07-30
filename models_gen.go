@@ -1978,7 +1978,6 @@ type DsClickHouseConfig struct {
 	TlsCert             string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
 	TlsEnabled          bool   `json:"tls_enabled,omitempty" toon:"tls_enabled,omitempty"`
 	TlsKey              string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsKeyPwd           string `json:"tls_key_pwd,omitempty" toon:"tls_key_pwd,omitempty"`
 	TlsMaxVersion       string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
 	TlsMinVersion       string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
 	TlsServerName       string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
@@ -2015,7 +2014,6 @@ type DsLokiConfig struct {
 	TlsCa             string   `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
 	TlsCert           string   `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
 	TlsKey            string   `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsKeyPwd         string   `json:"tls_key_pwd,omitempty" toon:"tls_key_pwd,omitempty"`
 	TlsMaxVersion     string   `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
 	TlsMinVersion     string   `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
 	TlsServerName     string   `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
@@ -2036,9 +2034,10 @@ type DsMySqlConfig struct {
 	TlsCa         string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
 	TlsCert       string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
 	TlsKey        string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsKeyPwd     string `json:"tls_key_pwd,omitempty" toon:"tls_key_pwd,omitempty"`
 	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
 	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
+	// TLS mode for the MySQL connection. Empty keeps the legacy per-field TLS behavior.
+	TlsMode       string `json:"tls_mode,omitempty" toon:"tls_mode,omitempty"`
 	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
 	TlsSkipVerify bool   `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
 	Username      string `json:"username,omitempty" toon:"username,omitempty"`
@@ -2075,11 +2074,13 @@ type DsPostgresConfig struct {
 	LifetimeSeconds int64  `json:"lifetime_seconds,omitempty" toon:"lifetime_seconds,omitempty"`
 	OpenConns       int64  `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
 	Password        string `json:"password,omitempty" toon:"password,omitempty"`
-	TimeoutMills    int64  `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
-	TlsCa           string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
-	TlsCert         string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
-	TlsKey          string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	Username        string `json:"username,omitempty" toon:"username,omitempty"`
+	// SSL mode for the PostgreSQL connection. Empty keeps the legacy behavior inferred from `tls_ca`.
+	SslMode      string `json:"ssl_mode,omitempty" toon:"ssl_mode,omitempty"`
+	TimeoutMills int64  `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
+	TlsCa        string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	TlsCert      string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	TlsKey       string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	Username     string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsPrometheusConfig is generated from the Flashduty OpenAPI schema.
@@ -2097,7 +2098,6 @@ type DsPrometheusConfig struct {
 	TlsCa         string   `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
 	TlsCert       string   `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
 	TlsKey        string   `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsKeyPwd     string   `json:"tls_key_pwd,omitempty" toon:"tls_key_pwd,omitempty"`
 	TlsMaxVersion string   `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
 	TlsMinVersion string   `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
 	TlsServerName string   `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
@@ -2137,7 +2137,6 @@ type DsVictoriaLogsConfig struct {
 	TlsCa             string   `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
 	TlsCert           string   `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
 	TlsKey            string   `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsKeyPwd         string   `json:"tls_key_pwd,omitempty" toon:"tls_key_pwd,omitempty"`
 	TlsMaxVersion     string   `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
 	TlsMinVersion     string   `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
 	TlsServerName     string   `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
@@ -7559,7 +7558,8 @@ type TemplateCreateRequest struct {
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
 	// Render alert labels as a table in Feishu app cards.
-	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
+	FeishuAppCardTableEnabled bool                     `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
+	IncidentCardHiddenFields  IncidentCardHiddenFields `json:"incident_card_hidden_fields,omitempty" toon:"incident_card_hidden_fields,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.
@@ -7621,7 +7621,8 @@ type TemplateItem struct {
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app" toon:"feishu_app"`
 	// Whether alert labels use table rendering in Feishu app cards.
-	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled" toon:"feishu_app_card_table_enabled"`
+	FeishuAppCardTableEnabled bool                     `json:"feishu_app_card_table_enabled" toon:"feishu_app_card_table_enabled"`
+	IncidentCardHiddenFields  IncidentCardHiddenFields `json:"incident_card_hidden_fields" toon:"incident_card_hidden_fields"`
 	// Slack robot message template source.
 	Slack string `json:"slack" toon:"slack"`
 	// Slack app message template source.
@@ -7695,7 +7696,8 @@ type TemplateUpdateRequest struct {
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
 	// When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting.
-	FeishuAppCardTableEnabled *bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
+	FeishuAppCardTableEnabled *bool                    `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
+	IncidentCardHiddenFields  IncidentCardHiddenFields `json:"incident_card_hidden_fields,omitempty" toon:"incident_card_hidden_fields,omitempty"`
 	// Slack robot message template source.
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.

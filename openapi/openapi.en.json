@@ -21377,153 +21377,153 @@
           }
         }
       }
-      },
-      "/incident/post-mortem/content/reset": {
-        "post": {
-          "operationId": "incident-post-mortem-write-reset-content",
-          "summary": "Reset post-mortem content",
-          "description": "Replace the body of a drafting post-mortem report with Markdown.",
-          "tags": [
-            "On-call/Incidents"
-          ],
-          "x-mint": {
-            "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | Edit access to the target report is required. |\n\n## Usage\n\n- The report must be drafting and its current revision must equal `expected_revision`; otherwise the API returns `409 Conflict`.\n- Reuse an `idempotency_key` only for the same report, revision, and Markdown content; different reuse returns `409 Conflict`.\n- A successful reset disconnects the previous collaboration (Yjs) room. Reconnect to the new generation room `post-mortem-{accountId}-{postMortemId}-g{N}` (generation 0 has no `-g` suffix). The reset cannot be rolled back.\n- Markdown content is limited to 4 MiB.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-            "href": "/en/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
-            "metadata": {
-              "sidebarTitle": "Reset post-mortem content"
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Success",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/SuccessEnvelope"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "data": {
-                            "$ref": "#/components/schemas/PostMortemContentResetResponse"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "example": {
-                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                    "data": {
-                      "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
-                      "generation": 2,
-                      "revision": 12,
-                      "previous_generation": 1,
-                      "previous_revision": 11,
-                      "markdown_bytes": 88,
-                      "markdown_sha256": "70d764e77e68f8fbfa14d72a235ac07b0110768b8380c8e3436459ebaf02a7c0"
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "$ref": "#/components/responses/BadRequest"
-            },
-            "401": {
-              "$ref": "#/components/responses/Unauthorized"
-            },
-            "403": {
-              "$ref": "#/components/responses/Forbidden"
-            },
-            "409": {
-              "description": "The report is not drafting, the revision is stale, or the idempotency key was reused for a different request.",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "required": [
-                      "request_id",
-                      "error"
-                    ],
-                    "properties": {
-                      "request_id": {
-                        "type": "string"
-                      },
-                      "error": {
-                        "type": "object",
-                        "required": [
-                          "code",
-                          "message"
-                        ],
-                        "properties": {
-                          "code": {
-                            "type": "string",
-                            "enum": [
-                              "Conflict"
-                            ]
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "example": {
-                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                    "error": {
-                      "code": "Conflict",
-                      "message": "expected_revision conflict: request has 11 but current revision is 12"
-                    }
-                  }
-                }
-              }
-            },
-            "413": {
-              "description": "Markdown content exceeds the 4 MiB limit.",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/ErrorResponse"
-                  },
-                  "example": {
-                    "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                    "error": {
-                      "code": "EntityTooLarge",
-                      "message": "markdown exceeds maximum size"
-                    }
-                  }
-                }
-              }
-            },
-            "429": {
-              "$ref": "#/components/responses/TooManyRequests"
-            },
-            "500": {
-              "$ref": "#/components/responses/ServerError"
-            }
-          },
-          "requestBody": {
-            "required": true,
+    },
+    "/incident/post-mortem/content/reset": {
+      "post": {
+        "operationId": "incident-post-mortem-write-reset-content",
+        "summary": "Reset post-mortem content",
+        "description": "Replace the body of a drafting post-mortem report with Markdown.",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | Edit access to the target report is required. |\n\n## Usage\n\n- The report must be drafting and its current revision must equal `expected_revision`; otherwise the API returns `409 Conflict`.\n- Reuse an `idempotency_key` only for the same report, revision, and Markdown content; different reuse returns `409 Conflict`.\n- A successful reset disconnects the previous collaboration (Yjs) room. Reconnect to the new generation room `post-mortem-{accountId}-{postMortemId}-g{N}` (generation 0 has no `-g` suffix). The reset cannot be rolled back.\n- Markdown content is limited to 4 MiB.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/incidents/incident-post-mortem-write-reset-content",
+          "metadata": {
+            "sidebarTitle": "Reset post-mortem content"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResetPostMortemContentRequest"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PostMortemContentResetResponse"
+                        }
+                      }
+                    }
+                  ]
                 },
                 "example": {
-                  "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
-                  "markdown": "# Database saturation incident\n\nThe database pool was exhausted; added saturation alert.",
-                  "expected_revision": 11,
-                  "idempotency_key": "postmortem-reset-8104935102-11"
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                    "generation": 2,
+                    "revision": 12,
+                    "previous_generation": 1,
+                    "previous_revision": 11,
+                    "markdown_bytes": 88,
+                    "markdown_sha256": "70d764e77e68f8fbfa14d72a235ac07b0110768b8380c8e3436459ebaf02a7c0"
+                  }
                 }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The report is not drafting, the revision is stale, or the idempotency key was reused for a different request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "request_id",
+                    "error"
+                  ],
+                  "properties": {
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "Conflict"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "Conflict",
+                    "message": "expected_revision conflict: request has 11 but current revision is 12"
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Markdown content exceeds the 4 MiB limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "EntityTooLarge",
+                    "message": "markdown exceeds maximum size"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPostMortemContentRequest"
+              },
+              "example": {
+                "post_mortem_id": "8104935102bf89dc01ac638a5261fe7e",
+                "markdown": "# Database saturation incident\n\nThe database pool was exhausted; added saturation alert.",
+                "expected_revision": 11,
+                "idempotency_key": "postmortem-reset-8104935102-11"
               }
             }
           }
         }
-      },
-      "/incident/post-mortem/status/reset": {
+      }
+    },
+    "/incident/post-mortem/status/reset": {
       "post": {
         "operationId": "postmortem-write-reset-status",
         "summary": "Update post-mortem status",
@@ -35176,6 +35176,9 @@
             "type": "string",
             "description": "Zoom bot message template source."
           },
+          "incident_card_hidden_fields": {
+            "$ref": "#/components/schemas/IncidentCardHiddenFields"
+          },
           "status": {
             "type": "string",
             "description": "Template lifecycle status.",
@@ -35398,6 +35401,9 @@
           "zoom": {
             "type": "string",
             "description": "Zoom bot message template source."
+          },
+          "incident_card_hidden_fields": {
+            "$ref": "#/components/schemas/IncidentCardHiddenFields"
           }
         }
       },
@@ -35514,6 +35520,9 @@
           "zoom": {
             "type": "string",
             "description": "Zoom bot message template source."
+          },
+          "incident_card_hidden_fields": {
+            "$ref": "#/components/schemas/IncidentCardHiddenFields"
           }
         }
       },
@@ -39300,9 +39309,6 @@
           "tls_key": {
             "type": "string"
           },
-          "tls_key_pwd": {
-            "type": "string"
-          },
           "tls_skip_verify": {
             "type": "boolean"
           },
@@ -39351,9 +39357,6 @@
           "tls_key": {
             "type": "string"
           },
-          "tls_key_pwd": {
-            "type": "string"
-          },
           "tls_skip_verify": {
             "type": "boolean"
           },
@@ -39396,6 +39399,15 @@
             "format": "int64",
             "description": "Query timeout in milliseconds."
           },
+          "tls_mode": {
+            "type": "string",
+            "enum": [
+              "disable",
+              "require",
+              "verify-full"
+            ],
+            "description": "TLS mode for the MySQL connection. Empty keeps the legacy per-field TLS behavior."
+          },
           "tls_ca": {
             "type": "string"
           },
@@ -39403,9 +39415,6 @@
             "type": "string"
           },
           "tls_key": {
-            "type": "string"
-          },
-          "tls_key_pwd": {
             "type": "string"
           },
           "tls_skip_verify": {
@@ -39479,6 +39488,16 @@
             "type": "integer",
             "format": "int64"
           },
+          "ssl_mode": {
+            "type": "string",
+            "enum": [
+              "disable",
+              "require",
+              "verify-ca",
+              "verify-full"
+            ],
+            "description": "SSL mode for the PostgreSQL connection. Empty keeps the legacy behavior inferred from `tls_ca`."
+          },
           "tls_ca": {
             "type": "string"
           },
@@ -39538,9 +39557,6 @@
             "type": "string"
           },
           "tls_key": {
-            "type": "string"
-          },
-          "tls_key_pwd": {
             "type": "string"
           },
           "tls_skip_verify": {
@@ -39659,9 +39675,6 @@
             "type": "string"
           },
           "tls_key": {
-            "type": "string"
-          },
-          "tls_key_pwd": {
             "type": "string"
           },
           "tls_skip_verify": {
@@ -48702,7 +48715,7 @@
       },
       "IncidentCardHiddenFields": {
         "type": "object",
-        "description": "Fields to hide by IM app when previewing an incident card. Only supported IM app types and field names are accepted.",
+        "description": "Incident-card fields to hide, keyed by IM app type. Only supported IM app types and field names are accepted.",
         "propertyNames": {
           "type": "string",
           "enum": [
@@ -48723,7 +48736,9 @@
               "snoozed_before",
               "severity",
               "responders",
-              "aggregate_alert_count"
+              "aggregate_alert_count",
+              "detail",
+              "ai_analysis"
             ]
           }
         }
