@@ -103,6 +103,13 @@ const (
 	IncidentFeedTypeIWrCreate    IncidentFeedType = "i_wr_create"
 	IncidentFeedTypeIWrDelete    IncidentFeedType = "i_wr_delete"
 	IncidentFeedTypeIAutoRefresh IncidentFeedType = "i_auto_refresh"
+	IncidentFeedTypeIWiCreated   IncidentFeedType = "i_wi_created"
+	IncidentFeedTypeIWiUpdated   IncidentFeedType = "i_wi_updated"
+	IncidentFeedTypeIWiAssignees IncidentFeedType = "i_wi_assignees"
+	IncidentFeedTypeIWiCompleted IncidentFeedType = "i_wi_completed"
+	IncidentFeedTypeIWiConverted IncidentFeedType = "i_wi_converted"
+	IncidentFeedTypeIWiBound     IncidentFeedType = "i_wi_bound"
+	IncidentFeedTypeIWiDeleted   IncidentFeedType = "i_wi_deleted"
 	IncidentFeedTypeAMerge       IncidentFeedType = "a_merge"
 )
 
@@ -1310,6 +1317,16 @@ type AutomationTemplateListResponse struct {
 	Templates []AutomationTemplateItem `json:"templates" toon:"templates"`
 }
 
+// BindWorkItemPostMortemRequest is generated from the Flashduty OpenAPI schema.
+type BindWorkItemPostMortemRequest struct {
+	// Client-generated idempotency key (max 128 characters; letters, digits, `_`, `-`, `.`, `:` only).
+	IdempotencyKey string `json:"idempotency_key" toon:"idempotency_key"`
+	// Incident ID (MongoDB ObjectID) whose converted-but-unbound follow-ups are bound.
+	IncidentID string `json:"incident_id" toon:"incident_id"`
+	// Post-mortem ID (32-character hex string) to bind the follow-ups to.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+}
+
 // CalEventIDRequest is generated from the Flashduty OpenAPI schema.
 type CalEventIDRequest struct {
 	// Calendar ID.
@@ -1679,12 +1696,26 @@ type ChannelShort struct {
 
 // CommentIncidentRequest is generated from the Flashduty OpenAPI schema.
 type CommentIncidentRequest struct {
-	// Comment body.
+	// Comment body. Leading and trailing whitespace is trimmed; the comment must be non-empty after trimming and at most 1024 characters (counted after @mention normalization).
 	Comment string `json:"comment,omitempty" toon:"comment,omitempty"`
+	// Optional ID of an account-level comment type to attach to the comment (MongoDB ObjectID). An invalid or all-zero ID is rejected with 400.
+	CommentTypeID *string `json:"comment_type_id,omitempty" toon:"comment_type_id,omitempty"`
 	// Incident IDs to comment on. At most 100 per call.
 	IncidentIDs []string `json:"incident_ids" toon:"incident_ids"`
 	// When true, do not trigger webhook reply actions for this comment.
 	MuteReply bool `json:"mute_reply,omitempty" toon:"mute_reply,omitempty"`
+}
+
+// CompleteWorkItemRequest is generated from the Flashduty OpenAPI schema.
+type CompleteWorkItemRequest struct {
+	// Client-generated idempotency key (max 128 characters; letters, digits, `_`, `-`, `.`, `:` only).
+	IdempotencyKey string `json:"idempotency_key" toon:"idempotency_key"`
+	// Client-defined status to set (max 64 characters). There is no fixed state machine.
+	TargetStatus string `json:"target_status" toon:"target_status"`
+	// Current item version for optimistic locking. Must match the stored version.
+	Version int64 `json:"version" toon:"version"`
+	// Work item ID (opaque string, max 128 characters).
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
 }
 
 // ContextResolvedItem is generated from the Flashduty OpenAPI schema.
@@ -1699,6 +1730,18 @@ type ContextResolvedItem struct {
 	TeamPackID string `json:"team_pack_id" toon:"team_pack_id"`
 	// Per-pack resolved version map.
 	Versions map[string]int64 `json:"versions" toon:"versions"`
+}
+
+// ConvertWorkItemRequest is generated from the Flashduty OpenAPI schema.
+type ConvertWorkItemRequest struct {
+	// Client-generated idempotency key (max 128 characters; letters, digits, `_`, `-`, `.`, `:` only).
+	IdempotencyKey string `json:"idempotency_key" toon:"idempotency_key"`
+	// Optional client-defined status to set on the converted follow-up (max 64 characters).
+	TargetStatus *string `json:"target_status,omitempty" toon:"target_status,omitempty"`
+	// Current item version for optimistic locking. Must match the stored version.
+	Version int64 `json:"version" toon:"version"`
+	// Work item ID (opaque string, max 128 characters).
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
 }
 
 // CreateChannelRequest is generated from the Flashduty OpenAPI schema.
@@ -1793,6 +1836,21 @@ type CreateFieldResponse struct {
 	FieldID string `json:"field_id" toon:"field_id"`
 	// Echo of the submitted `field_name`.
 	FieldName string `json:"field_name" toon:"field_name"`
+}
+
+// CreateIncidentCommentTypeRequest is generated from the Flashduty OpenAPI schema.
+type CreateIncidentCommentTypeRequest struct {
+	// Label color as a hex value in #RRGGBB format. Normalized to uppercase.
+	Color string `json:"color" toon:"color"`
+	// Display name. Trimmed before storing; must be unique within the account (case-insensitive). At most 40 characters.
+	Name string `json:"name" toon:"name"`
+}
+
+// CreateIncidentCommentTypeResponse is generated from the Flashduty OpenAPI schema.
+type CreateIncidentCommentTypeResponse struct {
+	// ID of the created comment type (24-character hex ObjectID).
+	CommentTypeID string                  `json:"comment_type_id" toon:"comment_type_id"`
+	Item          IncidentCommentTypeItem `json:"item" toon:"item"`
 }
 
 // CreateIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -1956,6 +2014,28 @@ type CreateWarRoomRequest struct {
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Additional member IDs to add to the war room.
 	MemberIDs []int64 `json:"member_ids,omitempty" toon:"member_ids,omitempty"`
+}
+
+// CreateWorkItemRequest is generated from the Flashduty OpenAPI schema.
+type CreateWorkItemRequest struct {
+	// Initial assignee member IDs. Assignees must be active members who can already read the anchor; assignment never grants access.
+	AssigneeIDs []int64 `json:"assignee_ids,omitempty" toon:"assignee_ids,omitempty"`
+	// Optional longer description (max 65,535 characters).
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Client-generated idempotency key (max 128 characters; letters, digits, `_`, `-`, `.`, `:` only).
+	IdempotencyKey string `json:"idempotency_key" toon:"idempotency_key"`
+	// Incident ID (MongoDB ObjectID) the item is anchored to.
+	IncidentID string `json:"incident_id" toon:"incident_id"`
+	// `action` anchors to an active incident and must not set `post_mortem_id`; `follow_up` requires `post_mortem_id`.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// Post-mortem ID (32-character hex string). Required for `follow_up`, forbidden for `action`. The post-mortem must be linked to `incident_id`.
+	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
+	// Optional client-defined priority (max 64 characters).
+	Priority string `json:"priority,omitempty" toon:"priority,omitempty"`
+	// Optional client-defined initial status (max 64 characters).
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	// Item title (max 512 characters).
+	Title string `json:"title" toon:"title"`
 }
 
 // CustomFieldValues is generated from the Flashduty OpenAPI schema.
@@ -2196,6 +2276,12 @@ type DeleteFieldRequest struct {
 	FieldID string `json:"field_id" toon:"field_id"`
 }
 
+// DeleteIncidentCommentTypeRequest is generated from the Flashduty OpenAPI schema.
+type DeleteIncidentCommentTypeRequest struct {
+	// ID of the comment type to delete (24-character hex ObjectID).
+	CommentTypeID string `json:"comment_type_id" toon:"comment_type_id"`
+}
+
 // DeletePostMortemRequest is generated from the Flashduty OpenAPI schema.
 type DeletePostMortemRequest struct {
 	// Post-mortem ID.
@@ -2264,6 +2350,14 @@ type DeleteWarRoomRequest struct {
 	IncidentID string `json:"incident_id" toon:"incident_id"`
 	// IM integration ID.
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+}
+
+// DeleteWorkItemRequest is generated from the Flashduty OpenAPI schema.
+type DeleteWorkItemRequest struct {
+	// Current item version for optimistic locking. Must match the stored version.
+	Version int64 `json:"version" toon:"version"`
+	// Work item ID (opaque string, max 128 characters).
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
 }
 
 // DiagnoseEvidenceWindow is generated from the Flashduty OpenAPI schema.
@@ -2823,7 +2917,10 @@ type FeedDetailIncidentAutoRefreshCard struct{}
 // FeedDetailIncidentComment is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentComment struct {
 	// Comment body.
-	Comment string `json:"comment" toon:"comment"`
+	Comment     string                     `json:"comment" toon:"comment"`
+	CommentType IncidentCommentTypeDisplay `json:"comment_type" toon:"comment_type"`
+	// ObjectID of the account-level comment type attached to the comment.
+	CommentTypeID string `json:"comment_type_id" toon:"comment_type_id"`
 	// Whether replies to this comment are muted.
 	MuteReply bool `json:"mute_reply" toon:"mute_reply"`
 }
@@ -2997,6 +3094,118 @@ type FeedDetailIncidentWarRoomDelete struct {
 	IntegrationName string `json:"integration_name" toon:"integration_name"`
 	// Chat integration plugin type.
 	PluginType string `json:"plugin_type" toon:"plugin_type"`
+}
+
+// FeedDetailWorkItemAssigneesChanged is generated from the Flashduty OpenAPI schema.
+type FeedDetailWorkItemAssigneesChanged struct {
+	// Member IDs added as assignees.
+	AddedAssigneeIDs []int64 `json:"added_assignee_ids" toon:"added_assignee_ids"`
+	// Assignee member IDs after the change.
+	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
+	// Work item type.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// Member IDs removed from assignees.
+	RemovedAssigneeIDs []int64 `json:"removed_assignee_ids" toon:"removed_assignee_ids"`
+	// Work item title.
+	Title string `json:"title" toon:"title"`
+	// Work item ID.
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// FeedDetailWorkItemBound is generated from the Flashduty OpenAPI schema.
+type FeedDetailWorkItemBound struct {
+	// Work item type.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// ID of the post-mortem the work item is bound to.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Work item title.
+	Title string `json:"title" toon:"title"`
+	// Work item ID.
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// FeedDetailWorkItemCompleted is generated from the Flashduty OpenAPI schema.
+type FeedDetailWorkItemCompleted struct {
+	// Status label before completion.
+	FromStatus string `json:"from_status" toon:"from_status"`
+	// Work item type.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// ID of the post-mortem the work item is bound to.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Work item title.
+	Title string `json:"title" toon:"title"`
+	// Status label after completion.
+	ToStatus string `json:"to_status" toon:"to_status"`
+	// Work item ID.
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// FeedDetailWorkItemConverted is generated from the Flashduty OpenAPI schema.
+type FeedDetailWorkItemConverted struct {
+	// Work item type before the conversion.
+	FromType string `json:"from_type" toon:"from_type"`
+	// ID of the post-mortem the work item is bound to.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Work item status label after the conversion.
+	Status string `json:"status" toon:"status"`
+	// Work item title.
+	Title string `json:"title" toon:"title"`
+	// Work item type after the conversion.
+	ToType string `json:"to_type" toon:"to_type"`
+	// Work item ID.
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// FeedDetailWorkItemCreated is generated from the Flashduty OpenAPI schema.
+type FeedDetailWorkItemCreated struct {
+	// Assignee member IDs.
+	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
+	// Work item type.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// ID of the post-mortem the work item is bound to.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Work item status label (e.g. `open`, `done`).
+	Status string `json:"status" toon:"status"`
+	// Work item title.
+	Title string `json:"title" toon:"title"`
+	// Work item ID.
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// FeedDetailWorkItemDeleted is generated from the Flashduty OpenAPI schema.
+type FeedDetailWorkItemDeleted struct {
+	// Work item type.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// ID of the post-mortem the work item is bound to.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Work item title.
+	Title string `json:"title" toon:"title"`
+	// Work item ID.
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// FeedDetailWorkItemUpdated is generated from the Flashduty OpenAPI schema.
+type FeedDetailWorkItemUpdated struct {
+	// Description before the update.
+	FromDescription string `json:"from_description" toon:"from_description"`
+	// Priority label before the update.
+	FromPriority string `json:"from_priority" toon:"from_priority"`
+	// Status label before the update.
+	FromStatus string `json:"from_status" toon:"from_status"`
+	// Title before the update.
+	FromTitle string `json:"from_title" toon:"from_title"`
+	// Work item type.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// Work item title.
+	Title string `json:"title" toon:"title"`
+	// Description after the update.
+	ToDescription string `json:"to_description" toon:"to_description"`
+	// Priority label after the update.
+	ToPriority string `json:"to_priority" toon:"to_priority"`
+	// Status label after the update.
+	ToStatus string `json:"to_status" toon:"to_status"`
+	// Work item ID.
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
 }
 
 // FeedItem is generated from the Flashduty OpenAPI schema.
@@ -3221,6 +3430,38 @@ type IncidentActionImage struct {
 	Href string `json:"href,omitempty" toon:"href,omitempty"`
 	// Image source. Accepts an `img_` upload token, an `http(s)` URL, or an object-storage key beginning with `/`.
 	Src string `json:"src" toon:"src"`
+}
+
+// IncidentCommentTypeDisplay is generated from the Flashduty OpenAPI schema.
+type IncidentCommentTypeDisplay struct {
+	// Badge color in #RRGGBB format.
+	Color string `json:"color" toon:"color"`
+	// Comment type ID (MongoDB ObjectID).
+	ID string `json:"id" toon:"id"`
+	// Display name of the comment type.
+	Name string `json:"name" toon:"name"`
+}
+
+// IncidentCommentTypeItem is generated from the Flashduty OpenAPI schema.
+type IncidentCommentTypeItem struct {
+	// Account ID that owns the comment type.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Label color as a hex value in #RRGGBB format (stored uppercase).
+	Color string `json:"color" toon:"color"`
+	// Comment type ID (24-character hex ObjectID).
+	CommentTypeID string `json:"comment_type_id" toon:"comment_type_id"`
+	// Creation time as a Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// ID of the user who created the comment type.
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
+	// Display name of the comment type. Unique within the account (case-insensitive, trimmed).
+	Name string `json:"name" toon:"name"`
+	// 1-based display position of the comment type.
+	Position int64 `json:"position" toon:"position"`
+	// Last update time as a Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// ID of the user who last updated the comment type.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // IncidentFeedItem is generated from the Flashduty OpenAPI schema.
@@ -3845,6 +4086,15 @@ type ListIncidentAlertsResponse struct {
 	Total int64 `json:"total" toon:"total"`
 }
 
+// ListIncidentCommentTypesRequest is generated from the Flashduty OpenAPI schema.
+type ListIncidentCommentTypesRequest struct{}
+
+// ListIncidentCommentTypesResponse is generated from the Flashduty OpenAPI schema.
+type ListIncidentCommentTypesResponse struct {
+	// All comment types of the account, ordered by position.
+	Items []IncidentCommentTypeItem `json:"items" toon:"items"`
+}
+
 // ListIncidentFeedRequest is generated from the Flashduty OpenAPI schema.
 type ListIncidentFeedRequest struct {
 	ListOptions
@@ -4058,6 +4308,22 @@ type ListWebhookHistoryResponse struct {
 	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total number of matching records.
 	Total int64 `json:"total" toon:"total"`
+}
+
+// ListWorkItemRequest is generated from the Flashduty OpenAPI schema.
+type ListWorkItemRequest struct {
+	// Restrict results to items assigned to this member ID. Listing by assignee alone requires being that assignee or an account admin.
+	AssigneeID int64 `json:"assignee_id,omitempty" toon:"assignee_id,omitempty"`
+	// Pagination cursor from a previous response's `next_cursor`.
+	Cursor string `json:"cursor,omitempty" toon:"cursor,omitempty"`
+	// Incident ID (MongoDB ObjectID). Also returns follow-ups anchored on the incident's post-mortem.
+	IncidentID string `json:"incident_id,omitempty" toon:"incident_id,omitempty"`
+	// Restrict results to one item type.
+	ItemType string `json:"item_type,omitempty" toon:"item_type,omitempty"`
+	// Page size, at most 200. Defaults to 50.
+	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
+	// Post-mortem ID (32-character hex string). Returns follow-ups bound to this post-mortem.
+	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
 }
 
 // LogPatternDiagnoseSummary is generated from the Flashduty OpenAPI schema.
@@ -5333,6 +5599,12 @@ type ReopenIncidentRequest struct {
 	Reason string `json:"reason,omitempty" toon:"reason,omitempty"`
 }
 
+// ReorderIncidentCommentTypesRequest is generated from the Flashduty OpenAPI schema.
+type ReorderIncidentCommentTypesRequest struct {
+	// IDs of every comment type of the account in the desired order (24-character hex ObjectIDs).
+	CommentTypeIDs []string `json:"comment_type_ids" toon:"comment_type_ids"`
+}
+
 // ResetIncidentFieldRequest is generated from the Flashduty OpenAPI schema.
 type ResetIncidentFieldRequest struct {
 	// Custom field name; must match a field defined on the account.
@@ -5393,6 +5665,16 @@ type ResetPostMortemTitleRequest struct {
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
 	// New report title.
 	Title string `json:"title" toon:"title"`
+}
+
+// ResetWorkItemAssigneesRequest is generated from the Flashduty OpenAPI schema.
+type ResetWorkItemAssigneesRequest struct {
+	// New assignee member IDs, replacing the current set. An empty array clears all assignees.
+	AssigneeIDs []int64 `json:"assignee_ids,omitempty" toon:"assignee_ids,omitempty"`
+	// Current item version for optimistic locking. Must match the stored version.
+	Version int64 `json:"version" toon:"version"`
+	// Work item ID (opaque string, max 128 characters).
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
 }
 
 // ResolveIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -7900,6 +8182,16 @@ type UpdateFieldRequest struct {
 	Options []string `json:"options,omitempty" toon:"options,omitempty"`
 }
 
+// UpdateIncidentCommentTypeRequest is generated from the Flashduty OpenAPI schema.
+type UpdateIncidentCommentTypeRequest struct {
+	// New label color as a hex value in #RRGGBB format. Normalized to uppercase.
+	Color string `json:"color,omitempty" toon:"color,omitempty"`
+	// ID of the comment type to update (24-character hex ObjectID).
+	CommentTypeID string `json:"comment_type_id" toon:"comment_type_id"`
+	// New display name. Trimmed before storing; must be unique within the account (case-insensitive). At most 40 characters.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+}
+
 // UpdateIncidentFieldsRequest is generated from the Flashduty OpenAPI schema.
 type UpdateIncidentFieldsRequest struct {
 	// New description.
@@ -8023,6 +8315,22 @@ type UpdateStatusPageRequest struct {
 	TemplatePreference string `json:"template_preference,omitempty" toon:"template_preference,omitempty"`
 	// URL-safe slug, unique per account and page type. Omit to keep the existing value.
 	URLName string `json:"url_name,omitempty" toon:"url_name,omitempty"`
+}
+
+// UpdateWorkItemRequest is generated from the Flashduty OpenAPI schema.
+type UpdateWorkItemRequest struct {
+	// New description (max 65,535 characters).
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// New client-defined priority (max 64 characters).
+	Priority *string `json:"priority,omitempty" toon:"priority,omitempty"`
+	// New client-defined status (max 64 characters).
+	Status *string `json:"status,omitempty" toon:"status,omitempty"`
+	// New title (max 512 characters).
+	Title *string `json:"title,omitempty" toon:"title,omitempty"`
+	// Current item version for optimistic locking. Must match the stored version.
+	Version int64 `json:"version" toon:"version"`
+	// Work item ID (opaque string, max 128 characters).
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
 }
 
 // UpsertPostMortemTemplateRequest is generated from the Flashduty OpenAPI schema.
@@ -8282,6 +8590,78 @@ type WebhookHistoryItem struct {
 	StatusCode int64 `json:"status_code" toon:"status_code"`
 	// Source object kind. `incident` or `alert`.
 	WebhookType string `json:"webhook_type" toon:"webhook_type"`
+}
+
+// WorkItemCreateResult is generated from the Flashduty OpenAPI schema.
+type WorkItemCreateResult struct {
+	// Assignee member IDs that were newly added (and notified).
+	AddedAssigneeIDs []int64 `json:"added_assignee_ids" toon:"added_assignee_ids"`
+	// True when the call replayed an earlier request with the same idempotency key and no new item was created.
+	IdempotentReplay bool         `json:"idempotent_replay" toon:"idempotent_replay"`
+	Item             WorkItemItem `json:"item" toon:"item"`
+}
+
+// WorkItemItem is generated from the Flashduty OpenAPI schema.
+type WorkItemItem struct {
+	// Member IDs of the current assignees. Never null; an empty array means unassigned.
+	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
+	// Conversion time as a Unix timestamp in seconds. Present only after conversion.
+	ConvertedAtSeconds Timestamp `json:"converted_at_seconds" toon:"converted_at_seconds"`
+	// Member ID of the operator who converted the action into a follow-up. Present only after conversion.
+	ConvertedBy int64 `json:"converted_by" toon:"converted_by"`
+	// Creation time as a Unix timestamp in seconds.
+	CreatedAtSeconds Timestamp `json:"created_at_seconds" toon:"created_at_seconds"`
+	// Member ID of the creator.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Optional longer description (max 65,535 characters).
+	Description string `json:"description" toon:"description"`
+	// Incident ID (MongoDB ObjectID) the item is anchored to.
+	IncidentID string `json:"incident_id" toon:"incident_id"`
+	// `action` for an item anchored to an active incident; `follow_up` for a post-mortem follow-up.
+	ItemType string `json:"item_type" toon:"item_type"`
+	// Original identifier of the legacy follow-up this item was migrated from. Present only when `source_kind` is `legacy_follow_up`.
+	LegacySourceID string `json:"legacy_source_id" toon:"legacy_source_id"`
+	// Post-mortem ID (32-character hex string). Present on follow-up items once bound to a post-mortem.
+	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
+	// Optional client-defined priority (max 64 characters).
+	Priority string `json:"priority" toon:"priority"`
+	// `native` for items created through this API; `legacy_follow_up` for items migrated from legacy post-mortem follow-ups.
+	SourceKind string `json:"source_kind" toon:"source_kind"`
+	// Client-defined status (max 64 characters). There is no fixed state machine.
+	Status string `json:"status" toon:"status"`
+	// Item title (max 512 characters).
+	Title string `json:"title" toon:"title"`
+	// Last update time as a Unix timestamp in seconds.
+	UpdatedAtSeconds Timestamp `json:"updated_at_seconds" toon:"updated_at_seconds"`
+	// Member ID of the last updater.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Optimistic-locking version, incremented on every mutation.
+	Version int64 `json:"version" toon:"version"`
+	// Work item ID (opaque string, max 128 characters).
+	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// WorkItemListResult is generated from the Flashduty OpenAPI schema.
+type WorkItemListResult struct {
+	// True when more results are available.
+	HasMore bool `json:"has_more" toon:"has_more"`
+	// True when the call replayed an earlier request with the same idempotency key.
+	IdempotentReplay bool `json:"idempotent_replay" toon:"idempotent_replay"`
+	// Work items for the current page.
+	Items []WorkItemItem `json:"items" toon:"items"`
+	// Cursor for the next page. Pass it as `cursor`; absent when there are no more results.
+	NextCursor string `json:"next_cursor" toon:"next_cursor"`
+}
+
+// WorkItemMutationResult is generated from the Flashduty OpenAPI schema.
+type WorkItemMutationResult struct {
+	// Assignee member IDs that were newly added (and notified).
+	AddedAssigneeIDs []int64 `json:"added_assignee_ids" toon:"added_assignee_ids"`
+	// True when the call replayed an earlier request with the same idempotency key.
+	IdempotentReplay bool         `json:"idempotent_replay" toon:"idempotent_replay"`
+	Item             WorkItemItem `json:"item" toon:"item"`
+	// Assignee member IDs that were removed (never notified).
+	RemovedAssigneeIDs []int64 `json:"removed_assignee_ids" toon:"removed_assignee_ids"`
 }
 
 // AccountInfoRestrictions is generated from the Flashduty OpenAPI schema.

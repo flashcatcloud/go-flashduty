@@ -104,6 +104,61 @@ func (s *IncidentsService) Comment(ctx context.Context, req *CommentIncidentRequ
 	return s.client.do(ctx, "/incident/comment", req, nil)
 }
 
+// Create a comment type.
+//
+// Create a comment type that can be attached to incident comments.
+//
+// API: POST /incident/comment-type/create (incidentCommentTypeCreate).
+func (s *IncidentsService) CommentTypeCreate(ctx context.Context, req *CreateIncidentCommentTypeRequest) (*CreateIncidentCommentTypeResponse, *Response, error) {
+	out := new(CreateIncidentCommentTypeResponse)
+	resp, err := s.client.do(ctx, "/incident/comment-type/create", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Delete a comment type.
+//
+// Delete a comment type. Comments that used it keep their text but lose the type label.
+//
+// API: POST /incident/comment-type/delete (incidentCommentTypeDelete).
+func (s *IncidentsService) CommentTypeDelete(ctx context.Context, req *DeleteIncidentCommentTypeRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/comment-type/delete", req, nil)
+}
+
+// List comment types.
+//
+// Retrieve all comment types of the account, ordered by their display position.
+//
+// API: POST /incident/comment-type/list (incidentCommentTypeList).
+func (s *IncidentsService) CommentTypeList(ctx context.Context) (*ListIncidentCommentTypesResponse, *Response, error) {
+	out := new(ListIncidentCommentTypesResponse)
+	resp, err := s.client.do(ctx, "/incident/comment-type/list", nil, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Reorder comment types.
+//
+// Set the display order of all comment types by passing every type ID in the desired order.
+//
+// API: POST /incident/comment-type/reorder (incidentCommentTypeReorder).
+func (s *IncidentsService) CommentTypeReorder(ctx context.Context, req *ReorderIncidentCommentTypesRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/comment-type/reorder", req, nil)
+}
+
+// Update a comment type.
+//
+// Update the name and/or color of an existing account comment type.
+//
+// API: POST /incident/comment-type/update (incidentCommentTypeUpdate).
+func (s *IncidentsService) CommentTypeUpdate(ctx context.Context, req *UpdateIncidentCommentTypeRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/comment-type/update", req, nil)
+}
+
 // Create incident.
 //
 // Manually create a new incident and assign responders.
@@ -383,6 +438,113 @@ func (s *IncidentsService) WarRoomDetail(ctx context.Context, req *GetWarRoomDet
 func (s *IncidentsService) WarRoomList(ctx context.Context, req *ListWarRoomsRequest) (*ListWarRoomsResponse, *Response, error) {
 	out := new(ListWarRoomsResponse)
 	resp, err := s.client.do(ctx, "/incident/war-room/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Bind work items to a post-mortem.
+//
+// Bulk-bind an incident's converted-but-unbound follow-ups to a post-mortem.
+//
+// API: POST /incident/work-item/post-mortem/bind (incidentWorkItemBindPostMortem).
+func (s *IncidentsService) WorkItemBindPostMortem(ctx context.Context, req *BindWorkItemPostMortemRequest) (*WorkItemListResult, *Response, error) {
+	out := new(WorkItemListResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/post-mortem/bind", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Complete a work item.
+//
+// Mark a work item as completed by setting a client-defined target status.
+//
+// API: POST /incident/work-item/complete (incidentWorkItemComplete).
+func (s *IncidentsService) WorkItemComplete(ctx context.Context, req *CompleteWorkItemRequest) (*WorkItemMutationResult, *Response, error) {
+	out := new(WorkItemMutationResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/complete", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Convert a work item to a follow-up.
+//
+// Convert an incident action item into a post-mortem follow-up in place.
+//
+// API: POST /incident/work-item/convert (incidentWorkItemConvert).
+func (s *IncidentsService) WorkItemConvert(ctx context.Context, req *ConvertWorkItemRequest) (*WorkItemMutationResult, *Response, error) {
+	out := new(WorkItemMutationResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/convert", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Create a work item.
+//
+// Create an action on an active incident or a follow-up on one of its post-mortems.
+//
+// API: POST /incident/work-item/create (incidentWorkItemCreate).
+func (s *IncidentsService) WorkItemCreate(ctx context.Context, req *CreateWorkItemRequest) (*WorkItemCreateResult, *Response, error) {
+	out := new(WorkItemCreateResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/create", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Delete a work item.
+//
+// Soft-delete a work item.
+//
+// API: POST /incident/work-item/delete (incidentWorkItemDelete).
+func (s *IncidentsService) WorkItemDelete(ctx context.Context, req *DeleteWorkItemRequest) (*Response, error) {
+	return s.client.do(ctx, "/incident/work-item/delete", req, nil)
+}
+
+// List work items.
+//
+// List incident work items (actions and post-mortem follow-ups) with cursor pagination.
+//
+// API: POST /incident/work-item/list (incidentWorkItemList).
+func (s *IncidentsService) WorkItemList(ctx context.Context, req *ListWorkItemRequest) (*WorkItemListResult, *Response, error) {
+	out := new(WorkItemListResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Reset work item assignees.
+//
+// Replace a work item's entire assignee set.
+//
+// API: POST /incident/work-item/assignees/reset (incidentWorkItemResetAssignees).
+func (s *IncidentsService) WorkItemResetAssignees(ctx context.Context, req *ResetWorkItemAssigneesRequest) (*WorkItemMutationResult, *Response, error) {
+	out := new(WorkItemMutationResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/assignees/reset", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Update a work item.
+//
+// Partially update a work item's title, description, status, or priority.
+//
+// API: POST /incident/work-item/update (incidentWorkItemUpdate).
+func (s *IncidentsService) WorkItemUpdate(ctx context.Context, req *UpdateWorkItemRequest) (*WorkItemMutationResult, *Response, error) {
+	out := new(WorkItemMutationResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/update", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
