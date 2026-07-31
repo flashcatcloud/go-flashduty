@@ -834,10 +834,10 @@
         "summary": "获取故障时间线",
         "description": "获取指定故障的时间线动态，包括状态变更、评论和系统事件。",
         "tags": [
-          "On-call/故障管理"
+          "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- 对于 `i_comm` 条目，`detail.comment_type` 在读取时根据当前账户级评论类型定义解析，因此始终反映类型的最新名称和颜色。",
           "href": "/zh/api-reference/on-call/incidents/incident-feed",
           "metadata": {
             "sidebarTitle": "获取故障时间线"
@@ -869,37 +869,56 @@
                     "has_next_page": true,
                     "items": [
                       {
-                        "ref_id": "69da451ef77b1b51f40e83ee",
-                        "type": "i_new",
+                        "ref_id": "6a5f1e28807515413b384bce",
+                        "type": "i_wi_created",
                         "detail": {
-                          "severity": "Critical",
-                          "title": "CPU usage high - web-server-01"
+                          "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                          "item_type": "follow_up",
+                          "title": "Follow-up: schedule database failover drill",
+                          "status": "open",
+                          "assignee_ids": [
+                            3790925372131,
+                            4756301322131
+                          ],
+                          "post_mortem_id": "51d65cd9525c369379ba471b5512df63"
                         },
                         "account_id": 2451002751131,
-                        "creator_id": 0,
-                        "created_at": 1775912222661,
-                        "updated_at": 1775912222661
+                        "creator_id": 5329873302131,
+                        "created_at": 1785495329402,
+                        "updated_at": 1785495329402
                       },
                       {
-                        "ref_id": "69da451ef77b1b51f40e83ee",
-                        "type": "i_notify",
+                        "ref_id": "6a5f1e28807515413b384bce",
+                        "type": "i_comm",
                         "detail": {
-                          "rid": "5e9ccfabcd154b41a0005fd0f52b674b",
-                          "msg_id": "naFudJYCawBWsChdV6ErPH",
-                          "fire_type": "fire",
-                          "escalate_rule_id": "000000000000000000000000",
-                          "layer_idx": 0,
-                          "by": "email",
-                          "persons": [
-                            {
-                              "person_id": 2476444212131
-                            }
-                          ]
+                          "comment": "Root cause identified: connection pool exhaustion on the primary database.",
+                          "comment_type_id": "6a5895d672a064bc2d3ddfc2",
+                          "comment_type": {
+                            "id": "6a5895d672a064bc2d3ddfc2",
+                            "name": "Key finding",
+                            "color": "#30A46C"
+                          }
                         },
                         "account_id": 2451002751131,
-                        "creator_id": 0,
-                        "created_at": 1775972130174,
-                        "updated_at": 1775972130174
+                        "creator_id": 3790925372131,
+                        "created_at": 1785496333926,
+                        "updated_at": 1785496333926
+                      },
+                      {
+                        "ref_id": "6a5f1e28807515413b384bce",
+                        "type": "i_wi_completed",
+                        "detail": {
+                          "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                          "item_type": "follow_up",
+                          "title": "Follow-up: schedule database failover drill",
+                          "from_status": "open",
+                          "to_status": "done",
+                          "post_mortem_id": "51d65cd9525c369379ba471b5512df63"
+                        },
+                        "account_id": 2451002751131,
+                        "creator_id": 3790925372131,
+                        "created_at": 1785496384806,
+                        "updated_at": 1785496384806
                       }
                     ]
                   }
@@ -1850,10 +1869,10 @@
         "summary": "评论故障",
         "description": "在故障时间线上添加文字评论。",
         "tags": [
-          "On-call/故障管理"
+          "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 要提及成员，在 `comment` 中嵌入形如 `[@显示名](flashduty://ref/member/<member_id>)` 的 markdown 链接。被提及的成员会收到专门的个人通知，不受 `mute_reply` 影响。\n- 不带链接语法的纯 `@名字` 文本不会形成提及。\n- 服务端会将每个提及的显示名改写为成员的规范名称。",
           "href": "/zh/api-reference/on-call/incidents/incident-comment",
           "metadata": {
             "sidebarTitle": "评论故障"
@@ -1910,7 +1929,8 @@
                 "incident_ids": [
                   "69da451ef77b1b51f40e83ee"
                 ],
-                "comment": "Identified the root cause. Rolling back the deployment now."
+                "comment": "Root cause identified. [@Jane Doe](flashduty://ref/member/2476444212131) please verify the fix.",
+                "comment_type_id": "6a5895d672a064bc2d3ddfc2"
               }
             }
           }
@@ -26478,6 +26498,1171 @@
           }
         }
       }
+    },
+    "/incident/comment-type/list": {
+      "post": {
+        "operationId": "incidentCommentTypeList",
+        "summary": "查询评论类型列表",
+        "description": "获取账户下全部评论类型，按展示位置排序。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- 一次调用返回完整列表，不分页。\n- 每个账户最多可创建 10 个评论类型。",
+          "href": "/zh/api-reference/on-call/incidents/incident-comment-type-list",
+          "metadata": {
+            "sidebarTitle": "查询评论类型列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ListIncidentCommentTypesResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "comment_type_id": "6a5895d672a064bc2d3ddfc2",
+                        "account_id": 2451002751131,
+                        "name": "Key finding",
+                        "color": "#30A46C",
+                        "position": 1,
+                        "creator_id": 5068740052131,
+                        "updated_by": 5068740052131,
+                        "created_at": 1784190422,
+                        "updated_at": 1784207748
+                      },
+                      {
+                        "comment_type_id": "6a5895b572a064bc2d3ddfc0",
+                        "account_id": 2451002751131,
+                        "name": "Hypothesis",
+                        "color": "#998000",
+                        "position": 2,
+                        "creator_id": 5068740052131,
+                        "updated_by": 3790925372131,
+                        "created_at": 1784190389,
+                        "updated_at": 1785141535
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListIncidentCommentTypesRequest"
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/incident/comment-type/create": {
+      "post": {
+        "operationId": "incidentCommentTypeCreate",
+        "summary": "创建评论类型",
+        "description": "创建可附加到故障评论的评论类型。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 新类型追加到展示顺序的末尾。\n- 名称在账户内必须唯一（不区分大小写，忽略首尾空白）。\n- 每个账户最多可创建 10 个评论类型。",
+          "href": "/zh/api-reference/on-call/incidents/incident-comment-type-create",
+          "metadata": {
+            "sidebarTitle": "创建评论类型"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CreateIncidentCommentTypeResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "comment_type_id": "6a5895d672a064bc2d3ddfc2",
+                    "item": {
+                      "comment_type_id": "6a5895d672a064bc2d3ddfc2",
+                      "account_id": 2451002751131,
+                      "name": "Key finding",
+                      "color": "#30A46C",
+                      "position": 1,
+                      "creator_id": 5068740052131,
+                      "updated_by": 5068740052131,
+                      "created_at": 1784190422,
+                      "updated_at": 1784207748
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIncidentCommentTypeRequest"
+              },
+              "example": {
+                "name": "Key finding",
+                "color": "#30A46C"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/comment-type/update": {
+      "post": {
+        "operationId": "incidentCommentTypeUpdate",
+        "summary": "更新评论类型",
+        "description": "更新已有账户评论类型的名称和/或颜色。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 部分更新 —— 仅修改提供的字段，但 `name` 和 `color` 至少提供一个。\n- 名称在账户内必须保持唯一（不区分大小写，忽略首尾空白）。",
+          "href": "/zh/api-reference/on-call/incidents/incident-comment-type-update",
+          "metadata": {
+            "sidebarTitle": "更新评论类型"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIncidentCommentTypeRequest"
+              },
+              "example": {
+                "comment_type_id": "6a5895b572a064bc2d3ddfc0",
+                "color": "#B7791F"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/comment-type/delete": {
+      "post": {
+        "operationId": "incidentCommentTypeDelete",
+        "summary": "删除评论类型",
+        "description": "删除评论类型。已使用该类型的评论保留文本内容，但不再显示类型标签。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 硬删除 —— 评论类型被永久移除，无法恢复。\n- 已引用该类型的评论会失去类型标签，其他内容不受影响。",
+          "href": "/zh/api-reference/on-call/incidents/incident-comment-type-delete",
+          "metadata": {
+            "sidebarTitle": "删除评论类型"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteIncidentCommentTypeRequest"
+              },
+              "example": {
+                "comment_type_id": "6a5895b572a064bc2d3ddfc0"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/comment-type/reorder": {
+      "post": {
+        "operationId": "incidentCommentTypeReorder",
+        "summary": "调整评论类型顺序",
+        "description": "传入账户全部评论类型 ID 的期望顺序，设置评论类型的展示顺序。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 全量排序 —— `comment_type_ids` 必须包含账户的全部评论类型，每个恰好出现一次，按期望顺序排列。\n- 展示位置从 1 开始重新分配：数组中的第一个 ID 即为位置 1。",
+          "href": "/zh/api-reference/on-call/incidents/incident-comment-type-reorder",
+          "metadata": {
+            "sidebarTitle": "调整评论类型顺序"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderIncidentCommentTypesRequest"
+              },
+              "example": {
+                "comment_type_ids": [
+                  "6a5895b572a064bc2d3ddfc0",
+                  "6a5895d672a064bc2d3ddfc2"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/list": {
+      "post": {
+        "operationId": "incidentWorkItemList",
+        "summary": "查询跟进事项列表",
+        "description": "查询故障跟进事项（行动项与复盘后续行动），使用游标分页。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- `incident_id`、`post_mortem_id`、`assignee_id` 至少提供一个。\n- 按 `updated_at_seconds` 倒序的游标分页 —— 将上一次响应的 `next_cursor` 作为 `cursor` 传入，直到 `has_more` 为 false。\n- 按 `incident_id` 查询时，同时包含锚定在该故障复盘上的后续行动。\n- 仅按 `assignee_id` 查询时，须为本人或账户管理员。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-list",
+          "metadata": {
+            "sidebarTitle": "查询跟进事项列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WorkItemListResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                        "item_type": "follow_up",
+                        "incident_id": "6a5f1e28807515413b384bce",
+                        "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                        "title": "Follow-ups assigned to Bowen and Weili",
+                        "status": "done",
+                        "source_kind": "native",
+                        "version": 2,
+                        "assignee_ids": [
+                          3790925372131,
+                          4756301322131,
+                          5068740052131
+                        ],
+                        "created_by": 5329873302131,
+                        "updated_by": 3790925372131,
+                        "created_at_seconds": 1785495329,
+                        "updated_at_seconds": 1785496384
+                      },
+                      {
+                        "work_item_id": "wi_dMRYTeZHivE5vf87PQEeFX",
+                        "item_type": "follow_up",
+                        "incident_id": "6a5f1e28807515413b384bce",
+                        "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                        "title": "Check whether this to-do notifies Bowen",
+                        "status": "open",
+                        "source_kind": "native",
+                        "version": 1,
+                        "assignee_ids": [
+                          5068740052131
+                        ],
+                        "created_by": 3790925372131,
+                        "updated_by": 3790925372131,
+                        "created_at_seconds": 1785495164,
+                        "updated_at_seconds": 1785495164
+                      }
+                    ],
+                    "next_cursor": "MTc4NTQ5NTE2NHx3aV9kTVJZVGVaSGl2RTV2Zjg3UFFFZUZY",
+                    "has_more": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListWorkItemRequest"
+              },
+              "example": {
+                "incident_id": "6a5f1e28807515413b384bce",
+                "limit": 50
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/create": {
+      "post": {
+        "operationId": "incidentWorkItemCreate",
+        "summary": "创建跟进事项",
+        "description": "在活动故障上创建行动项，或在其故障复盘上创建后续行动。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- `action` 锚定活动故障，且不得设置 `post_mortem_id`；`follow_up` 必须设置为关联到 `incident_id` 的故障复盘 ID。\n- 负责人须为已能查看锚定故障或复盘的活跃成员 —— 指派不会授予访问权限。\n- 新添加的负责人会收到通知。\n- 以相同的（`creator`、`idempotency_key`）重试时，返回原事项并标记 `idempotent_replay: true`，不会创建重复事项。\n- 已审计 —— 变更会记录到审计日志。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-create",
+          "metadata": {
+            "sidebarTitle": "创建跟进事项"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WorkItemCreateResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "item": {
+                      "work_item_id": "wi_9fK2mNqRtVwXyZaBcDeFgH",
+                      "item_type": "action",
+                      "incident_id": "6a5f1e28807515413b384bce",
+                      "title": "Roll back the v2.14 deployment on web-server-01",
+                      "status": "open",
+                      "source_kind": "native",
+                      "version": 1,
+                      "assignee_ids": [
+                        3790925372131
+                      ],
+                      "created_by": 3790925372131,
+                      "updated_by": 3790925372131,
+                      "created_at_seconds": 1785496400,
+                      "updated_at_seconds": 1785496400
+                    },
+                    "added_assignee_ids": [
+                      3790925372131
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkItemRequest"
+              },
+              "example": {
+                "item_type": "action",
+                "title": "Roll back the v2.14 deployment on web-server-01",
+                "description": "CPU saturation started right after the v2.14 rollout; roll back and watch the error rate.",
+                "status": "open",
+                "priority": "high",
+                "incident_id": "6a5f1e28807515413b384bce",
+                "assignee_ids": [
+                  3790925372131
+                ],
+                "idempotency_key": "create-wi-20260731-0001"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/update": {
+      "post": {
+        "operationId": "incidentWorkItemUpdate",
+        "summary": "更新跟进事项",
+        "description": "部分更新跟进事项的标题、描述、状态或优先级。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 部分更新：未提供的字段保持不变；显式传 `null` 则清空该字段。\n- 乐观锁 —— `version` 必须与事项当前版本一致；不一致返回冲突错误。\n- 负责人、`item_type` 以及故障/复盘锚点不能在此修改 —— 请使用专用接口。\n- 已审计 —— 变更会记录到审计日志。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-update",
+          "metadata": {
+            "sidebarTitle": "更新跟进事项"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WorkItemMutationResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "item": {
+                      "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                      "item_type": "follow_up",
+                      "incident_id": "6a5f1e28807515413b384bce",
+                      "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                      "title": "Follow-ups assigned to Bowen and Weili",
+                      "status": "done",
+                      "source_kind": "native",
+                      "version": 2,
+                      "assignee_ids": [
+                        3790925372131,
+                        4756301322131,
+                        5068740052131
+                      ],
+                      "created_by": 5329873302131,
+                      "updated_by": 3790925372131,
+                      "created_at_seconds": 1785495329,
+                      "updated_at_seconds": 1785496384
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkItemRequest"
+              },
+              "example": {
+                "work_item_id": "wi_9fK2mNqRtVwXyZaBcDeFgH",
+                "version": 1,
+                "title": "Roll back the v2.14 deployment on web-server-01 and web-server-02",
+                "status": "in_progress"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/delete": {
+      "post": {
+        "operationId": "incidentWorkItemDelete",
+        "summary": "删除跟进事项",
+        "description": "软删除跟进事项。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 软删除 —— 事项不再出现在列表中，但数据仍保留。\n- 乐观锁 —— `version` 必须与事项当前版本一致；不一致返回冲突错误。\n- 已审计 —— 变更会记录到审计日志。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-delete",
+          "metadata": {
+            "sidebarTitle": "删除跟进事项"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteWorkItemRequest"
+              },
+              "example": {
+                "work_item_id": "wi_9fK2mNqRtVwXyZaBcDeFgH",
+                "version": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/complete": {
+      "post": {
+        "operationId": "incidentWorkItemComplete",
+        "summary": "完成跟进事项",
+        "description": "通过设置客户端自定义的目标状态，将跟进事项标记为完成。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 仅当前负责人可以完成跟进事项。\n- `target_status` 为客户端自定义字符串 —— 没有固定状态机。\n- 相同 `idempotency_key` 搭配相同 `target_status` 会幂等重放；相同键搭配不同 `target_status` 将返回错误。\n- 已审计 —— 变更会记录到审计日志。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-complete",
+          "metadata": {
+            "sidebarTitle": "完成跟进事项"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WorkItemMutationResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "item": {
+                      "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                      "item_type": "follow_up",
+                      "incident_id": "6a5f1e28807515413b384bce",
+                      "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                      "title": "Follow-ups assigned to Bowen and Weili",
+                      "status": "done",
+                      "source_kind": "native",
+                      "version": 2,
+                      "assignee_ids": [
+                        3790925372131,
+                        4756301322131,
+                        5068740052131
+                      ],
+                      "created_by": 5329873302131,
+                      "updated_by": 3790925372131,
+                      "created_at_seconds": 1785495329,
+                      "updated_at_seconds": 1785496384
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteWorkItemRequest"
+              },
+              "example": {
+                "work_item_id": "wi_9fK2mNqRtVwXyZaBcDeFgH",
+                "version": 2,
+                "target_status": "done",
+                "idempotency_key": "complete-wi-20260731-0001"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/convert": {
+      "post": {
+        "operationId": "incidentWorkItemConvert",
+        "summary": "转化跟进事项为复盘后续行动",
+        "description": "将故障行动项原地转化为故障复盘后续行动。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 将 `action` 事项原地转化为复盘 `follow_up` —— `work_item_id` 不变。\n- 转化已是 `follow_up` 的事项时返回 `idempotent_replay: true`。\n- 如果故障已存在复盘，转化后的事项会自动绑定到该复盘。\n- 已审计 —— 变更会记录到审计日志。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-convert",
+          "metadata": {
+            "sidebarTitle": "转化跟进事项为复盘后续行动"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WorkItemMutationResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "item": {
+                      "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                      "item_type": "follow_up",
+                      "incident_id": "6a5f1e28807515413b384bce",
+                      "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                      "title": "Follow-ups assigned to Bowen and Weili",
+                      "status": "done",
+                      "source_kind": "native",
+                      "version": 2,
+                      "assignee_ids": [
+                        3790925372131,
+                        4756301322131,
+                        5068740052131
+                      ],
+                      "created_by": 5329873302131,
+                      "updated_by": 3790925372131,
+                      "created_at_seconds": 1785495329,
+                      "updated_at_seconds": 1785496384
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertWorkItemRequest"
+              },
+              "example": {
+                "work_item_id": "wi_9fK2mNqRtVwXyZaBcDeFgH",
+                "version": 2,
+                "target_status": "open",
+                "idempotency_key": "convert-wi-20260731-0001"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/assignees/reset": {
+      "post": {
+        "operationId": "incidentWorkItemResetAssignees",
+        "summary": "重置跟进事项负责人",
+        "description": "整体替换跟进事项的负责人集合。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 整体替换负责人集合 —— 空数组表示清空所有负责人。\n- 仅新添加的负责人会收到通知；移除不通知。\n- 已审计 —— 变更会记录到审计日志。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-reset-assignees",
+          "metadata": {
+            "sidebarTitle": "重置跟进事项负责人"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WorkItemMutationResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "item": {
+                      "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                      "item_type": "follow_up",
+                      "incident_id": "6a5f1e28807515413b384bce",
+                      "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                      "title": "Follow-ups assigned to Bowen and Weili",
+                      "status": "done",
+                      "source_kind": "native",
+                      "version": 2,
+                      "assignee_ids": [
+                        3790925372131,
+                        4756301322131,
+                        5068740052131
+                      ],
+                      "created_by": 5329873302131,
+                      "updated_by": 3790925372131,
+                      "created_at_seconds": 1785495329,
+                      "updated_at_seconds": 1785496384
+                    },
+                    "added_assignee_ids": [
+                      5068740052131
+                    ],
+                    "removed_assignee_ids": [
+                      4756301322131
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetWorkItemAssigneesRequest"
+              },
+              "example": {
+                "work_item_id": "wi_9fK2mNqRtVwXyZaBcDeFgH",
+                "version": 2,
+                "assignee_ids": [
+                  3790925372131,
+                  5068740052131
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incident/work-item/post-mortem/bind": {
+      "post": {
+        "operationId": "incidentWorkItemBindPostMortem",
+        "summary": "绑定跟进事项到复盘",
+        "description": "将故障下已转化但未绑定的后续行动批量绑定到故障复盘。",
+        "tags": [
+          "On-call/Incidents"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 一次调用将该故障全部已转化但未绑定的后续行动绑定到指定复盘。\n- `items` 为本次新绑定的批次；不设置 `next_cursor` 和 `has_more`。\n- 通过 `idempotency_key` 幂等 —— 以相同键重试时重放原始结果。\n- 已审计 —— 变更会记录到审计日志。",
+          "href": "/zh/api-reference/on-call/incidents/incident-work-item-bind-post-mortem",
+          "metadata": {
+            "sidebarTitle": "绑定跟进事项到复盘"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WorkItemListResult"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01J8XQ3E5Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "work_item_id": "wi_68MHnkWBiyjrh6uhkxUyiZ",
+                        "item_type": "follow_up",
+                        "incident_id": "6a5f1e28807515413b384bce",
+                        "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                        "title": "Follow-ups assigned to Bowen and Weili",
+                        "status": "done",
+                        "source_kind": "native",
+                        "version": 2,
+                        "assignee_ids": [
+                          3790925372131,
+                          4756301322131,
+                          5068740052131
+                        ],
+                        "created_by": 5329873302131,
+                        "updated_by": 3790925372131,
+                        "created_at_seconds": 1785495329,
+                        "updated_at_seconds": 1785496384
+                      },
+                      {
+                        "work_item_id": "wi_dMRYTeZHivE5vf87PQEeFX",
+                        "item_type": "follow_up",
+                        "incident_id": "6a5f1e28807515413b384bce",
+                        "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                        "title": "Check whether this to-do notifies Bowen",
+                        "status": "open",
+                        "source_kind": "native",
+                        "version": 1,
+                        "assignee_ids": [
+                          5068740052131
+                        ],
+                        "created_by": 3790925372131,
+                        "updated_by": 3790925372131,
+                        "created_at_seconds": 1785495164,
+                        "updated_at_seconds": 1785495164
+                      }
+                    ],
+                    "has_more": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BindWorkItemPostMortemRequest"
+              },
+              "example": {
+                "post_mortem_id": "51d65cd9525c369379ba471b5512df63",
+                "incident_id": "6a5f1e28807515413b384bce",
+                "idempotency_key": "bind-wi-20260731-0001"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -28058,7 +29243,7 @@
       },
       "IncidentFeedType": {
         "type": "string",
-        "description": "故障时间线条目类型。每个值对应一个生命周期事件，其 `detail` 载荷结构由该字段决定。故障级事件前缀为 `i_`；向上冒泡到故障时间线的告警级事件前缀为 `a_`。\n\n| 类型 | 含义 |\n|---|---|\n| `i_new` | 故障创建：系统自动或人工创建了新故障。 |\n| `i_assign` | 分派响应人：故障被分派给指定人员处理。 |\n| `i_a_rspd` | 添加响应人：有新的响应人被加入处理。 |\n| `i_notify` | 通过某个渠道在指定环节发送通知。 |\n| `i_storm` | 故障触发告警风暴阈值。 |\n| `i_snooze` | 暂停通知指定时长。 |\n| `i_wake` | 取消暂停并恢复通知。 |\n| `i_ack` | 确认故障：响应人确认已开始处理故障。 |\n| `i_unack` | 取消认领。 |\n| `i_comm` | 添加评论：响应人记录了处理进展或关键信息。 |\n| `i_rslv` | 解决故障：故障被标记为已解决。 |\n| `i_reopen` | 重新打开：已解决的故障被重新打开，可能问题复发。 |\n| `i_merge` | 合并故障：多个相关故障被合并为一个。 |\n| `i_r_title` | 标题更新。 |\n| `i_r_desc` | 描述更新。 |\n| `i_r_impact` | 影响范围更新。 |\n| `i_r_rc` | 根因更新。 |\n| `i_r_rsltn` | 解决方案更新。 |\n| `i_r_severity` | 严重等级变更：故障的严重程度被调整。 |\n| `i_r_field` | 自定义字段值更新。 |\n| `i_m_flapping` | 因抖动检测被静默。 |\n| `i_m_reply` | 评论静音回复标记。 |\n| `i_custom` | 执行动作：触发了自动化操作或脚本。 |\n| `i_wr_create` | 创建作战室：建立了即时通讯群组用于协作处理。 |\n| `i_wr_delete` | 删除作战室群组。 |\n| `i_auto_refresh` | 卡片自动刷新事件。 |",
+        "description": "故障时间线条目类型。每个值对应一个生命周期事件，其 `detail` 载荷结构由该字段决定。故障级事件前缀为 `i_`；向上冒泡到故障时间线的告警级事件前缀为 `a_`。\n\n| 类型 | 含义 |\n|---|---|\n| `i_new` | 故障创建：系统自动或人工创建了新故障。 |\n| `i_assign` | 分派响应人：故障被分派给指定人员处理。 |\n| `i_a_rspd` | 添加响应人：有新的响应人被加入处理。 |\n| `i_notify` | 通过某个渠道在指定环节发送通知。 |\n| `i_storm` | 故障触发告警风暴阈值。 |\n| `i_snooze` | 暂停通知指定时长。 |\n| `i_wake` | 取消暂停并恢复通知。 |\n| `i_ack` | 确认故障：响应人确认已开始处理故障。 |\n| `i_unack` | 取消认领。 |\n| `i_comm` | 添加评论：响应人记录了处理进展或关键信息。 |\n| `i_rslv` | 解决故障：故障被标记为已解决。 |\n| `i_reopen` | 重新打开：已解决的故障被重新打开，可能问题复发。 |\n| `i_merge` | 合并故障：多个相关故障被合并为一个。 |\n| `i_r_title` | 标题更新。 |\n| `i_r_desc` | 描述更新。 |\n| `i_r_impact` | 影响范围更新。 |\n| `i_r_rc` | 根因更新。 |\n| `i_r_rsltn` | 解决方案更新。 |\n| `i_r_severity` | 严重等级变更：故障的严重程度被调整。 |\n| `i_r_field` | 自定义字段值更新。 |\n| `i_m_flapping` | 因抖动检测被静默。 |\n| `i_m_reply` | 评论静音回复标记。 |\n| `i_custom` | 执行动作：触发了自动化操作或脚本。 |\n| `i_wr_create` | 创建作战室：建立了即时通讯群组用于协作处理。 |\n| `i_wr_delete` | 删除作战室群组。 |\n| `i_auto_refresh` | 卡片自动刷新事件。 |\n| `i_wi_created` | 跟进事项创建：创建了行动项或后续行动。 |\n| `i_wi_updated` | 跟进事项更新：标题、描述、状态或优先级发生变化。 |\n| `i_wi_assignees` | 跟进事项负责人变更：负责人被更新。 |\n| `i_wi_completed` | 跟进事项完成：负责人将跟进事项标记为完成。 |\n| `i_wi_converted` | 跟进事项转化：行动项被转化为后续行动。 |\n| `i_wi_bound` | 跟进事项绑定：已转化的后续行动被绑定到故障复盘。 |\n| `i_wi_deleted` | 跟进事项删除：行动项或后续行动被软删除。 |\n| `a_merge` | 告警合并：一条告警被合并进已有故障。 |",
         "enum": [
           "i_new",
           "i_assign",
@@ -28086,6 +29271,13 @@
           "i_wr_create",
           "i_wr_delete",
           "i_auto_refresh",
+          "i_wi_created",
+          "i_wi_updated",
+          "i_wi_assignees",
+          "i_wi_completed",
+          "i_wi_converted",
+          "i_wi_bound",
+          "i_wi_deleted",
           "a_merge"
         ]
       },
@@ -28184,6 +29376,14 @@
           "mute_reply": {
             "type": "boolean",
             "description": "是否静音该评论的回复。"
+          },
+          "comment_type_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "附加到评论的账户级评论类型 ObjectID。"
+          },
+          "comment_type": {
+            "$ref": "#/components/schemas/IncidentCommentTypeDisplay"
           }
         },
         "title": "i_comm"
@@ -28707,6 +29907,27 @@
               },
               {
                 "$ref": "#/components/schemas/FeedDetailIncidentAutoRefreshCard"
+              },
+              {
+                "$ref": "#/components/schemas/FeedDetailWorkItemCreated"
+              },
+              {
+                "$ref": "#/components/schemas/FeedDetailWorkItemUpdated"
+              },
+              {
+                "$ref": "#/components/schemas/FeedDetailWorkItemAssigneesChanged"
+              },
+              {
+                "$ref": "#/components/schemas/FeedDetailWorkItemCompleted"
+              },
+              {
+                "$ref": "#/components/schemas/FeedDetailWorkItemConverted"
+              },
+              {
+                "$ref": "#/components/schemas/FeedDetailWorkItemBound"
+              },
+              {
+                "$ref": "#/components/schemas/FeedDetailWorkItemDeleted"
               }
             ],
             "discriminator": {
@@ -28737,7 +29958,14 @@
                 "i_custom": "#/components/schemas/FeedDetailIncidentCustomAction",
                 "i_wr_create": "#/components/schemas/FeedDetailIncidentWarRoomCreate",
                 "i_wr_delete": "#/components/schemas/FeedDetailIncidentWarRoomDelete",
-                "i_auto_refresh": "#/components/schemas/FeedDetailIncidentAutoRefreshCard"
+                "i_auto_refresh": "#/components/schemas/FeedDetailIncidentAutoRefreshCard",
+                "i_wi_created": "#/components/schemas/FeedDetailWorkItemCreated",
+                "i_wi_updated": "#/components/schemas/FeedDetailWorkItemUpdated",
+                "i_wi_assignees": "#/components/schemas/FeedDetailWorkItemAssigneesChanged",
+                "i_wi_completed": "#/components/schemas/FeedDetailWorkItemCompleted",
+                "i_wi_converted": "#/components/schemas/FeedDetailWorkItemConverted",
+                "i_wi_bound": "#/components/schemas/FeedDetailWorkItemBound",
+                "i_wi_deleted": "#/components/schemas/FeedDetailWorkItemDeleted"
               }
             }
           },
@@ -29218,11 +30446,19 @@
           "comment": {
             "type": "string",
             "maxLength": 1024,
-            "description": "评论内容。"
+            "description": "评论内容。首尾空白会被去除；去除后必须非空，且最多 1024 字符（按 @提及归一化后计数）。"
           },
           "mute_reply": {
             "type": "boolean",
             "description": "为 true 时不触发 webhook 回复动作。"
+          },
+          "comment_type_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "可选，附加到评论的账户级评论类型 ID（MongoDB ObjectID）。无效或全零 ID 将返回 400。"
           }
         }
       },
@@ -49646,6 +50882,952 @@
             "description": "下一页翻页游标。无更多数据时为空。"
           }
         }
+      },
+      "IncidentCommentTypeItem": {
+        "type": "object",
+        "description": "账户级评论类型，可附加到故障评论。",
+        "properties": {
+          "comment_type_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "评论类型 ID（24 位十六进制 ObjectID）。"
+          },
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "评论类型所属的账户 ID。"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "评论类型展示名称。账户内唯一（不区分大小写，忽略首尾空白）。"
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-F]{6}$",
+            "description": "标签颜色，#RRGGBB 格式十六进制值（存储为大写）。"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int64",
+            "description": "评论类型的展示位置，从 1 开始。"
+          },
+          "creator_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建该评论类型的用户 ID。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最后更新该评论类型的用户 ID。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间，Unix 秒级时间戳。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最后更新时间，Unix 秒级时间戳。"
+          }
+        }
+      },
+      "ListIncidentCommentTypesRequest": {
+        "type": "object",
+        "description": "无参数。该接口始终返回调用账户的全部评论类型。",
+        "properties": {}
+      },
+      "ListIncidentCommentTypesResponse": {
+        "type": "object",
+        "description": "账户评论类型的完整列表，按展示位置排序。",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncidentCommentTypeItem"
+            },
+            "description": "账户的全部评论类型，按展示位置排序。"
+          }
+        }
+      },
+      "CreateIncidentCommentTypeRequest": {
+        "type": "object",
+        "description": "创建评论类型的参数。",
+        "required": [
+          "name",
+          "color"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "展示名称。存储前去除首尾空白；账户内唯一（不区分大小写）。最多 40 个字符。"
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "description": "标签颜色，#RRGGBB 格式十六进制值，统一转为大写。"
+          }
+        }
+      },
+      "CreateIncidentCommentTypeResponse": {
+        "type": "object",
+        "description": "创建评论类型的结果。",
+        "properties": {
+          "comment_type_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "新建评论类型的 ID（24 位十六进制 ObjectID）。"
+          },
+          "item": {
+            "$ref": "#/components/schemas/IncidentCommentTypeItem"
+          }
+        }
+      },
+      "UpdateIncidentCommentTypeRequest": {
+        "type": "object",
+        "description": "更新评论类型的参数。部分更新：`name` 和 `color` 至少提供一个。",
+        "required": [
+          "comment_type_id"
+        ],
+        "properties": {
+          "comment_type_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "要更新的评论类型 ID（24 位十六进制 ObjectID）。"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "新的展示名称。存储前去除首尾空白；账户内唯一（不区分大小写）。最多 40 个字符。"
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "description": "新的标签颜色，#RRGGBB 格式十六进制值，统一转为大写。"
+          }
+        }
+      },
+      "DeleteIncidentCommentTypeRequest": {
+        "type": "object",
+        "description": "删除评论类型的参数。",
+        "required": [
+          "comment_type_id"
+        ],
+        "properties": {
+          "comment_type_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "要删除的评论类型 ID（24 位十六进制 ObjectID）。"
+          }
+        }
+      },
+      "ReorderIncidentCommentTypesRequest": {
+        "type": "object",
+        "description": "调整评论类型顺序的参数。",
+        "required": [
+          "comment_type_ids"
+        ],
+        "properties": {
+          "comment_type_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{24}$"
+            },
+            "minItems": 1,
+            "description": "账户全部评论类型的 ID，按期望顺序排列（24 位十六进制 ObjectID）。"
+          }
+        }
+      },
+      "WorkItemItem": {
+        "type": "object",
+        "description": "结构化的故障跟进事项（行动项或复盘后续行动）及其负责人。",
+        "required": [
+          "work_item_id",
+          "item_type",
+          "incident_id",
+          "title",
+          "status",
+          "source_kind",
+          "version",
+          "assignee_ids",
+          "created_by",
+          "updated_by",
+          "created_at_seconds",
+          "updated_at_seconds"
+        ],
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "跟进事项 ID（不透明字符串，最长 128 字符）。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "`action` 表示锚定在活动故障上的行动项；`follow_up` 表示复盘后续行动。"
+          },
+          "incident_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "事项锚定的故障 ID（MongoDB ObjectID）。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "故障复盘 ID（32 位十六进制字符串）。后续行动绑定复盘后返回。"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "事项标题（最长 512 字符）。"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 65535,
+            "description": "可选的详细描述（最长 65,535 字符）。"
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "客户端自定义状态（最长 64 字符），没有固定状态机。"
+          },
+          "priority": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "可选的客户端自定义优先级（最长 64 字符）。"
+          },
+          "source_kind": {
+            "type": "string",
+            "enum": [
+              "native",
+              "legacy_follow_up"
+            ],
+            "description": "`native` 表示通过本 API 创建的事项；`legacy_follow_up` 表示从旧版复盘后续行动迁移而来的事项。"
+          },
+          "legacy_source_id": {
+            "type": "string",
+            "description": "该事项迁移自旧版后续行动的原始标识。仅当 `source_kind` 为 `legacy_follow_up` 时返回。"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "乐观锁版本号，每次变更递增。"
+          },
+          "assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "当前负责人的成员 ID 列表。不会为 null；空数组表示未指派。"
+          },
+          "created_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建者成员 ID。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最后更新人成员 ID。"
+          },
+          "converted_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "将行动项转化为后续行动的操作人成员 ID。仅转化后返回。"
+          },
+          "converted_at_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "转化时间，Unix 秒级时间戳。仅转化后返回。"
+          },
+          "created_at_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间，Unix 秒级时间戳。"
+          },
+          "updated_at_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最后更新时间，Unix 秒级时间戳。"
+          }
+        }
+      },
+      "WorkItemCreateResult": {
+        "type": "object",
+        "description": "创建跟进事项的结果。",
+        "required": [
+          "item"
+        ],
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/WorkItemItem"
+          },
+          "added_assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "新添加（并已通知）的负责人成员 ID。"
+          },
+          "idempotent_replay": {
+            "type": "boolean",
+            "description": "为 true 表示本次调用以相同幂等键重放了之前的请求，未创建新事项。"
+          }
+        }
+      },
+      "WorkItemMutationResult": {
+        "type": "object",
+        "description": "变更跟进事项的结果。",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/WorkItemItem"
+          },
+          "added_assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "新添加（并已通知）的负责人成员 ID。"
+          },
+          "removed_assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "被移除（不通知）的负责人成员 ID。"
+          },
+          "idempotent_replay": {
+            "type": "boolean",
+            "description": "为 true 表示本次调用以相同幂等键重放了之前的请求。"
+          }
+        }
+      },
+      "WorkItemListResult": {
+        "type": "object",
+        "description": "游标分页的跟进事项列表。",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemItem"
+            },
+            "description": "当前页的跟进事项。"
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "下一页游标，作为 `cursor` 传入；没有更多结果时不返回。"
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "为 true 表示还有更多结果。"
+          },
+          "idempotent_replay": {
+            "type": "boolean",
+            "description": "为 true 表示本次调用以相同幂等键重放了之前的请求。"
+          }
+        }
+      },
+      "ListWorkItemRequest": {
+        "type": "object",
+        "description": "查询跟进事项的过滤条件。`incident_id`、`post_mortem_id`、`assignee_id` 至少提供一个。",
+        "properties": {
+          "incident_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "故障 ID（MongoDB ObjectID）。同时返回锚定在该故障复盘上的后续行动。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "故障复盘 ID（32 位十六进制字符串）。返回绑定到该复盘的后续行动。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "按事项类型过滤结果。"
+          },
+          "assignee_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "按负责人成员 ID 过滤结果。仅按负责人查询时，须为本人或账户管理员。"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "分页游标，取自上一次响应的 `next_cursor`。"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50,
+            "description": "每页条数，最多 200，默认 50。"
+          }
+        }
+      },
+      "CreateWorkItemRequest": {
+        "type": "object",
+        "description": "创建故障跟进事项的参数。",
+        "required": [
+          "item_type",
+          "title",
+          "incident_id",
+          "idempotency_key"
+        ],
+        "properties": {
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "`action` 锚定活动故障，不得设置 `post_mortem_id`；`follow_up` 必须设置 `post_mortem_id`。"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "事项标题（最长 512 字符）。"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 65535,
+            "description": "可选的详细描述（最长 65,535 字符）。"
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "可选的客户端自定义初始状态（最长 64 字符）。"
+          },
+          "priority": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "可选的客户端自定义优先级（最长 64 字符）。"
+          },
+          "incident_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "事项锚定的故障 ID（MongoDB ObjectID）。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "故障复盘 ID（32 位十六进制字符串）。`follow_up` 必填，`action` 禁止填写。该复盘必须关联到 `incident_id`。"
+          },
+          "assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "初始负责人成员 ID 列表。负责人须为已能查看锚定对象的活跃成员；指派不会授予访问权限。"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_\\-.:]+$",
+            "description": "客户端生成的幂等键（最长 128 字符；仅限字母、数字、`_`、`-`、`.`、`:`）。"
+          }
+        }
+      },
+      "UpdateWorkItemRequest": {
+        "type": "object",
+        "description": "跟进事项的部分更新。未提供的字段保持不变；显式传 `null` 则清空该字段。",
+        "required": [
+          "work_item_id",
+          "version"
+        ],
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "跟进事项 ID（不透明字符串，最长 128 字符）。"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "事项当前版本号，用于乐观锁。必须与存储的版本一致。"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新标题（最长 512 字符）。",
+            "maxLength": 512
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新描述（最长 65,535 字符）。",
+            "maxLength": 65535
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的客户端自定义状态（最长 64 字符）。",
+            "maxLength": 64
+          },
+          "priority": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的客户端自定义优先级（最长 64 字符）。",
+            "maxLength": 64
+          }
+        }
+      },
+      "DeleteWorkItemRequest": {
+        "type": "object",
+        "description": "软删除跟进事项的参数。",
+        "required": [
+          "work_item_id",
+          "version"
+        ],
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "跟进事项 ID（不透明字符串，最长 128 字符）。"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "事项当前版本号，用于乐观锁。必须与存储的版本一致。"
+          }
+        }
+      },
+      "CompleteWorkItemRequest": {
+        "type": "object",
+        "description": "完成跟进事项的参数。",
+        "required": [
+          "work_item_id",
+          "version",
+          "target_status",
+          "idempotency_key"
+        ],
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "跟进事项 ID（不透明字符串，最长 128 字符）。"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "事项当前版本号，用于乐观锁。必须与存储的版本一致。"
+          },
+          "target_status": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "要设置的客户端自定义状态（最长 64 字符），没有固定状态机。"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_\\-.:]+$",
+            "description": "客户端生成的幂等键（最长 128 字符；仅限字母、数字、`_`、`-`、`.`、`:`）。"
+          }
+        }
+      },
+      "ConvertWorkItemRequest": {
+        "type": "object",
+        "description": "将行动项原地转化为复盘后续行动的参数。",
+        "required": [
+          "work_item_id",
+          "version",
+          "idempotency_key"
+        ],
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "跟进事项 ID（不透明字符串，最长 128 字符）。"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "事项当前版本号，用于乐观锁。必须与存储的版本一致。"
+          },
+          "target_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "可选，设置在转化后后续行动上的客户端自定义状态（最长 64 字符）。",
+            "maxLength": 64
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_\\-.:]+$",
+            "description": "客户端生成的幂等键（最长 128 字符；仅限字母、数字、`_`、`-`、`.`、`:`）。"
+          }
+        }
+      },
+      "ResetWorkItemAssigneesRequest": {
+        "type": "object",
+        "description": "整体替换跟进事项的负责人集合。",
+        "required": [
+          "work_item_id",
+          "version"
+        ],
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "跟进事项 ID（不透明字符串，最长 128 字符）。"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "事项当前版本号，用于乐观锁。必须与存储的版本一致。"
+          },
+          "assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "新的负责人成员 ID 列表，整体替换当前集合。空数组表示清空所有负责人。"
+          }
+        }
+      },
+      "BindWorkItemPostMortemRequest": {
+        "type": "object",
+        "description": "将故障下未绑定的后续行动批量绑定到复盘的参数。",
+        "required": [
+          "post_mortem_id",
+          "incident_id",
+          "idempotency_key"
+        ],
+        "properties": {
+          "post_mortem_id": {
+            "type": "string",
+            "description": "要绑定后续行动的故障复盘 ID（32 位十六进制字符串）。"
+          },
+          "incident_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "故障 ID（MongoDB ObjectID），其已转化但未绑定的后续行动将被绑定。"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_\\-.:]+$",
+            "description": "客户端生成的幂等键（最长 128 字符；仅限字母、数字、`_`、`-`、`.`、`:`）。"
+          }
+        }
+      },
+      "IncidentCommentTypeDisplay": {
+        "type": "object",
+        "description": "账户级评论类型的解析后展示信息，读取时根据当前类型定义填充。",
+        "required": [
+          "id",
+          "name",
+          "color"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "评论类型 ID（MongoDB ObjectID）。"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "评论类型展示名称。"
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "description": "徽标颜色，#RRGGBB 格式。"
+          }
+        }
+      },
+      "FeedDetailWorkItemCreated": {
+        "type": "object",
+        "description": "`i_wi_created` 的 detail 载荷。",
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "description": "跟进事项 ID。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "跟进事项类型。"
+          },
+          "title": {
+            "type": "string",
+            "description": "跟进事项标题。"
+          },
+          "status": {
+            "type": "string",
+            "description": "跟进事项状态标签（如 `open`、`done`）。"
+          },
+          "assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "负责人成员 ID 列表。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "跟进事项绑定的故障复盘 ID。"
+          }
+        },
+        "title": "i_wi_created"
+      },
+      "FeedDetailWorkItemUpdated": {
+        "type": "object",
+        "description": "`i_wi_updated` 的 detail 载荷。仅发生变化的字段携带 `from_*`/`to_*` 值。",
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "description": "跟进事项 ID。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "跟进事项类型。"
+          },
+          "title": {
+            "type": "string",
+            "description": "跟进事项标题。"
+          },
+          "from_title": {
+            "type": "string",
+            "description": "更新前的标题。"
+          },
+          "from_status": {
+            "type": "string",
+            "description": "更新前的状态标签。"
+          },
+          "to_status": {
+            "type": "string",
+            "description": "更新后的状态标签。"
+          },
+          "from_priority": {
+            "type": "string",
+            "description": "更新前的优先级标签。"
+          },
+          "to_priority": {
+            "type": "string",
+            "description": "更新后的优先级标签。"
+          },
+          "from_description": {
+            "type": "string",
+            "description": "更新前的描述。"
+          },
+          "to_description": {
+            "type": "string",
+            "description": "更新后的描述。"
+          }
+        },
+        "title": "i_wi_updated"
+      },
+      "FeedDetailWorkItemAssigneesChanged": {
+        "type": "object",
+        "description": "`i_wi_assignees` 的 detail 载荷。",
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "description": "跟进事项 ID。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "跟进事项类型。"
+          },
+          "title": {
+            "type": "string",
+            "description": "跟进事项标题。"
+          },
+          "assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "变更后的负责人成员 ID 列表。"
+          },
+          "added_assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "新增为负责人的成员 ID。"
+          },
+          "removed_assignee_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "从负责人中移除的成员 ID。"
+          }
+        },
+        "title": "i_wi_assignees"
+      },
+      "FeedDetailWorkItemCompleted": {
+        "type": "object",
+        "description": "`i_wi_completed` 的 detail 载荷。",
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "description": "跟进事项 ID。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "跟进事项类型。"
+          },
+          "title": {
+            "type": "string",
+            "description": "跟进事项标题。"
+          },
+          "from_status": {
+            "type": "string",
+            "description": "完成前的状态标签。"
+          },
+          "to_status": {
+            "type": "string",
+            "description": "完成后的状态标签。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "跟进事项绑定的故障复盘 ID。"
+          }
+        },
+        "title": "i_wi_completed"
+      },
+      "FeedDetailWorkItemConverted": {
+        "type": "object",
+        "description": "`i_wi_converted` 的 detail 载荷。",
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "description": "跟进事项 ID。"
+          },
+          "title": {
+            "type": "string",
+            "description": "跟进事项标题。"
+          },
+          "from_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "转化前的事项类型。"
+          },
+          "to_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "转化后的事项类型。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "跟进事项绑定的故障复盘 ID。"
+          },
+          "status": {
+            "type": "string",
+            "description": "转化后的事项状态标签。"
+          }
+        },
+        "title": "i_wi_converted"
+      },
+      "FeedDetailWorkItemBound": {
+        "type": "object",
+        "description": "`i_wi_bound` 的 detail 载荷。",
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "description": "跟进事项 ID。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "跟进事项类型。"
+          },
+          "title": {
+            "type": "string",
+            "description": "跟进事项标题。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "跟进事项绑定的故障复盘 ID。"
+          }
+        },
+        "title": "i_wi_bound"
+      },
+      "FeedDetailWorkItemDeleted": {
+        "type": "object",
+        "description": "`i_wi_deleted` 的 detail 载荷。",
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "description": "跟进事项 ID。"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "action",
+              "follow_up"
+            ],
+            "description": "跟进事项类型。"
+          },
+          "title": {
+            "type": "string",
+            "description": "跟进事项标题。"
+          },
+          "post_mortem_id": {
+            "type": "string",
+            "description": "跟进事项绑定的故障复盘 ID。"
+          }
+        },
+        "title": "i_wi_deleted"
       }
     }
   }
