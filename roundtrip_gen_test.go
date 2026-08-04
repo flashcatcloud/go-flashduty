@@ -13,6 +13,7 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"GET /status-page/change/active/list":        func(d json.RawMessage) error { var v StatusPageChangeListResponse; return json.Unmarshal(d, &v) },
 	"GET /status-page/change/info":               func(d json.RawMessage) error { var v StatusPageChangeItem; return json.Unmarshal(d, &v) },
 	"GET /status-page/change/list":               func(d json.RawMessage) error { var v StatusPageChangeListResponse; return json.Unmarshal(d, &v) },
+	"GET /status-page/info":                      func(d json.RawMessage) error { var v StatusPageItem; return json.Unmarshal(d, &v) },
 	"GET /status-page/list":                      func(d json.RawMessage) error { var v ListStatusPageResponse; return json.Unmarshal(d, &v) },
 	"GET /status-page/migration/status":          func(d json.RawMessage) error { var v StatusPageMigrationJob; return json.Unmarshal(d, &v) },
 	"GET /status-page/subscriber/list":           func(d json.RawMessage) error { var v StatusPageSubscriberListResponse; return json.Unmarshal(d, &v) },
