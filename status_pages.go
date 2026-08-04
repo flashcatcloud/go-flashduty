@@ -178,8 +178,13 @@ func (s *StatusPagesService) Delete(ctx context.Context, req *DeleteStatusPageRe
 // Retrieve detailed configuration for a specific status page.
 //
 // API: GET /status-page/info (statusPageInfo).
-func (s *StatusPagesService) Info(ctx context.Context, req *StatusPagesInfoRequest) (*Response, error) {
-	return s.client.doGet(ctx, "/status-page/info", req, nil)
+func (s *StatusPagesService) Info(ctx context.Context, req *StatusPagesInfoRequest) (*StatusPageItem, *Response, error) {
+	out := new(StatusPageItem)
+	resp, err := s.client.doGet(ctx, "/status-page/info", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
 }
 
 // Migrate email subscribers.
