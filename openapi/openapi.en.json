@@ -17892,12 +17892,12 @@
       "post": {
         "operationId": "memberResetInfo",
         "summary": "Reset member info",
-        "description": "Batch-update multiple profile fields of the current member.",
+        "description": "Identify a member and reset the specified profile fields.",
         "tags": [
           "Platform/Members"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Identify the member with one of `member_id`, `member_name`, `email`, `phone`, or `ref_id`. If multiple identifiers are present, the server checks them in that order.\n- When identifying or updating a member by `phone`, include `country_code` when the number needs country-specific parsing.\n- Put the profile fields to write under `updates`: `member_name`, `password`, `phone`, `country_code`, `email`, `avatar`, `locale`, `time_zone`, or `ref_id`.\n- Members provisioned by SSO cannot be changed when SSO marks them as externally managed.",
           "href": "/en/api-reference/platform/members/member-reset-info",
           "metadata": {
             "sidebarTitle": "Reset member info"
@@ -17952,9 +17952,11 @@
               },
               "example": {
                 "member_id": 2476444212131,
-                "member_name": "Alice",
-                "locale": "zh-CN",
-                "time_zone": "Asia/Shanghai"
+                "updates": {
+                  "member_name": "Alice Chen",
+                  "locale": "zh-CN",
+                  "time_zone": "Asia/Shanghai"
+                }
               }
             }
           }
@@ -42643,70 +42645,114 @@
       },
       "MemberResetInfoRequest": {
         "type": "object",
-        "description": "Reset member info request",
+        "description": "Reset member info request. Top-level fields identify the member, and updates contains the profile fields to write.",
         "required": [
-          "member_id"
+          "updates"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "member_id"
+            ]
+          },
+          {
+            "required": [
+              "member_name"
+            ]
+          },
+          {
+            "required": [
+              "email"
+            ]
+          },
+          {
+            "required": [
+              "phone"
+            ]
+          },
+          {
+            "required": [
+              "ref_id"
+            ]
+          }
         ],
         "properties": {
           "member_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Member ID of the member to update"
+            "description": "Member ID used to identify the member."
           },
           "member_name": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 2,
-            "maxLength": 39,
-            "description": "Display name"
+            "type": "string",
+            "description": "Member name used to identify the member."
           },
           "email": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Email address"
+            "type": "string",
+            "description": "Email address used to identify the member."
           },
           "phone": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Phone number"
+            "type": "string",
+            "description": "Phone number used to identify the member. Include country_code when the number is not in E.164 format."
           },
           "country_code": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Country code"
+            "type": "string",
+            "description": "Country or region code used to parse phone."
+          },
+          "ref_id": {
+            "type": "string",
+            "description": "External reference ID used to identify the member."
+          },
+          "updates": {
+            "$ref": "#/components/schemas/MemberResetInfoUpdates"
+          }
+        }
+      },
+      "MemberResetInfoUpdates": {
+        "type": "object",
+        "description": "Member profile fields to write. Omitted fields remain unchanged.",
+        "properties": {
+          "member_name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 39,
+            "description": "New display name."
+          },
+          "password": {
+            "type": "string",
+            "description": "New login password in the encrypted format accepted by the backend."
+          },
+          "phone": {
+            "type": "string",
+            "description": "New phone number. Include country_code when the number is not in E.164 format."
+          },
+          "country_code": {
+            "type": "string",
+            "description": "Country or region code for the new phone number."
+          },
+          "email": {
+            "type": "string",
+            "description": "New email address."
           },
           "avatar": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Avatar URL"
+            "type": "string",
+            "maxLength": 499,
+            "description": "New avatar URL."
           },
           "locale": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "enum": [
               "zh-CN",
               "en-US"
             ],
-            "description": "Locale"
+            "description": "New locale preference."
           },
           "time_zone": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Time zone"
+            "type": "string",
+            "description": "New IANA time zone name, such as Asia/Shanghai."
+          },
+          "ref_id": {
+            "type": "string",
+            "description": "New external reference ID."
           }
         }
       },

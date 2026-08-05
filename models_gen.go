@@ -4996,22 +4996,41 @@ type MemberListResponse struct {
 
 // MemberResetInfoRequest is generated from the Flashduty OpenAPI schema.
 type MemberResetInfoRequest struct {
-	// Avatar URL
-	Avatar *string `json:"avatar,omitempty" toon:"avatar,omitempty"`
-	// Country code
-	CountryCode *string `json:"country_code,omitempty" toon:"country_code,omitempty"`
-	// Email address
-	Email *string `json:"email,omitempty" toon:"email,omitempty"`
-	// Locale
-	Locale *string `json:"locale,omitempty" toon:"locale,omitempty"`
-	// Member ID of the member to update
-	MemberID uint64 `json:"member_id" toon:"member_id"`
-	// Display name
-	MemberName *string `json:"member_name,omitempty" toon:"member_name,omitempty"`
-	// Phone number
-	Phone *string `json:"phone,omitempty" toon:"phone,omitempty"`
-	// Time zone
-	TimeZone *string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+	// Country or region code used to parse phone.
+	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
+	// Email address used to identify the member.
+	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	// Member ID used to identify the member.
+	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
+	// Member name used to identify the member.
+	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	// Phone number used to identify the member. Include country_code when the number is not in E.164 format.
+	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	// External reference ID used to identify the member.
+	RefID   string                 `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	Updates MemberResetInfoUpdates `json:"updates" toon:"updates"`
+}
+
+// MemberResetInfoUpdates is generated from the Flashduty OpenAPI schema.
+type MemberResetInfoUpdates struct {
+	// New avatar URL.
+	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
+	// Country or region code for the new phone number.
+	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
+	// New email address.
+	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	// New locale preference.
+	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	// New display name.
+	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	// New login password in the encrypted format accepted by the backend.
+	Password string `json:"password,omitempty" toon:"password,omitempty"`
+	// New phone number. Include country_code when the number is not in E.164 format.
+	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	// New external reference ID.
+	RefID string `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	// New IANA time zone name, such as Asia/Shanghai.
+	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
 }
 
 // MemberRoleGrantRequest is generated from the Flashduty OpenAPI schema.
