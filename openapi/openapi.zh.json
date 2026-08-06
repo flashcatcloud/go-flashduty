@@ -41491,12 +41491,12 @@
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "创建时间，Unix 时间戳（秒）。"
+            "description": "创建时间，Unix 时间戳（毫秒）。"
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "最后更新时间，Unix 时间戳（秒）。"
+            "description": "最后更新时间，Unix 时间戳（毫秒）。"
           }
         }
       },

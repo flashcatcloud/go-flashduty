@@ -41500,12 +41500,12 @@
           "created_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Creation timestamp, Unix epoch seconds."
+            "description": "Creation timestamp, Unix epoch milliseconds."
           },
           "updated_at": {
             "type": "integer",
             "format": "int64",
-            "description": "Last update timestamp, Unix epoch seconds."
+            "description": "Last update timestamp, Unix epoch milliseconds."
           }
         }
       },
