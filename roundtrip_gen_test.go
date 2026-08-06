@@ -125,6 +125,11 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /monit/rule/status":                    func(d json.RawMessage) error { var v RuleStatusResponse; return json.Unmarshal(d, &v) },
 	"POST /monit/rule/update":                    func(d json.RawMessage) error { var v AlertRule; return json.Unmarshal(d, &v) },
 	"POST /monit/rule/update/fields":             func(d json.RawMessage) error { var v RuleNameMessageListResponse; return json.Unmarshal(d, &v) },
+	"POST /monit/servicemap/fleet":               func(d json.RawMessage) error { var v ServiceMapFleetBrowseResponse; return json.Unmarshal(d, &v) },
+	"POST /monit/servicemap/fleet/summary":       func(d json.RawMessage) error { var v ServiceMapFleetSummaryResponse; return json.Unmarshal(d, &v) },
+	"POST /monit/servicemap/status":              func(d json.RawMessage) error { var v ServiceMapStatusResponse; return json.Unmarshal(d, &v) },
+	"POST /monit/servicemap/summary":             func(d json.RawMessage) error { var v ServiceMapSummaryResponse; return json.Unmarshal(d, &v) },
+	"POST /monit/servicemap/topology":            func(d json.RawMessage) error { var v ServiceMapTopologyResponse; return json.Unmarshal(d, &v) },
 	"POST /monit/store/ruleset/create":           func(d json.RawMessage) error { var v StoreRulesetItem; return json.Unmarshal(d, &v) },
 	"POST /monit/store/ruleset/info":             func(d json.RawMessage) error { var v StoreRulesetItem; return json.Unmarshal(d, &v) },
 	"POST /monit/store/ruleset/list":             func(d json.RawMessage) error { var v StoreRulesetListResponse; return json.Unmarshal(d, &v) },
@@ -147,11 +152,23 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /rum/application/list":                 func(d json.RawMessage) error { var v RUMApplicationListResponse; return json.Unmarshal(d, &v) },
 	"POST /rum/application/webhook/test":         func(d json.RawMessage) error { var v RUMWebhookTestResponse; return json.Unmarshal(d, &v) },
 	"POST /rum/data/query":                       func(d json.RawMessage) error { var v RUMDataQueryResponse; return json.Unmarshal(d, &v) },
-	"POST /rum/facet/count":                      func(d json.RawMessage) error { var v RUMFacetCountResponse; return json.Unmarshal(d, &v) },
-	"POST /rum/facet/list":                       func(d json.RawMessage) error { var v RUMFacetListResponse; return json.Unmarshal(d, &v) },
-	"POST /rum/field/list":                       func(d json.RawMessage) error { var v RUMFieldListResponse; return json.Unmarshal(d, &v) },
-	"POST /rum/issue/info":                       func(d json.RawMessage) error { var v RUMIssueItem; return json.Unmarshal(d, &v) },
-	"POST /rum/issue/list":                       func(d json.RawMessage) error { var v RUMIssueListResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/error-ingestion/rules/create":     func(d json.RawMessage) error { var v RUMErrorIngestionCreateResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/error-ingestion/rules/history/list": func(d json.RawMessage) error {
+		var v RUMErrorIngestionHistoryListResponse
+		return json.Unmarshal(d, &v)
+	},
+	"POST /rum/error-ingestion/rules/list":         func(d json.RawMessage) error { var v RUMErrorIngestionListResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/facet/count":                        func(d json.RawMessage) error { var v RUMFacetCountResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/field/list":                         func(d json.RawMessage) error { var v RUMFieldListResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/issue/info":                         func(d json.RawMessage) error { var v RUMIssueItem; return json.Unmarshal(d, &v) },
+	"POST /rum/issue/list":                         func(d json.RawMessage) error { var v RUMIssueListResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/issue/preset-severity/rules/create": func(d json.RawMessage) error { var v RUMPresetSeverityRuleCreateResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/issue/preset-severity/rules/history/list": func(d json.RawMessage) error {
+		var v RUMPresetSeverityRuleHistoryListResponse
+		return json.Unmarshal(d, &v)
+	},
+	"POST /rum/issue/preset-severity/rules/list": func(d json.RawMessage) error { var v RUMPresetSeverityRuleListResponse; return json.Unmarshal(d, &v) },
+	"POST /rum/resource/info":                    func(d json.RawMessage) error { var v RUMResourceItem; return json.Unmarshal(d, &v) },
 	"POST /rum/session-replay/metadata":          func(d json.RawMessage) error { var v RUMSessionReplayMetaItem; return json.Unmarshal(d, &v) },
 	"POST /rum/session-replay/segments":          func(d json.RawMessage) error { var v RUMSessionReplaySegmentsResult; return json.Unmarshal(d, &v) },
 	"POST /safari/a2a-agent/create":              func(d json.RawMessage) error { var v A2aAgentCreateResponse; return json.Unmarshal(d, &v) },

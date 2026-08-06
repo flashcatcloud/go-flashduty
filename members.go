@@ -69,7 +69,7 @@ func (s *MembersService) MemberList(ctx context.Context, req *MemberListRequest)
 
 // Reset member info.
 //
-// Batch-update multiple profile fields of the current member.
+// Identify a member and reset the specified profile fields.
 //
 // API: POST /member/info/reset (memberResetInfo).
 func (s *MembersService) MemberResetInfo(ctx context.Context, req *MemberResetInfoRequest) (*Response, error) {

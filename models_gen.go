@@ -161,6 +161,9 @@ type RuleStatusResponse []AlertRuleStatus
 // RUMDataQueryResponse is a map response payload.
 type RUMDataQueryResponse map[string]RUMDataQueryOutput
 
+// RUMErrorIngestionOrFilters is a list response payload.
+type RUMErrorIngestionOrFilters [][]RUMErrorIngestionFilterCondition
+
 // SLSLogstoresResponse is a list response payload.
 type SLSLogstoresResponse []string
 
@@ -807,7 +810,7 @@ type AlertRule struct {
 	CreatedAt   int64    `json:"created_at,omitempty" toon:"created_at,omitempty"`
 	CreatorID   uint64   `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
 	CreatorName string   `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
-	// 5-field cron schedule.
+	// 5-field cron schedule. Must not start with `CRON_TZ=` or `TZ=`; use the `timezone` field instead.
 	CronPattern     string `json:"cron_pattern,omitempty" toon:"cron_pattern,omitempty"`
 	DebugLogEnabled bool   `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
 	DelaySeconds    int64  `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
@@ -835,9 +838,11 @@ type AlertRule struct {
 	// Max number of repeat notifications.
 	RepeatTotal int64       `json:"repeat_total,omitempty" toon:"repeat_total,omitempty"`
 	RuleConfigs RuleConfigs `json:"rule_configs,omitzero" toon:"rule_configs,omitempty"`
-	UpdatedAt   int64       `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
-	UpdaterID   uint64      `json:"updater_id,omitempty" toon:"updater_id,omitempty"`
-	UpdaterName string      `json:"updater_name,omitempty" toon:"updater_name,omitempty"`
+	// Timezone in which the rule executes. Determines how the cron schedule and effective time windows are interpreted. Only IANA timezone names are accepted (e.g. `Asia/Shanghai`, `UTC`, `Europe/London`); shortcuts and offsets such as `Local`, `UTC+8`, or `CST` are rejected. Treated as `Asia/Shanghai` if empty.
+	Timezone    string `json:"timezone,omitempty" toon:"timezone,omitempty"`
+	UpdatedAt   int64  `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	UpdaterID   uint64 `json:"updater_id,omitempty" toon:"updater_id,omitempty"`
+	UpdaterName string `json:"updater_name,omitempty" toon:"updater_name,omitempty"`
 }
 
 // AlertRuleAudit is generated from the Flashduty OpenAPI schema.
@@ -863,7 +868,7 @@ type AlertRuleBasic struct {
 	CreatedAt   int64  `json:"created_at" toon:"created_at"`
 	CreatorID   uint64 `json:"creator_id" toon:"creator_id"`
 	CreatorName string `json:"creator_name" toon:"creator_name"`
-	// 5-field cron schedule, e.g. `* * * * *`.
+	// 5-field cron schedule, e.g. `* * * * *`. Must not start with `CRON_TZ=` or `TZ=`; use the `timezone` field instead.
 	CronPattern string `json:"cron_pattern" toon:"cron_pattern"`
 	// Whether debug logging is enabled.
 	DebugLogEnabled bool `json:"debug_log_enabled" toon:"debug_log_enabled"`
@@ -881,6 +886,8 @@ type AlertRuleBasic struct {
 	Labels map[string]string `json:"labels" toon:"labels"`
 	// Rule name.
 	Name string `json:"name" toon:"name"`
+	// Timezone in which the rule executes. Determines how the cron schedule and effective time windows are interpreted. Only IANA timezone names are accepted (e.g. `Asia/Shanghai`, `UTC`, `Europe/London`); shortcuts and offsets such as `Local`, `UTC+8`, or `CST` are rejected. Treated as `Asia/Shanghai` if empty.
+	Timezone string `json:"timezone" toon:"timezone"`
 	// True if the rule currently has active alerts.
 	Triggered   bool   `json:"triggered" toon:"triggered"`
 	UpdatedAt   int64  `json:"updated_at" toon:"updated_at"`
@@ -916,6 +923,8 @@ type AlertRuleExport struct {
 	RepeatInterval  int64             `json:"repeat_interval" toon:"repeat_interval"`
 	RepeatTotal     int64             `json:"repeat_total" toon:"repeat_total"`
 	RuleConfigs     RuleConfigs       `json:"rule_configs" toon:"rule_configs"`
+	// Timezone in which the rule executes. IANA timezone name; defaults to `Asia/Shanghai`.
+	Timezone string `json:"timezone" toon:"timezone"`
 }
 
 // AlertRuleInfoResponse is generated from the Flashduty OpenAPI schema.
@@ -927,7 +936,7 @@ type AlertRuleInfoResponse struct {
 	CreatedAt   int64    `json:"created_at" toon:"created_at"`
 	CreatorID   uint64   `json:"creator_id" toon:"creator_id"`
 	CreatorName string   `json:"creator_name" toon:"creator_name"`
-	// 5-field cron schedule.
+	// 5-field cron schedule. Must not start with `CRON_TZ=` or `TZ=`; use the `timezone` field instead.
 	CronPattern     string `json:"cron_pattern" toon:"cron_pattern"`
 	DebugLogEnabled bool   `json:"debug_log_enabled" toon:"debug_log_enabled"`
 	DelaySeconds    int64  `json:"delay_seconds" toon:"delay_seconds"`
@@ -955,9 +964,11 @@ type AlertRuleInfoResponse struct {
 	// Max number of repeat notifications.
 	RepeatTotal int64       `json:"repeat_total" toon:"repeat_total"`
 	RuleConfigs RuleConfigs `json:"rule_configs" toon:"rule_configs"`
-	UpdatedAt   int64       `json:"updated_at" toon:"updated_at"`
-	UpdaterID   uint64      `json:"updater_id" toon:"updater_id"`
-	UpdaterName string      `json:"updater_name" toon:"updater_name"`
+	// Timezone in which the rule executes. Determines how the cron schedule and effective time windows are interpreted. Only IANA timezone names are accepted (e.g. `Asia/Shanghai`, `UTC`, `Europe/London`); shortcuts and offsets such as `Local`, `UTC+8`, or `CST` are rejected. Treated as `Asia/Shanghai` if empty.
+	Timezone    string `json:"timezone" toon:"timezone"`
+	UpdatedAt   int64  `json:"updated_at" toon:"updated_at"`
+	UpdaterID   uint64 `json:"updater_id" toon:"updater_id"`
+	UpdaterName string `json:"updater_name" toon:"updater_name"`
 }
 
 // AlertRuleStatus is generated from the Flashduty OpenAPI schema.
@@ -4996,22 +5007,43 @@ type MemberListResponse struct {
 
 // MemberResetInfoRequest is generated from the Flashduty OpenAPI schema.
 type MemberResetInfoRequest struct {
-	// Avatar URL
-	Avatar *string `json:"avatar,omitempty" toon:"avatar,omitempty"`
-	// Country code
-	CountryCode *string `json:"country_code,omitempty" toon:"country_code,omitempty"`
-	// Email address
-	Email *string `json:"email,omitempty" toon:"email,omitempty"`
-	// Locale
-	Locale *string `json:"locale,omitempty" toon:"locale,omitempty"`
-	// Member ID of the member to update
-	MemberID uint64 `json:"member_id" toon:"member_id"`
-	// Display name
-	MemberName *string `json:"member_name,omitempty" toon:"member_name,omitempty"`
-	// Phone number
-	Phone *string `json:"phone,omitempty" toon:"phone,omitempty"`
-	// Time zone
-	TimeZone *string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
+	// Country or region code used to parse phone.
+	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
+	// Email address used to identify the member.
+	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	// Set to `api` to mark an updated phone or email as verified. Only takes effect when the account has member invites disabled; any other value is ignored.
+	From string `json:"from,omitempty" toon:"from,omitempty"`
+	// Member ID used to identify the member.
+	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
+	// Member name used to identify the member.
+	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	// Phone number used to identify the member. Include country_code when the number is not in E.164 format.
+	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	// External reference ID used to identify the member.
+	RefID   string                 `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	Updates MemberResetInfoUpdates `json:"updates" toon:"updates"`
+}
+
+// MemberResetInfoUpdates is generated from the Flashduty OpenAPI schema.
+type MemberResetInfoUpdates struct {
+	// New avatar URL.
+	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
+	// Country or region code for the new phone number.
+	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
+	// New email address.
+	Email string `json:"email,omitempty" toon:"email,omitempty"`
+	// New locale preference.
+	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
+	// New display name.
+	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
+	// New login password in the encrypted format accepted by the backend.
+	Password string `json:"password,omitempty" toon:"password,omitempty"`
+	// New phone number. Include country_code when the number is not in E.164 format.
+	Phone string `json:"phone,omitempty" toon:"phone,omitempty"`
+	// New external reference ID.
+	RefID string `json:"ref_id,omitempty" toon:"ref_id,omitempty"`
+	// New IANA time zone name, such as Asia/Shanghai.
+	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
 }
 
 // MemberRoleGrantRequest is generated from the Flashduty OpenAPI schema.
@@ -5956,6 +5988,8 @@ type RuleFieldsUpdateRequest struct {
 	Labels         map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
 	RepeatInterval int64             `json:"repeat_interval,omitempty" toon:"repeat_interval,omitempty"`
 	RepeatTotal    int64             `json:"repeat_total,omitempty" toon:"repeat_total,omitempty"`
+	// Timezone in which the rule executes. IANA timezone name; defaults to `Asia/Shanghai`.
+	Timezone string `json:"timezone,omitempty" toon:"timezone,omitempty"`
 }
 
 // RuleFolderIDRequest is generated from the Flashduty OpenAPI schema.
@@ -6238,6 +6272,164 @@ type RUMDataSamplingDecision struct {
 	SelectedTablets []string `json:"selected_tablets" toon:"selected_tablets"`
 }
 
+// RUMErrorIngestionCreateRequest is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionCreateRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Rule description, up to 512 characters.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Filter conditions the rule matches errors against.
+	Filters RUMErrorIngestionOrFilters `json:"filters" toon:"filters"`
+	// Rule name, 1-128 characters.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+}
+
+// RUMErrorIngestionCreateResponse is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionCreateResponse struct {
+	// ID assigned to the new rule.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Echo of the created rule's name.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+}
+
+// RUMErrorIngestionEmptyResponse is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionEmptyResponse struct{}
+
+// RUMErrorIngestionFilterCondition is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionFilterCondition struct {
+	// Field key. One of `error.usr_id`, `error.usr_email`, `error.error_type`, `error.error_message`, `error.error_stack`, `error.view_url`, `error.env`, `error.version`, `error.service`, `error.browser_name`, `error.browser_version`, `error.fingerprint`, `error.is_crash`, or a `context.`-prefixed custom context path (up to 3 levels deep).
+	Key string `json:"key" toon:"key"`
+	// Match mode: `IN` matches when the field value matches any entry in `vals`; `NOTIN` matches when it matches none.
+	Oper string `json:"oper" toon:"oper"`
+	// Values to match against, at least 1 entry. Each entry is an exact string, or a special pattern using wildcards (`*`/`?`), a regexp wrapped in `/`, a `cidr:`-prefixed CIDR match, or a `num:lt|le|gt|ge:`-prefixed numeric comparison.
+	Vals []string `json:"vals" toon:"vals"`
+}
+
+// RUMErrorIngestionHistoryItem is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionHistoryItem struct {
+	// The application's complete rule list as of this version.
+	Rules []RUMErrorIngestionRuleSnapshotItem `json:"rules" toon:"rules"`
+	// Unix timestamp in milliseconds when this snapshot was recorded.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Member ID whose action triggered this snapshot.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Display name of the member whose action triggered this snapshot.
+	UpdatedByName string `json:"updated_by_name" toon:"updated_by_name"`
+	// History version number, incrementing from 1.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RUMErrorIngestionHistoryListRequest is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionHistoryListRequest struct {
+	ListOptions
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Sort ascending instead of the default descending order.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Sort column: `updated_at` or `version`. Unrecognized values fall back to `updated_at`.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+}
+
+// RUMErrorIngestionHistoryListResponse is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionHistoryListResponse struct {
+	// Whether another page of history exists after this one.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// History snapshots, ordered by `orderby`/`asc`.
+	Items []RUMErrorIngestionHistoryItem `json:"items" toon:"items"`
+	// Total number of history versions for the application.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// RUMErrorIngestionListRequest is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionListRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+}
+
+// RUMErrorIngestionListResponse is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionListResponse struct {
+	// Rules, newest-created first.
+	Items []RUMErrorIngestionRule `json:"items" toon:"items"`
+}
+
+// RUMErrorIngestionRevertRequest is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionRevertRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// History version number to revert to.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RUMErrorIngestionRule is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionRule struct {
+	// Unix timestamp in milliseconds when the rule was created.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Rule description, up to 512 characters.
+	Description string `json:"description" toon:"description"`
+	// The rule's filter conditions.
+	Filters RUMErrorIngestionOrFilters `json:"filters" toon:"filters"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Rule name, 1-128 characters. Not required to be unique within the application.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+	// Current status of the rule.
+	Status string `json:"status" toon:"status"`
+	// Unix timestamp in milliseconds when the rule was last updated.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
+// RUMErrorIngestionRuleIDRequest is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionRuleIDRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+}
+
+// RUMErrorIngestionRuleSnapshotItem is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionRuleSnapshotItem struct {
+	// Account ID.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// RUM application ID the rule belongs to.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Unix timestamp in milliseconds when the row was created.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Member ID who created the rule.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Unix timestamp in milliseconds when the row was soft-deleted; `0` when not deleted.
+	DeletedAt TimestampMilli `json:"deleted_at" toon:"deleted_at"`
+	// Rule description.
+	Description string `json:"description" toon:"description"`
+	// The rule's filter conditions as of this snapshot version.
+	Filters RUMErrorIngestionOrFilters `json:"filters" toon:"filters"`
+	// Internal row ID.
+	ID uint64 `json:"id" toon:"id"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Rule name.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+	// The rule's status as of this snapshot version.
+	Status string `json:"status" toon:"status"`
+	// Unix timestamp in milliseconds when the row was last updated.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Member ID who last updated the rule.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// RUMErrorIngestionUpdateRequest is generated from the Flashduty OpenAPI schema.
+type RUMErrorIngestionUpdateRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// New rule description, up to 512 characters. Omit to leave unchanged.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// New filter conditions. Omit to leave unchanged.
+	Filters RUMErrorIngestionOrFilters `json:"filters,omitempty" toon:"filters,omitempty"`
+	// Rule ID to update.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// New rule name, 1-128 characters. Omit to leave unchanged.
+	RuleName *string `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
+}
+
 // RUMFacetCountRequest is generated from the Flashduty OpenAPI schema.
 type RUMFacetCountRequest struct {
 	// RUM DQL filter expression applied before counting.
@@ -6261,19 +6453,6 @@ type RUMFacetCountRequest struct {
 // RUMFacetCountResponse is generated from the Flashduty OpenAPI schema.
 type RUMFacetCountResponse struct {
 	Items []FacetCountItem `json:"items" toon:"items"`
-}
-
-// RUMFacetListRequest is generated from the Flashduty OpenAPI schema.
-type RUMFacetListRequest struct {
-	// When true, return only facet-enabled fields. When false or omitted, return all fields.
-	IsFacet bool `json:"is_facet,omitempty" toon:"is_facet,omitempty"`
-	// Filter by RUM data scopes. Valid values: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`.
-	Scopes []string `json:"scopes,omitempty" toon:"scopes,omitempty"`
-}
-
-// RUMFacetListResponse is generated from the Flashduty OpenAPI schema.
-type RUMFacetListResponse struct {
-	Items []RUMFieldItem `json:"items" toon:"items"`
 }
 
 // RUMFieldItem is generated from the Flashduty OpenAPI schema.
@@ -6403,6 +6582,184 @@ type RUMIssueUpdateRequest struct {
 	SuspectedCause string `json:"suspected_cause,omitempty" toon:"suspected_cause,omitempty"`
 }
 
+// RUMPresetSeverityRuleCreateRequest is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleCreateRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Optional description, up to 512 characters.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// OR-of-ANDs filter structure: the outer array is OR'd, each inner array is AND'd. A rule matches an error when at least one inner AND-group fully matches.
+	Filters [][]RUMPresetSeverityRuleFilterCondition `json:"filters" toon:"filters"`
+	// Rule display name, 1-128 characters.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+	// Severity to assign to errors matching this rule.
+	Severity string `json:"severity" toon:"severity"`
+}
+
+// RUMPresetSeverityRuleCreateResponse is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleCreateResponse struct {
+	// Evaluation order assigned to the new rule (always the current lowest precedence, i.e. current max + 1).
+	Priority int64 `json:"priority" toon:"priority"`
+	// ID of the newly created rule.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Echo of the rule's display name.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+}
+
+// RUMPresetSeverityRuleFilterCondition is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleFilterCondition struct {
+	// Filter attribute key. Only these Error-level attributes are supported for preset severity rules.
+	Key string `json:"key" toon:"key"`
+	// Match semantics: `IN` matches when the field's value matches any of `vals`; `NOTIN` matches when it matches none of them (and matches when the field is absent).
+	Oper string `json:"oper" toon:"oper"`
+	// Values to match against. Each entry supports exact string match, wildcard (`*`/`?`), regex (wrap in `/.../`), CIDR (`cidr:10.0.0.0/8`) for IP-shaped values, or numeric comparison (`num:gt:100`, `num:le:50`, etc.).
+	Vals []string `json:"vals" toon:"vals"`
+}
+
+// RUMPresetSeverityRuleHistoryItem is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleHistoryItem struct {
+	// Full rule set captured immediately before the mutation that produced this snapshot. Empty for the very first snapshot.
+	Rules []RUMPresetSeverityRuleHistorySnapshotRule `json:"rules" toon:"rules"`
+	// Unix timestamp in milliseconds when the snapshot was written.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Member ID who triggered the mutation this snapshot precedes.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Display name of `updated_by` at the time of the change.
+	UpdatedByName string `json:"updated_by_name" toon:"updated_by_name"`
+	// Monotonically increasing snapshot version number, starting at 1.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RUMPresetSeverityRuleHistoryListRequest is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleHistoryListRequest struct {
+	ListOptions
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Sort ascending when true; results are descending by default.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Sort column. Any other value (including omitted) falls back to `updated_at`.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+}
+
+// RUMPresetSeverityRuleHistoryListResponse is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleHistoryListResponse struct {
+	// Whether another page is available after this one.
+	HasNextPage bool                               `json:"has_next_page" toon:"has_next_page"`
+	Items       []RUMPresetSeverityRuleHistoryItem `json:"items" toon:"items"`
+	// Total number of history snapshots for the application.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// RUMPresetSeverityRuleHistoryRevertRequest is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleHistoryRevertRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Version number of the snapshot to revert to.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RUMPresetSeverityRuleHistorySnapshotRule is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleHistorySnapshotRule struct {
+	// Account ID the rule belongs to.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// RUM application ID the rule belongs to.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Unix timestamp in milliseconds when the rule was created.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Member ID who originally created the rule.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Unix timestamp in milliseconds the rule was soft-deleted; `0` means not deleted. Always `0` in practice, since deleted rules are excluded before a snapshot is taken.
+	DeletedAt TimestampMilli `json:"deleted_at" toon:"deleted_at"`
+	// Rule description. May be empty.
+	Description string `json:"description" toon:"description"`
+	// OR-of-ANDs filter structure: the outer array is OR'd, each inner array is AND'd. A rule matches an error when at least one inner AND-group fully matches.
+	Filters [][]RUMPresetSeverityRuleFilterCondition `json:"filters" toon:"filters"`
+	// Internal auto-increment row ID. Not stable across a history revert — reverting reinserts rows with new IDs.
+	ID uint64 `json:"id" toon:"id"`
+	// Evaluation order at snapshot time; `1` is highest precedence.
+	Priority int64 `json:"priority" toon:"priority"`
+	// Unique rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Rule display name.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+	// Severity assigned to errors matching this rule.
+	Severity string `json:"severity" toon:"severity"`
+	// Rule status at snapshot time.
+	Status string `json:"status" toon:"status"`
+	// Unix timestamp in milliseconds when the rule was last updated.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Member ID who last updated the rule as of snapshot time.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// RUMPresetSeverityRuleIDRequest is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleIDRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+}
+
+// RUMPresetSeverityRuleItem is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleItem struct {
+	// Unix timestamp in milliseconds when the rule was created.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Rule description. May be empty.
+	Description string `json:"description" toon:"description"`
+	// OR-of-ANDs filter structure: the outer array is OR'd, each inner array is AND'd. A rule matches an error when at least one inner AND-group fully matches.
+	Filters [][]RUMPresetSeverityRuleFilterCondition `json:"filters" toon:"filters"`
+	// Evaluation order among the application's rules. `1` is evaluated first (highest precedence); the first enabled rule whose filters match wins.
+	Priority int64 `json:"priority" toon:"priority"`
+	// Unique rule ID.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Rule display name.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+	// Severity assigned to errors matching this rule.
+	Severity string `json:"severity" toon:"severity"`
+	// Only enabled rules are evaluated against incoming errors.
+	Status string `json:"status" toon:"status"`
+	// Unix timestamp in milliseconds when the rule was last updated.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
+// RUMPresetSeverityRuleListRequest is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleListRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+}
+
+// RUMPresetSeverityRuleListResponse is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleListResponse struct {
+	// Rules ordered by evaluation order (`priority` ascending, then `created_at` ascending).
+	Items []RUMPresetSeverityRuleItem `json:"items" toon:"items"`
+}
+
+// RUMPresetSeverityRuleReorderRequest is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleReorderRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// ID of the rule being moved.
+	DragRuleID string `json:"drag_rule_id" toon:"drag_rule_id"`
+	// ID of the rule whose evaluation position `drag_rule_id` moves to.
+	TargetRuleID string `json:"target_rule_id" toon:"target_rule_id"`
+}
+
+// RUMPresetSeverityRuleUpdateRequest is generated from the Flashduty OpenAPI schema.
+type RUMPresetSeverityRuleUpdateRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// New description, up to 512 characters. Omit to leave unchanged.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// OR-of-ANDs filter structure: the outer array is OR'd, each inner array is AND'd. A rule matches an error when at least one inner AND-group fully matches.
+	Filters [][]RUMPresetSeverityRuleFilterCondition `json:"filters,omitempty" toon:"filters,omitempty"`
+	// Rule ID to update.
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// New display name, 1-128 characters. Omit to leave unchanged.
+	RuleName *string `json:"rule_name,omitempty" toon:"rule_name,omitempty"`
+	// New severity. Omit to leave unchanged.
+	Severity *string `json:"severity,omitempty" toon:"severity,omitempty"`
+}
+
 // RUMReplayApplication is generated from the Flashduty OpenAPI schema.
 type RUMReplayApplication struct {
 	// RUM application ID the session belongs to.
@@ -6463,6 +6820,68 @@ type RUMReplayView struct {
 	URL string `json:"url" toon:"url"`
 	// Unique ID of the view within the session.
 	ViewID string `json:"view_id" toon:"view_id"`
+}
+
+// RUMResourceInfoRequest is generated from the Flashduty OpenAPI schema.
+type RUMResourceInfoRequest struct {
+	// Bypass the short-lived cache of the resource record (plan version, quotas, status) and read it from source. Does not refresh the usage counts. Default `false`.
+	NoCache bool `json:"no_cache,omitempty" toon:"no_cache,omitempty"`
+}
+
+// RUMResourceItem is generated from the Flashduty OpenAPI schema.
+type RUMResourceItem struct {
+	// Account ID that owns this resource.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Retention period in days for action (user interaction) data.
+	ActionDays int64 `json:"action.days" toon:"action.days"`
+	// Unix timestamp in seconds when the resource was created. Also anchors the start of the first billing window.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Retention period in days for error data.
+	ErrorDays int64 `json:"error.days" toon:"error.days"`
+	// Unix timestamp in seconds when the on-premises license expires. Only present on on-premises deployments; omitted entirely for SaaS accounts.
+	ExpiredAt Timestamp `json:"expired_at" toon:"expired_at"`
+	// Retention period in days for long-task data.
+	LongTaskDays int64 `json:"long_task.days" toon:"long_task.days"`
+	// ID of the offering (SKU) this resource was provisioned from.
+	OfferingID int64 `json:"offering_id" toon:"offering_id"`
+	// ID of the order that provisioned this resource. Empty for resources provisioned outside the order flow (e.g. on-premises).
+	OrderID string `json:"order_id" toon:"order_id"`
+	// Product code for this resource. Always `rum` for this endpoint.
+	Product string `json:"product" toon:"product"`
+	// Retention period in days for resource (network request) data.
+	ResourceDays int64 `json:"resource.days" toon:"resource.days"`
+	// Unique resource identifier for the account's RUM resource.
+	ResourceID string `json:"resource_id" toon:"resource_id"`
+	// Display name of the resource.
+	ResourceName string `json:"resource_name" toon:"resource_name"`
+	// Retention period in days for session data.
+	SessionDays int64 `json:"session.days" toon:"session.days"`
+	// Free quota for investigate sessions per application, per billing window.
+	SessionInvestigateFreeCnt int64 `json:"session_investigate.free_cnt" toon:"session_investigate.free_cnt"`
+	// Number of investigate (error tracking) sessions used in the current billing window.
+	SessionInvestigateUsedCnt int64 `json:"session_investigate.used_cnt" toon:"session_investigate.used_cnt"`
+	// `true` when a `version=free` account has exceeded its combined free session quota across all applications. Always `false` for non-free plans.
+	SessionLimitReached bool `json:"session_limit_reached" toon:"session_limit_reached"`
+	// Free quota for measure sessions per application, per billing window.
+	SessionMeasureFreeCnt int64 `json:"session_measure.free_cnt" toon:"session_measure.free_cnt"`
+	// Number of measure (performance) sessions used in the current billing window.
+	SessionMeasureUsedCnt int64 `json:"session_measure.used_cnt" toon:"session_measure.used_cnt"`
+	// Free quota for session-replay sessions per application, per billing window.
+	SessionReplayFreeCnt int64 `json:"session_replay.free_cnt" toon:"session_replay.free_cnt"`
+	// Number of session-replay sessions used in the current billing window.
+	SessionReplayUsedCnt int64 `json:"session_replay.used_cnt" toon:"session_replay.used_cnt"`
+	// Status of the resource. A resource with status `deleted` or `destroyed` never reaches this field — the operation returns `ResourceNotFound` for those instead.
+	Status string `json:"status" toon:"status"`
+	// Unix timestamp in seconds when the resource was last updated.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// Plan version of this resource.
+	Version string `json:"version" toon:"version"`
+	// Retention period in days for view (page/screen) data.
+	ViewDays int64 `json:"view.days" toon:"view.days"`
+	// Unix timestamp in seconds for the end of the current 30-day billing window.
+	WindowEndTime Timestamp `json:"window_end_time" toon:"window_end_time"`
+	// Unix timestamp in seconds for the start of the current 30-day billing window.
+	WindowStartTime Timestamp `json:"window_start_time" toon:"window_start_time"`
 }
 
 // RUMSessionReplayMetaItem is generated from the Flashduty OpenAPI schema.
@@ -6930,6 +7349,596 @@ type ServiceDeskPlusRequestMappingItem struct {
 	RequestLink string `json:"request_link" toon:"request_link"`
 	// Synchronization status.
 	Status string `json:"status" toon:"status"`
+}
+
+// ServiceMapAnchor is generated from the Flashduty OpenAPI schema.
+type ServiceMapAnchor struct {
+	// Optional process/entity ID within the host to anchor on. Omit to anchor on the whole host.
+	EntityID string `json:"entity_id,omitempty" toon:"entity_id,omitempty"`
+	// Stable ServiceMap host identifier, e.g. `host_0123...`. Must already be known to ServiceMap.
+	HostID string `json:"host_id" toon:"host_id"`
+}
+
+// ServiceMapCapability is generated from the Flashduty OpenAPI schema.
+type ServiceMapCapability struct {
+	// Capture mode, e.g. `ebpf` or `polling`.
+	CaptureMode string `json:"capture_mode" toon:"capture_mode"`
+	// True if ServiceMap collection is enabled on this host.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// Host ID this capability describes.
+	HostID string `json:"host_id" toon:"host_id"`
+	// True if the host has an inventory row with ServiceMap capability metadata at all.
+	Present bool `json:"present" toon:"present"`
+	// Machine-readable codes explaining the current capability status.
+	ReasonCodes []string `json:"reason_codes" toon:"reason_codes"`
+	// Configured reporting interval in milliseconds.
+	ReportIntervalMs int64 `json:"report_interval_ms" toon:"report_interval_ms"`
+	// True if the agent has produced at least one full snapshot.
+	SnapshotReady bool `json:"snapshot_ready" toon:"snapshot_ready"`
+	// Agent-reported capability status, e.g. `running`, `disabled`, `starting`, `failed`, `unsupported`.
+	Status string `json:"status" toon:"status"`
+}
+
+// ServiceMapEdge is generated from the Flashduty OpenAPI schema.
+type ServiceMapEdge struct {
+	// Traversal depth this edge was discovered at, relative to the anchor.
+	Depth int64 `json:"depth" toon:"depth"`
+	// Destination endpoint of the connection.
+	Destination ServiceMapEndpoint `json:"destination" toon:"destination"`
+	// Resolution of the destination endpoint to candidate target nodes.
+	EndpointResolution ServiceMapEndpointResolution `json:"endpoint_resolution" toon:"endpoint_resolution"`
+	// How the edge was observed, e.g. `connect`.
+	Evidence string `json:"evidence" toon:"evidence"`
+	// Timestamp the edge was first observed.
+	FirstSeen string `json:"first_seen" toon:"first_seen"`
+	// Host the edge's source node lives on.
+	HostID string `json:"host_id" toon:"host_id"`
+	// Edge ID, unique within its host.
+	ID string `json:"id" toon:"id"`
+	// Timestamp the edge was last observed.
+	LastSeen string `json:"last_seen" toon:"last_seen"`
+	// Opaque per-edge metrics payload, only present when `include_metrics=true` was requested.
+	Metrics any `json:"metrics" toon:"metrics"`
+	// Entity ID of the source node.
+	SourceEntityID string `json:"source_entity_id" toon:"source_entity_id"`
+	// Network namespace ID the connection originated from.
+	SourceNetnsID string `json:"source_netns_id" toon:"source_netns_id"`
+}
+
+// ServiceMapEndpoint is generated from the Flashduty OpenAPI schema.
+type ServiceMapEndpoint struct {
+	// Destination IP address.
+	IP string `json:"ip" toon:"ip"`
+	// Destination port.
+	Port int64 `json:"port" toon:"port"`
+	// Transport protocol, `tcp` or `udp`.
+	Protocol string `json:"protocol" toon:"protocol"`
+}
+
+// ServiceMapEndpointResolution is generated from the Flashduty OpenAPI schema.
+type ServiceMapEndpointResolution struct {
+	// Candidate nodes found for this endpoint, ranked by confidence.
+	Candidates []ServiceMapResolutionCandidate `json:"candidates" toon:"candidates"`
+	// True if the candidate list was cut short by an internal query budget.
+	CandidatesTruncated bool `json:"candidates_truncated" toon:"candidates_truncated"`
+	// The destination endpoint being resolved.
+	Endpoint ServiceMapEndpoint `json:"endpoint" toon:"endpoint"`
+	// Machine-readable reason code when `status` is not `resolved`, e.g. `no_current_listener`, `multiple_current_listeners`, `query_budget_exceeded`.
+	Reason string `json:"reason" toon:"reason"`
+	// Resolution outcome. `resolved` = exactly one confident candidate; `ambiguous` = multiple or low-confidence candidates; `unresolved` = no candidate found.
+	Status string `json:"status" toon:"status"`
+}
+
+// ServiceMapFleetBrowseRequest is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetBrowseRequest struct {
+	// Filter to hosts on any of these exact agent versions. Up to 20 values.
+	AgentVersions []string `json:"agent_versions,omitempty" toon:"agent_versions,omitempty"`
+	// Filter to hosts using any of these capture modes. `unknown` matches hosts that have not reported a capture mode yet.
+	CaptureModes []string `json:"capture_modes,omitempty" toon:"capture_modes,omitempty"`
+	// Opaque pagination cursor. Pass back the exact value from a previous response's `next_cursor`; omit for the first page.
+	Cursor string `json:"cursor,omitempty" toon:"cursor,omitempty"`
+	// Filter to hosts in any of these exact edge cluster names. Up to 20 values.
+	EdgeClusters []string `json:"edge_clusters,omitempty" toon:"edge_clusters,omitempty"`
+	// Maximum number of matching hosts to return in this page. Default 50, range 1-100.
+	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
+	// Maximum number of candidate hosts to examine while filling this page. Default 1000, range `limit`-2000.
+	ScanLimit int64 `json:"scan_limit,omitempty" toon:"scan_limit,omitempty"`
+	// Filter to hosts currently in any of these statuses. Up to 20 values.
+	Statuses []string `json:"statuses,omitempty" toon:"statuses,omitempty"`
+}
+
+// ServiceMapFleetBrowseResponse is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetBrowseResponse struct {
+	// Coverage of the candidate scan that produced this page.
+	Coverage ServiceMapFleetCoverage `json:"coverage" toon:"coverage"`
+	// Unix timestamp in milliseconds this response was generated.
+	GeneratedAtMs TimestampMilli `json:"generated_at_ms" toon:"generated_at_ms"`
+	// Matching hosts for this page.
+	Items []ServiceMapFleetHost `json:"items" toon:"items"`
+	// Opaque cursor to fetch the next page. Absent when there are no more candidates to scan.
+	NextCursor string `json:"next_cursor" toon:"next_cursor"`
+	// True if any host in this page failed to read status, or the scan was truncated.
+	Partial bool `json:"partial" toon:"partial"`
+	// True if `scan_limit` was reached before finding `limit` matches; `next_cursor` may still find more.
+	Truncated bool `json:"truncated" toon:"truncated"`
+	// Machine-readable reasons the scan was truncated, when `truncated=true`.
+	TruncationReasons []string `json:"truncation_reasons" toon:"truncation_reasons"`
+}
+
+// ServiceMapFleetCoverage is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetCoverage struct {
+	// Number of candidate hosts whose status could not be read.
+	Failed int64 `json:"failed" toon:"failed"`
+	// Number of scanned hosts that passed all filters.
+	Matched int64 `json:"matched" toon:"matched"`
+	// Number of matched hosts included in this page (`<= limit`).
+	Returned int64 `json:"returned" toon:"returned"`
+	// Number of distinct candidate hosts actually examined in this request.
+	Scanned int64 `json:"scanned" toon:"scanned"`
+	// Count of returned items per status value; always includes all seven status keys, zero-filled. Reflects only this page, not the account's full population.
+	States map[string]int64 `json:"states" toon:"states"`
+}
+
+// ServiceMapFleetHost is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetHost struct {
+	// Agent version reported by this host.
+	AgentVersion string `json:"agent_version" toon:"agent_version"`
+	// Edge cluster name this host belongs to.
+	EdgeCluster string `json:"edge_cluster" toon:"edge_cluster"`
+	// Stable ServiceMap host identifier.
+	HostID string `json:"host_id" toon:"host_id"`
+	// ServiceMap capability and current collection status for this host.
+	Servicemap ServiceMapFleetHostCapability `json:"servicemap" toon:"servicemap"`
+}
+
+// ServiceMapFleetHostCapability is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetHostCapability struct {
+	// True if the host has an authoritative current graph.
+	Authoritative bool `json:"authoritative" toon:"authoritative"`
+	// Agent-reported capability status, e.g. `running`, `disabled`, `starting`, `failed`, `unsupported`.
+	CapabilityStatus string `json:"capability_status" toon:"capability_status"`
+	// Capture mode, e.g. `ebpf` or `polling`.
+	CaptureMode string `json:"capture_mode" toon:"capture_mode"`
+	// Number of edges in the host's current graph.
+	EdgeCount int64 `json:"edge_count" toon:"edge_count"`
+	// True if ServiceMap collection is enabled on this host.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// Set to `status_unavailable` when this host's live status could not be read; other fields fall back to inventory-derived defaults in that case.
+	ErrorCode string `json:"error_code" toon:"error_code"`
+	// Freshness classification of the host's graph.
+	FreshnessStatus string `json:"freshness_status" toon:"freshness_status"`
+	// True if a current graph can be fetched for this host right now.
+	GraphAvailable bool `json:"graph_available" toon:"graph_available"`
+	// Age in milliseconds of the host's graph data, relative to when this response was generated.
+	MaxAgeMs int64 `json:"max_age_ms" toon:"max_age_ms"`
+	// Number of nodes in the host's current graph.
+	NodeCount int64 `json:"node_count" toon:"node_count"`
+	// Unix timestamp in milliseconds the host's graph was observed by the agent.
+	ObservedAtMs TimestampMilli `json:"observed_at_ms" toon:"observed_at_ms"`
+	// Machine-readable codes explaining the current status.
+	ReasonCodes []string `json:"reason_codes" toon:"reason_codes"`
+	// Unix timestamp in milliseconds the host's current graph generation was received by the server.
+	ReceivedAtMs TimestampMilli `json:"received_at_ms" toon:"received_at_ms"`
+	// Configured reporting interval in milliseconds.
+	ReportIntervalMs int64 `json:"report_interval_ms" toon:"report_interval_ms"`
+	// True if the agent has produced at least one full snapshot.
+	SnapshotReady bool `json:"snapshot_ready" toon:"snapshot_ready"`
+	// Overall ServiceMap collection status.
+	Status string `json:"status" toon:"status"`
+}
+
+// ServiceMapFleetSummaryCoverage is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetSummaryCoverage struct {
+	// Number of matched hosts successfully classified into one of the seven statuses; equals the sum of `states`.
+	Classified int64 `json:"classified" toon:"classified"`
+	// Number of hosts whose candidate/detail read raced or whose live status could not be read.
+	Failed int64 `json:"failed" toon:"failed"`
+	// Number of scanned hosts that passed the agent version / edge cluster / capture mode filters and still have a current inventory row.
+	Matched int64 `json:"matched" toon:"matched"`
+	// Number of distinct candidate hosts actually examined.
+	Scanned int64 `json:"scanned" toon:"scanned"`
+	// Count of hosts per status value; always includes all seven keys, zero-filled.
+	States map[string]int64 `json:"states" toon:"states"`
+}
+
+// ServiceMapFleetSummaryRequest is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetSummaryRequest struct {
+	// Filter to hosts on any of these exact agent versions. Up to 20 values.
+	AgentVersions []string `json:"agent_versions,omitempty" toon:"agent_versions,omitempty"`
+	// Filter to hosts using any of these capture modes. `unknown` matches hosts that have not reported a capture mode yet.
+	CaptureModes []string `json:"capture_modes,omitempty" toon:"capture_modes,omitempty"`
+	// Filter to hosts in any of these exact edge cluster names. Up to 20 values.
+	EdgeClusters []string `json:"edge_clusters,omitempty" toon:"edge_clusters,omitempty"`
+	// Maximum number of candidate hosts to scan. Default 2000, range 1-5000.
+	ScanLimit int64 `json:"scan_limit,omitempty" toon:"scan_limit,omitempty"`
+}
+
+// ServiceMapFleetSummaryResponse is generated from the Flashduty OpenAPI schema.
+type ServiceMapFleetSummaryResponse struct {
+	// Aggregate status distribution across the scanned candidate hosts.
+	Coverage ServiceMapFleetSummaryCoverage `json:"coverage" toon:"coverage"`
+	// Unix timestamp in milliseconds this response was generated.
+	GeneratedAtMs TimestampMilli `json:"generated_at_ms" toon:"generated_at_ms"`
+	// True if the scan was truncated or any host failed to classify.
+	Partial bool `json:"partial" toon:"partial"`
+	// The normalized scan budget actually applied, echoing the default when the request omitted it.
+	ScanLimit int64 `json:"scan_limit" toon:"scan_limit"`
+	// True if `scan_limit` was reached before scanning every candidate host in the account.
+	Truncated bool `json:"truncated" toon:"truncated"`
+	// Machine-readable reasons the scan was truncated, when `truncated=true`.
+	TruncationReasons []string `json:"truncation_reasons" toon:"truncation_reasons"`
+}
+
+// ServiceMapFreshness is generated from the Flashduty OpenAPI schema.
+type ServiceMapFreshness struct {
+	// Age in milliseconds of the staleest graph covered, relative to now.
+	MaxAgeMs int64 `json:"max_age_ms" toon:"max_age_ms"`
+	// Unix timestamp in milliseconds of the most recently received graph among the hosts covered.
+	NewestReceivedAtMs TimestampMilli `json:"newest_received_at_ms" toon:"newest_received_at_ms"`
+	// Unix timestamp in milliseconds of the least recently received graph among the hosts covered.
+	OldestReceivedAtMs TimestampMilli `json:"oldest_received_at_ms" toon:"oldest_received_at_ms"`
+	// Freshness classification.
+	Status string `json:"status" toon:"status"`
+}
+
+// ServiceMapHostCoverage is generated from the Flashduty OpenAPI schema.
+type ServiceMapHostCoverage struct {
+	// True if the host's graph was degraded at collection time.
+	Degraded bool `json:"degraded" toon:"degraded"`
+	// Kubernetes enrichment status for this host, as self-reported by the agent.
+	KubernetesEnrichmentStatus string `json:"kubernetes_enrichment_status" toon:"kubernetes_enrichment_status"`
+	// Network-inventory enrichment status for this host, e.g. `complete`, `partial`, `unavailable`, as self-reported by the agent.
+	NetworkInventoryStatus string `json:"network_inventory_status" toon:"network_inventory_status"`
+	// Machine-readable codes explaining the current coverage status.
+	ReasonCodes []string `json:"reason_codes" toon:"reason_codes"`
+	// True if the host's graph was truncated at collection time.
+	Truncated bool `json:"truncated" toon:"truncated"`
+}
+
+// ServiceMapNode is generated from the Flashduty OpenAPI schema.
+type ServiceMapNode struct {
+	// Container name, when the node runs in a container.
+	ContainerName string `json:"container_name" toon:"container_name"`
+	// Human-readable display name.
+	DisplayName string `json:"display_name" toon:"display_name"`
+	// Executable file name.
+	ExecutableName string `json:"executable_name" toon:"executable_name"`
+	// Timestamp the node was first observed.
+	FirstSeen string `json:"first_seen" toon:"first_seen"`
+	// Host the node was observed on.
+	HostID string `json:"host_id" toon:"host_id"`
+	// Entity ID of the node, unique within its host.
+	ID string `json:"id" toon:"id"`
+	// Opaque, kind-specific identity payload. Shape depends on `kind`.
+	Identity any `json:"identity" toon:"identity"`
+	// Container image repository.
+	ImageRepository string `json:"image_repository" toon:"image_repository"`
+	// Container image tag/version.
+	ImageVersion string `json:"image_version" toon:"image_version"`
+	// Number of instances folded into this node, when the node represents a workload replica set.
+	InstanceCount int64 `json:"instance_count" toon:"instance_count"`
+	// Node kind, e.g. `process`, `container`.
+	Kind string `json:"kind" toon:"kind"`
+	// Timestamp the node was last observed.
+	LastSeen string `json:"last_seen" toon:"last_seen"`
+	// Kubernetes namespace, when known.
+	Namespace string `json:"namespace" toon:"namespace"`
+	// Opaque sample of underlying instances folded into this node, when applicable.
+	SampleInstances any `json:"sample_instances" toon:"sample_instances"`
+	// systemd unit name, when the node is a systemd-managed process.
+	SystemdUnit string `json:"systemd_unit" toon:"systemd_unit"`
+	// Kubernetes workload name, when known.
+	WorkloadName string `json:"workload_name" toon:"workload_name"`
+}
+
+// ServiceMapResolutionCandidate is generated from the Flashduty OpenAPI schema.
+type ServiceMapResolutionCandidate struct {
+	// Match confidence in `[0, 1]`; capped at 0.6 whenever more than one candidate is returned.
+	Confidence float64 `json:"confidence" toon:"confidence"`
+	// Destination IP actually being resolved against this candidate.
+	EffectiveIP string `json:"effective_ip" toon:"effective_ip"`
+	// Entity/process ID of the candidate listener.
+	EntityID string `json:"entity_id" toon:"entity_id"`
+	// Sequence number of the graph generation this candidate was observed in.
+	GraphSequence uint64 `json:"graph_sequence" toon:"graph_sequence"`
+	// Host ID of the candidate listener.
+	HostID string `json:"host_id" toon:"host_id"`
+	// Identifier of the matched listener.
+	ListenerID string `json:"listener_id" toon:"listener_id"`
+	// IP address the listener is bound to (may be a wildcard address).
+	ListenerIP string `json:"listener_ip" toon:"listener_ip"`
+	// How the listener matched the destination, e.g. `exact`, `wildcard`, `wildcard_dual_stack`, `wildcard_address_family_unknown`.
+	MatchKind string `json:"match_kind" toon:"match_kind"`
+	// Network namespace ID the candidate listener is in.
+	NetnsID string `json:"netns_id" toon:"netns_id"`
+	// Display name of the candidate's owning node, when known.
+	NodeDisplayName string `json:"node_display_name" toon:"node_display_name"`
+	// Kind of the candidate's owning node, when known.
+	NodeKind string `json:"node_kind" toon:"node_kind"`
+	// Unix timestamp in milliseconds when the candidate's graph generation was observed by the agent.
+	ObservedAtMs TimestampMilli `json:"observed_at_ms" toon:"observed_at_ms"`
+	// Destination port.
+	Port int64 `json:"port" toon:"port"`
+	// Transport protocol, `tcp` or `udp`.
+	Protocol string `json:"protocol" toon:"protocol"`
+}
+
+// ServiceMapResolutionCounts is generated from the Flashduty OpenAPI schema.
+type ServiceMapResolutionCounts struct {
+	// Number of edges resolved to multiple or low-confidence candidates.
+	Ambiguous int64 `json:"ambiguous" toon:"ambiguous"`
+	// Number of edges resolved to exactly one confident candidate.
+	Resolved int64 `json:"resolved" toon:"resolved"`
+	// Number of edges with no resolvable candidate.
+	Unresolved int64 `json:"unresolved" toon:"unresolved"`
+}
+
+// ServiceMapStatusBatchCoverage is generated from the Flashduty OpenAPI schema.
+type ServiceMapStatusBatchCoverage struct {
+	// Number of hosts whose status could not be read.
+	Failed int64 `json:"failed" toon:"failed"`
+	// Number of hosts requested (explicit `host_id`/`host_ids`, or the fleet sample size actually scanned).
+	Requested int64 `json:"requested" toon:"requested"`
+	// Count of items per status value; always includes all seven keys (`active`, `degraded`, `stale`, `initializing`, `disabled`, `unsupported`, `no_data`), zero-filled.
+	States map[string]int64 `json:"states" toon:"states"`
+	// Number of hosts whose status was read successfully.
+	Succeeded int64 `json:"succeeded" toon:"succeeded"`
+	// True if `fleet` mode found more candidates than `limit` allowed to return.
+	Truncated bool `json:"truncated" toon:"truncated"`
+}
+
+// ServiceMapStatusItem is generated from the Flashduty OpenAPI schema.
+type ServiceMapStatusItem struct {
+	// True if the host has an authoritative current graph.
+	Authoritative bool `json:"authoritative" toon:"authoritative"`
+	// The host's self-reported ServiceMap capability.
+	Capability ServiceMapCapability `json:"capability" toon:"capability"`
+	// Coverage and enrichment status for this host's graph.
+	Coverage ServiceMapHostCoverage `json:"coverage" toon:"coverage"`
+	// Number of edges in the host's current graph.
+	EdgeCount int64 `json:"edge_count" toon:"edge_count"`
+	// Set to `status_unavailable` when this host's status could not be read; other fields fall back to inventory-derived defaults in that case.
+	ErrorCode string `json:"error_code" toon:"error_code"`
+	// How recent the host's graph data is.
+	Freshness ServiceMapFreshness `json:"freshness" toon:"freshness"`
+	// True if a current graph can be fetched for this host right now.
+	GraphAvailable bool `json:"graph_available" toon:"graph_available"`
+	// Host ID this status describes.
+	HostID string `json:"host_id" toon:"host_id"`
+	// Unix timestamp in milliseconds of the most recent non-authoritative health signal, when more recent than the current graph.
+	LatestHealthAtMs TimestampMilli `json:"latest_health_at_ms" toon:"latest_health_at_ms"`
+	// Network scope resolved for this host, when known.
+	NetworkScopeID string `json:"network_scope_id" toon:"network_scope_id"`
+	// Number of nodes in the host's current graph.
+	NodeCount int64 `json:"node_count" toon:"node_count"`
+	// Unix timestamp in milliseconds the host's graph was observed by the agent.
+	ObservedAtMs TimestampMilli `json:"observed_at_ms" toon:"observed_at_ms"`
+	// Machine-readable codes explaining the current status.
+	ReasonCodes []string `json:"reason_codes" toon:"reason_codes"`
+	// Unix timestamp in milliseconds the host's current graph generation was received by the server.
+	ReceivedAtMs TimestampMilli `json:"received_at_ms" toon:"received_at_ms"`
+	// Configured reporting interval in milliseconds.
+	ReportIntervalMs int64 `json:"report_interval_ms" toon:"report_interval_ms"`
+	// Overall ServiceMap collection status.
+	Status string `json:"status" toon:"status"`
+}
+
+// ServiceMapStatusRequest is generated from the Flashduty OpenAPI schema.
+type ServiceMapStatusRequest struct {
+	// When `true`, ignore `host_id`/`host_ids` and instead sample up to `limit` fleet candidate hosts for the account. Default `false`.
+	Fleet bool `json:"fleet,omitempty" toon:"fleet,omitempty"`
+	// A single host ID to check. Combine with `host_ids` to check several; mutually exclusive with `fleet=true`.
+	HostID string `json:"host_id,omitempty" toon:"host_id,omitempty"`
+	// Multiple host IDs to check in one call, up to 200 combined with `host_id`. Mutually exclusive with `fleet=true`.
+	HostIDs []string `json:"host_ids,omitempty" toon:"host_ids,omitempty"`
+	// In `fleet` mode, the number of candidate hosts to sample. Ignored otherwise. Default 100, range 1-200.
+	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
+}
+
+// ServiceMapStatusResponse is generated from the Flashduty OpenAPI schema.
+type ServiceMapStatusResponse struct {
+	// Summary of how many hosts were successfully covered.
+	Coverage ServiceMapStatusBatchCoverage `json:"coverage" toon:"coverage"`
+	// Echoes whether this response was produced from a fleet sample rather than explicit host IDs.
+	Fleet bool `json:"fleet" toon:"fleet"`
+	// Unix timestamp in milliseconds this response was generated.
+	GeneratedAtMs TimestampMilli `json:"generated_at_ms" toon:"generated_at_ms"`
+	// Per-host status, in the same order the hosts were resolved.
+	Items []ServiceMapStatusItem `json:"items" toon:"items"`
+	// True if any host failed or the fleet sample was truncated.
+	Partial bool `json:"partial" toon:"partial"`
+}
+
+// ServiceMapSummaryNeighbor is generated from the Flashduty OpenAPI schema.
+type ServiceMapSummaryNeighbor struct {
+	// Active connection count for this relation, when the underlying agent reports it.
+	ActiveConnections int64 `json:"active_connections" toon:"active_connections"`
+	// Destination IP address.
+	DestinationIP string `json:"destination_ip" toon:"destination_ip"`
+	// Destination port.
+	DestinationPort int64 `json:"destination_port" toon:"destination_port"`
+	// Transport protocol of the destination.
+	DestinationProtocol string `json:"destination_protocol" toon:"destination_protocol"`
+	// Edge ID.
+	EdgeID string `json:"edge_id" toon:"edge_id"`
+	// Timestamp this relation was last observed.
+	LastSeen string `json:"last_seen" toon:"last_seen"`
+	// Resolution outcome for this relation's destination.
+	ResolutionStatus string `json:"resolution_status" toon:"resolution_status"`
+	// Display name of the source node, when known.
+	SourceDisplayName string `json:"source_display_name" toon:"source_display_name"`
+	// Entity ID of the source node.
+	SourceEntityID string `json:"source_entity_id" toon:"source_entity_id"`
+	// Display name of the resolved target, when known.
+	TargetDisplayName string `json:"target_display_name" toon:"target_display_name"`
+	// Entity ID of the resolved target, when `resolution_status=resolved` and unambiguous.
+	TargetEntityID string `json:"target_entity_id" toon:"target_entity_id"`
+	// Host ID of the resolved target, when `resolution_status=resolved` and unambiguous.
+	TargetHostID string `json:"target_host_id" toon:"target_host_id"`
+}
+
+// ServiceMapSummaryRequest is generated from the Flashduty OpenAPI schema.
+type ServiceMapSummaryRequest struct {
+	// Host (and optional entity) to summarize.
+	Anchor ServiceMapAnchor `json:"anchor" toon:"anchor"`
+	// Optional integrity check: if set, must match the network scope already associated with `anchor.host_id`, or the request is rejected with `InvalidParameter`.
+	NetworkScopeID string `json:"network_scope_id,omitempty" toon:"network_scope_id,omitempty"`
+}
+
+// ServiceMapSummaryResponse is generated from the Flashduty OpenAPI schema.
+type ServiceMapSummaryResponse struct {
+	// Echo of the requested anchor entity ID, when one was given.
+	AnchorEntityID string `json:"anchor_entity_id" toon:"anchor_entity_id"`
+	// Echo of the requested anchor host ID.
+	AnchorHostID string `json:"anchor_host_id" toon:"anchor_host_id"`
+	// Always `true`; the summary is only ever built from an authoritative graph.
+	Authoritative bool `json:"authoritative" toon:"authoritative"`
+	// Pre-rendered natural-language evidence string summarizing this response, designed for LLM prompts. The structured fields above are the source of truth; this is a convenience rendering of them.
+	ContextRefDetail string `json:"context_ref_detail" toon:"context_ref_detail"`
+	// Aggregate coverage and enrichment status for the anchor host's graph.
+	Coverage ServiceMapTopologyCoverage `json:"coverage" toon:"coverage"`
+	// How recent the graph data is.
+	Freshness ServiceMapFreshness `json:"freshness" toon:"freshness"`
+	// `current` if the summary reflects the live graph; `last_known_good` if the latest ingestion is unhealthy and this reflects the last authoritative graph instead.
+	GraphRole string `json:"graph_role" toon:"graph_role"`
+	// False when `graph_role=last_known_good`, i.e. the most recent collection attempt was not authoritative.
+	LatestCollectionAuthoritative bool `json:"latest_collection_authoritative" toon:"latest_collection_authoritative"`
+	// Unix timestamp in milliseconds of the most recent non-authoritative health signal, when more recent than the current graph.
+	LatestHealthAtMs TimestampMilli `json:"latest_health_at_ms" toon:"latest_health_at_ms"`
+	// Up to 12 outbound relations, most informative first.
+	Neighbors []ServiceMapSummaryNeighbor `json:"neighbors" toon:"neighbors"`
+	// Network scope the summary was resolved within.
+	NetworkScopeID string `json:"network_scope_id" toon:"network_scope_id"`
+	// Unix timestamp in milliseconds the underlying data was observed by the agent.
+	ObservedAtMs TimestampMilli `json:"observed_at_ms" toon:"observed_at_ms"`
+	// Unix timestamp in milliseconds the current graph generation was received by the server.
+	ReceivedAtMs TimestampMilli `json:"received_at_ms" toon:"received_at_ms"`
+	// Counts of the anchor host's outbound relations by resolution outcome.
+	ResolutionCounts ServiceMapResolutionCounts `json:"resolution_counts" toon:"resolution_counts"`
+	// ServiceMap collection status of the anchor host.
+	Status string `json:"status" toon:"status"`
+	// True if the fixed-size summary omitted any neighbor or coverage detail to stay within its bounds.
+	Truncated bool `json:"truncated" toon:"truncated"`
+	// Machine-readable reasons the summary was truncated, when `truncated=true`.
+	TruncationReasons []string `json:"truncation_reasons" toon:"truncation_reasons"`
+}
+
+// ServiceMapTopologyCoverage is generated from the Flashduty OpenAPI schema.
+type ServiceMapTopologyCoverage struct {
+	// Distinct capture modes (e.g. `ebpf`) seen across loaded hosts.
+	CaptureModes []string `json:"capture_modes" toon:"capture_modes"`
+	// Number of loaded host graphs that were degraded at collection time.
+	DegradedHosts int64 `json:"degraded_hosts" toon:"degraded_hosts"`
+	// Always `outbound`; ServiceMap currently only models outbound relations.
+	Direction string `json:"direction" toon:"direction"`
+	// Number of distinct host graphs loaded to answer the query.
+	HostsLoaded int64 `json:"hosts_loaded" toon:"hosts_loaded"`
+	// Number of IPv6 wildcard listeners with a known IPV6_V6ONLY setting.
+	Ipv6OnlyKnownListenerCount int64 `json:"ipv6_only_known_listener_count" toon:"ipv6_only_known_listener_count"`
+	// Number of IPv6 wildcard listeners whose IPV6_V6ONLY setting could not be determined.
+	Ipv6OnlyUnknownListenerCount int64 `json:"ipv6_only_unknown_listener_count" toon:"ipv6_only_unknown_listener_count"`
+	// Number of IPv6 wildcard (unspecified-address) listeners observed.
+	Ipv6WildcardListenerCount int64 `json:"ipv6_wildcard_listener_count" toon:"ipv6_wildcard_listener_count"`
+	// Aggregate Kubernetes enrichment coverage across loaded hosts.
+	KubernetesEnrichmentStatus string `json:"kubernetes_enrichment_status" toon:"kubernetes_enrichment_status"`
+	// Aggregate coverage of IPv4/IPv6 listener address-family resolution across loaded hosts.
+	ListenerAddressFamilyStatus string `json:"listener_address_family_status" toon:"listener_address_family_status"`
+	// Aggregate network-inventory enrichment coverage across loaded hosts.
+	NetworkInventoryStatus string `json:"network_inventory_status" toon:"network_inventory_status"`
+	// Machine-readable reason codes explaining any degraded or truncated state among loaded hosts.
+	Reasons []string `json:"reasons" toon:"reasons"`
+	// Number of loaded host graphs that were truncated at collection time.
+	TruncatedHosts int64 `json:"truncated_hosts" toon:"truncated_hosts"`
+}
+
+// ServiceMapTopologyRequest is generated from the Flashduty OpenAPI schema.
+type ServiceMapTopologyRequest struct {
+	// Host (and optional entity) to start the traversal from.
+	Anchor ServiceMapAnchor `json:"anchor" toon:"anchor"`
+	// Time selector for the query. Only `now` is currently supported; omitting the field behaves the same.
+	At string `json:"at,omitempty" toon:"at,omitempty"`
+	// Maximum traversal depth from the anchor. Default 1, maximum 3.
+	Depth int64 `json:"depth,omitempty" toon:"depth,omitempty"`
+	// Traversal direction. Only `outbound` is currently supported; omitting the field behaves the same.
+	Direction string `json:"direction,omitempty" toon:"direction,omitempty"`
+	// Whether to include the raw per-edge `metrics` payload in the response. Default `false`.
+	IncludeMetrics bool `json:"include_metrics,omitempty" toon:"include_metrics,omitempty"`
+	// Maximum number of edges to examine before truncating. Default 200, maximum 1000.
+	MaxEdges int64 `json:"max_edges,omitempty" toon:"max_edges,omitempty"`
+	// Maximum number of nodes to return before truncating. Default 100, maximum 500.
+	MaxNodes int64 `json:"max_nodes,omitempty" toon:"max_nodes,omitempty"`
+	// Optional integrity check: if set, must match the network scope already associated with `anchor.host_id`, or the request is rejected with `InvalidParameter`.
+	NetworkScopeID string `json:"network_scope_id,omitempty" toon:"network_scope_id,omitempty"`
+	// How unresolved edges are projected. `full` (default) includes them in `edges` and `unresolved_endpoints`; `summary` omits them from `edges` and returns only a bounded sample in `unresolved_endpoints`.
+	UnresolvedMode string `json:"unresolved_mode,omitempty" toon:"unresolved_mode,omitempty"`
+}
+
+// ServiceMapTopologyResponse is generated from the Flashduty OpenAPI schema.
+type ServiceMapTopologyResponse struct {
+	// Echo of the requested anchor entity ID, when one was given.
+	AnchorEntityID string `json:"anchor_entity_id" toon:"anchor_entity_id"`
+	// Echo of the requested anchor host ID.
+	AnchorHostID string `json:"anchor_host_id" toon:"anchor_host_id"`
+	// Aggregate coverage and enrichment status across loaded hosts.
+	Coverage ServiceMapTopologyCoverage `json:"coverage" toon:"coverage"`
+	// Edges discovered during the traversal. Excludes unresolved edges when `unresolved_mode=summary`.
+	Edges []ServiceMapEdge `json:"edges" toon:"edges"`
+	// How recent the graph data is.
+	Freshness ServiceMapFreshness `json:"freshness" toon:"freshness"`
+	// Network scope the graph was resolved within.
+	NetworkScopeID string `json:"network_scope_id" toon:"network_scope_id"`
+	// Nodes discovered during the traversal.
+	Nodes []ServiceMapNode `json:"nodes" toon:"nodes"`
+	// Unix timestamp in milliseconds the underlying data was observed by the agent (the most recent among loaded hosts).
+	ObservedAtMs TimestampMilli `json:"observed_at_ms" toon:"observed_at_ms"`
+	// Counts of edges by resolution outcome.
+	ResolutionCounts ServiceMapResolutionCounts `json:"resolution_counts" toon:"resolution_counts"`
+	// True if any bound (`max_nodes`, `max_edges`, or an internal query budget) cut the traversal short.
+	Truncated bool `json:"truncated" toon:"truncated"`
+	// Machine-readable reasons the traversal was truncated, when `truncated=true`.
+	TruncationReasons []string `json:"truncation_reasons" toon:"truncation_reasons"`
+	// Sample or full set of edges whose destination could not be resolved, per `unresolved_projection`.
+	UnresolvedEndpoints []ServiceMapUnresolvedEndpoint `json:"unresolved_endpoints" toon:"unresolved_endpoints"`
+	// How unresolved edges were projected into this response.
+	UnresolvedProjection ServiceMapUnresolvedProjection `json:"unresolved_projection" toon:"unresolved_projection"`
+}
+
+// ServiceMapUnresolvedEndpoint is generated from the Flashduty OpenAPI schema.
+type ServiceMapUnresolvedEndpoint struct {
+	// Destination endpoint of the connection.
+	Destination ServiceMapEndpoint `json:"destination" toon:"destination"`
+	// Edge ID, unique within its host.
+	EdgeID string `json:"edge_id" toon:"edge_id"`
+	// Host the edge's source node lives on.
+	HostID string `json:"host_id" toon:"host_id"`
+	// Machine-readable reason the endpoint could not be resolved.
+	Reason string `json:"reason" toon:"reason"`
+	// Entity ID of the source node.
+	SourceEntityID string `json:"source_entity_id" toon:"source_entity_id"`
+	// Network namespace ID the connection originated from.
+	SourceNetnsID string `json:"source_netns_id" toon:"source_netns_id"`
+}
+
+// ServiceMapUnresolvedProjection is generated from the Flashduty OpenAPI schema.
+type ServiceMapUnresolvedProjection struct {
+	// Breakdown of `total` unresolved edges by reason code.
+	ByReason []ServiceMapUnresolvedReasonCount `json:"by_reason" toon:"by_reason"`
+	// The `unresolved_mode` that was applied.
+	Mode string `json:"mode" toon:"mode"`
+	// Number of unresolved edges found but not returned (`total - returned`).
+	Omitted int64 `json:"omitted" toon:"omitted"`
+	// Number of unresolved edges included in `unresolved_endpoints`.
+	Returned int64 `json:"returned" toon:"returned"`
+	// Total number of unresolved edges found, regardless of how many were returned.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// ServiceMapUnresolvedReasonCount is generated from the Flashduty OpenAPI schema.
+type ServiceMapUnresolvedReasonCount struct {
+	// Number of unresolved edges with this reason.
+	Count int64 `json:"count" toon:"count"`
+	// Machine-readable unresolved reason code.
+	Reason string `json:"reason" toon:"reason"`
 }
 
 // SessionDeleteRequest is generated from the Flashduty OpenAPI schema.

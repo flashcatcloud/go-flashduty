@@ -151,6 +151,22 @@
     {
       "name": "RUM/Session replay",
       "description": "查询 RUM 会话的回放元数据与录制分段。"
+    },
+    {
+      "name": "Monitors/服务拓扑",
+      "description": "查询基于网络观测生成的服务拓扑、依赖摘要，以及主机的服务拓扑采集状态。"
+    },
+    {
+      "name": "RUM/错误采集规则",
+      "description": "配置和查看决定 RUM 应用采集哪些错误的规则，并可查看其编辑历史。"
+    },
+    {
+      "name": "RUM/Issue 预设严重性规则",
+      "description": "管理按应用配置的预设严重性规则，用于为匹配的前端错误指定严重级别，并管理其评估顺序与变更历史。"
+    },
+    {
+      "name": "RUM/资源",
+      "description": "查询账户的 RUM 资源记录及当前用量。"
     }
   ],
   "paths": {
@@ -15628,7 +15644,7 @@
           "RUM/RUM 自定义字段"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**100 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 使用 `POST /rum/facet/list` 发现每个 scope 下可用的 `facet_key` 值。\n- `scope` 必须是以下之一：`session`、`view`、`action`、`error`、`resource`、`long_task`、`vital`、`issue`、`sourcemap`。\n- 传入 `dql` 可在统计前进一步过滤事件，DQL 语法遵循 RUM 查询语言。\n- 传入 `sql` 可使用仅含 WHERE 子句（无 SELECT）的 SQL 风格过滤。\n- 默认 limit 为 100，最大 100。\n- 时间范围必填（`start_time` / `end_time` 为 Unix 毫秒时间戳），最大跨度 31 天。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**100 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 使用 `POST /rum/field/list`（传 `is_facet: true`）发现每个 scope 下可用的 `facet_key` 值。\n- `scope` 必须是以下之一：`session`、`view`、`action`、`error`、`resource`、`long_task`、`vital`、`issue`、`sourcemap`。\n- 传入 `dql` 可在统计前进一步过滤事件，DQL 语法遵循 RUM 查询语言。\n- 传入 `sql` 可使用仅含 WHERE 子句（无 SELECT）的 SQL 风格过滤。\n- 默认 limit 为 100，最大 100。\n- 时间范围必填（`start_time` / `end_time` 为 Unix 毫秒时间戳），最大跨度 31 天。",
           "href": "/zh/api-reference/rum/facets/rum-read-facet-count",
           "metadata": {
             "sidebarTitle": "查询分值分布"
@@ -16043,101 +16059,6 @@
                 "limit": 20,
                 "query": "",
                 "is_my_team": false
-              }
-            }
-          }
-        }
-      }
-    },
-    "/rum/facet/list": {
-      "post": {
-        "operationId": "rum-read-facet-list",
-        "summary": "查询分面列表",
-        "description": "返回所有可用的 RUM 字段定义，可按 scope 和是否为分面字段过滤。",
-        "tags": [
-          "RUM/RUM 自定义字段"
-        ],
-        "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 使用返回的 `field_key` 作为 `POST /rum/facet/count` 的 `facet_key` 参数。\n- 合法的 `scopes` 值为：`session`、`view`、`action`、`error`、`resource`、`long_task`、`vital`、`issue`、`sourcemap`。\n- 设置 `is_facet: true` 只返回支持分面查询的字段（即支持值分布统计的字段）。",
-          "href": "/zh/api-reference/rum/facets/rum-read-facet-list",
-          "metadata": {
-            "sidebarTitle": "查询分面列表"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/RumFacetListResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "items": [
-                      {
-                        "account_id": 0,
-                        "field_key": "error.type",
-                        "field_name": "Error type",
-                        "group": "Error",
-                        "description": "错误类型。",
-                        "value_type": "string",
-                        "show_type": "list",
-                        "unit_family": "",
-                        "unit_name": "",
-                        "edit_able": false,
-                        "is_facet": true,
-                        "enum_values": [],
-                        "scopes": [
-                          "error"
-                        ],
-                        "status": "active",
-                        "queryable": true
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RumFacetListRequest"
-              },
-              "example": {
-                "scopes": [
-                  "error"
-                ],
-                "is_facet": true
               }
             }
           }
@@ -17884,12 +17805,12 @@
       "post": {
         "operationId": "memberResetInfo",
         "summary": "重置成员信息",
-        "description": "批量更新当前成员的多个资料字段。",
+        "description": "通过成员标识定位成员，并重置指定资料字段。",
         "tags": [
           "平台/成员管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 使用 `member_id`、`member_name`、`email`、`phone` 或 `ref_id` 中任一字段定位成员；如果同时传多个字段，服务端按上述顺序匹配。\n- 使用 `phone` 定位或更新手机号时，可同时传 `country_code` 辅助解析。\n- `updates` 承载要写入的新资料，支持 `member_name`、`password`、`phone`、`country_code`、`email`、`avatar`、`locale`、`time_zone`、`ref_id`。\n- 由 SSO 托管且不可编辑的成员不能通过此接口修改。\n- `updates` 至少要带一个字段；所有字段都不传的空对象会被拒绝。",
           "href": "/zh/api-reference/platform/members/member-reset-info",
           "metadata": {
             "sidebarTitle": "重置成员信息"
@@ -17944,9 +17865,11 @@
               },
               "example": {
                 "member_id": 2476444212131,
-                "member_name": "Alice",
-                "locale": "zh-CN",
-                "time_zone": "Asia/Shanghai"
+                "updates": {
+                  "member_name": "Alice Chen",
+                  "locale": "zh-CN",
+                  "time_zone": "Asia/Shanghai"
+                }
               }
             }
           }
@@ -26601,7 +26524,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 新类型追加到展示顺序的末尾。\n- 名称在账户内必须唯一（不区分大小写，忽略首尾空白）。\n- 每个账户最多可创建 10 个评论类型。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 新类型追加到展示顺序的末尾。\n- 名称在账户内必须唯一（不区分大小写，忽略首尾空白）。\n- 每个账户最多可创建 10 个评论类型。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
           "href": "/zh/api-reference/on-call/incidents/incident-comment-type-create",
           "metadata": {
             "sidebarTitle": "创建评论类型"
@@ -26685,7 +26608,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 部分更新 —— 仅修改提供的字段，但 `name` 和 `color` 至少提供一个。\n- 名称在账户内必须保持唯一（不区分大小写，忽略首尾空白）。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 部分更新 —— 仅修改提供的字段，但 `name` 和 `color` 至少提供一个。\n- 名称在账户内必须保持唯一（不区分大小写，忽略首尾空白）。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
           "href": "/zh/api-reference/on-call/incidents/incident-comment-type-update",
           "metadata": {
             "sidebarTitle": "更新评论类型"
@@ -26756,7 +26679,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 硬删除 —— 评论类型被永久移除，无法恢复。\n- 已引用该类型的评论会失去类型标签，其他内容不受影响。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 硬删除 —— 评论类型被永久移除，无法恢复。\n- 已引用该类型的评论会失去类型标签，其他内容不受影响。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
           "href": "/zh/api-reference/on-call/incidents/incident-comment-type-delete",
           "metadata": {
             "sidebarTitle": "删除评论类型"
@@ -26826,7 +26749,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 全量排序 —— `comment_type_ids` 必须包含账户的全部评论类型，每个恰好出现一次，按期望顺序排列。\n- 展示位置从 1 开始重新分配：数组中的第一个 ID 即为位置 1。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 全量排序 —— `comment_type_ids` 必须包含账户的全部评论类型，每个恰好出现一次，按期望顺序排列。\n- 展示位置从 1 开始重新分配：数组中的第一个 ID 即为位置 1。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
           "href": "/zh/api-reference/on-call/incidents/incident-comment-type-reorder",
           "metadata": {
             "sidebarTitle": "调整评论类型顺序"
@@ -26899,7 +26822,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- `incident_id`、`post_mortem_id`、`assignee_id` 至少提供一个。\n- 按 `updated_at_seconds` 倒序的游标分页 —— 将上一次响应的 `next_cursor` 作为 `cursor` 传入，直到 `has_more` 为 false。\n- 按 `incident_id` 查询时，同时包含锚定在该故障复盘上的后续行动。\n- 仅按 `assignee_id` 查询时，须为本人或账户管理员。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- `incident_id`、`post_mortem_id`、`assignee_id` 至少提供一个。\n- 按 `updated_at_seconds` 倒序的游标分页 —— 将上一次响应的 `next_cursor` 作为 `cursor` 传入，直到 `has_more` 为 false。\n- 按 `incident_id` 查询时，同时包含锚定在该故障复盘上的后续行动。\n- 仅按 `assignee_id` 查询时，须为本人或账户管理员。",
           "href": "/zh/api-reference/on-call/incidents/incident-work-item-list",
           "metadata": {
             "sidebarTitle": "查询跟进事项列表"
@@ -27663,6 +27586,2232 @@
           }
         }
       }
+    },
+    "/monit/servicemap/status": {
+      "post": {
+        "operationId": "monit-servicemap-read-status",
+        "summary": "获取采集状态",
+        "description": "返回一台或多台主机的服务拓扑采集状态，或一份有界的主机群抽样状态。",
+        "tags": [
+          "Monitors/服务拓扑"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **100 次/分钟**；**5 次/秒** |\n| 权限要求 | **监控对象查看**（`monit`） |\n\n## 使用说明\n\n- 服务拓扑是可选子系统：未配置 `redis.servicemap` 的部署会返回 `ServiceUnavailable`。\n- 每次调用只能使用一种选择方式：显式的 `host_id`/`host_ids`，或 `fleet=true`；两者同时传入会被拒绝。\n- 与 `POST /monit/servicemap/topology`、`POST /monit/servicemap/summary` 不同，单个主机解析失败不会导致整个请求失败，而是通过 `items[].error_code` 逐项披露。\n- `limit`（默认 100，最大 200）限定了显式主机的接受数量，在 `fleet` 模式下则限定了抽样的候选主机数量。",
+          "href": "/zh/api-reference/monitors/service-map/monit-servicemap-read-status",
+          "metadata": {
+            "sidebarTitle": "获取采集状态"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ServiceMapStatusResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "fleet": false,
+                    "items": [
+                      {
+                        "host_id": "host_0123456789abcdef0123456789abcdef",
+                        "network_scope_id": "ns_0123456789abcdef0123456789abcdef",
+                        "status": "active",
+                        "authoritative": true,
+                        "graph_available": true,
+                        "capability": {
+                          "present": true,
+                          "enabled": true,
+                          "status": "running",
+                          "host_id": "host_0123456789abcdef0123456789abcdef",
+                          "capture_mode": "ebpf",
+                          "report_interval_ms": 60000,
+                          "snapshot_ready": true
+                        },
+                        "freshness": {
+                          "status": "fresh",
+                          "newest_received_at_ms": 1784635557272,
+                          "oldest_received_at_ms": 1784635557272,
+                          "max_age_ms": 1200
+                        },
+                        "coverage": {
+                          "degraded": false,
+                          "truncated": false,
+                          "network_inventory_status": "complete",
+                          "kubernetes_enrichment_status": "unavailable"
+                        },
+                        "observed_at_ms": 1784635556072,
+                        "received_at_ms": 1784635557272,
+                        "report_interval_ms": 60000,
+                        "node_count": 12,
+                        "edge_count": 8
+                      }
+                    ],
+                    "coverage": {
+                      "requested": 1,
+                      "succeeded": 1,
+                      "failed": 0,
+                      "truncated": false,
+                      "states": {
+                        "active": 1,
+                        "degraded": 0,
+                        "stale": 0,
+                        "initializing": 0,
+                        "disabled": 0,
+                        "unsupported": 0,
+                        "no_data": 0
+                      }
+                    },
+                    "partial": false,
+                    "generated_at_ms": 1784635558472
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceMapStatusRequest"
+              },
+              "example": {
+                "host_id": "host_0123456789abcdef0123456789abcdef"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/servicemap/topology": {
+      "post": {
+        "operationId": "monit-servicemap-read-topology",
+        "summary": "获取服务拓扑图",
+        "description": "返回以某台主机为锚点、通过实时网络观测发现的出向依赖拓扑图。",
+        "tags": [
+          "Monitors/服务拓扑"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **20 次/分钟**；**1 次/秒** |\n| 权限要求 | **服务拓扑查看**（`monit`） |\n\n## 使用说明\n\n- 服务拓扑是可选子系统：未配置 `redis.servicemap` 的部署会返回 `ServiceUnavailable`。\n- `at` 当前仅支持 `now`（留空效果相同）。\n- `direction` 当前仅支持 `outbound`（留空效果相同）。\n- `anchor.host_id` 必须已被服务拓扑感知（存在当前或近期的拓扑数据），否则返回 `ResourceNotFound`。\n- `depth`（最大 3）、`max_nodes`（最大 500）、`max_edges`（最大 1000）共同限定遍历范围；触发任一上限时 `truncated=true`，并在 `truncation_reasons` 中说明原因。\n- `unresolved_mode=summary`（相对默认值 `full`）会从 `edges` 中省略未解析边，仅在 `unresolved_endpoints` 中返回有界样本。",
+          "href": "/zh/api-reference/monitors/service-map/monit-servicemap-read-topology",
+          "metadata": {
+            "sidebarTitle": "获取服务拓扑图"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ServiceMapTopologyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "network_scope_id": "ns_0123456789abcdef0123456789abcdef",
+                    "anchor_host_id": "host_0123456789abcdef0123456789abcdef",
+                    "observed_at_ms": 1784635556072,
+                    "freshness": {
+                      "status": "fresh",
+                      "newest_received_at_ms": 1784635557272,
+                      "oldest_received_at_ms": 1784635557272,
+                      "max_age_ms": 1200
+                    },
+                    "coverage": {
+                      "direction": "outbound",
+                      "hosts_loaded": 2,
+                      "degraded_hosts": 0,
+                      "truncated_hosts": 0,
+                      "capture_modes": [
+                        "ebpf"
+                      ],
+                      "network_inventory_status": "complete",
+                      "kubernetes_enrichment_status": "unavailable",
+                      "listener_address_family_status": "complete",
+                      "ipv6_wildcard_listener_count": 0,
+                      "ipv6_only_known_listener_count": 0,
+                      "ipv6_only_unknown_listener_count": 0
+                    },
+                    "truncated": false,
+                    "nodes": [
+                      {
+                        "host_id": "host_0123456789abcdef0123456789abcdef",
+                        "id": "procw_v1_source",
+                        "kind": "process",
+                        "display_name": "orders.service",
+                        "systemd_unit": "orders.service",
+                        "first_seen": "2026-07-01T02:00:00Z",
+                        "last_seen": "2026-07-21T18:45:56.072+08:00"
+                      },
+                      {
+                        "host_id": "host_fedcba9876543210fedcba9876543210",
+                        "id": "procw_v1_mysql",
+                        "kind": "process",
+                        "display_name": "mysqld.service",
+                        "systemd_unit": "mysqld.service",
+                        "first_seen": "2026-07-01T02:00:00Z",
+                        "last_seen": "2026-07-21T18:45:56.072+08:00"
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "host_id": "host_0123456789abcdef0123456789abcdef",
+                        "id": "edge_v1_example",
+                        "source_entity_id": "procw_v1_source",
+                        "source_netns_id": "netns_v1_default",
+                        "destination": {
+                          "ip": "10.99.1.105",
+                          "port": 3306,
+                          "protocol": "tcp"
+                        },
+                        "evidence": "connect",
+                        "last_seen": "2026-07-21T18:45:56.072+08:00",
+                        "depth": 1,
+                        "endpoint_resolution": {
+                          "status": "resolved",
+                          "endpoint": {
+                            "ip": "10.99.1.105",
+                            "port": 3306,
+                            "protocol": "tcp"
+                          },
+                          "candidates": [
+                            {
+                              "host_id": "host_fedcba9876543210fedcba9876543210",
+                              "entity_id": "procw_v1_mysql",
+                              "netns_id": "netns_v1_default",
+                              "listener_id": "listener_v1_mysql",
+                              "listener_ip": "10.99.1.105",
+                              "effective_ip": "10.99.1.105",
+                              "protocol": "tcp",
+                              "port": 3306,
+                              "match_kind": "exact",
+                              "confidence": 1.0,
+                              "node_kind": "process",
+                              "node_display_name": "mysqld.service",
+                              "graph_sequence": 42,
+                              "observed_at_ms": 1784635556072
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "unresolved_endpoints": [],
+                    "resolution_counts": {
+                      "resolved": 1,
+                      "ambiguous": 0,
+                      "unresolved": 0
+                    },
+                    "unresolved_projection": {
+                      "mode": "full",
+                      "total": 0,
+                      "returned": 0,
+                      "omitted": 0,
+                      "by_reason": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceMapTopologyRequest"
+              },
+              "example": {
+                "anchor": {
+                  "host_id": "host_0123456789abcdef0123456789abcdef"
+                },
+                "depth": 2,
+                "max_nodes": 100,
+                "max_edges": 200,
+                "include_metrics": true,
+                "unresolved_mode": "full"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/servicemap/summary": {
+      "post": {
+        "operationId": "monit-servicemap-read-summary",
+        "summary": "获取拓扑摘要",
+        "description": "返回某台主机出向服务依赖的有界摘要，专为 AI 场景准备。",
+        "tags": [
+          "Monitors/服务拓扑"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **30 次/分钟**；**2 次/秒** |\n| 权限要求 | **服务拓扑查看**（`monit`） |\n\n## 使用说明\n\n- 服务拓扑是可选子系统：未配置 `redis.servicemap` 的部署会返回 `ServiceUnavailable`。\n- `anchor.host_id` 必须已被服务拓扑感知，否则返回 `ResourceNotFound`。\n- 本接口是固定大小的摘要，而非 `POST /monit/servicemap/topology` 的缩小版：深度固定为 1，相邻关系上限固定为 12 条，调用方均不可调整。\n- `context_ref_detail` 是为大模型提示词预先渲染好的自然语言证据摘要文本；结构化字段才是权威来源，该字段只是对其的便捷呈现。\n- `graph_role=last_known_good` 表示最新一次采集不健康，摘要改为基于上一份权威拓扑而非实时数据。",
+          "href": "/zh/api-reference/monitors/service-map/monit-servicemap-read-summary",
+          "metadata": {
+            "sidebarTitle": "获取拓扑摘要"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ServiceMapSummaryResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "network_scope_id": "ns_0123456789abcdef0123456789abcdef",
+                    "anchor_host_id": "host_0123456789abcdef0123456789abcdef",
+                    "status": "active",
+                    "authoritative": true,
+                    "graph_role": "current",
+                    "latest_collection_authoritative": true,
+                    "observed_at_ms": 1784635556072,
+                    "received_at_ms": 1784635557272,
+                    "freshness": {
+                      "status": "fresh",
+                      "newest_received_at_ms": 1784635557272,
+                      "oldest_received_at_ms": 1784635557272,
+                      "max_age_ms": 1200
+                    },
+                    "coverage": {
+                      "direction": "outbound",
+                      "hosts_loaded": 2,
+                      "degraded_hosts": 0,
+                      "truncated_hosts": 0,
+                      "capture_modes": [
+                        "ebpf"
+                      ],
+                      "network_inventory_status": "complete",
+                      "kubernetes_enrichment_status": "unavailable"
+                    },
+                    "truncated": false,
+                    "resolution_counts": {
+                      "resolved": 1,
+                      "ambiguous": 0,
+                      "unresolved": 0
+                    },
+                    "neighbors": [
+                      {
+                        "edge_id": "edge_v1_example",
+                        "source_entity_id": "procw_v1_source",
+                        "source_display_name": "orders.service",
+                        "resolution_status": "resolved",
+                        "target_host_id": "host_fedcba9876543210fedcba9876543210",
+                        "target_entity_id": "procw_v1_mysql",
+                        "target_display_name": "mysqld.service",
+                        "destination_protocol": "tcp",
+                        "destination_ip": "10.99.1.105",
+                        "destination_port": 3306,
+                        "last_seen": "2026-07-21T18:45:56.072+08:00",
+                        "active_connections": 1
+                      }
+                    ],
+                    "context_ref_detail": "ServiceMap current bounded evidence: anchor_host_id=host_0123456789abcdef0123456789abcdef; observed_at_ms=1784635556072; received_at_ms=1784635557272; latest_health_at_ms=0; status=active; freshness=fresh; graph_authoritative=true; latest_collection_authoritative=true; coverage_hosts=2; resolution_counts=resolved:1,ambiguous:0,unresolved:0; truncated=false. Observed outbound relations (relations_shown=1/1): [orders.service -> mysqld.service, resolution=resolved, last_seen=2026-07-21T18:45:56.072+08:00] Evidence rules: only resolution=resolved relations are certain; treat ambiguous/unresolved relations as leads to verify, not fact."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceMapSummaryRequest"
+              },
+              "example": {
+                "anchor": {
+                  "host_id": "host_0123456789abcdef0123456789abcdef"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/servicemap/fleet": {
+      "post": {
+        "operationId": "monit-servicemap-read-fleet",
+        "summary": "浏览拓扑主机",
+        "description": "浏览账户内启用了服务拓扑能力的主机及其当前采集状态。",
+        "tags": [
+          "Monitors/服务拓扑"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **30 次/分钟**；**2 次/秒** |\n| 权限要求 | **监控对象查看**（`monit`） |\n\n## 使用说明\n\n- 与其余四个服务拓扑只读接口不同，本接口在服务拓扑存储不可用时会优雅降级：匹配逻辑仍基于清单数据运行，受影响的项通过 `servicemap.error_code=status_unavailable` 及 `partial=true` 披露，而不会导致整个请求失败。\n- `cursor` 是不透明值，请原样传入 `next_cursor` 返回的值，不要自行构造或解析。\n- 在找到 `limit` 个匹配前先达到 `scan_limit` 时，会设置 `truncated=true` 且仍会返回 `next_cursor`——这与扫描到账户主机末尾不是一回事。\n- `coverage.scanned`/`matched`/`returned` 仅描述本页的扫描情况，不代表账户内主机总量。",
+          "href": "/zh/api-reference/monitors/service-map/monit-servicemap-read-fleet",
+          "metadata": {
+            "sidebarTitle": "浏览拓扑主机"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ServiceMapFleetBrowseResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "host_id": "host_0123456789abcdef0123456789abcdef",
+                        "agent_version": "v1.2.3",
+                        "edge_cluster": "edge-a",
+                        "servicemap": {
+                          "enabled": true,
+                          "status": "active",
+                          "capability_status": "running",
+                          "capture_mode": "ebpf",
+                          "snapshot_ready": true,
+                          "authoritative": true,
+                          "graph_available": true,
+                          "freshness_status": "fresh",
+                          "observed_at_ms": 1784635557272,
+                          "received_at_ms": 1784635557272,
+                          "node_count": 46,
+                          "edge_count": 200
+                        }
+                      }
+                    ],
+                    "coverage": {
+                      "scanned": 80,
+                      "matched": 2,
+                      "returned": 2,
+                      "failed": 0,
+                      "states": {
+                        "active": 0,
+                        "degraded": 1,
+                        "stale": 1,
+                        "initializing": 0,
+                        "disabled": 0,
+                        "unsupported": 0,
+                        "no_data": 0
+                      }
+                    },
+                    "partial": false,
+                    "truncated": false,
+                    "generated_at_ms": 1784635557272
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceMapFleetBrowseRequest"
+              },
+              "example": {
+                "limit": 50,
+                "scan_limit": 1000,
+                "statuses": [
+                  "degraded",
+                  "stale"
+                ],
+                "agent_versions": [
+                  "v1.2.3"
+                ],
+                "edge_clusters": [
+                  "edge-a"
+                ],
+                "capture_modes": [
+                  "ebpf"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/servicemap/fleet/summary": {
+      "post": {
+        "operationId": "monit-servicemap-read-fleet-summary",
+        "summary": "获取主机概览",
+        "description": "返回账户内启用服务拓扑能力的主机的状态分布聚合统计。",
+        "tags": [
+          "Monitors/服务拓扑"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **10 次/分钟**；**1 次/秒** |\n| 权限要求 | **监控对象查看**（`monit`） |\n\n## 使用说明\n\n- 与 `POST /monit/servicemap/fleet` 相同，本接口在服务拓扑存储不可用时会优雅降级，而不会导致整个请求失败。\n- 本接口是单次请求、不分页的聚合统计，扫描范围最多 `scan_limit` 台主机（默认 2000，最大 5000）——不返回逐台主机明细，也不接受状态过滤。\n- 在扫描完账户全部主机前先达到 `scan_limit` 时会设置 `truncated=true`；此时 `coverage.states` 仅反映实际扫描到的主机，不代表账户全量分布。",
+          "href": "/zh/api-reference/monitors/service-map/monit-servicemap-read-fleet-summary",
+          "metadata": {
+            "sidebarTitle": "获取主机概览"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ServiceMapFleetSummaryResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "coverage": {
+                      "scanned": 1200,
+                      "matched": 1150,
+                      "classified": 1149,
+                      "failed": 1,
+                      "states": {
+                        "active": 1000,
+                        "degraded": 20,
+                        "stale": 30,
+                        "initializing": 40,
+                        "disabled": 25,
+                        "unsupported": 4,
+                        "no_data": 30
+                      }
+                    },
+                    "scan_limit": 2000,
+                    "partial": true,
+                    "truncated": false,
+                    "generated_at_ms": 1784635557272
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceMapFleetSummaryRequest"
+              },
+              "example": {
+                "scan_limit": 2000,
+                "agent_versions": [
+                  "v1.2.3"
+                ],
+                "edge_clusters": [
+                  "edge-a"
+                ],
+                "capture_modes": [
+                  "ebpf"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/list": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-list",
+        "summary": "查询错误采集规则列表",
+        "description": "返回某 RUM 应用下配置的全部错误采集规则。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 已删除的规则不会出现在结果中，仅返回状态为 `enabled` 或 `disabled` 的规则。\n- 结果按创建时间倒序排列。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-list",
+          "metadata": {
+            "sidebarTitle": "查询错误采集规则列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "rule_id": "9spXEVoMeZWujjz25yrgTe",
+                        "rule_name": "Production console errors",
+                        "description": "Only ingest TypeError/ReferenceError from production, excluding Safari.",
+                        "filters": [
+                          [
+                            {
+                              "key": "error.env",
+                              "oper": "IN",
+                              "vals": [
+                                "production"
+                              ]
+                            },
+                            {
+                              "key": "error.error_type",
+                              "oper": "IN",
+                              "vals": [
+                                "TypeError",
+                                "ReferenceError"
+                              ]
+                            }
+                          ],
+                          [
+                            {
+                              "key": "error.browser_name",
+                              "oper": "NOTIN",
+                              "vals": [
+                                "Safari"
+                              ]
+                            }
+                          ]
+                        ],
+                        "status": "enabled",
+                        "created_at": 1786000000000,
+                        "updated_at": 1786003600000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionListRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/create": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-create",
+        "summary": "创建错误采集规则",
+        "description": "创建一条新的错误采集规则，用于过滤要存储的错误。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 创建、更新、启用、禁用、删除都会先把应用当前的全部规则快照进历史记录，因此 `history/list` 会反映每一次变更。\n- `filters` 中的每个条件 key 必须是受支持的 `error.*` 字段或 `context.*` 路径，不支持的 key 会返回 `InvalidParameter`。\n- 新建规则的初始状态为 `enabled`；如需创建后即处于停用状态，需再调用一次 `disable`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-create",
+          "metadata": {
+            "sidebarTitle": "创建错误采集规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionCreateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "rule_id": "9spXEVoMeZWujjz25yrgTe",
+                    "rule_name": "Production console errors"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionCreateRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_name": "Production console errors",
+                "description": "Only ingest TypeError/ReferenceError from production, excluding Safari.",
+                "filters": [
+                  [
+                    {
+                      "key": "error.env",
+                      "oper": "IN",
+                      "vals": [
+                        "production"
+                      ]
+                    },
+                    {
+                      "key": "error.error_type",
+                      "oper": "IN",
+                      "vals": [
+                        "TypeError",
+                        "ReferenceError"
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      "key": "error.browser_name",
+                      "oper": "NOTIN",
+                      "vals": [
+                        "Safari"
+                      ]
+                    }
+                  ]
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/update": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-update",
+        "summary": "更新错误采集规则",
+        "description": "更新错误采集规则的名称、描述或过滤条件。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 仅更新请求中出现的字段，未传入的字段保持原值不变。\n- 不传任何可更新字段时视为空操作，仍会返回成功。\n- 若 `rule_id` 在该 `application_id` 下不存在，返回 `ResourceNotFound`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-update",
+          "metadata": {
+            "sidebarTitle": "更新错误采集规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionEmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionUpdateRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "9spXEVoMeZWujjz25yrgTe",
+                "description": "Now also excludes staging traffic."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/delete": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-delete",
+        "summary": "删除错误采集规则",
+        "description": "从 RUM 应用中删除一条错误采集规则。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 删除后规则会立即从 `list` 结果中消失；但用于过滤判定的启用规则集有最多 5 秒缓存，因此删除后数秒内上报的错误仍可能被该规则匹配。\n- 若 `rule_id` 在该 `application_id` 下不存在，返回 `ResourceNotFound`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-delete",
+          "metadata": {
+            "sidebarTitle": "删除错误采集规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionEmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionRuleIDRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "9spXEVoMeZWujjz25yrgTe"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/enable": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-enable",
+        "summary": "启用错误采集规则",
+        "description": "重新启用一条已被禁用的错误采集规则。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 若 `rule_id` 在该 `application_id` 下不存在，返回 `ResourceNotFound`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-enable",
+          "metadata": {
+            "sidebarTitle": "启用错误采集规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionEmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionRuleIDRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "9spXEVoMeZWujjz25yrgTe"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/disable": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-disable",
+        "summary": "禁用错误采集规则",
+        "description": "禁用一条错误采集规则但不删除它。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 禁用的规则会保留并仍出现在 `list` 结果中，但不再参与错误匹配。\n- 若 `rule_id` 在该 `application_id` 下不存在，返回 `ResourceNotFound`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-disable",
+          "metadata": {
+            "sidebarTitle": "禁用错误采集规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionEmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionRuleIDRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "9spXEVoMeZWujjz25yrgTe"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/history/list": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-history-list",
+        "summary": "查询错误采集规则历史",
+        "description": "分页返回某应用错误采集规则集合的历史快照。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 每条历史记录都是该应用在某一时刻全部规则的完整快照，而不是单条规则的差异。\n- `p` 是从 0 开始的页码，不是字节偏移量——服务端内部按 `offset = p * limit` 计算。\n- `orderby` 仅支持 `updated_at` 或 `version`；传入其他值会被静默回退为 `updated_at`。\n- `limit` 默认 20，服务端上限 100；超过 100 会被静默截断，小于等于 0 时回退为默认值。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-history-list",
+          "metadata": {
+            "sidebarTitle": "查询错误采集规则历史"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionHistoryListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "total": 3,
+                    "has_next_page": false,
+                    "items": [
+                      {
+                        "rules": [
+                          {
+                            "id": 1044,
+                            "account_id": 20001,
+                            "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                            "rule_id": "9spXEVoMeZWujjz25yrgTe",
+                            "rule_name": "Production console errors",
+                            "description": "Only ingest TypeError/ReferenceError from production, excluding Safari.",
+                            "filters": [
+                              [
+                                {
+                                  "key": "error.env",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "production"
+                                  ]
+                                },
+                                {
+                                  "key": "error.error_type",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "TypeError",
+                                    "ReferenceError"
+                                  ]
+                                }
+                              ],
+                              [
+                                {
+                                  "key": "error.browser_name",
+                                  "oper": "NOTIN",
+                                  "vals": [
+                                    "Safari"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "status": "enabled",
+                            "created_by": 1001,
+                            "updated_by": 1001,
+                            "deleted_at": 0,
+                            "created_at": 1786000000000,
+                            "updated_at": 1786003600000
+                          }
+                        ],
+                        "version": 3,
+                        "updated_by": 1001,
+                        "updated_by_name": "Alice Chen",
+                        "updated_at": 1786003600000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionHistoryListRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "p": 0,
+                "limit": 20,
+                "orderby": "updated_at",
+                "asc": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/error-ingestion/rules/history/revert": {
+      "post": {
+        "operationId": "rum-error-ingestion-rules-history-revert",
+        "summary": "回滚错误采集规则到历史版本",
+        "description": "将某应用的全部错误采集规则恢复到指定历史版本。",
+        "tags": [
+          "RUM/错误采集规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 回滚会替换该应用的整个规则集合——目标版本之后新建的规则会被移除，而不是合并保留。\n- 回滚前会先把当前状态快照进历史记录，因此回滚操作本身也可以通过再次回滚来撤销。\n- 若 `version` 在该应用下不存在，返回的是 `InvalidParameter` 而不是 `ResourceNotFound`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/error-ingestion-rules/rum-error-ingestion-rules-history-revert",
+          "metadata": {
+            "sidebarTitle": "回滚错误采集规则到历史版本"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumErrorIngestionEmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumErrorIngestionRevertRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "version": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/list": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-list",
+        "summary": "查询预设严重性规则列表",
+        "description": "返回指定 RUM 应用下配置的所有预设严重性规则。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 返回结果按 `priority` 升序、`created_at` 升序排列，与实际评估顺序一致。\n- 仅已启用的规则参与对新错误的评估；按优先级顺序第一条过滤条件匹配的已启用规则生效并赋予其 `severity`。未命中任何已启用规则的错误保持默认严重级别。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-list",
+          "metadata": {
+            "sidebarTitle": "查询预设严重性规则列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumPresetSeverityRuleListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "rule_id": "TAHUYnQmXKzgMS4TFVUKvz",
+                        "rule_name": "生产环境崩溃升级",
+                        "description": "将生产环境的崩溃错误升级为 Critical 严重级别",
+                        "filters": [
+                          [
+                            {
+                              "key": "error.env",
+                              "oper": "IN",
+                              "vals": [
+                                "production"
+                              ]
+                            },
+                            {
+                              "key": "error.is_crash",
+                              "oper": "IN",
+                              "vals": [
+                                "true"
+                              ]
+                            }
+                          ]
+                        ],
+                        "severity": "Critical",
+                        "priority": 1,
+                        "status": "enabled",
+                        "created_at": 1785830452160,
+                        "updated_at": 1785830452160
+                      },
+                      {
+                        "rule_id": "n8mZQ2VbXk4wPRs6DfC9Ay",
+                        "rule_name": "已知浏览器插件噪声错误",
+                        "description": "将已知浏览器插件错误降级为 Info",
+                        "filters": [
+                          [
+                            {
+                              "key": "error.error_message",
+                              "oper": "IN",
+                              "vals": [
+                                "/^ResizeObserver loop.*|.*chrome-extension:\\/\\/.*/"
+                              ]
+                            }
+                          ]
+                        ],
+                        "severity": "Info",
+                        "priority": 2,
+                        "status": "disabled",
+                        "created_at": 1785744052160,
+                        "updated_at": 1785916852160
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleListRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/create": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-create",
+        "summary": "创建预设严重性规则",
+        "description": "为 RUM 应用创建新的预设严重性规则。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- `filters.*.key` 仅支持固定的一组 Error 级别属性，传入其他键将返回 `InvalidParameter`。\n- 请至少传入一组条件：`filters` 传空数组虽然会被接受，但该规则永远不会命中。\n- 新规则创建后默认启用，并以最低优先级追加到末尾（`priority` = 当前最大值 + 1）；如需提前评估顺序，请调用 `reorder`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-create",
+          "metadata": {
+            "sidebarTitle": "创建预设严重性规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumPresetSeverityRuleCreateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "rule_id": "TAHUYnQmXKzgMS4TFVUKvz",
+                    "rule_name": "生产环境崩溃升级",
+                    "priority": 3
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleCreateRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_name": "生产环境崩溃升级",
+                "description": "将生产环境的崩溃错误升级为 Critical 严重级别",
+                "filters": [
+                  [
+                    {
+                      "key": "error.env",
+                      "oper": "IN",
+                      "vals": [
+                        "production"
+                      ]
+                    },
+                    {
+                      "key": "error.is_crash",
+                      "oper": "IN",
+                      "vals": [
+                        "true"
+                      ]
+                    }
+                  ]
+                ],
+                "severity": "Critical"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/update": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-update",
+        "summary": "更新预设严重性规则",
+        "description": "更新预设严重性规则的名称、描述、过滤条件或严重级别。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 仅更新请求中出现的字段，未传字段保持原值不变。\n- 若 `rule_id` 在该应用下不存在，返回 `ResourceNotFound`。\n- 若传入 `filters`，将整体替换原有过滤结构，并按与 `create` 相同的允许键集合重新校验。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-update",
+          "metadata": {
+            "sidebarTitle": "更新预设严重性规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleUpdateRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "TAHUYnQmXKzgMS4TFVUKvz",
+                "rule_name": "生产环境崩溃升级（已更新）",
+                "severity": "Critical"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/delete": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-delete",
+        "summary": "删除预设严重性规则",
+        "description": "删除指定的预设严重性规则。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 若 `rule_id` 在该应用下不存在，返回 `ResourceNotFound`。\n- 删除为软删除：规则会立即从列表中消失，但启用规则集有最多 5 秒缓存，因此删除后数秒内上报的错误仍可能被其评估。删除前的状态仍可通过历史接口查看。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-delete",
+          "metadata": {
+            "sidebarTitle": "删除预设严重性规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleIDRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "n8mZQ2VbXk4wPRs6DfC9Ay"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/enable": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-enable",
+        "summary": "启用预设严重性规则",
+        "description": "启用指定的预设严重性规则。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 若 `rule_id` 在该应用下不存在，返回 `ResourceNotFound`。\n- 已启用规则会被缓存最多 5 秒，因此对新采集错误生效可能有数秒延迟。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-enable",
+          "metadata": {
+            "sidebarTitle": "启用预设严重性规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleIDRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "TAHUYnQmXKzgMS4TFVUKvz"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/disable": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-disable",
+        "summary": "禁用预设严重性规则",
+        "description": "禁用指定的预设严重性规则。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 若 `rule_id` 在该应用下不存在，返回 `ResourceNotFound`。\n- 禁用的规则在评估时会被跳过，但仍保留其 `priority` 位置；缓存生效最多有 5 秒延迟。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-disable",
+          "metadata": {
+            "sidebarTitle": "禁用预设严重性规则"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleIDRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "rule_id": "TAHUYnQmXKzgMS4TFVUKvz"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/reorder": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-reorder",
+        "summary": "调整预设严重性规则顺序",
+        "description": "将一条预设严重性规则移动到另一条规则的评估顺序位置。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 本接口每次只移动一条规则，而非整体重排：`drag_rule_id` 的 `priority` 被设为 `target_rule_id` 当前的 `priority`，两者原位置之间的规则（含 `target_rule_id` 自身）整体平移一位以填补空缺。\n- `priority` 数值越小越先评估；拖动到编号更小的目标会使该规则评估顺序提前，拖动到编号更大的目标则顺延。\n- 若 `drag_rule_id` 或 `target_rule_id` 任一在该应用下不存在，返回 `ResourceNotFound`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-reorder",
+          "metadata": {
+            "sidebarTitle": "调整预设严重性规则顺序"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleReorderRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "drag_rule_id": "n8mZQ2VbXk4wPRs6DfC9Ay",
+                "target_rule_id": "TAHUYnQmXKzgMS4TFVUKvz"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/history/list": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-history-list",
+        "summary": "查询预设严重性规则历史列表",
+        "description": "返回指定 RUM 应用下预设严重性规则的变更历史列表。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 每条记录是该应用下所有规则在触发本次变更**之前**那一刻的整体快照，而非增量差异。每次真正产生变更的 create/update/enable/disable/delete/reorder/revert 调用前都会写入一条新快照（若 `update` 请求未携带任何可改字段，会直接返回成功且不写快照），因此 `version=1` 通常是首次创建规则之前捕获到的空规则集。\n- `rules` 中的每一项都是完整的内部行结构（包含 `account_id`、`created_by`、`id`、`deleted_at`），比 `rules/list` 返回的结构更宽。\n- `limit` 默认 20，超过 100 会被静默截断为 100，而不会报错。\n- `orderby` 仅支持 `updated_at` 或 `version`，传入其他值（含缺省）会回退为 `updated_at`，不会报错。\n- 结果默认按降序排列，传入 `asc=true` 可改为升序。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-history-list",
+          "metadata": {
+            "sidebarTitle": "查询预设严重性规则历史列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumPresetSeverityRuleHistoryListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "total": 4,
+                    "has_next_page": false,
+                    "items": [
+                      {
+                        "rules": [
+                          {
+                            "account_id": 3790925372131,
+                            "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                            "rule_id": "TAHUYnQmXKzgMS4TFVUKvz",
+                            "rule_name": "生产环境崩溃升级",
+                            "description": "将生产环境的崩溃错误升级为 Critical 严重级别",
+                            "filters": [
+                              [
+                                {
+                                  "key": "error.env",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "production"
+                                  ]
+                                },
+                                {
+                                  "key": "error.is_crash",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "true"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "severity": "Critical",
+                            "priority": 1,
+                            "status": "enabled",
+                            "created_by": 3790925372131,
+                            "updated_by": 3790925372131,
+                            "id": 4821,
+                            "deleted_at": 0,
+                            "created_at": 1785830452160,
+                            "updated_at": 1785830452160
+                          }
+                        ],
+                        "version": 2,
+                        "updated_by": 2476444212131,
+                        "updated_by_name": "Alice Chen",
+                        "updated_at": 1785916852160
+                      },
+                      {
+                        "rules": [],
+                        "version": 1,
+                        "updated_by": 3790925372131,
+                        "updated_by_name": "Bob Zhang",
+                        "updated_at": 1785830452159
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleHistoryListRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "p": 0,
+                "limit": 20
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/issue/preset-severity/rules/history/revert": {
+      "post": {
+        "operationId": "rum-issue-preset-severity-rules-history-revert",
+        "summary": "回滚预设严重性规则到历史版本",
+        "description": "将预设严重性规则回滚到指定历史快照时的状态。",
+        "tags": [
+          "RUM/Issue 预设严重性规则"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 会用该快照的行整体替换当前规则集：`rule_id`、`priority`、`filters`、`severity`、`status`、`created_by` 沿用快照中的值，但 `created_at`/`updated_at` 会重置为回滚发生的时间，`updated_by` 会设为执行回滚的用户。\n- 当 `version` 在该应用下不存在对应历史快照时，返回 `InvalidParameter`（而非 `ResourceNotFound`）。\n- 回滚操作本身也会先生成一条新的历史快照再执行，因此回滚也可以被再次回滚。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "href": "/zh/api-reference/rum/issue-preset-severity-rules/rum-issue-preset-severity-rules-history-revert",
+          "metadata": {
+            "sidebarTitle": "回滚预设严重性规则到历史版本"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleHistoryRevertRequest"
+              },
+              "example": {
+                "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                "version": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rum/resource/info": {
+      "post": {
+        "operationId": "rum-resource-read-info",
+        "summary": "查看 RUM 资源信息",
+        "description": "返回账户的 RUM 资源记录及当前会话用量。",
+        "tags": [
+          "RUM/资源"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 账户尚未开通 RUM 资源，或资源状态为 `deleted`/`destroyed` 时，返回 `ResourceNotFound`。\n- `no_cache=true` 跳过的是资源记录本身（套餐版本、配额、状态）的短时缓存；`used_cnt` 系列用量来自另一份小时级缓存，不受该参数影响，无论是否传该参数都可能有延迟。\n- 已用量字段反映当前 30 天计费窗口（`window_start_time` 至 `window_end_time`）内的用量，而非历史累计总量。\n- `expired_at` 仅私有化部署会返回，取自 License 到期时间；SaaS 账户该字段不会出现在响应中。\n- 对于 `version=free` 的账户，用量超过所有应用的免费额度合计（单应用免费额度 × 应用数）时 `session_limit_reached` 为 `true`；账户尚无任何应用时始终为 `false`。",
+          "href": "/zh/api-reference/rum/resources/rum-resource-read-info",
+          "metadata": {
+            "sidebarTitle": "查看 RUM 资源信息"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RumResourceItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "account_id": 2451002751131,
+                    "product": "rum",
+                    "resource_id": "rum_2451002751131",
+                    "resource_name": "rum_2451002751131",
+                    "order_id": "fd_order_20260615_8f3a1c2b",
+                    "version": "professional",
+                    "offering_id": 11,
+                    "session_measure.used_cnt": 128400,
+                    "session_investigate.used_cnt": 5230,
+                    "session_replay.used_cnt": 812,
+                    "session_measure.free_cnt": 0,
+                    "session_investigate.free_cnt": 0,
+                    "session_replay.free_cnt": 0,
+                    "session.days": 30,
+                    "view.days": 30,
+                    "error.days": 30,
+                    "action.days": 30,
+                    "resource.days": 15,
+                    "long_task.days": 15,
+                    "status": "enabled",
+                    "created_at": 1750000000,
+                    "updated_at": 1752000000,
+                    "window_start_time": 1752192000,
+                    "window_end_time": 1754784000,
+                    "session_limit_reached": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RumResourceInfoRequest"
+              },
+              "example": {
+                "no_cache": false
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -27799,6 +29948,27 @@
                   "error": {
                     "code": "InternalError",
                     "message": "We encountered an internal error, and it has been reported. Please try again later."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "当前部署未开启或无法访问 ServiceMap 子系统。反馈问题时请附带 request_id。",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "serviceMapDisabled": {
+                "value": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "ServiceUnavailable",
+                    "message": "servicemap store is not initialized"
                   }
                 }
               }
@@ -39535,7 +41705,12 @@
           },
           "cron_pattern": {
             "type": "string",
-            "description": "5 字段 cron 调度，如 `* * * * *`。"
+            "description": "5 字段 cron 调度，如 `* * * * *`。不允许以 `CRON_TZ=` 或 `TZ=` 开头，时区请填写到 `timezone` 字段。"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "告警规则执行时区，决定 cron 调度与生效时间窗口的解释方式。仅接受 IANA 时区名（如 `Asia/Shanghai`、`UTC`、`Europe/London`）；不接受 `Local`、`UTC+8`、`CST` 等简写或偏移量。留空时按 `Asia/Shanghai` 处理。",
+            "default": "Asia/Shanghai"
           },
           "delay_seconds": {
             "type": "integer",
@@ -39820,7 +41995,12 @@
           },
           "cron_pattern": {
             "type": "string",
-            "description": "5 字段 cron 调度。"
+            "description": "5 字段 cron 调度。不允许以 `CRON_TZ=` 或 `TZ=` 开头，时区请填写到 `timezone` 字段。"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "告警规则执行时区，决定 cron 调度与生效时间窗口的解释方式。仅接受 IANA 时区名（如 `Asia/Shanghai`、`UTC`、`Europe/London`）；不接受 `Local`、`UTC+8`、`CST` 等简写或偏移量。留空时按 `Asia/Shanghai` 处理。",
+            "default": "Asia/Shanghai"
           },
           "delay_seconds": {
             "type": "integer"
@@ -40063,6 +42243,11 @@
           },
           "cron_pattern": {
             "type": "string"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "告警规则执行时区，IANA 时区名，默认 `Asia/Shanghai`。",
+            "default": "Asia/Shanghai"
           },
           "delay_seconds": {
             "type": "integer"
@@ -40390,6 +42575,11 @@
           },
           "cron_pattern": {
             "type": "string"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "告警规则执行时区，IANA 时区名，默认 `Asia/Shanghai`。",
+            "default": "Asia/Shanghai"
           },
           "delay_seconds": {
             "type": "integer"
@@ -42634,70 +44824,118 @@
       },
       "MemberResetInfoRequest": {
         "type": "object",
-        "description": "重置成员信息请求",
+        "description": "重置成员信息请求。外层字段用于定位成员，updates 用于传入要写入的新资料。",
         "required": [
-          "member_id"
+          "updates"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "member_id"
+            ]
+          },
+          {
+            "required": [
+              "member_name"
+            ]
+          },
+          {
+            "required": [
+              "email"
+            ]
+          },
+          {
+            "required": [
+              "phone"
+            ]
+          },
+          {
+            "required": [
+              "ref_id"
+            ]
+          }
         ],
         "properties": {
           "member_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "要更新的成员 ID"
+            "description": "用于定位成员的成员 ID。"
           },
           "member_name": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 2,
-            "maxLength": 39,
-            "description": "显示名称"
+            "type": "string",
+            "description": "用于定位成员的成员名称。"
           },
           "email": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "邮箱地址"
+            "type": "string",
+            "description": "用于定位成员的邮箱地址。"
           },
           "phone": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "手机号"
+            "type": "string",
+            "description": "用于定位成员的手机号；如不是 E.164 格式，可同时传 country_code。"
           },
           "country_code": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "国家区号"
+            "type": "string",
+            "description": "手机号对应的国家或地区区号，用于解析 phone。"
+          },
+          "ref_id": {
+            "type": "string",
+            "description": "用于定位成员的外部引用 ID。"
+          },
+          "from": {
+            "type": "string",
+            "description": "传 `api` 可将更新后的手机号或邮箱标记为已验证。仅在账户关闭成员邀请时生效，其他取值均被忽略。"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/MemberResetInfoUpdates"
+          }
+        }
+      },
+      "MemberResetInfoUpdates": {
+        "type": "object",
+        "description": "要写入的成员资料字段。未传的字段保持不变。",
+        "properties": {
+          "member_name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 39,
+            "description": "新的显示名称。"
+          },
+          "password": {
+            "type": "string",
+            "description": "按前端加密格式传入的新登录密码。"
+          },
+          "phone": {
+            "type": "string",
+            "description": "新的手机号；如不是 E.164 格式，可同时传 country_code。"
+          },
+          "country_code": {
+            "type": "string",
+            "description": "新手机号对应的国家或地区区号。"
+          },
+          "email": {
+            "type": "string",
+            "description": "新的邮箱地址。"
           },
           "avatar": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "头像 URL"
+            "type": "string",
+            "maxLength": 499,
+            "description": "新的头像 URL。"
           },
           "locale": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "enum": [
               "zh-CN",
               "en-US"
             ],
-            "description": "语言"
+            "description": "新的语言偏好。"
           },
           "time_zone": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "时区"
+            "type": "string",
+            "description": "新的 IANA 时区名称，例如 Asia/Shanghai。"
+          },
+          "ref_id": {
+            "type": "string",
+            "description": "新的外部引用 ID。"
           }
         }
       },
@@ -46348,38 +48586,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FacetCountItem"
-            }
-          }
-        }
-      },
-      "RumFacetListRequest": {
-        "type": "object",
-        "description": "RUM 字段定义列表的过滤参数。",
-        "properties": {
-          "scopes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "按 RUM 数据 scope 过滤。合法值：`session`、`view`、`action`、`error`、`resource`、`long_task`、`vital`、`issue`、`sourcemap`。"
-          },
-          "is_facet": {
-            "type": "boolean",
-            "description": "为 true 时只返回支持分面查询的字段；为 false 或不传时返回所有字段。"
-          }
-        }
-      },
-      "RumFacetListResponse": {
-        "type": "object",
-        "description": "RUM 字段定义列表。",
-        "required": [
-          "items"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RumFieldItem"
             }
           }
         }
@@ -51828,6 +54034,2740 @@
           }
         },
         "title": "i_wi_deleted"
+      },
+      "ServiceMapAnchor": {
+        "type": "object",
+        "description": "标识本次查询锚定的主机（以及可选的具体进程/实体）。",
+        "required": [
+          "host_id"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "稳定的服务拓扑主机标识符，例如 `host_0123...`。该主机必须已被服务拓扑感知。",
+            "pattern": "^host_[a-z0-9_-]+$",
+            "maxLength": 128
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "可选，主机内具体进程/实体的 ID，用于锚定到该实体。省略则锚定到整台主机。"
+          }
+        }
+      },
+      "ServiceMapTopologyRequest": {
+        "type": "object",
+        "description": "出向拓扑遍历的查询参数。",
+        "required": [
+          "anchor"
+        ],
+        "properties": {
+          "anchor": {
+            "$ref": "#/components/schemas/ServiceMapAnchor",
+            "description": "遍历的起始主机（及可选的实体）。"
+          },
+          "network_scope_id": {
+            "type": "string",
+            "description": "可选的一致性校验：如果设置，必须与 `anchor.host_id` 已关联的网络域一致，否则返回 `InvalidParameter`。"
+          },
+          "at": {
+            "type": "string",
+            "enum": [
+              "now"
+            ],
+            "description": "查询的时间选择器。当前仅支持 `now`；省略该字段效果相同。"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "outbound"
+            ],
+            "description": "遍历方向。当前仅支持 `outbound`；省略该字段效果相同。"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "从锚点开始的最大遍历深度。默认 1，最大 3。",
+            "default": 1,
+            "maximum": 3
+          },
+          "max_nodes": {
+            "type": "integer",
+            "description": "返回节点数量的上限，超出则截断。默认 100，最大 500。",
+            "default": 100,
+            "maximum": 500
+          },
+          "max_edges": {
+            "type": "integer",
+            "description": "遍历边数量的上限，超出则截断。默认 200，最大 1000。",
+            "default": 200,
+            "maximum": 1000
+          },
+          "include_metrics": {
+            "type": "boolean",
+            "description": "是否在响应中包含每条边的原始 `metrics` 数据。默认 `false`。",
+            "default": false
+          },
+          "unresolved_mode": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "full"
+            ],
+            "description": "未解析边的投影方式。`full`（默认）会将其同时纳入 `edges` 和 `unresolved_endpoints`；`summary` 会从 `edges` 中省略，仅在 `unresolved_endpoints` 中返回有界样本。",
+            "default": "full"
+          }
+        }
+      },
+      "ServiceMapFreshness": {
+        "type": "object",
+        "description": "描述底层拓扑数据的新鲜程度。",
+        "required": [
+          "status",
+          "newest_received_at_ms",
+          "oldest_received_at_ms",
+          "max_age_ms"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "fresh",
+              "stale",
+              "unknown"
+            ],
+            "description": "新鲜度分类。"
+          },
+          "newest_received_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "覆盖主机中最近一次收到拓扑数据的 Unix 时间戳（毫秒）。"
+          },
+          "oldest_received_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "覆盖主机中最早一次收到拓扑数据的 Unix 时间戳（毫秒）。"
+          },
+          "max_age_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "覆盖范围内最旧拓扑数据相对当前时间的年龄（毫秒）。"
+          }
+        }
+      },
+      "ServiceMapTopologyCoverage": {
+        "type": "object",
+        "description": "本次查询所加载的全部主机拓扑数据的整体覆盖与增强状态。",
+        "required": [
+          "direction",
+          "hosts_loaded",
+          "degraded_hosts",
+          "truncated_hosts",
+          "network_inventory_status",
+          "kubernetes_enrichment_status",
+          "listener_address_family_status"
+        ],
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "outbound"
+            ],
+            "description": "始终为 `outbound`；服务拓扑当前仅建模出向关系。"
+          },
+          "hosts_loaded": {
+            "type": "integer",
+            "format": "int64",
+            "description": "为回答本次查询所加载的不同主机拓扑数量。"
+          },
+          "degraded_hosts": {
+            "type": "integer",
+            "format": "int64",
+            "description": "已加载的主机拓扑中，在采集时处于降级状态的数量。"
+          },
+          "truncated_hosts": {
+            "type": "integer",
+            "format": "int64",
+            "description": "已加载的主机拓扑中，在采集时被截断的数量。"
+          },
+          "capture_modes": {
+            "type": "array",
+            "description": "已加载主机中出现的不同采集模式（如 `ebpf`）。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "network_inventory_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "complete",
+              "partial",
+              "unavailable"
+            ],
+            "description": "已加载主机的网络清单增强覆盖聚合状态。"
+          },
+          "kubernetes_enrichment_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "complete",
+              "partial",
+              "unavailable"
+            ],
+            "description": "已加载主机的 Kubernetes 增强覆盖聚合状态。"
+          },
+          "listener_address_family_status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "complete",
+              "partial",
+              "unavailable"
+            ],
+            "description": "已加载主机的监听地址族（IPv4/IPv6）解析覆盖聚合状态。"
+          },
+          "ipv6_wildcard_listener_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "观测到的 IPv6 通配（未指定地址）监听数量。"
+          },
+          "ipv6_only_known_listener_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "IPV6_V6ONLY 设置已知的 IPv6 通配监听数量。"
+          },
+          "ipv6_only_unknown_listener_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "IPV6_V6ONLY 设置无法确定的 IPv6 通配监听数量。"
+          },
+          "reasons": {
+            "type": "array",
+            "description": "解释已加载主机中降级或截断状态的机器可读原因码。",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ServiceMapEndpoint": {
+        "type": "object",
+        "description": "一个网络传输端点。",
+        "required": [
+          "ip",
+          "port",
+          "protocol"
+        ],
+        "properties": {
+          "ip": {
+            "type": "string",
+            "description": "目标 IP 地址。"
+          },
+          "port": {
+            "type": "integer",
+            "description": "目标端口。"
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "tcp",
+              "udp"
+            ],
+            "description": "传输协议，`tcp` 或 `udp`。"
+          }
+        }
+      },
+      "ServiceMapResolutionCandidate": {
+        "type": "object",
+        "description": "某条边目的端点可能解析到的一个候选节点。",
+        "required": [
+          "host_id",
+          "entity_id",
+          "netns_id",
+          "listener_id",
+          "listener_ip",
+          "effective_ip",
+          "protocol",
+          "port",
+          "match_kind",
+          "confidence",
+          "graph_sequence",
+          "observed_at_ms"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "候选监听所在主机 ID。"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "候选监听对应的实体/进程 ID。"
+          },
+          "netns_id": {
+            "type": "string",
+            "description": "候选监听所在的网络命名空间 ID。"
+          },
+          "listener_id": {
+            "type": "string",
+            "description": "匹配到的监听标识符。"
+          },
+          "listener_ip": {
+            "type": "string",
+            "description": "监听绑定的 IP 地址（可能为通配地址）。"
+          },
+          "effective_ip": {
+            "type": "string",
+            "description": "本次实际用于匹配该候选的目标 IP。"
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "tcp",
+              "udp"
+            ],
+            "description": "传输协议，`tcp` 或 `udp`。"
+          },
+          "port": {
+            "type": "integer",
+            "description": "目标端口。"
+          },
+          "match_kind": {
+            "type": "string",
+            "description": "监听与目的端点的匹配方式，例如 `exact`、`wildcard`、`wildcard_dual_stack`、`wildcard_address_family_unknown`。"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "匹配置信度，范围 `[0, 1]`；当返回多个候选时上限为 0.6。"
+          },
+          "node_kind": {
+            "type": "string",
+            "description": "候选所属节点的类型（如已知）。"
+          },
+          "node_display_name": {
+            "type": "string",
+            "description": "候选所属节点的展示名称（如已知）。"
+          },
+          "graph_sequence": {
+            "type": "integer",
+            "format": "uint64",
+            "description": "观测到该候选时所在拓扑生成的序列号。"
+          },
+          "observed_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该候选所在拓扑生成被 Agent 观测到的 Unix 时间戳（毫秒）。"
+          }
+        }
+      },
+      "ServiceMapEndpointResolution": {
+        "type": "object",
+        "description": "将某条边的目的端点解析为一个或多个候选节点的结果。",
+        "required": [
+          "status",
+          "endpoint",
+          "candidates"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "resolved",
+              "ambiguous",
+              "unresolved"
+            ],
+            "description": "解析结果。`resolved` 表示唯一且置信的候选；`ambiguous` 表示存在多个或低置信候选；`unresolved` 表示未找到候选。"
+          },
+          "reason": {
+            "type": "string",
+            "description": "当 `status` 非 `resolved` 时的机器可读原因码，例如 `no_current_listener`、`multiple_current_listeners`、`query_budget_exceeded`。"
+          },
+          "endpoint": {
+            "$ref": "#/components/schemas/ServiceMapEndpoint",
+            "description": "被解析的目的端点。"
+          },
+          "candidates": {
+            "type": "array",
+            "description": "为该端点找到的候选节点，按置信度排序。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapResolutionCandidate"
+            }
+          },
+          "candidates_truncated": {
+            "type": "boolean",
+            "description": "若候选列表因内部查询预算被截断则为 true。"
+          }
+        }
+      },
+      "ServiceMapNode": {
+        "type": "object",
+        "description": "在某台主机上发现的进程、容器或工作负载。",
+        "required": [
+          "host_id",
+          "id",
+          "kind",
+          "display_name"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "观测到该节点的主机。"
+          },
+          "id": {
+            "type": "string",
+            "description": "节点的实体 ID，在其主机范围内唯一。"
+          },
+          "kind": {
+            "type": "string",
+            "description": "节点类型，例如 `process`、`container`。"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "人类可读的展示名称。"
+          },
+          "systemd_unit": {
+            "type": "string",
+            "description": "当节点为 systemd 管理的进程时的 unit 名称。"
+          },
+          "executable_name": {
+            "type": "string",
+            "description": "可执行文件名称。"
+          },
+          "container_name": {
+            "type": "string",
+            "description": "当节点运行在容器中时的容器名称。"
+          },
+          "image_repository": {
+            "type": "string",
+            "description": "容器镜像仓库。"
+          },
+          "image_version": {
+            "type": "string",
+            "description": "容器镜像标签/版本。"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Kubernetes 命名空间（如已知）。"
+          },
+          "workload_name": {
+            "type": "string",
+            "description": "Kubernetes 工作负载名称（如已知）。"
+          },
+          "instance_count": {
+            "type": "integer",
+            "description": "当节点代表一个工作负载副本集时，折叠进该节点的实例数量。"
+          },
+          "identity": {
+            "description": "与节点类型相关的不透明身份数据，结构取决于 `kind`。"
+          },
+          "sample_instances": {
+            "description": "折叠进该节点的底层实例样本（如适用），结构不透明。"
+          },
+          "first_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "首次观测到该节点的时间。"
+          },
+          "last_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "最近一次观测到该节点的时间。"
+          }
+        }
+      },
+      "ServiceMapEdge": {
+        "type": "object",
+        "description": "从源节点到目的端点的一条已观测出向网络关系。",
+        "required": [
+          "host_id",
+          "id",
+          "source_entity_id",
+          "source_netns_id",
+          "destination",
+          "evidence",
+          "depth",
+          "endpoint_resolution"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "该边源节点所在的主机。"
+          },
+          "id": {
+            "type": "string",
+            "description": "边 ID，在其主机范围内唯一。"
+          },
+          "source_entity_id": {
+            "type": "string",
+            "description": "源节点的实体 ID。"
+          },
+          "source_netns_id": {
+            "type": "string",
+            "description": "发起该连接的网络命名空间 ID。"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/ServiceMapEndpoint",
+            "description": "该连接的目的端点。"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "该边的观测方式，例如 `connect`。"
+          },
+          "first_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "首次观测到该边的时间。"
+          },
+          "last_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "最近一次观测到该边的时间。"
+          },
+          "metrics": {
+            "description": "仅当请求 `include_metrics=true` 时才会出现的、每条边的不透明指标数据。"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "发现该边时相对锚点的遍历深度。"
+          },
+          "endpoint_resolution": {
+            "$ref": "#/components/schemas/ServiceMapEndpointResolution",
+            "description": "目的端点到候选目标节点的解析结果。"
+          }
+        }
+      },
+      "ServiceMapUnresolvedEndpoint": {
+        "type": "object",
+        "description": "目的端点未能被置信解析到某个节点的出向边。",
+        "required": [
+          "host_id",
+          "edge_id",
+          "source_entity_id",
+          "source_netns_id",
+          "destination",
+          "reason"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "该边源节点所在的主机。"
+          },
+          "edge_id": {
+            "type": "string",
+            "description": "边 ID，在其主机范围内唯一。"
+          },
+          "source_entity_id": {
+            "type": "string",
+            "description": "源节点的实体 ID。"
+          },
+          "source_netns_id": {
+            "type": "string",
+            "description": "发起该连接的网络命名空间 ID。"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/ServiceMapEndpoint",
+            "description": "该连接的目的端点。"
+          },
+          "reason": {
+            "type": "string",
+            "description": "该端点未能解析的机器可读原因。"
+          }
+        }
+      },
+      "ServiceMapResolutionCounts": {
+        "type": "object",
+        "description": "按解析结果分类的边数量统计。",
+        "required": [
+          "resolved",
+          "ambiguous",
+          "unresolved"
+        ],
+        "properties": {
+          "resolved": {
+            "type": "integer",
+            "description": "解析到唯一置信候选的边数量。"
+          },
+          "ambiguous": {
+            "type": "integer",
+            "description": "解析到多个或低置信候选的边数量。"
+          },
+          "unresolved": {
+            "type": "integer",
+            "description": "未能解析出候选的边数量。"
+          }
+        }
+      },
+      "ServiceMapUnresolvedReasonCount": {
+        "type": "object",
+        "description": "共享同一原因的未解析边数量统计。",
+        "required": [
+          "reason",
+          "count"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "机器可读的未解析原因码。"
+          },
+          "count": {
+            "type": "integer",
+            "description": "该原因对应的未解析边数量。"
+          }
+        }
+      },
+      "ServiceMapUnresolvedProjection": {
+        "type": "object",
+        "description": "描述未解析边如何按 `unresolved_mode` 投影进响应中的汇总信息。",
+        "required": [
+          "mode",
+          "total",
+          "returned",
+          "omitted",
+          "by_reason"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "full"
+            ],
+            "description": "本次应用的 `unresolved_mode`。"
+          },
+          "total": {
+            "type": "integer",
+            "description": "找到的未解析边总数，不论实际返回了多少。"
+          },
+          "returned": {
+            "type": "integer",
+            "description": "已包含在 `unresolved_endpoints` 中的未解析边数量。"
+          },
+          "omitted": {
+            "type": "integer",
+            "description": "已找到但未返回的未解析边数量（`total - returned`）。"
+          },
+          "by_reason": {
+            "type": "array",
+            "description": "按原因码对 `total` 未解析边数量的细分。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapUnresolvedReasonCount"
+            }
+          }
+        }
+      },
+      "ServiceMapTopologyResponse": {
+        "type": "object",
+        "description": "以锚点主机为中心发现的出向依赖拓扑图。",
+        "required": [
+          "network_scope_id",
+          "anchor_host_id",
+          "observed_at_ms",
+          "freshness",
+          "coverage",
+          "truncated",
+          "nodes",
+          "edges",
+          "unresolved_endpoints",
+          "resolution_counts",
+          "unresolved_projection"
+        ],
+        "properties": {
+          "network_scope_id": {
+            "type": "string",
+            "description": "本次拓扑解析所属的网络域。"
+          },
+          "anchor_host_id": {
+            "type": "string",
+            "description": "回显请求中的锚点主机 ID。"
+          },
+          "anchor_entity_id": {
+            "type": "string",
+            "description": "回显请求中的锚点实体 ID（如提供）。"
+          },
+          "observed_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "底层数据被 Agent 观测到的 Unix 时间戳（毫秒），取已加载主机中的最新值。"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/ServiceMapFreshness",
+            "description": "拓扑数据的新鲜程度。"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/ServiceMapTopologyCoverage",
+            "description": "已加载主机的整体覆盖与增强状态。"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "若因任一上限（`max_nodes`、`max_edges` 或内部查询预算）导致遍历被截断则为 true。"
+          },
+          "truncation_reasons": {
+            "type": "array",
+            "description": "当 `truncated=true` 时，遍历被截断的机器可读原因。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "description": "遍历中发现的节点。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapNode"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "description": "遍历中发现的边。当 `unresolved_mode=summary` 时不包含未解析边。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapEdge"
+            }
+          },
+          "unresolved_endpoints": {
+            "type": "array",
+            "description": "目的端点未能解析的边的样本或全集，取决于 `unresolved_projection`。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapUnresolvedEndpoint"
+            }
+          },
+          "resolution_counts": {
+            "$ref": "#/components/schemas/ServiceMapResolutionCounts",
+            "description": "按解析结果分类的边数量统计。"
+          },
+          "unresolved_projection": {
+            "$ref": "#/components/schemas/ServiceMapUnresolvedProjection",
+            "description": "未解析边如何被投影进本次响应。"
+          }
+        }
+      },
+      "ServiceMapSummaryRequest": {
+        "type": "object",
+        "description": "有界的、面向 AI 场景的依赖摘要查询参数。",
+        "required": [
+          "anchor"
+        ],
+        "properties": {
+          "anchor": {
+            "$ref": "#/components/schemas/ServiceMapAnchor",
+            "description": "要生成摘要的主机（及可选的实体）。"
+          },
+          "network_scope_id": {
+            "type": "string",
+            "description": "可选的一致性校验：如果设置，必须与 `anchor.host_id` 已关联的网络域一致，否则返回 `InvalidParameter`。"
+          }
+        }
+      },
+      "ServiceMapSummaryNeighbor": {
+        "type": "object",
+        "description": "折叠进摘要中的一条出向关系，结构为便于用于提示词的紧凑形式。",
+        "required": [
+          "edge_id",
+          "source_entity_id",
+          "resolution_status"
+        ],
+        "properties": {
+          "edge_id": {
+            "type": "string",
+            "description": "边 ID。"
+          },
+          "source_entity_id": {
+            "type": "string",
+            "description": "源节点的实体 ID。"
+          },
+          "source_display_name": {
+            "type": "string",
+            "description": "源节点的展示名称（如已知）。"
+          },
+          "resolution_status": {
+            "type": "string",
+            "enum": [
+              "resolved",
+              "ambiguous",
+              "unresolved"
+            ],
+            "description": "该关系目的端的解析结果。"
+          },
+          "target_host_id": {
+            "type": "string",
+            "description": "当 `resolution_status=resolved` 且唯一时，目标所在主机 ID。"
+          },
+          "target_entity_id": {
+            "type": "string",
+            "description": "当 `resolution_status=resolved` 且唯一时，目标的实体 ID。"
+          },
+          "target_display_name": {
+            "type": "string",
+            "description": "已解析目标的展示名称（如已知）。"
+          },
+          "destination_protocol": {
+            "type": "string",
+            "enum": [
+              "tcp",
+              "udp"
+            ],
+            "description": "目的端的传输协议。"
+          },
+          "destination_ip": {
+            "type": "string",
+            "description": "目的 IP 地址。"
+          },
+          "destination_port": {
+            "type": "integer",
+            "description": "目的端口。"
+          },
+          "last_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "最近一次观测到该关系的时间。"
+          },
+          "active_connections": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "该关系的活跃连接数（若底层 Agent 上报了该数据）。"
+          }
+        }
+      },
+      "ServiceMapSummaryResponse": {
+        "type": "object",
+        "description": "某台主机出向服务依赖的有界、面向 AI 场景的摘要。",
+        "required": [
+          "network_scope_id",
+          "anchor_host_id",
+          "status",
+          "authoritative",
+          "graph_role",
+          "latest_collection_authoritative",
+          "observed_at_ms",
+          "received_at_ms",
+          "freshness",
+          "coverage",
+          "truncated",
+          "resolution_counts",
+          "neighbors",
+          "context_ref_detail"
+        ],
+        "properties": {
+          "network_scope_id": {
+            "type": "string",
+            "description": "本次摘要解析所属的网络域。"
+          },
+          "anchor_host_id": {
+            "type": "string",
+            "description": "回显请求中的锚点主机 ID。"
+          },
+          "anchor_entity_id": {
+            "type": "string",
+            "description": "回显请求中的锚点实体 ID（如提供）。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "degraded",
+              "stale",
+              "initializing",
+              "disabled",
+              "unsupported",
+              "no_data"
+            ],
+            "description": "锚点主机的服务拓扑采集状态。"
+          },
+          "authoritative": {
+            "type": "boolean",
+            "description": "始终为 `true`；摘要仅基于权威拓扑数据构建。"
+          },
+          "graph_role": {
+            "type": "string",
+            "enum": [
+              "current",
+              "last_known_good"
+            ],
+            "description": "`current` 表示摘要基于实时拓扑；`last_known_good` 表示最新采集不健康，摘要改为基于上一份权威拓扑。"
+          },
+          "latest_collection_authoritative": {
+            "type": "boolean",
+            "description": "当 `graph_role=last_known_good` 时为 false，即最近一次采集并非权威数据。"
+          },
+          "latest_health_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近一次非权威健康信号的 Unix 时间戳（毫秒），仅当其晚于当前拓扑时出现。"
+          },
+          "observed_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "底层数据被 Agent 观测到的 Unix 时间戳（毫秒）。"
+          },
+          "received_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "服务端收到当前拓扑生成数据的 Unix 时间戳（毫秒）。"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/ServiceMapFreshness",
+            "description": "拓扑数据的新鲜程度。"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/ServiceMapTopologyCoverage",
+            "description": "锚点主机拓扑数据的整体覆盖与增强状态。"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "若为保持固定大小的摘要而省略了任何相邻关系或覆盖细节，则为 true。"
+          },
+          "truncation_reasons": {
+            "type": "array",
+            "description": "当 `truncated=true` 时，摘要被截断的机器可读原因。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resolution_counts": {
+            "$ref": "#/components/schemas/ServiceMapResolutionCounts",
+            "description": "锚点主机出向关系按解析结果分类的数量统计。"
+          },
+          "neighbors": {
+            "type": "array",
+            "description": "最多 12 条出向关系，信息量最高的排在前面。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapSummaryNeighbor"
+            }
+          },
+          "context_ref_detail": {
+            "type": "string",
+            "description": "为大模型提示词预先渲染好的自然语言证据摘要文本，是对上述结构化字段的便捷呈现，结构化字段本身才是权威来源。"
+          }
+        }
+      },
+      "ServiceMapStatusRequest": {
+        "type": "object",
+        "description": "选择要查询采集状态的主机：可指定明确的主机 ID，或使用有界的主机群抽样。",
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "要查询的单个主机 ID。可与 `host_ids` 组合以查询多台；与 `fleet=true` 互斥。",
+            "pattern": "^host_[a-z0-9_-]+$",
+            "maxLength": 128
+          },
+          "host_ids": {
+            "type": "array",
+            "description": "本次调用要查询的多个主机 ID，与 `host_id` 合计最多 200 个。与 `fleet=true` 互斥。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fleet": {
+            "type": "boolean",
+            "description": "为 `true` 时忽略 `host_id`/`host_ids`，改为对账户内主机抽样，最多返回 `limit` 台候选主机。默认 `false`。",
+            "default": false
+          },
+          "limit": {
+            "type": "integer",
+            "description": "`fleet` 模式下抽样的候选主机数量，其他模式下忽略该字段。默认 100，范围 1～200。",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 200
+          }
+        }
+      },
+      "ServiceMapCapability": {
+        "type": "object",
+        "description": "该主机在监控对象清单中自报的服务拓扑能力信息。",
+        "required": [
+          "present",
+          "enabled",
+          "snapshot_ready"
+        ],
+        "properties": {
+          "present": {
+            "type": "boolean",
+            "description": "该主机是否存在带有服务拓扑能力元数据的清单记录。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "该主机是否已启用服务拓扑采集。"
+          },
+          "status": {
+            "type": "string",
+            "description": "Agent 自报的能力状态，例如 `running`、`disabled`、`starting`、`failed`、`unsupported`。"
+          },
+          "host_id": {
+            "type": "string",
+            "description": "该能力信息所属的主机 ID。"
+          },
+          "capture_mode": {
+            "type": "string",
+            "description": "采集模式，例如 `ebpf` 或 `polling`。"
+          },
+          "report_interval_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "配置的上报间隔（毫秒）。"
+          },
+          "snapshot_ready": {
+            "type": "boolean",
+            "description": "Agent 是否已产出过至少一次完整快照。"
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "解释当前能力状态的机器可读原因码。",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ServiceMapHostCoverage": {
+        "type": "object",
+        "description": "单台主机拓扑数据的覆盖与增强状态。",
+        "required": [
+          "degraded",
+          "truncated"
+        ],
+        "properties": {
+          "degraded": {
+            "type": "boolean",
+            "description": "该主机拓扑在采集时是否处于降级状态。"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "该主机拓扑在采集时是否被截断。"
+          },
+          "network_inventory_status": {
+            "type": "string",
+            "description": "该主机的网络清单增强状态，如 `complete`、`partial`、`unavailable`，由 Agent 自报。"
+          },
+          "kubernetes_enrichment_status": {
+            "type": "string",
+            "description": "该主机的 Kubernetes 增强状态，由 Agent 自报。"
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "解释当前覆盖状态的机器可读原因码。",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ServiceMapStatusItem": {
+        "type": "object",
+        "description": "单台主机的服务拓扑采集状态。",
+        "required": [
+          "host_id",
+          "status",
+          "authoritative",
+          "graph_available",
+          "capability",
+          "freshness",
+          "coverage",
+          "node_count",
+          "edge_count"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "该状态所属的主机 ID。"
+          },
+          "network_scope_id": {
+            "type": "string",
+            "description": "该主机解析到的网络域（如已知）。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "degraded",
+              "stale",
+              "initializing",
+              "disabled",
+              "unsupported",
+              "no_data"
+            ],
+            "description": "总体的服务拓扑采集状态。"
+          },
+          "authoritative": {
+            "type": "boolean",
+            "description": "该主机是否存在权威的当前拓扑。"
+          },
+          "graph_available": {
+            "type": "boolean",
+            "description": "当前是否可以获取该主机的拓扑数据。"
+          },
+          "capability": {
+            "$ref": "#/components/schemas/ServiceMapCapability",
+            "description": "该主机自报的服务拓扑能力信息。"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/ServiceMapFreshness",
+            "description": "该主机拓扑数据的新鲜程度。"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/ServiceMapHostCoverage",
+            "description": "该主机拓扑数据的覆盖与增强状态。"
+          },
+          "observed_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该主机拓扑被 Agent 观测到的 Unix 时间戳（毫秒）。"
+          },
+          "received_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "服务端收到该主机当前拓扑生成数据的 Unix 时间戳（毫秒）。"
+          },
+          "latest_health_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近一次非权威健康信号的 Unix 时间戳（毫秒），仅当其晚于当前拓扑时出现。"
+          },
+          "report_interval_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "配置的上报间隔（毫秒）。"
+          },
+          "node_count": {
+            "type": "integer",
+            "description": "该主机当前拓扑中的节点数量。"
+          },
+          "edge_count": {
+            "type": "integer",
+            "description": "该主机当前拓扑中的边数量。"
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "解释当前状态的机器可读原因码。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "error_code": {
+            "type": "string",
+            "description": "当无法读取该主机状态时设为 `status_unavailable`；此时其余字段回退为基于清单数据推导的默认值。"
+          }
+        }
+      },
+      "ServiceMapStatusBatchCoverage": {
+        "type": "object",
+        "description": "本次请求中主机覆盖情况的汇总统计。",
+        "required": [
+          "requested",
+          "succeeded",
+          "failed",
+          "truncated",
+          "states"
+        ],
+        "properties": {
+          "requested": {
+            "type": "integer",
+            "description": "请求涉及的主机数量（显式的 `host_id`/`host_ids`，或 fleet 模式下实际扫描的抽样数量）。"
+          },
+          "succeeded": {
+            "type": "integer",
+            "description": "状态读取成功的主机数量。"
+          },
+          "failed": {
+            "type": "integer",
+            "description": "状态读取失败的主机数量。"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "`fleet` 模式下若候选主机数超过 `limit` 上限则为 true。"
+          },
+          "states": {
+            "type": "object",
+            "description": "按状态值统计的数量；固定包含全部七个 key（`active`、`degraded`、`stale`、`initializing`、`disabled`、`unsupported`、`no_data`），未出现的值填 0。",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "ServiceMapStatusResponse": {
+        "type": "object",
+        "description": "所请求主机的服务拓扑采集状态。",
+        "required": [
+          "fleet",
+          "items",
+          "coverage",
+          "partial",
+          "generated_at_ms"
+        ],
+        "properties": {
+          "fleet": {
+            "type": "boolean",
+            "description": "回显本次响应是否来自主机群抽样而非显式主机 ID。"
+          },
+          "items": {
+            "type": "array",
+            "description": "各主机的状态，顺序与主机解析顺序一致。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapStatusItem"
+            }
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/ServiceMapStatusBatchCoverage",
+            "description": "主机覆盖情况的汇总统计。"
+          },
+          "partial": {
+            "type": "boolean",
+            "description": "若存在主机读取失败，或主机群抽样被截断，则为 true。"
+          },
+          "generated_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "生成本次响应的 Unix 时间戳（毫秒）。"
+          }
+        }
+      },
+      "ServiceMapFleetBrowseRequest": {
+        "type": "object",
+        "description": "浏览已启用服务拓扑能力主机的过滤与分页参数。",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "description": "不透明的分页游标。请原样传入上一次响应中的 `next_cursor`；首页请省略此字段。"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "本页最多返回的匹配主机数。默认 50，范围 1～100。",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "scan_limit": {
+            "type": "integer",
+            "description": "填充本页时最多检查的候选主机数。默认 1000，范围 `limit`～2000。",
+            "default": 1000,
+            "maximum": 2000
+          },
+          "statuses": {
+            "type": "array",
+            "description": "筛选处于以下任一状态的主机，最多 20 个值。",
+            "items": {
+              "type": "string",
+              "enum": [
+                "active",
+                "degraded",
+                "stale",
+                "initializing",
+                "disabled",
+                "unsupported",
+                "no_data"
+              ]
+            },
+            "maxItems": 20
+          },
+          "agent_versions": {
+            "type": "array",
+            "description": "筛选运行以下任一确切 Agent 版本的主机，最多 20 个值。",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20
+          },
+          "edge_clusters": {
+            "type": "array",
+            "description": "筛选属于以下任一确切边缘集群名称的主机，最多 20 个值。",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20
+          },
+          "capture_modes": {
+            "type": "array",
+            "description": "筛选使用以下任一采集模式的主机。`unknown` 匹配尚未上报采集模式的主机。",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ebpf",
+                "polling",
+                "unknown"
+              ]
+            },
+            "maxItems": 3
+          }
+        }
+      },
+      "ServiceMapFleetHostCapability": {
+        "type": "object",
+        "description": "主机群列表中某台主机的服务拓扑能力及当前采集状态，由清单数据与实时状态联合而成。",
+        "required": [
+          "enabled",
+          "status",
+          "snapshot_ready",
+          "authoritative",
+          "graph_available",
+          "node_count",
+          "edge_count"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "该主机是否已启用服务拓扑采集。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "degraded",
+              "stale",
+              "initializing",
+              "disabled",
+              "unsupported",
+              "no_data"
+            ],
+            "description": "总体的服务拓扑采集状态。"
+          },
+          "capability_status": {
+            "type": "string",
+            "description": "Agent 自报的能力状态，例如 `running`、`disabled`、`starting`、`failed`、`unsupported`。"
+          },
+          "capture_mode": {
+            "type": "string",
+            "description": "采集模式，例如 `ebpf` 或 `polling`。"
+          },
+          "report_interval_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "配置的上报间隔（毫秒）。"
+          },
+          "snapshot_ready": {
+            "type": "boolean",
+            "description": "Agent 是否已产出过至少一次完整快照。"
+          },
+          "authoritative": {
+            "type": "boolean",
+            "description": "该主机是否存在权威的当前拓扑。"
+          },
+          "graph_available": {
+            "type": "boolean",
+            "description": "当前是否可以获取该主机的拓扑数据。"
+          },
+          "freshness_status": {
+            "type": "string",
+            "enum": [
+              "fresh",
+              "stale",
+              "unknown"
+            ],
+            "description": "该主机拓扑数据的新鲜度分类。"
+          },
+          "max_age_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该主机拓扑数据相对本次响应生成时间的年龄（毫秒）。"
+          },
+          "observed_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该主机拓扑被 Agent 观测到的 Unix 时间戳（毫秒）。"
+          },
+          "received_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "服务端收到该主机当前拓扑生成数据的 Unix 时间戳（毫秒）。"
+          },
+          "node_count": {
+            "type": "integer",
+            "description": "该主机当前拓扑中的节点数量。"
+          },
+          "edge_count": {
+            "type": "integer",
+            "description": "该主机当前拓扑中的边数量。"
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "解释当前状态的机器可读原因码。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "error_code": {
+            "type": "string",
+            "description": "当无法读取该主机实时状态时设为 `status_unavailable`；此时其余字段回退为基于清单数据推导的默认值。"
+          }
+        }
+      },
+      "ServiceMapFleetHost": {
+        "type": "object",
+        "description": "主机群浏览过滤条件匹配到的一台主机。",
+        "required": [
+          "host_id",
+          "agent_version",
+          "edge_cluster",
+          "servicemap"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "稳定的服务拓扑主机标识符。"
+          },
+          "agent_version": {
+            "type": "string",
+            "description": "该主机上报的 Agent 版本。"
+          },
+          "edge_cluster": {
+            "type": "string",
+            "description": "该主机所属的边缘集群名称。"
+          },
+          "servicemap": {
+            "$ref": "#/components/schemas/ServiceMapFleetHostCapability",
+            "description": "该主机的服务拓扑能力及当前采集状态。"
+          }
+        }
+      },
+      "ServiceMapFleetCoverage": {
+        "type": "object",
+        "description": "产生本页结果的候选扫描覆盖情况。",
+        "required": [
+          "scanned",
+          "matched",
+          "returned",
+          "failed",
+          "states"
+        ],
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "description": "本次请求实际检查的去重候选主机数。"
+          },
+          "matched": {
+            "type": "integer",
+            "description": "扫描主机中通过全部筛选条件的数量。"
+          },
+          "returned": {
+            "type": "integer",
+            "description": "本页实际返回的匹配主机数（`<= limit`）。"
+          },
+          "failed": {
+            "type": "integer",
+            "description": "状态读取失败的候选主机数量。"
+          },
+          "states": {
+            "type": "object",
+            "description": "按状态值统计的返回项数量；固定包含全部七个状态 key，未出现的值填 0。仅反映本页结果，不代表账户全量分布。",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "ServiceMapFleetBrowseResponse": {
+        "type": "object",
+        "description": "匹配主机群浏览过滤条件的一页主机结果。",
+        "required": [
+          "items",
+          "coverage",
+          "partial",
+          "truncated",
+          "generated_at_ms"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "本页匹配到的主机。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapFleetHost"
+            }
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/ServiceMapFleetCoverage",
+            "description": "产生本页结果的候选扫描覆盖情况。"
+          },
+          "partial": {
+            "type": "boolean",
+            "description": "若本页存在读取失败的主机，或扫描被截断，则为 true。"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "若在找到 `limit` 个匹配前达到了 `scan_limit`，则为 true；此时 `next_cursor` 仍可能找到更多结果。"
+          },
+          "truncation_reasons": {
+            "type": "array",
+            "description": "当 `truncated=true` 时，扫描被截断的机器可读原因。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "用于获取下一页的不透明游标。若已无更多候选可扫描则不返回该字段。"
+          },
+          "generated_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "生成本次响应的 Unix 时间戳（毫秒）。"
+          }
+        }
+      },
+      "ServiceMapFleetSummaryRequest": {
+        "type": "object",
+        "description": "主机群状态分布聚合统计的过滤参数。",
+        "properties": {
+          "scan_limit": {
+            "type": "integer",
+            "description": "最多扫描的候选主机数。默认 2000，范围 1～5000。",
+            "default": 2000,
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "agent_versions": {
+            "type": "array",
+            "description": "筛选运行以下任一确切 Agent 版本的主机，最多 20 个值。",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20
+          },
+          "edge_clusters": {
+            "type": "array",
+            "description": "筛选属于以下任一确切边缘集群名称的主机，最多 20 个值。",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20
+          },
+          "capture_modes": {
+            "type": "array",
+            "description": "筛选使用以下任一采集模式的主机。`unknown` 匹配尚未上报采集模式的主机。",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ebpf",
+                "polling",
+                "unknown"
+              ]
+            },
+            "maxItems": 3
+          }
+        }
+      },
+      "ServiceMapFleetSummaryCoverage": {
+        "type": "object",
+        "description": "被扫描候选主机的状态分布聚合统计。",
+        "required": [
+          "scanned",
+          "matched",
+          "classified",
+          "failed",
+          "states"
+        ],
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "description": "实际检查的去重候选主机数。"
+          },
+          "matched": {
+            "type": "integer",
+            "description": "扫描主机中通过 Agent 版本/边缘集群/采集模式过滤，且仍存在最新清单记录的数量。"
+          },
+          "classified": {
+            "type": "integer",
+            "description": "成功归类到七种状态之一的匹配主机数，等于 `states` 各项之和。"
+          },
+          "failed": {
+            "type": "integer",
+            "description": "候选/详情读取发生竞态，或实时状态读取失败的主机数量。"
+          },
+          "states": {
+            "type": "object",
+            "description": "按状态值统计的主机数量；固定包含全部七个 key，未出现的值填 0。",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "ServiceMapFleetSummaryResponse": {
+        "type": "object",
+        "description": "账户内已启用服务拓扑能力主机的状态分布聚合统计。",
+        "required": [
+          "coverage",
+          "scan_limit",
+          "partial",
+          "truncated",
+          "generated_at_ms"
+        ],
+        "properties": {
+          "coverage": {
+            "$ref": "#/components/schemas/ServiceMapFleetSummaryCoverage",
+            "description": "被扫描候选主机的状态分布聚合统计。"
+          },
+          "scan_limit": {
+            "type": "integer",
+            "description": "本次实际应用的归一化扫描预算；请求未指定时回显默认值。"
+          },
+          "partial": {
+            "type": "boolean",
+            "description": "若扫描被截断，或存在归类失败的主机，则为 true。"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "若在扫描完账户内全部候选主机前达到了 `scan_limit`，则为 true。"
+          },
+          "truncation_reasons": {
+            "type": "array",
+            "description": "当 `truncated=true` 时，扫描被截断的机器可读原因。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "generated_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "生成本次响应的 Unix 时间戳（毫秒）。"
+          }
+        }
+      },
+      "RumErrorIngestionFilterCondition": {
+        "type": "object",
+        "description": "单条过滤条件，匹配错误的某一个字段。",
+        "required": [
+          "key",
+          "oper",
+          "vals"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "字段 key。取值范围：`error.usr_id`、`error.usr_email`、`error.error_type`、`error.error_message`、`error.error_stack`、`error.view_url`、`error.env`、`error.version`、`error.service`、`error.browser_name`、`error.browser_version`、`error.fingerprint`、`error.is_crash`，或以 `context.` 为前缀、最多三级嵌套的自定义上下文字段。"
+          },
+          "oper": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "NOTIN"
+            ],
+            "description": "匹配方式：`IN` 表示字段值命中 `vals` 中任意一项即匹配，`NOTIN` 表示都不命中才匹配。"
+          },
+          "vals": {
+            "type": "array",
+            "description": "待匹配的取值列表，至少 1 项。每项为精确字符串，或使用通配符（`*`/`?`）、正则（以 `/` 包裹）、`cidr:` 前缀、`num:lt|le|gt|ge:` 前缀表示的特殊匹配模式。",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RumErrorIngestionOrFilters": {
+        "type": "array",
+        "description": "OR-of-ANDs 过滤器集合：外层数组为 OR，一个错误只要匹配其中任意一个内层 AND 组即视为命中该规则。",
+        "items": {
+          "type": "array",
+          "description": "AND 组：仅当组内每个条件都匹配时，该组才算命中。",
+          "items": {
+            "$ref": "#/components/schemas/RumErrorIngestionFilterCondition"
+          }
+        }
+      },
+      "RumErrorIngestionHistoryListRequest": {
+        "type": "object",
+        "description": "分页查询应用规则历史的入参。",
+        "required": [
+          "application_id"
+        ],
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "p": {
+            "type": "integer",
+            "format": "int64",
+            "description": "从 0 开始的页码，默认 0。",
+            "default": 0,
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "每页条数，默认 20，服务端上限 100；小于等于 0 时回退为默认值。",
+            "default": 20,
+            "maximum": 100
+          },
+          "orderby": {
+            "type": "string",
+            "description": "排序字段：`updated_at` 或 `version`；无法识别的值会回退为 `updated_at`。",
+            "default": "updated_at"
+          },
+          "asc": {
+            "type": "boolean",
+            "description": "按升序排序，默认按降序排序。",
+            "default": false
+          }
+        }
+      },
+      "RumErrorIngestionRuleSnapshotItem": {
+        "type": "object",
+        "description": "历史快照中的一条规则记录，包含内部存储字段（区别于 `list` 返回的精简字段集）。",
+        "required": [
+          "id",
+          "account_id",
+          "application_id",
+          "rule_id",
+          "rule_name",
+          "description",
+          "filters",
+          "status",
+          "created_by",
+          "updated_by",
+          "deleted_at",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "uint64",
+            "description": "内部行 ID。"
+          },
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "账户 ID。"
+          },
+          "application_id": {
+            "type": "string",
+            "description": "所属 RUM 应用 ID。"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "规则 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "description": "规则名称。"
+          },
+          "description": {
+            "type": "string",
+            "description": "规则描述。"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/RumErrorIngestionOrFilters",
+            "description": "该规则在此快照版本中的过滤条件。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "该规则在此快照版本中的状态。"
+          },
+          "created_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建者成员 ID。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近更新者成员 ID。"
+          },
+          "deleted_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "软删除时间，Unix 毫秒时间戳；未删除时为 0。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间，Unix 毫秒时间戳。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "更新时间，Unix 毫秒时间戳。"
+          }
+        }
+      },
+      "RumErrorIngestionHistoryItem": {
+        "type": "object",
+        "description": "某一历史版本下，应用全部规则的快照。",
+        "required": [
+          "rules",
+          "version",
+          "updated_by",
+          "updated_by_name",
+          "updated_at"
+        ],
+        "properties": {
+          "rules": {
+            "type": "array",
+            "description": "此版本下应用的完整规则列表。",
+            "items": {
+              "$ref": "#/components/schemas/RumErrorIngestionRuleSnapshotItem"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "description": "历史版本号，从 1 开始递增。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "触发此次快照的成员 ID。"
+          },
+          "updated_by_name": {
+            "type": "string",
+            "description": "触发此次快照的成员名称。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "快照生成时间，Unix 毫秒时间戳。"
+          }
+        }
+      },
+      "RumErrorIngestionHistoryListResponse": {
+        "type": "object",
+        "description": "分页返回的错误采集规则历史。",
+        "required": [
+          "total",
+          "has_next_page",
+          "items"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该应用的历史版本总数。"
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "description": "是否还有下一页历史记录。"
+          },
+          "items": {
+            "type": "array",
+            "description": "历史快照列表，按 `orderby`/`asc` 排序。",
+            "items": {
+              "$ref": "#/components/schemas/RumErrorIngestionHistoryItem"
+            }
+          }
+        }
+      },
+      "RumErrorIngestionListRequest": {
+        "type": "object",
+        "description": "查询应用错误采集规则列表的入参。",
+        "required": [
+          "application_id"
+        ],
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          }
+        }
+      },
+      "RumErrorIngestionRule": {
+        "type": "object",
+        "description": "错误采集规则。",
+        "required": [
+          "rule_id",
+          "rule_name",
+          "description",
+          "filters",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "规则 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "description": "规则名称，1-128 个字符，同一应用内不要求唯一。"
+          },
+          "description": {
+            "type": "string",
+            "description": "规则描述，最多 512 个字符。"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/RumErrorIngestionOrFilters",
+            "description": "该规则的过滤条件。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "规则当前状态。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则创建时间，Unix 毫秒时间戳。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则最近更新时间，Unix 毫秒时间戳。"
+          }
+        }
+      },
+      "RumErrorIngestionListResponse": {
+        "type": "object",
+        "description": "该应用下配置的全部错误采集规则。",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "规则列表，按创建时间倒序排列。",
+            "items": {
+              "$ref": "#/components/schemas/RumErrorIngestionRule"
+            }
+          }
+        }
+      },
+      "RumErrorIngestionCreateRequest": {
+        "type": "object",
+        "description": "创建错误采集规则的入参。",
+        "required": [
+          "application_id",
+          "rule_name",
+          "filters"
+        ],
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "description": "规则名称，1-128 个字符。",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "description": {
+            "type": "string",
+            "description": "规则描述，最多 512 个字符。",
+            "maxLength": 512
+          },
+          "filters": {
+            "$ref": "#/components/schemas/RumErrorIngestionOrFilters",
+            "description": "用于匹配错误的过滤条件。"
+          }
+        }
+      },
+      "RumErrorIngestionCreateResponse": {
+        "type": "object",
+        "description": "新建规则的标识信息。",
+        "required": [
+          "rule_id",
+          "rule_name"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "新规则被分配到的 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "description": "回显新建规则的名称。"
+          }
+        }
+      },
+      "RumErrorIngestionRuleIDRequest": {
+        "type": "object",
+        "description": "定位应用下某一条规则的入参。",
+        "required": [
+          "application_id",
+          "rule_id"
+        ],
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "规则 ID。"
+          }
+        }
+      },
+      "RumErrorIngestionRevertRequest": {
+        "type": "object",
+        "description": "指定要回滚到的历史版本。",
+        "required": [
+          "application_id",
+          "version"
+        ],
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "version": {
+            "type": "integer",
+            "description": "要回滚到的历史版本号。",
+            "minimum": 1
+          }
+        }
+      },
+      "RumErrorIngestionUpdateRequest": {
+        "type": "object",
+        "description": "对已有错误采集规则的部分字段更新，未传入的字段保持不变。",
+        "required": [
+          "application_id",
+          "rule_id"
+        ],
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "要更新的规则 ID。"
+          },
+          "rule_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的规则名称，1-128 个字符；不传则保持不变。",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新的规则描述，最多 512 个字符；不传则保持不变。",
+            "maxLength": 512
+          },
+          "filters": {
+            "$ref": "#/components/schemas/RumErrorIngestionOrFilters",
+            "description": "新的过滤条件；不传则保持不变。"
+          }
+        }
+      },
+      "RumErrorIngestionEmptyResponse": {
+        "type": "object",
+        "description": "成功时返回的空响应体。",
+        "properties": {}
+      },
+      "RumPresetSeverityRuleFilterCondition": {
+        "type": "object",
+        "description": "AND 分组内的单条过滤条件。",
+        "required": [
+          "key",
+          "oper",
+          "vals"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "error.usr_id",
+              "error.usr_email",
+              "error.view_url",
+              "error.view_url_path",
+              "error.error_type",
+              "error.error_message",
+              "error.env",
+              "error.service",
+              "error.device_type",
+              "error.os_name",
+              "error.browser_name",
+              "error.is_crash"
+            ],
+            "description": "过滤属性键。预设严重性规则仅支持以下 Error 级别属性。"
+          },
+          "oper": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "NOTIN"
+            ],
+            "description": "匹配语义：`IN` 表示字段值匹配 `vals` 中任意一个即命中；`NOTIN` 表示一个都不匹配才命中（字段缺失时也视为命中）。"
+          },
+          "vals": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "待匹配的值列表。每一项支持精确字符串匹配、通配符（`*`/`?`）、正则（用 `/.../` 包裹）、面向 IP 类字段的 CIDR（`cidr:10.0.0.0/8`），或数值比较（如 `num:gt:100`、`num:le:50`）。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleItem": {
+        "type": "object",
+        "description": "一条预设严重性规则。",
+        "required": [
+          "rule_id",
+          "rule_name",
+          "description",
+          "filters",
+          "severity",
+          "priority",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "唯一规则 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "description": "规则显示名称。"
+          },
+          "description": {
+            "type": "string",
+            "description": "规则描述，可为空。"
+          },
+          "filters": {
+            "type": "array",
+            "description": "OR-of-ANDs 过滤结构：外层数组之间为 OR，内层数组内为 AND。当至少一个内层 AND 分组完全匹配时，该规则命中此错误。",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleFilterCondition"
+              }
+            }
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "Warning",
+              "Info"
+            ],
+            "description": "命中该规则的错误将被赋予的严重级别。"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "在该应用规则集合中的评估顺序，`1` 最先评估（优先级最高）；第一条过滤条件匹配的已启用规则生效。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "仅已启用的规则会参与对新错误的评估。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则创建时间，Unix 毫秒时间戳。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则最近更新时间，Unix 毫秒时间戳。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleListRequest": {
+        "type": "object",
+        "required": [
+          "application_id"
+        ],
+        "description": "查询预设严重性规则列表的参数。",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumPresetSeverityRuleItem"
+            },
+            "description": "按评估顺序排列的规则列表（`priority` 升序，其次 `created_at` 升序）。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleCreateRequest": {
+        "type": "object",
+        "required": [
+          "application_id",
+          "rule_name",
+          "filters",
+          "severity"
+        ],
+        "description": "创建预设严重性规则的参数。",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "规则显示名称，1-128 个字符。"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "可选描述，最多 512 个字符。"
+          },
+          "filters": {
+            "type": "array",
+            "description": "OR-of-ANDs 过滤结构：外层数组之间为 OR，内层数组内为 AND。当至少一个内层 AND 分组完全匹配时，该规则命中此错误。",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleFilterCondition"
+              }
+            }
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "Warning",
+              "Info"
+            ],
+            "description": "命中该规则的错误将被赋予的严重级别。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleCreateResponse": {
+        "type": "object",
+        "required": [
+          "rule_id",
+          "rule_name",
+          "priority"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "新创建规则的 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "description": "规则显示名称的回显。"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "赋予新规则的评估顺序（始终为当前最低优先级，即当前最大值 + 1）。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleUpdateRequest": {
+        "type": "object",
+        "required": [
+          "application_id",
+          "rule_id"
+        ],
+        "description": "更新预设严重性规则的参数，仅更新提供的字段。",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "要更新的规则 ID。"
+          },
+          "rule_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "新的显示名称，1-128 个字符。不传则保持不变。"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 512,
+            "description": "新的描述，最多 512 个字符。不传则保持不变。"
+          },
+          "filters": {
+            "type": "array",
+            "description": "OR-of-ANDs 过滤结构：外层数组之间为 OR，内层数组内为 AND。当至少一个内层 AND 分组完全匹配时，该规则命中此错误。",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleFilterCondition"
+              }
+            }
+          },
+          "severity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "Critical",
+              "Warning",
+              "Info"
+            ],
+            "description": "新的严重级别。不传则保持不变。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleIDRequest": {
+        "type": "object",
+        "required": [
+          "application_id",
+          "rule_id"
+        ],
+        "description": "标识应用内某条规则的请求。",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "规则 ID。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleReorderRequest": {
+        "type": "object",
+        "required": [
+          "application_id",
+          "drag_rule_id",
+          "target_rule_id"
+        ],
+        "description": "将一条规则移动到另一条规则评估位置的参数。",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "drag_rule_id": {
+            "type": "string",
+            "description": "被移动规则的 ID。"
+          },
+          "target_rule_id": {
+            "type": "string",
+            "description": "`drag_rule_id` 将移动到的目标规则 ID，以其评估位置为准。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleHistoryListRequest": {
+        "type": "object",
+        "required": [
+          "application_id"
+        ],
+        "description": "查询预设严重性规则变更历史的过滤参数。",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "p": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "页码，从 0 开始。"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "description": "分页大小。小于等于 0 时默认取 20，超过 100 时会被截断为 100。"
+          },
+          "orderby": {
+            "type": "string",
+            "enum": [
+              "updated_at",
+              "version"
+            ],
+            "default": "updated_at",
+            "description": "排序字段。传入其他值（含缺省）会回退为 `updated_at`。"
+          },
+          "asc": {
+            "type": "boolean",
+            "default": false,
+            "description": "为 true 时按升序排列；默认按降序排列。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleHistorySnapshotRule": {
+        "type": "object",
+        "description": "历史快照中单条规则的完整内部行结构，并非 `rules/list` 返回的精简结构。快照直接序列化数据库原始行，因此包含内部字段（`account_id`、`created_by`、`id`、`deleted_at`）。",
+        "required": [
+          "account_id",
+          "application_id",
+          "rule_id",
+          "rule_name",
+          "description",
+          "filters",
+          "severity",
+          "priority",
+          "status",
+          "created_by",
+          "updated_by",
+          "id",
+          "deleted_at",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则所属账户 ID。"
+          },
+          "application_id": {
+            "type": "string",
+            "description": "规则所属的 RUM 应用 ID。"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "唯一规则 ID。"
+          },
+          "rule_name": {
+            "type": "string",
+            "description": "规则显示名称。"
+          },
+          "description": {
+            "type": "string",
+            "description": "规则描述，可为空。"
+          },
+          "filters": {
+            "type": "array",
+            "description": "OR-of-ANDs 过滤结构：外层数组之间为 OR，内层数组内为 AND。当至少一个内层 AND 分组完全匹配时，该规则命中此错误。",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/RumPresetSeverityRuleFilterCondition"
+              }
+            }
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "Warning",
+              "Info"
+            ],
+            "description": "命中该规则的错误将被赋予的严重级别。"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "快照时刻的评估顺序，`1` 优先级最高。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "快照时刻的规则状态。"
+          },
+          "created_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最初创建该规则的成员 ID。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "快照时刻，最后更新该规则的成员 ID。"
+          },
+          "id": {
+            "type": "integer",
+            "format": "uint64",
+            "description": "内部自增行 ID。历史回滚后会以新 ID 重新插入，因此该值在回滚前后并不稳定。"
+          },
+          "deleted_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则软删除时间，Unix 毫秒时间戳；`0` 表示未删除。由于快照生成前会排除已删除规则，该值实际上恒为 `0`。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则创建时间，Unix 毫秒时间戳。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "规则最近更新时间，Unix 毫秒时间戳。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleHistoryItem": {
+        "type": "object",
+        "description": "某次变更时，该应用下所有预设严重性规则的完整版本快照。",
+        "required": [
+          "rules",
+          "version",
+          "updated_by",
+          "updated_by_name",
+          "updated_at"
+        ],
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumPresetSeverityRuleHistorySnapshotRule"
+            },
+            "description": "本次快照对应变更**之前**的完整规则集。首条快照通常为空。"
+          },
+          "version": {
+            "type": "integer",
+            "description": "快照版本号，从 1 开始单调递增。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "触发本次快照对应变更的成员 ID。"
+          },
+          "updated_by_name": {
+            "type": "string",
+            "description": "变更发生时 `updated_by` 对应的显示名称。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "快照写入时间，Unix 毫秒时间戳。"
+          }
+        }
+      },
+      "RumPresetSeverityRuleHistoryListResponse": {
+        "type": "object",
+        "required": [
+          "total",
+          "has_next_page",
+          "items"
+        ],
+        "description": "预设严重性规则历史快照的分页列表。",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该应用下历史快照的总数。"
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "description": "是否还有下一页。"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumPresetSeverityRuleHistoryItem"
+            }
+          }
+        }
+      },
+      "RumPresetSeverityRuleHistoryRevertRequest": {
+        "type": "object",
+        "required": [
+          "application_id",
+          "version"
+        ],
+        "description": "回滚到历史快照的参数。",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "RUM 应用 ID。"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "要回滚到的快照版本号。"
+          }
+        }
+      },
+      "RumResourceInfoRequest": {
+        "type": "object",
+        "description": "查询账户 RUM 资源记录的参数。",
+        "properties": {
+          "no_cache": {
+            "type": "boolean",
+            "description": "跳过资源记录（套餐版本、配额、状态）的短时缓存，从源头读取；不会刷新已用量数据。默认 `false`。",
+            "default": false
+          }
+        }
+      },
+      "RumResourceItem": {
+        "type": "object",
+        "description": "账户的 RUM 资源记录，包含计费窗口及当前会话用量。",
+        "required": [
+          "account_id",
+          "product",
+          "resource_id",
+          "resource_name",
+          "order_id",
+          "version",
+          "offering_id",
+          "session_measure.used_cnt",
+          "session_investigate.used_cnt",
+          "session_replay.used_cnt",
+          "session_measure.free_cnt",
+          "session_investigate.free_cnt",
+          "session_replay.free_cnt",
+          "session.days",
+          "view.days",
+          "error.days",
+          "action.days",
+          "resource.days",
+          "long_task.days",
+          "status",
+          "created_at",
+          "updated_at",
+          "window_start_time",
+          "window_end_time",
+          "session_limit_reached"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该资源所属的账户 ID。"
+          },
+          "product": {
+            "type": "string",
+            "enum": [
+              "rum"
+            ],
+            "description": "该资源的产品代码，本接口下恒为 `rum`。"
+          },
+          "resource_id": {
+            "type": "string",
+            "description": "账户 RUM 资源的唯一标识。"
+          },
+          "resource_name": {
+            "type": "string",
+            "description": "资源的展示名称。"
+          },
+          "order_id": {
+            "type": "string",
+            "description": "开通该资源所对应的订单 ID；通过订单流程之外方式开通的资源（如私有化部署）该字段为空。"
+          },
+          "version": {
+            "type": "string",
+            "enum": [
+              "free",
+              "professional"
+            ],
+            "description": "该资源的套餐版本。"
+          },
+          "offering_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "开通该资源所对应的商品（SKU）ID。"
+          },
+          "session_measure.used_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前计费窗口内已使用的性能监控（measure）会话数。"
+          },
+          "session_investigate.used_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前计费窗口内已使用的异常追踪（investigate）会话数。"
+          },
+          "session_replay.used_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前计费窗口内已使用的会话重放（replay）会话数。"
+          },
+          "session_measure.free_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "每个应用、每个计费窗口的性能监控会话免费额度。"
+          },
+          "session_investigate.free_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "每个应用、每个计费窗口的异常追踪会话免费额度。"
+          },
+          "session_replay.free_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "每个应用、每个计费窗口的会话重放免费额度。"
+          },
+          "session.days": {
+            "type": "integer",
+            "format": "int64",
+            "description": "会话数据的保留天数。"
+          },
+          "view.days": {
+            "type": "integer",
+            "format": "int64",
+            "description": "页面/屏幕（view）数据的保留天数。"
+          },
+          "error.days": {
+            "type": "integer",
+            "format": "int64",
+            "description": "异常（error）数据的保留天数。"
+          },
+          "action.days": {
+            "type": "integer",
+            "format": "int64",
+            "description": "用户交互（action）数据的保留天数。"
+          },
+          "resource.days": {
+            "type": "integer",
+            "format": "int64",
+            "description": "网络请求（resource）数据的保留天数。"
+          },
+          "long_task.days": {
+            "type": "integer",
+            "format": "int64",
+            "description": "长任务（long task）数据的保留天数。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "资源状态。状态为 `deleted` 或 `destroyed` 的资源不会出现在该字段——接口会直接返回 `ResourceNotFound`。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "资源创建时间，Unix 秒级时间戳；同时也是首个计费窗口的起点。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "资源最近更新时间，Unix 秒级时间戳。"
+          },
+          "window_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前 30 天计费窗口起始时间，Unix 秒级时间戳。"
+          },
+          "window_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前 30 天计费窗口结束时间，Unix 秒级时间戳。"
+          },
+          "session_limit_reached": {
+            "type": "boolean",
+            "description": "`version=free` 的账户在所有应用的免费会话额度合计用尽后为 `true`；非免费套餐恒为 `false`。"
+          },
+          "expired_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "私有化部署 License 到期时间，Unix 秒级时间戳。仅私有化部署会返回该字段，SaaS 账户不会出现该字段。"
+          }
+        }
       }
     }
   }

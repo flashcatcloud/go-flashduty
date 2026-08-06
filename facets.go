@@ -21,20 +21,6 @@ func (s *FacetsService) FacetCount(ctx context.Context, req *RUMFacetCountReques
 	return out, resp, nil
 }
 
-// List RUM facet fields.
-//
-// Return all available RUM field definitions, optionally filtered by scope and facet status.
-//
-// API: POST /rum/facet/list (rum-read-facet-list).
-func (s *FacetsService) FacetList(ctx context.Context, req *RUMFacetListRequest) (*RUMFacetListResponse, *Response, error) {
-	out := new(RUMFacetListResponse)
-	resp, err := s.client.do(ctx, "/rum/facet/list", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // List RUM fields.
 //
 // Return RUM field definitions, optionally filtered by scope and facet status.

@@ -8,40 +8,44 @@ type service struct{ client *Client }
 
 // genServices is embedded in Client to expose the generated service handles.
 type genServices struct {
-	A2aAgents             *A2aAgentsService
-	Automations           *AutomationsService
-	McpServers            *McpServersService
-	Sessions              *SessionsService
-	Skills                *SkillsService
-	AlertRules            *AlertRulesService
-	DataSources           *DataSourcesService
-	Diagnostics           *DiagnosticsService
-	MonitorUtilities      *MonitorUtilitiesService
-	RuleSets              *RuleSetsService
-	AlertEnrichment       *AlertEnrichmentService
-	Alerts                *AlertsService
-	Analytics             *AnalyticsService
-	Calendars             *CalendarsService
-	Changes               *ChangesService
-	Channels              *ChannelsService
-	ImIntegrations        *ImIntegrationsService
-	Incidents             *IncidentsService
-	Integrations          *IntegrationsService
-	Licenses              *LicensesService
-	NotificationTemplates *NotificationTemplatesService
-	Schedules             *SchedulesService
-	StatusPages           *StatusPagesService
-	Account               *AccountService
-	AuditLogs             *AuditLogsService
-	Members               *MembersService
-	RolesPermissions      *RolesPermissionsService
-	Teams                 *TeamsService
-	Applications          *ApplicationsService
-	DataQuery             *DataQueryService
-	Facets                *FacetsService
-	Issues                *IssuesService
-	SessionReplay         *SessionReplayService
-	Sourcemaps            *SourcemapsService
+	A2aAgents                *A2aAgentsService
+	Automations              *AutomationsService
+	McpServers               *McpServersService
+	Sessions                 *SessionsService
+	Skills                   *SkillsService
+	AlertRules               *AlertRulesService
+	DataSources              *DataSourcesService
+	Diagnostics              *DiagnosticsService
+	MonitorUtilities         *MonitorUtilitiesService
+	RuleSets                 *RuleSetsService
+	ServiceMap               *ServiceMapService
+	AlertEnrichment          *AlertEnrichmentService
+	Alerts                   *AlertsService
+	Analytics                *AnalyticsService
+	Calendars                *CalendarsService
+	Changes                  *ChangesService
+	Channels                 *ChannelsService
+	ImIntegrations           *ImIntegrationsService
+	Incidents                *IncidentsService
+	Integrations             *IntegrationsService
+	Licenses                 *LicensesService
+	NotificationTemplates    *NotificationTemplatesService
+	Schedules                *SchedulesService
+	StatusPages              *StatusPagesService
+	Account                  *AccountService
+	AuditLogs                *AuditLogsService
+	Members                  *MembersService
+	RolesPermissions         *RolesPermissionsService
+	Teams                    *TeamsService
+	Applications             *ApplicationsService
+	DataQuery                *DataQueryService
+	ErrorIngestionRules      *ErrorIngestionRulesService
+	Facets                   *FacetsService
+	IssuePresetSeverityRules *IssuePresetSeverityRulesService
+	Issues                   *IssuesService
+	Resources                *ResourcesService
+	SessionReplay            *SessionReplayService
+	Sourcemaps               *SourcemapsService
 }
 
 // initServices wires every service to the shared backref. Called by NewClient.
@@ -57,6 +61,7 @@ func (c *Client) initServices() {
 	c.Diagnostics = (*DiagnosticsService)(&c.common)
 	c.MonitorUtilities = (*MonitorUtilitiesService)(&c.common)
 	c.RuleSets = (*RuleSetsService)(&c.common)
+	c.ServiceMap = (*ServiceMapService)(&c.common)
 	c.AlertEnrichment = (*AlertEnrichmentService)(&c.common)
 	c.Alerts = (*AlertsService)(&c.common)
 	c.Analytics = (*AnalyticsService)(&c.common)
@@ -77,8 +82,11 @@ func (c *Client) initServices() {
 	c.Teams = (*TeamsService)(&c.common)
 	c.Applications = (*ApplicationsService)(&c.common)
 	c.DataQuery = (*DataQueryService)(&c.common)
+	c.ErrorIngestionRules = (*ErrorIngestionRulesService)(&c.common)
 	c.Facets = (*FacetsService)(&c.common)
+	c.IssuePresetSeverityRules = (*IssuePresetSeverityRulesService)(&c.common)
 	c.Issues = (*IssuesService)(&c.common)
+	c.Resources = (*ResourcesService)(&c.common)
 	c.SessionReplay = (*SessionReplayService)(&c.common)
 	c.Sourcemaps = (*SourcemapsService)(&c.common)
 }
