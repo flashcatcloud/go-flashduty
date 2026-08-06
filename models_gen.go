@@ -6057,8 +6057,8 @@ type RUMApplicationItem struct {
 	ApplicationName string `json:"application_name" toon:"application_name"`
 	// Token used to initialize the RUM SDK.
 	ClientToken string `json:"client_token" toon:"client_token"`
-	// Creation timestamp, Unix epoch seconds.
-	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Creation timestamp, Unix epoch milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Creator member ID.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
 	// If `true`, the application is only accessible to team members.
@@ -6075,8 +6075,8 @@ type RUMApplicationItem struct {
 	Tracing RUMApplicationTracing `json:"tracing" toon:"tracing"`
 	// Application type.
 	Type string `json:"type" toon:"type"`
-	// Last update timestamp, Unix epoch seconds.
-	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// Last update timestamp, Unix epoch milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
