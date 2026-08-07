@@ -223,7 +223,7 @@
                         "integration_types": [
                           "monit.alert"
                         ],
-                        "dedup_key": "100128:prom-10.99.1.107:A:1579244238440766834:anydata",
+                        "dedup_key": "100128:prom-203.0.113.107:A:1579244238440766834:anydata",
                         "equals_md5": "",
                         "start_time": 1775912219,
                         "end_time": 0,
@@ -473,7 +473,7 @@
                     "integration_types": [
                       "monit.alert"
                     ],
-                    "dedup_key": "100128:prom-10.99.1.107:A:1579244238440766834:anydata",
+                    "dedup_key": "100128:prom-203.0.113.107:A:1579244238440766834:anydata",
                     "equals_md5": "",
                     "start_time": 1775912219,
                     "end_time": 0,
@@ -624,7 +624,7 @@
                         "integration_types": [
                           "monit.alert"
                         ],
-                        "dedup_key": "100128:prom-10.99.1.107:A:1579244238440766834:anydata",
+                        "dedup_key": "100128:prom-203.0.113.107:A:1579244238440766834:anydata",
                         "equals_md5": "",
                         "start_time": 1775912219,
                         "end_time": 0,
@@ -762,7 +762,7 @@
                         "description": "",
                         "title": "CPU usage high - web-server-01",
                         "title_rule": "",
-                        "alert_key": "100128:prom-10.99.1.107:A:1579244238440766834:anydata",
+                        "alert_key": "100128:prom-203.0.113.107:A:1579244238440766834:anydata",
                         "alert_severity": "Critical",
                         "alert_status": "Critical",
                         "start_time": 1775912219,
@@ -27812,7 +27812,7 @@
                         "source_entity_id": "procw_v1_source",
                         "source_netns_id": "netns_v1_default",
                         "destination": {
-                          "ip": "10.99.1.105",
+                          "ip": "203.0.113.105",
                           "port": 3306,
                           "protocol": "tcp"
                         },
@@ -27822,7 +27822,7 @@
                         "endpoint_resolution": {
                           "status": "resolved",
                           "endpoint": {
-                            "ip": "10.99.1.105",
+                            "ip": "203.0.113.105",
                             "port": 3306,
                             "protocol": "tcp"
                           },
@@ -27832,8 +27832,8 @@
                               "entity_id": "procw_v1_mysql",
                               "netns_id": "netns_v1_default",
                               "listener_id": "listener_v1_mysql",
-                              "listener_ip": "10.99.1.105",
-                              "effective_ip": "10.99.1.105",
+                              "listener_ip": "203.0.113.105",
+                              "effective_ip": "203.0.113.105",
                               "protocol": "tcp",
                               "port": 3306,
                               "match_kind": "exact",
@@ -27982,7 +27982,7 @@
                         "target_entity_id": "procw_v1_mysql",
                         "target_display_name": "mysqld.service",
                         "destination_protocol": "tcp",
-                        "destination_ip": "10.99.1.105",
+                        "destination_ip": "203.0.113.105",
                         "destination_port": 3306,
                         "last_seen": "2026-07-21T18:45:56.072+08:00",
                         "active_connections": 1
@@ -28072,17 +28072,39 @@
                         "edge_cluster": "edge-a",
                         "servicemap": {
                           "enabled": true,
-                          "status": "active",
+                          "status": "degraded",
+                          "capability_status": "degraded",
+                          "capture_mode": "ebpf",
+                          "snapshot_ready": true,
+                          "authoritative": true,
+                          "graph_available": false,
+                          "freshness_status": "fresh",
+                          "observed_at_ms": 1784635557272,
+                          "received_at_ms": 1784635557272,
+                          "node_count": 46,
+                          "edge_count": 200,
+                          "reason_codes": [
+                            "snapshot_incomplete"
+                          ]
+                        }
+                      },
+                      {
+                        "host_id": "host_fedcba9876543210fedcba9876543210",
+                        "agent_version": "v1.2.3",
+                        "edge_cluster": "edge-a",
+                        "servicemap": {
+                          "enabled": true,
+                          "status": "stale",
                           "capability_status": "running",
                           "capture_mode": "ebpf",
                           "snapshot_ready": true,
                           "authoritative": true,
                           "graph_available": true,
-                          "freshness_status": "fresh",
-                          "observed_at_ms": 1784635557272,
-                          "received_at_ms": 1784635557272,
-                          "node_count": 46,
-                          "edge_count": 200
+                          "freshness_status": "stale",
+                          "observed_at_ms": 1784631957272,
+                          "received_at_ms": 1784631957272,
+                          "node_count": 38,
+                          "edge_count": 152
                         }
                       }
                     ],
@@ -28791,7 +28813,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "total": 3,
+                    "total": 2,
                     "has_next_page": false,
                     "items": [
                       {
@@ -28836,13 +28858,20 @@
                             "updated_by": 1001,
                             "deleted_at": 0,
                             "created_at": 1786000000000,
-                            "updated_at": 1786003600000
+                            "updated_at": 1786000000000
                           }
                         ],
-                        "version": 3,
+                        "version": 2,
                         "updated_by": 1001,
                         "updated_by_name": "Alice Chen",
                         "updated_at": 1786003600000
+                      },
+                      {
+                        "rules": [],
+                        "version": 1,
+                        "updated_by": 1001,
+                        "updated_by_name": "Alice Chen",
+                        "updated_at": 1786000000000
                       }
                     ]
                   }
@@ -28993,6 +29022,27 @@
                   "data": {
                     "items": [
                       {
+                        "rule_id": "n8mZQ2VbXk4wPRs6DfC9Ay",
+                        "rule_name": "Known noisy browser extension errors",
+                        "description": "Downgrade known extension errors to Info",
+                        "filters": [
+                          [
+                            {
+                              "key": "error.error_message",
+                              "oper": "IN",
+                              "vals": [
+                                "/^ResizeObserver loop.*|.*chrome-extension:\\/\\/.*/"
+                              ]
+                            }
+                          ]
+                        ],
+                        "severity": "Info",
+                        "priority": 1,
+                        "status": "disabled",
+                        "created_at": 1785744052160,
+                        "updated_at": 1785916852160
+                      },
+                      {
                         "rule_id": "TAHUYnQmXKzgMS4TFVUKvz",
                         "rule_name": "Critical crash spikes",
                         "description": "Escalate production crashes to Critical severity",
@@ -29015,31 +29065,10 @@
                           ]
                         ],
                         "severity": "Critical",
-                        "priority": 1,
+                        "priority": 2,
                         "status": "enabled",
                         "created_at": 1785830452160,
                         "updated_at": 1785830452160
-                      },
-                      {
-                        "rule_id": "n8mZQ2VbXk4wPRs6DfC9Ay",
-                        "rule_name": "Known noisy browser extension errors",
-                        "description": "Downgrade known extension errors to Info",
-                        "filters": [
-                          [
-                            {
-                              "key": "error.error_message",
-                              "oper": "IN",
-                              "vals": [
-                                "/^ResizeObserver loop.*|.*chrome-extension:\\/\\/.*/"
-                              ]
-                            }
-                          ]
-                        ],
-                        "severity": "Info",
-                        "priority": 2,
-                        "status": "disabled",
-                        "created_at": 1785744052160,
-                        "updated_at": 1785916852160
                       }
                     ]
                   }
@@ -29115,7 +29144,7 @@
                   "data": {
                     "rule_id": "TAHUYnQmXKzgMS4TFVUKvz",
                     "rule_name": "Critical crash spikes",
-                    "priority": 3
+                    "priority": 2
                   }
                 }
               }
@@ -29566,11 +29595,38 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "total": 4,
+                    "total": 3,
                     "has_next_page": false,
                     "items": [
                       {
                         "rules": [
+                          {
+                            "account_id": 3790925372131,
+                            "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                            "rule_id": "n8mZQ2VbXk4wPRs6DfC9Ay",
+                            "rule_name": "Known noisy browser extension errors",
+                            "description": "Downgrade known extension errors to Info",
+                            "filters": [
+                              [
+                                {
+                                  "key": "error.error_message",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "/^ResizeObserver loop.*|.*chrome-extension:\\/\\/.*/"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "severity": "Info",
+                            "priority": 1,
+                            "status": "enabled",
+                            "created_by": 3790925372131,
+                            "updated_by": 3790925372131,
+                            "id": 4820,
+                            "deleted_at": 0,
+                            "created_at": 1785744052160,
+                            "updated_at": 1785744052160
+                          },
                           {
                             "account_id": 3790925372131,
                             "application_id": "WoyQQ3BohkdtPivubEvE8o",
@@ -29596,7 +29652,7 @@
                               ]
                             ],
                             "severity": "Critical",
-                            "priority": 1,
+                            "priority": 2,
                             "status": "enabled",
                             "created_by": 3790925372131,
                             "updated_by": 3790925372131,
@@ -29606,17 +29662,52 @@
                             "updated_at": 1785830452160
                           }
                         ],
-                        "version": 2,
+                        "version": 3,
                         "updated_by": 2476444212131,
                         "updated_by_name": "Alice Chen",
                         "updated_at": 1785916852160
+                      },
+                      {
+                        "rules": [
+                          {
+                            "account_id": 3790925372131,
+                            "application_id": "WoyQQ3BohkdtPivubEvE8o",
+                            "rule_id": "n8mZQ2VbXk4wPRs6DfC9Ay",
+                            "rule_name": "Known noisy browser extension errors",
+                            "description": "Downgrade known extension errors to Info",
+                            "filters": [
+                              [
+                                {
+                                  "key": "error.error_message",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "/^ResizeObserver loop.*|.*chrome-extension:\\/\\/.*/"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "severity": "Info",
+                            "priority": 1,
+                            "status": "enabled",
+                            "created_by": 3790925372131,
+                            "updated_by": 3790925372131,
+                            "id": 4820,
+                            "deleted_at": 0,
+                            "created_at": 1785744052160,
+                            "updated_at": 1785744052160
+                          }
+                        ],
+                        "version": 2,
+                        "updated_by": 3790925372131,
+                        "updated_by_name": "Bob Zhang",
+                        "updated_at": 1785830452160
                       },
                       {
                         "rules": [],
                         "version": 1,
                         "updated_by": 3790925372131,
                         "updated_by_name": "Bob Zhang",
-                        "updated_at": 1785830452159
+                        "updated_at": 1785744052160
                       }
                     ]
                   }
@@ -29767,7 +29858,7 @@
                     "product": "rum",
                     "resource_id": "rum_2451002751131",
                     "resource_name": "rum_2451002751131",
-                    "order_id": "fd_order_20260615_8f3a1c2b",
+                    "order_id": "fd_order_20250615_8f3a1c2b",
                     "version": "professional",
                     "offering_id": 11,
                     "session_measure.used_cnt": 128400,
@@ -29785,8 +29876,8 @@
                     "status": "enabled",
                     "created_at": 1750000000,
                     "updated_at": 1752000000,
-                    "window_start_time": 1752192000,
-                    "window_end_time": 1754784000,
+                    "window_start_time": 1750000000,
+                    "window_end_time": 1752592000,
                     "session_limit_reached": false
                   }
                 }
