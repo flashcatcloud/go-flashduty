@@ -4000,6 +4000,185 @@ type InviteMemberItem struct {
 	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
 }
 
+// KnowledgeFileDeleteRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgeFileDeleteRequest struct {
+	// Delete even when other pack files reference this file; the referrers are then returned as warnings instead of blocking the delete.
+	Force bool `json:"force,omitempty" toon:"force,omitempty"`
+	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
+	// Path of the file relative to the pack root.
+	RelPath string `json:"rel_path" toon:"rel_path"`
+}
+
+// KnowledgeFileDeleteResponse is generated from the Flashduty OpenAPI schema.
+type KnowledgeFileDeleteResponse struct {
+	Warnings []KnowledgeWarning `json:"warnings" toon:"warnings"`
+}
+
+// KnowledgeFileGetRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgeFileGetRequest struct {
+	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
+	// Path of the file relative to the pack root.
+	RelPath string `json:"rel_path" toon:"rel_path"`
+}
+
+// KnowledgeFileGetResponse is generated from the Flashduty OpenAPI schema.
+type KnowledgeFileGetResponse struct {
+	// Base64-encoded file content; decodes to UTF-8 text.
+	ContentB64 string            `json:"content_b64" toon:"content_b64"`
+	File       KnowledgeFileItem `json:"file" toon:"file"`
+}
+
+// KnowledgeFileItem is generated from the Flashduty OpenAPI schema.
+type KnowledgeFileItem struct {
+	// SHA-256 hex digest of the file content.
+	Checksum string `json:"checksum" toon:"checksum"`
+	// MIME type; inferred from the file extension when not set on upload.
+	ContentType string `json:"content_type" toon:"content_type"`
+	// File ID (`kfl_` prefix).
+	FileID string `json:"file_id" toon:"file_id"`
+	// ID of the knowledge pack that contains the file.
+	PackID string `json:"pack_id" toon:"pack_id"`
+	// Path relative to the pack root, e.g. `runbooks/restart.md`.
+	RelPath string `json:"rel_path" toon:"rel_path"`
+	// File size in bytes.
+	SizeBytes int64 `json:"size_bytes" toon:"size_bytes"`
+	// Unix timestamp in milliseconds when the file was last modified.
+	UpdatedAtMs TimestampMilli `json:"updated_at_ms" toon:"updated_at_ms"`
+	// Person ID of the member who last modified the file.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// KnowledgeFileListRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgeFileListRequest struct {
+	ListOptions
+	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
+}
+
+// KnowledgeFileListResponse is generated from the Flashduty OpenAPI schema.
+type KnowledgeFileListResponse struct {
+	Files []KnowledgeFileItem `json:"files" toon:"files"`
+	// Total number of files in the pack.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// KnowledgeFilePutRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgeFilePutRequest struct {
+	// Base64-encoded file content; must decode to valid UTF-8 text.
+	ContentB64 string `json:"content_b64,omitempty" toon:"content_b64,omitempty"`
+	// MIME type; inferred from the file extension when omitted.
+	ContentType string `json:"content_type,omitempty" toon:"content_type,omitempty"`
+	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
+	// Destination path relative to the pack root; existing files are overwritten.
+	RelPath string `json:"rel_path" toon:"rel_path"`
+}
+
+// KnowledgeFilePutResponse is generated from the Flashduty OpenAPI schema.
+type KnowledgeFilePutResponse struct {
+	File     KnowledgeFileItem  `json:"file" toon:"file"`
+	Warnings []KnowledgeWarning `json:"warnings" toon:"warnings"`
+}
+
+// KnowledgeGetRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgeGetRequest struct{}
+
+// KnowledgeGetResponse is generated from the Flashduty OpenAPI schema.
+type KnowledgeGetResponse struct {
+	Files []KnowledgeFileItem `json:"files" toon:"files"`
+	Pack  KnowledgePackItem   `json:"pack" toon:"pack"`
+}
+
+// KnowledgePackDeleteRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgePackDeleteRequest struct {
+	// Knowledge pack ID to delete.
+	PackID string `json:"pack_id" toon:"pack_id"`
+}
+
+// KnowledgePackDeleteResponse is generated from the Flashduty OpenAPI schema.
+type KnowledgePackDeleteResponse struct {
+	// True when the pack was deleted.
+	OK bool `json:"ok" toon:"ok"`
+}
+
+// KnowledgePackEnsureRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgePackEnsureRequest struct {
+	// Scope of the pack to ensure.
+	Scope string `json:"scope" toon:"scope"`
+	// Team ID; required for `team` scope, ignored for `account` scope.
+	ScopeID int64 `json:"scope_id,omitempty" toon:"scope_id,omitempty"`
+}
+
+// KnowledgePackItem is generated from the Flashduty OpenAPI schema.
+type KnowledgePackItem struct {
+	// Account that owns the pack.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Whether the caller can edit this pack.
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
+	// Unix timestamp in milliseconds when the pack was created.
+	CreatedAtMs TimestampMilli `json:"created_at_ms" toon:"created_at_ms"`
+	// Person ID of the member who created the pack.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Number of files in the pack.
+	FileCount int64 `json:"file_count" toon:"file_count"`
+	// Knowledge pack ID (`kpk_` prefix).
+	PackID string `json:"pack_id" toon:"pack_id"`
+	// Pack scope. `channel` is a legacy scope; new packs are `account` or `team`.
+	Scope string `json:"scope" toon:"scope"`
+	// Scope owner: the account ID for `account` scope, the team ID for `team` scope.
+	ScopeID int64 `json:"scope_id" toon:"scope_id"`
+	// Display name of the owning team (team scope only); empty for account scope.
+	TeamName string `json:"team_name" toon:"team_name"`
+	// Total size of all files in bytes.
+	TotalBytes int64 `json:"total_bytes" toon:"total_bytes"`
+	// Unix timestamp in milliseconds when the pack was last modified.
+	UpdatedAtMs TimestampMilli `json:"updated_at_ms" toon:"updated_at_ms"`
+	// Pack version, incremented on every file change.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// KnowledgePackListRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgePackListRequest struct {
+	ListOptions
+	// Include the account-scope pack; defaults to true.
+	IncludeAccount *bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
+	// Case-insensitive substring filter over pack ID, scope, and team name.
+	Query string `json:"query,omitempty" toon:"query,omitempty"`
+	// Restrict to one scope; `all` (default) overrides `include_account`.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// Restrict to these team IDs; for non-admins the list is intersected with their own teams.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
+}
+
+// KnowledgePackListResponse is generated from the Flashduty OpenAPI schema.
+type KnowledgePackListResponse struct {
+	Packs []KnowledgePackItem `json:"packs" toon:"packs"`
+	// Total number of packs after filtering, before pagination.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// KnowledgePackUpdateRequest is generated from the Flashduty OpenAPI schema.
+type KnowledgePackUpdateRequest struct {
+	// Knowledge pack ID to update.
+	PackID string `json:"pack_id" toon:"pack_id"`
+	// Destination scope; omit for a no-op that returns the current pack.
+	Scope *string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// Destination team ID; required when `scope` is `team`, set automatically for `account`.
+	ScopeID *int64 `json:"scope_id,omitempty" toon:"scope_id,omitempty"`
+}
+
+// KnowledgeWarning is generated from the Flashduty OpenAPI schema.
+type KnowledgeWarning struct {
+	// Warning code.
+	Code string `json:"code" toon:"code"`
+	// Single reference related to the warning.
+	Ref string `json:"ref" toon:"ref"`
+	// Multiple references related to the warning.
+	Refs []string `json:"refs" toon:"refs"`
+}
+
 // LicenseListResponse is generated from the Flashduty OpenAPI schema.
 type LicenseListResponse struct {
 	// People holding an active license.

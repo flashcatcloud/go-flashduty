@@ -167,6 +167,9 @@
     {
       "name": "RUM/资源",
       "description": "查询账户的 RUM 资源记录及当前用量。"
+    },
+    {
+      "name": "AI SRE/知识"
     }
   ],
   "paths": {
@@ -29903,6 +29906,843 @@
           }
         }
       }
+    },
+    "/safari/knowledge/get": {
+      "post": {
+        "operationId": "knowledge-pack-read-get",
+        "summary": "查看账户知识包",
+        "description": "返回账户范围知识包的元数据及其文件列表。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 固定返回调用者的账户范围知识包——没有 `pack_id` 参数；如需团队知识包请使用 `POST /safari/knowledge/pack/list`。\n- 账户知识包在首次访问时惰性创建，因此有效账户调用不会返回 not-found。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-pack-read-get",
+          "metadata": {
+            "sidebarTitle": "查看账户知识包"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeGetResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "pack": {
+                      "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                      "account_id": 2451002751131,
+                      "scope": "account",
+                      "scope_id": 2451002751131,
+                      "file_count": 17,
+                      "total_bytes": 41010,
+                      "version": 134,
+                      "created_by": 2476444212131,
+                      "created_at_ms": 1778768680053,
+                      "updated_at_ms": 1786456567177,
+                      "can_edit": true
+                    },
+                    "files": [
+                      {
+                        "file_id": "kfl_QvT4g3c8zAHxTthuT6hGne",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "aliyun.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1436,
+                        "checksum": "fccc276c0d7fbae2e9508285cdde0f8475169634e89e466dac2e59f176c9be2f",
+                        "updated_by": 3790925372131,
+                        "updated_at_ms": 1783311304757
+                      },
+                      {
+                        "file_id": "kfl_BMsQZCZSqhW4TFskYNb4H5",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "DUTY.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1301,
+                        "checksum": "450eabf178b41e46ea2f43d395a80bf8b956ddb9c9cea34f44ffc69a53e7a36b",
+                        "updated_by": 2476444212131,
+                        "updated_at_ms": 1784800003394
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeGetRequest"
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/list": {
+      "post": {
+        "operationId": "knowledge-pack-read-list",
+        "summary": "查询知识包列表",
+        "description": "查询调用者可见的账户与团队范围知识包列表。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 可见性与控制台一致：管理员可见账户包及全部团队包；非管理员可见账户包及所属团队包，传入的 `team_ids` 会被静默过滤为其所属团队。\n- `scope` 用于选择 `all`（默认）、仅 `account` 或仅 `team`，会覆盖 `include_account`。\n- `query` 对知识包 ID、范围和团队名称做大小写不敏感的子串过滤；`p`/`limit` 对过滤结果分页。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-pack-read-list",
+          "metadata": {
+            "sidebarTitle": "查询知识包列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "packs": [
+                      {
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "account_id": 2451002751131,
+                        "scope": "account",
+                        "scope_id": 2451002751131,
+                        "file_count": 17,
+                        "total_bytes": 41010,
+                        "version": 134,
+                        "created_by": 2476444212131,
+                        "created_at_ms": 1778768680053,
+                        "updated_at_ms": 1786456567177,
+                        "can_edit": true
+                      },
+                      {
+                        "pack_id": "kpk_5qRL34nKtoWM4nQVT2kHzy",
+                        "account_id": 2451002751131,
+                        "scope": "team",
+                        "scope_id": 2477033058131,
+                        "team_name": "研发团队",
+                        "file_count": 4,
+                        "total_bytes": 11159,
+                        "version": 15,
+                        "created_by": 2476444212131,
+                        "created_at_ms": 1782201586089,
+                        "updated_at_ms": 1785462092702,
+                        "can_edit": true
+                      }
+                    ],
+                    "total": 3
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackListRequest"
+              },
+              "example": {
+                "p": 1,
+                "limit": 20,
+                "scope": "all",
+                "include_account": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/ensure": {
+      "post": {
+        "operationId": "knowledge-pack-write-ensure",
+        "summary": "确保知识包存在",
+        "description": "在指定范围幂等创建知识包，已存在时直接返回现有知识包。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **知识库管理**（`ai-sre`） |\n\n## 使用说明\n\n- 幂等：若（`scope`, `scope_id`）已存在知识包，则原样返回。\n- 账户范围忽略 `scope_id`（使用账户 ID），首次创建时会自动写入默认 `DUTY.md`。\n- 创建账户范围知识包需要账户 Owner/Admin 权限；在团队下创建需要是该团队成员。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-pack-write-ensure",
+          "metadata": {
+            "sidebarTitle": "确保知识包存在"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                    "account_id": 2451002751131,
+                    "scope": "account",
+                    "scope_id": 2451002751131,
+                    "file_count": 17,
+                    "total_bytes": 41010,
+                    "version": 138,
+                    "created_by": 2476444212131,
+                    "created_at_ms": 1778768680053,
+                    "updated_at_ms": 1786458765182,
+                    "can_edit": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackEnsureRequest"
+              },
+              "example": {
+                "scope": "team",
+                "scope_id": 2477033058131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/update": {
+      "post": {
+        "operationId": "knowledge-pack-write-update",
+        "summary": "更新知识包",
+        "description": "将知识包移动到其他账户或团队范围。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **知识库管理**（`ai-sre`） |\n\n## 使用说明\n\n- `scope` 是唯一可修改的字段；不传则为空操作，返回当前知识包。\n- 团队范围必须传 `scope_id`；账户范围自动使用账户 ID。\n- 目标范围已存在知识包时返回 `ReferenceExist`——知识包不会被合并。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-pack-write-update",
+          "metadata": {
+            "sidebarTitle": "更新知识包"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "pack_id": "kpk_5qRL34nKtoWM4nQVT2kHzy",
+                    "account_id": 2451002751131,
+                    "scope": "team",
+                    "scope_id": 2477033058131,
+                    "team_name": "研发团队",
+                    "file_count": 4,
+                    "total_bytes": 11159,
+                    "version": 15,
+                    "created_by": 2476444212131,
+                    "created_at_ms": 1782201586089,
+                    "updated_at_ms": 1785462092702,
+                    "can_edit": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackUpdateRequest"
+              },
+              "example": {
+                "pack_id": "kpk_5qRL34nKtoWM4nQVT2kHzy",
+                "scope": "team",
+                "scope_id": 2477033058131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/delete": {
+      "post": {
+        "operationId": "knowledge-pack-write-delete",
+        "summary": "删除知识包",
+        "description": "删除知识包及其全部文件。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **知识库管理**（`ai-sre`） |\n\n## 使用说明\n\n- 删除知识包会同时删除其中所有文件，且不可恢复。\n- 允许删除账户范围知识包；下次访问时会重新创建为空包。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-pack-write-delete",
+          "metadata": {
+            "sidebarTitle": "删除知识包"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackDeleteResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "ok": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackDeleteRequest"
+              },
+              "example": {
+                "pack_id": "kpk_YqHXPTEUHQFGepUfRS7vsh"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/list": {
+      "post": {
+        "operationId": "knowledge-file-read-list",
+        "summary": "查询知识文件列表",
+        "description": "查询知识包内的文件列表，包含大小、校验和等元数据。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 不传 `pack_id` 时默认查询调用者的账户范围知识包（不存在时惰性创建）。\n- 读取团队范围知识包需要是该团队成员。\n- `p`/`limit` 参数会被接受，但当前实现始终返回完整文件列表。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-file-read-list",
+          "metadata": {
+            "sidebarTitle": "查询知识文件列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFileListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "files": [
+                      {
+                        "file_id": "kfl_QvT4g3c8zAHxTthuT6hGne",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "aliyun.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1436,
+                        "checksum": "fccc276c0d7fbae2e9508285cdde0f8475169634e89e466dac2e59f176c9be2f",
+                        "updated_by": 3790925372131,
+                        "updated_at_ms": 1783311304757
+                      },
+                      {
+                        "file_id": "kfl_BMsQZCZSqhW4TFskYNb4H5",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "DUTY.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1301,
+                        "checksum": "450eabf178b41e46ea2f43d395a80bf8b956ddb9c9cea34f44ffc69a53e7a36b",
+                        "updated_by": 2476444212131,
+                        "updated_at_ms": 1784800003394
+                      }
+                    ],
+                    "total": 17
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFileListRequest"
+              },
+              "example": {
+                "pack_id": "kpk_kE49k3FhecfJBwutbshEEc"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/get": {
+      "post": {
+        "operationId": "knowledge-file-read-get",
+        "summary": "获取知识文件",
+        "description": "返回知识文件的元数据及 Base64 编码的文件内容。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 文件内容通过 `content_b64`（Base64）返回；知识包文件保证为 UTF-8 文本。\n- 不传 `pack_id` 时默认账户范围知识包；读取团队范围知识包需要是该团队成员。\n- 文件不存在时返回 `ResourceNotFound`（HTTP 400）。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-file-read-get",
+          "metadata": {
+            "sidebarTitle": "获取知识文件"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFileGetResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "file": {
+                      "file_id": "kfl_gctXKRG45aFQGgxSFr59WY",
+                      "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                      "rel_path": "tmp/openapi-example.md",
+                      "content_type": "text/markdown",
+                      "size_bytes": 50,
+                      "checksum": "a0775f9b3f392cd0560b21ad2f579ae4a5d6b1282b9eb145688ba2de717a816d",
+                      "updated_by": 2476444212131,
+                      "updated_at_ms": 1786458764961
+                    },
+                    "content_b64": "IyBPcGVuQVBJIGV4YW1wbGUKVGVtcCBmaWxlIGZvciBBUEkgZG9jcyBleGFtcGxlLgo="
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFileGetRequest"
+              },
+              "example": {
+                "rel_path": "tmp/openapi-example.md"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/put": {
+      "post": {
+        "operationId": "knowledge-file-write-put",
+        "summary": "上传知识文件",
+        "description": "以 Base64 编码的内容在知识包中创建或覆盖文件。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **知识库管理**（`ai-sre`） |\n\n## 使用说明\n\n- 文件内容以 JSON 字段 `content_b64` 中的 Base64 文本上传——不是 multipart 上传。\n- 写入已存在的 `rel_path` 会覆盖原文件；`content_type` 留空时按扩展名推断（`.md` → `text/markdown`）。\n- 内容解码后必须是合法的 UTF-8 文本，二进制内容会被拒绝并返回 `InvalidParameter`。\n- 编辑账户范围知识包需要账户 Owner/Admin 权限；编辑团队知识包需要是该团队成员。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-file-write-put",
+          "metadata": {
+            "sidebarTitle": "上传知识文件"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFilePutResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "file": {
+                      "file_id": "kfl_gctXKRG45aFQGgxSFr59WY",
+                      "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                      "rel_path": "tmp/openapi-example.md",
+                      "content_type": "text/markdown",
+                      "size_bytes": 50,
+                      "checksum": "a0775f9b3f392cd0560b21ad2f579ae4a5d6b1282b9eb145688ba2de717a816d",
+                      "updated_by": 2476444212131,
+                      "updated_at_ms": 1786458764961
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFilePutRequest"
+              },
+              "example": {
+                "rel_path": "tmp/openapi-example.md",
+                "content_b64": "IyBPcGVuQVBJIGV4YW1wbGUKVGVtcCBmaWxlIGZvciBBUEkgZG9jcyBleGFtcGxlLgo=",
+                "content_type": "text/markdown"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/delete": {
+      "post": {
+        "operationId": "knowledge-file-write-delete",
+        "summary": "删除知识文件",
+        "description": "按相对路径删除知识包中的文件。",
+        "tags": [
+          "AI SRE/知识"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **知识库管理**（`ai-sre`） |\n\n## 使用说明\n\n- 删除是幂等的——删除不存在的文件也会成功。\n- 当其他包内文件仍引用目标文件时，删除失败并返回 `ReferenceExist`（附带引用方列表）；设置 `force` 可强制删除（引用方以警告形式返回）。\n- 不传 `pack_id` 时默认账户范围知识包；编辑账户包需要账户 Owner/Admin 权限，编辑团队包需要是该团队成员。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/knowledge/knowledge-file-write-delete",
+          "metadata": {
+            "sidebarTitle": "删除知识文件"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFileDeleteResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFileDeleteRequest"
+              },
+              "example": {
+                "rel_path": "tmp/openapi-delete-example.md"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -56955,6 +57795,481 @@
             "type": "integer",
             "format": "int64",
             "description": "私有化部署 License 到期时间，Unix 秒级时间戳。仅私有化部署会返回该字段，SaaS 账户不会出现该字段。"
+          }
+        }
+      },
+      "KnowledgePackItem": {
+        "type": "object",
+        "description": "知识包——一棵带版本号的文件树，AI SRE 会话启动时会注入到每个沙箱中。每个（账户, scope, scope_id）仅有一个知识包。",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "知识包 ID（`kpk_` 前缀）。"
+          },
+          "account_id": {
+            "type": "integer",
+            "description": "知识包所属账户 ID。",
+            "format": "int64"
+          },
+          "scope": {
+            "type": "string",
+            "description": "知识包范围；`channel` 为历史遗留范围，新建知识包为 `account` 或 `team`。",
+            "enum": [
+              "account",
+              "team",
+              "channel"
+            ]
+          },
+          "scope_id": {
+            "type": "integer",
+            "description": "范围归属 ID：账户范围为账户 ID，团队范围为团队 ID。",
+            "format": "int64"
+          },
+          "team_name": {
+            "type": "string",
+            "description": "所属团队的显示名称（仅团队范围）；账户范围为空。"
+          },
+          "file_count": {
+            "type": "integer",
+            "description": "包内文件数量。"
+          },
+          "total_bytes": {
+            "type": "integer",
+            "description": "包内所有文件的总字节数。",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "description": "知识包版本号，文件每次变更时递增。"
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "创建者成员 ID。",
+            "format": "int64"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "description": "创建时间的 Unix 毫秒时间戳。",
+            "format": "int64"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "description": "最近修改时间的 Unix 毫秒时间戳。",
+            "format": "int64"
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "调用者是否有权限编辑该知识包。"
+          }
+        },
+        "required": [
+          "pack_id",
+          "account_id",
+          "scope",
+          "scope_id",
+          "file_count",
+          "total_bytes",
+          "version",
+          "created_by",
+          "created_at_ms",
+          "updated_at_ms",
+          "can_edit"
+        ]
+      },
+      "KnowledgeFileItem": {
+        "type": "object",
+        "description": "知识包内单个文件的元数据；文件内容需通过 file/get 单独获取。",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "文件 ID（`kfl_` 前缀）。"
+          },
+          "pack_id": {
+            "type": "string",
+            "description": "文件所属的知识包 ID。"
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "相对于知识包根目录的路径，如 `runbooks/restart.md`。"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME 类型；上传时未指定则按扩展名推断。"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "description": "文件大小（字节）。",
+            "format": "int64"
+          },
+          "checksum": {
+            "type": "string",
+            "description": "文件内容的 SHA-256 十六进制摘要。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "description": "最近修改者成员 ID。",
+            "format": "int64"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "description": "最近修改时间的 Unix 毫秒时间戳。",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "file_id",
+          "pack_id",
+          "rel_path",
+          "content_type",
+          "size_bytes",
+          "checksum",
+          "updated_by",
+          "updated_at_ms"
+        ]
+      },
+      "KnowledgeWarning": {
+        "type": "object",
+        "description": "文件上传/删除返回的非阻塞提示，例如指向已删除文件的引用。",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "提示码。",
+            "enum": [
+              "unresolved_reference",
+              "still_referenced_by"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "description": "与提示相关的单个引用。"
+          },
+          "refs": {
+            "type": "array",
+            "description": "与提示相关的多个引用。",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "KnowledgeGetRequest": {
+        "type": "object",
+        "description": "无请求字段——固定查询账户范围知识包。",
+        "properties": {}
+      },
+      "KnowledgePackListRequest": {
+        "type": "object",
+        "description": "知识包列表的过滤与分页参数。",
+        "properties": {
+          "p": {
+            "type": "integer",
+            "description": "页码，从 1 开始；`p` 与 `limit` 均未设置时返回全部结果。"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "每页条数。"
+          },
+          "scope": {
+            "type": "string",
+            "description": "限定范围；`all`（默认）会覆盖 `include_account`。",
+            "enum": [
+              "all",
+              "account",
+              "team"
+            ]
+          },
+          "query": {
+            "type": "string",
+            "description": "对知识包 ID、范围和团队名称做大小写不敏感的子串过滤。",
+            "maxLength": 128
+          },
+          "team_ids": {
+            "type": "array",
+            "description": "限定团队 ID；非管理员会与其所属团队取交集。",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "include_account": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "是否包含账户范围的知识包；默认为 true。"
+          }
+        }
+      },
+      "KnowledgePackEnsureRequest": {
+        "type": "object",
+        "description": "要确保存在知识包的范围。",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "description": "知识包范围。",
+            "enum": [
+              "account",
+              "team"
+            ]
+          },
+          "scope_id": {
+            "type": "integer",
+            "description": "团队 ID；团队范围必填，账户范围忽略。",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "KnowledgePackUpdateRequest": {
+        "type": "object",
+        "description": "将知识包移动到其他范围。",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "要更新的知识包 ID。"
+          },
+          "scope": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "目标范围；不传则为空操作，返回当前知识包。",
+            "enum": [
+              "account",
+              "team",
+              null
+            ]
+          },
+          "scope_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "目标团队 ID；`scope` 为 `team` 时必填，为 `account` 时自动设置。",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "pack_id"
+        ]
+      },
+      "KnowledgePackDeleteRequest": {
+        "type": "object",
+        "description": "要删除的知识包。",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "要删除的知识包 ID。"
+          }
+        },
+        "required": [
+          "pack_id"
+        ]
+      },
+      "KnowledgePackDeleteResponse": {
+        "type": "object",
+        "description": "删除结果。",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "知识包删除成功时为 true。"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "KnowledgeFileListRequest": {
+        "type": "object",
+        "description": "要列出文件的知识包。",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "知识包 ID；默认为调用者的账户范围知识包。"
+          },
+          "p": {
+            "type": "integer",
+            "description": "页码，从 1 开始。"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "每页条数。"
+          }
+        }
+      },
+      "KnowledgeFileGetRequest": {
+        "type": "object",
+        "description": "要获取的文件。",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "知识包 ID；默认为调用者的账户范围知识包。"
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "文件相对于知识包根目录的路径。"
+          }
+        },
+        "required": [
+          "rel_path"
+        ]
+      },
+      "KnowledgeFilePutRequest": {
+        "type": "object",
+        "description": "要创建或覆盖的文件。文件体通过 `content_b64` 以 Base64 文本上传，不是 multipart 上传。",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "知识包 ID；默认为调用者的账户范围知识包。"
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "相对于知识包根目录的目标路径；已存在的文件会被覆盖。"
+          },
+          "content_b64": {
+            "type": "string",
+            "description": "Base64 编码的文件内容；解码后必须是合法的 UTF-8 文本。"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME 类型；留空时按扩展名推断。"
+          }
+        },
+        "required": [
+          "rel_path"
+        ]
+      },
+      "KnowledgeGetResponse": {
+        "type": "object",
+        "description": "账户范围知识包元数据及其文件列表。",
+        "properties": {
+          "pack": {
+            "$ref": "#/components/schemas/KnowledgePackItem"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeFileItem"
+            }
+          }
+        },
+        "required": [
+          "pack",
+          "files"
+        ]
+      },
+      "KnowledgePackListResponse": {
+        "type": "object",
+        "description": "可见的知识包及过滤后的总数。",
+        "properties": {
+          "packs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgePackItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "过滤后、分页前的知识包总数。",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "packs",
+          "total"
+        ]
+      },
+      "KnowledgeFileListResponse": {
+        "type": "object",
+        "description": "知识包内的文件。",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeFileItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "知识包内文件总数。",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "files",
+          "total"
+        ]
+      },
+      "KnowledgeFileGetResponse": {
+        "type": "object",
+        "description": "文件元数据及其 Base64 编码的内容。",
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/KnowledgeFileItem"
+          },
+          "content_b64": {
+            "type": "string",
+            "description": "Base64 编码的文件内容；解码后为 UTF-8 文本。"
+          }
+        },
+        "required": [
+          "file",
+          "content_b64"
+        ]
+      },
+      "KnowledgeFilePutResponse": {
+        "type": "object",
+        "description": "写入的文件及非阻塞提示。",
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/KnowledgeFileItem"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeWarning"
+            }
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "KnowledgeFileDeleteRequest": {
+        "type": "object",
+        "description": "要从知识包中删除的文件。",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "知识包 ID；默认为调用者的账户范围知识包。"
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "文件相对于知识包根目录的路径。"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "即使其他包内文件仍引用该文件也强制删除；此时引用方会以警告形式返回，而不再阻止删除。"
+          }
+        },
+        "required": [
+          "rel_path"
+        ]
+      },
+      "KnowledgeFileDeleteResponse": {
+        "type": "object",
+        "description": "删除结果；无警告时为空对象。",
+        "properties": {
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeWarning"
+            }
           }
         }
       }

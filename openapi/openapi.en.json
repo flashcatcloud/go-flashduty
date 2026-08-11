@@ -167,6 +167,9 @@
     {
       "name": "RUM/Resources",
       "description": "Query the RUM resource record and current usage for the account."
+    },
+    {
+      "name": "AI SRE/Knowledge"
     }
   ],
   "paths": {
@@ -29911,6 +29914,843 @@
           }
         }
       }
+    },
+    "/safari/knowledge/get": {
+      "post": {
+        "operationId": "knowledge-pack-read-get",
+        "summary": "Get account knowledge pack",
+        "description": "Return the account-scope knowledge pack metadata and its file list.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Always targets the caller's account-scope pack — there is no `pack_id` parameter; use `POST /safari/knowledge/pack/list` to discover team packs.\n- The account pack is created lazily on first access, so a valid account never gets not-found here.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-pack-read-get",
+          "metadata": {
+            "sidebarTitle": "Get account knowledge pack"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeGetResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "pack": {
+                      "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                      "account_id": 2451002751131,
+                      "scope": "account",
+                      "scope_id": 2451002751131,
+                      "file_count": 17,
+                      "total_bytes": 41010,
+                      "version": 134,
+                      "created_by": 2476444212131,
+                      "created_at_ms": 1778768680053,
+                      "updated_at_ms": 1786456567177,
+                      "can_edit": true
+                    },
+                    "files": [
+                      {
+                        "file_id": "kfl_QvT4g3c8zAHxTthuT6hGne",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "aliyun.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1436,
+                        "checksum": "fccc276c0d7fbae2e9508285cdde0f8475169634e89e466dac2e59f176c9be2f",
+                        "updated_by": 3790925372131,
+                        "updated_at_ms": 1783311304757
+                      },
+                      {
+                        "file_id": "kfl_BMsQZCZSqhW4TFskYNb4H5",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "DUTY.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1301,
+                        "checksum": "450eabf178b41e46ea2f43d395a80bf8b956ddb9c9cea34f44ffc69a53e7a36b",
+                        "updated_by": 2476444212131,
+                        "updated_at_ms": 1784800003394
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeGetRequest"
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/list": {
+      "post": {
+        "operationId": "knowledge-pack-read-list",
+        "summary": "List knowledge packs",
+        "description": "List knowledge packs visible to the caller across account and team scopes.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Visibility matches the console: admins see the account pack plus every team pack; non-admins see the account pack plus their own teams, and requested `team_ids` are silently intersected with their teams.\n- `scope` selects `all` (default), `account`-only, or `team`-only, overriding `include_account`.\n- `query` applies a case-insensitive substring filter over pack ID, scope, and team name; `p`/`limit` paginate the filtered result.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-pack-read-list",
+          "metadata": {
+            "sidebarTitle": "List knowledge packs"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "packs": [
+                      {
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "account_id": 2451002751131,
+                        "scope": "account",
+                        "scope_id": 2451002751131,
+                        "file_count": 17,
+                        "total_bytes": 41010,
+                        "version": 134,
+                        "created_by": 2476444212131,
+                        "created_at_ms": 1778768680053,
+                        "updated_at_ms": 1786456567177,
+                        "can_edit": true
+                      },
+                      {
+                        "pack_id": "kpk_5qRL34nKtoWM4nQVT2kHzy",
+                        "account_id": 2451002751131,
+                        "scope": "team",
+                        "scope_id": 2477033058131,
+                        "team_name": "研发团队",
+                        "file_count": 4,
+                        "total_bytes": 11159,
+                        "version": 15,
+                        "created_by": 2476444212131,
+                        "created_at_ms": 1782201586089,
+                        "updated_at_ms": 1785462092702,
+                        "can_edit": true
+                      }
+                    ],
+                    "total": 3
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackListRequest"
+              },
+              "example": {
+                "p": 1,
+                "limit": 20,
+                "scope": "all",
+                "include_account": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/ensure": {
+      "post": {
+        "operationId": "knowledge-pack-write-ensure",
+        "summary": "Ensure knowledge pack",
+        "description": "Idempotently create the knowledge pack at the given scope, or return the existing one.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Knowledge Manage** (`ai-sre`) |\n\n## Usage\n\n- Idempotent: if a pack already exists at (`scope`, `scope_id`), it is returned unchanged.\n- For `account` scope, `scope_id` is ignored (the account ID is used) and a default `DUTY.md` is seeded on first creation.\n- Creating the account-scope pack requires account owner/admin; creating into a team requires membership of that team.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-pack-write-ensure",
+          "metadata": {
+            "sidebarTitle": "Ensure knowledge pack"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                    "account_id": 2451002751131,
+                    "scope": "account",
+                    "scope_id": 2451002751131,
+                    "file_count": 17,
+                    "total_bytes": 41010,
+                    "version": 138,
+                    "created_by": 2476444212131,
+                    "created_at_ms": 1778768680053,
+                    "updated_at_ms": 1786458765182,
+                    "can_edit": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackEnsureRequest"
+              },
+              "example": {
+                "scope": "team",
+                "scope_id": 2477033058131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/update": {
+      "post": {
+        "operationId": "knowledge-pack-write-update",
+        "summary": "Update knowledge pack",
+        "description": "Move a knowledge pack to a different account or team scope.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Knowledge Manage** (`ai-sre`) |\n\n## Usage\n\n- `scope` is the only mutable field; omitting it is a no-op that returns the current pack.\n- For `team` scope, `scope_id` is required; for `account` scope it is set to the account ID automatically.\n- The move fails with `ReferenceExist` when the destination scope already has a pack — packs are never merged.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-pack-write-update",
+          "metadata": {
+            "sidebarTitle": "Update knowledge pack"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "pack_id": "kpk_5qRL34nKtoWM4nQVT2kHzy",
+                    "account_id": 2451002751131,
+                    "scope": "team",
+                    "scope_id": 2477033058131,
+                    "team_name": "研发团队",
+                    "file_count": 4,
+                    "total_bytes": 11159,
+                    "version": 15,
+                    "created_by": 2476444212131,
+                    "created_at_ms": 1782201586089,
+                    "updated_at_ms": 1785462092702,
+                    "can_edit": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackUpdateRequest"
+              },
+              "example": {
+                "pack_id": "kpk_5qRL34nKtoWM4nQVT2kHzy",
+                "scope": "team",
+                "scope_id": 2477033058131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/pack/delete": {
+      "post": {
+        "operationId": "knowledge-pack-write-delete",
+        "summary": "Delete knowledge pack",
+        "description": "Delete a knowledge pack and all of its files.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Knowledge Manage** (`ai-sre`) |\n\n## Usage\n\n- Deleting a pack removes every file it contains; the operation cannot be undone.\n- Deleting the account-scope pack is allowed; it is re-created empty on next access.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-pack-write-delete",
+          "metadata": {
+            "sidebarTitle": "Delete knowledge pack"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgePackDeleteResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "ok": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgePackDeleteRequest"
+              },
+              "example": {
+                "pack_id": "kpk_YqHXPTEUHQFGepUfRS7vsh"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/list": {
+      "post": {
+        "operationId": "knowledge-file-read-list",
+        "summary": "List knowledge files",
+        "description": "List the files in a knowledge pack with metadata such as size and checksum.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Omitting `pack_id` targets the caller's account-scope pack (created lazily if absent).\n- Reading a team-scope pack requires membership of that team.\n- `p`/`limit` are accepted but the current implementation always returns the full file list.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-file-read-list",
+          "metadata": {
+            "sidebarTitle": "List knowledge files"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFileListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "files": [
+                      {
+                        "file_id": "kfl_QvT4g3c8zAHxTthuT6hGne",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "aliyun.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1436,
+                        "checksum": "fccc276c0d7fbae2e9508285cdde0f8475169634e89e466dac2e59f176c9be2f",
+                        "updated_by": 3790925372131,
+                        "updated_at_ms": 1783311304757
+                      },
+                      {
+                        "file_id": "kfl_BMsQZCZSqhW4TFskYNb4H5",
+                        "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                        "rel_path": "DUTY.md",
+                        "content_type": "text/markdown",
+                        "size_bytes": 1301,
+                        "checksum": "450eabf178b41e46ea2f43d395a80bf8b956ddb9c9cea34f44ffc69a53e7a36b",
+                        "updated_by": 2476444212131,
+                        "updated_at_ms": 1784800003394
+                      }
+                    ],
+                    "total": 17
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFileListRequest"
+              },
+              "example": {
+                "pack_id": "kpk_kE49k3FhecfJBwutbshEEc"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/get": {
+      "post": {
+        "operationId": "knowledge-file-read-get",
+        "summary": "Get knowledge file",
+        "description": "Return a knowledge file's metadata and its base64-encoded content.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Content is returned in `content_b64` (base64); pack files are guaranteed UTF-8 text.\n- Omitting `pack_id` targets the account-scope pack; reading a team-scope pack requires team membership.\n- A missing file returns `ResourceNotFound` (HTTP 400).\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-file-read-get",
+          "metadata": {
+            "sidebarTitle": "Get knowledge file"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFileGetResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "file": {
+                      "file_id": "kfl_gctXKRG45aFQGgxSFr59WY",
+                      "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                      "rel_path": "tmp/openapi-example.md",
+                      "content_type": "text/markdown",
+                      "size_bytes": 50,
+                      "checksum": "a0775f9b3f392cd0560b21ad2f579ae4a5d6b1282b9eb145688ba2de717a816d",
+                      "updated_by": 2476444212131,
+                      "updated_at_ms": 1786458764961
+                    },
+                    "content_b64": "IyBPcGVuQVBJIGV4YW1wbGUKVGVtcCBmaWxlIGZvciBBUEkgZG9jcyBleGFtcGxlLgo="
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFileGetRequest"
+              },
+              "example": {
+                "rel_path": "tmp/openapi-example.md"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/put": {
+      "post": {
+        "operationId": "knowledge-file-write-put",
+        "summary": "Upload knowledge file",
+        "description": "Create or overwrite a file in a knowledge pack with base64-encoded content.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Knowledge Manage** (`ai-sre`) |\n\n## Usage\n\n- The file body is sent as base64 text in the JSON field `content_b64` — this is not a multipart upload.\n- Writing an existing `rel_path` overwrites it; `content_type` is inferred from the extension when omitted (`.md` → `text/markdown`).\n- Content must decode to valid UTF-8 text; binary payloads are rejected with `InvalidParameter`.\n- Editing the account-scope pack requires account owner/admin; editing a team pack requires team membership.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-file-write-put",
+          "metadata": {
+            "sidebarTitle": "Upload knowledge file"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFilePutResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "file": {
+                      "file_id": "kfl_gctXKRG45aFQGgxSFr59WY",
+                      "pack_id": "kpk_kE49k3FhecfJBwutbshEEc",
+                      "rel_path": "tmp/openapi-example.md",
+                      "content_type": "text/markdown",
+                      "size_bytes": 50,
+                      "checksum": "a0775f9b3f392cd0560b21ad2f579ae4a5d6b1282b9eb145688ba2de717a816d",
+                      "updated_by": 2476444212131,
+                      "updated_at_ms": 1786458764961
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFilePutRequest"
+              },
+              "example": {
+                "rel_path": "tmp/openapi-example.md",
+                "content_b64": "IyBPcGVuQVBJIGV4YW1wbGUKVGVtcCBmaWxlIGZvciBBUEkgZG9jcyBleGFtcGxlLgo=",
+                "content_type": "text/markdown"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/safari/knowledge/file/delete": {
+      "post": {
+        "operationId": "knowledge-file-write-delete",
+        "summary": "Delete knowledge file",
+        "description": "Delete a file from a knowledge pack by its relative path.",
+        "tags": [
+          "AI SRE/Knowledge"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Knowledge Manage** (`ai-sre`) |\n\n## Usage\n\n- Deleting is idempotent — removing a file that does not exist succeeds.\n- When other pack files still reference the target, the delete fails with `ReferenceExist` listing the referrers; set `force` to proceed (the referrers are returned as warnings).\n- Omitting `pack_id` targets the account-scope pack; editing the account pack requires account owner/admin, editing a team pack requires team membership.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/knowledge/knowledge-file-write-delete",
+          "metadata": {
+            "sidebarTitle": "Delete knowledge file"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/KnowledgeFileDeleteResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeFileDeleteRequest"
+              },
+              "example": {
+                "rel_path": "tmp/openapi-delete-example.md"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -56964,6 +57804,481 @@
             "type": "integer",
             "format": "int64",
             "description": "Unix timestamp in seconds when the on-premises license expires. Only present on on-premises deployments; omitted entirely for SaaS accounts."
+          }
+        }
+      },
+      "KnowledgePackItem": {
+        "type": "object",
+        "description": "A knowledge pack — a versioned file tree staged into every AI SRE sandbox at session start. One pack exists per (account, scope, scope_id).",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "Knowledge pack ID (`kpk_` prefix)."
+          },
+          "account_id": {
+            "type": "integer",
+            "description": "Account that owns the pack.",
+            "format": "int64"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Pack scope. `channel` is a legacy scope; new packs are `account` or `team`.",
+            "enum": [
+              "account",
+              "team",
+              "channel"
+            ]
+          },
+          "scope_id": {
+            "type": "integer",
+            "description": "Scope owner: the account ID for `account` scope, the team ID for `team` scope.",
+            "format": "int64"
+          },
+          "team_name": {
+            "type": "string",
+            "description": "Display name of the owning team (team scope only); empty for account scope."
+          },
+          "file_count": {
+            "type": "integer",
+            "description": "Number of files in the pack."
+          },
+          "total_bytes": {
+            "type": "integer",
+            "description": "Total size of all files in bytes.",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "description": "Pack version, incremented on every file change."
+          },
+          "created_by": {
+            "type": "integer",
+            "description": "Person ID of the member who created the pack.",
+            "format": "int64"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "description": "Unix timestamp in milliseconds when the pack was created.",
+            "format": "int64"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "description": "Unix timestamp in milliseconds when the pack was last modified.",
+            "format": "int64"
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "Whether the caller can edit this pack."
+          }
+        },
+        "required": [
+          "pack_id",
+          "account_id",
+          "scope",
+          "scope_id",
+          "file_count",
+          "total_bytes",
+          "version",
+          "created_by",
+          "created_at_ms",
+          "updated_at_ms",
+          "can_edit"
+        ]
+      },
+      "KnowledgeFileItem": {
+        "type": "object",
+        "description": "Metadata of one file inside a knowledge pack. Content is fetched separately via file/get.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "File ID (`kfl_` prefix)."
+          },
+          "pack_id": {
+            "type": "string",
+            "description": "ID of the knowledge pack that contains the file."
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "Path relative to the pack root, e.g. `runbooks/restart.md`."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME type; inferred from the file extension when not set on upload."
+          },
+          "size_bytes": {
+            "type": "integer",
+            "description": "File size in bytes.",
+            "format": "int64"
+          },
+          "checksum": {
+            "type": "string",
+            "description": "SHA-256 hex digest of the file content."
+          },
+          "updated_by": {
+            "type": "integer",
+            "description": "Person ID of the member who last modified the file.",
+            "format": "int64"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "description": "Unix timestamp in milliseconds when the file was last modified.",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "file_id",
+          "pack_id",
+          "rel_path",
+          "content_type",
+          "size_bytes",
+          "checksum",
+          "updated_by",
+          "updated_at_ms"
+        ]
+      },
+      "KnowledgeWarning": {
+        "type": "object",
+        "description": "Non-blocking annotation returned by file uploads and deletions, e.g. references that point at a removed file.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Warning code.",
+            "enum": [
+              "unresolved_reference",
+              "still_referenced_by"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "description": "Single reference related to the warning."
+          },
+          "refs": {
+            "type": "array",
+            "description": "Multiple references related to the warning.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "KnowledgeGetRequest": {
+        "type": "object",
+        "description": "No request fields — the account-scope pack is always targeted.",
+        "properties": {}
+      },
+      "KnowledgePackListRequest": {
+        "type": "object",
+        "description": "Filter and pagination for the pack list.",
+        "properties": {
+          "p": {
+            "type": "integer",
+            "description": "Page number, 1-based; returns all results when both `p` and `limit` are unset."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Page size."
+          },
+          "scope": {
+            "type": "string",
+            "description": "Restrict to one scope; `all` (default) overrides `include_account`.",
+            "enum": [
+              "all",
+              "account",
+              "team"
+            ]
+          },
+          "query": {
+            "type": "string",
+            "description": "Case-insensitive substring filter over pack ID, scope, and team name.",
+            "maxLength": 128
+          },
+          "team_ids": {
+            "type": "array",
+            "description": "Restrict to these team IDs; for non-admins the list is intersected with their own teams.",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "include_account": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Include the account-scope pack; defaults to true."
+          }
+        }
+      },
+      "KnowledgePackEnsureRequest": {
+        "type": "object",
+        "description": "Scope at which to ensure a knowledge pack exists.",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "description": "Scope of the pack to ensure.",
+            "enum": [
+              "account",
+              "team"
+            ]
+          },
+          "scope_id": {
+            "type": "integer",
+            "description": "Team ID; required for `team` scope, ignored for `account` scope.",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "KnowledgePackUpdateRequest": {
+        "type": "object",
+        "description": "Move a knowledge pack to a different scope.",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "Knowledge pack ID to update."
+          },
+          "scope": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Destination scope; omit for a no-op that returns the current pack.",
+            "enum": [
+              "account",
+              "team",
+              null
+            ]
+          },
+          "scope_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Destination team ID; required when `scope` is `team`, set automatically for `account`.",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "pack_id"
+        ]
+      },
+      "KnowledgePackDeleteRequest": {
+        "type": "object",
+        "description": "Pack to delete.",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "Knowledge pack ID to delete."
+          }
+        },
+        "required": [
+          "pack_id"
+        ]
+      },
+      "KnowledgePackDeleteResponse": {
+        "type": "object",
+        "description": "Deletion result.",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "True when the pack was deleted."
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "KnowledgeFileListRequest": {
+        "type": "object",
+        "description": "Which pack's files to list.",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "Knowledge pack ID; defaults to the caller's account-scope pack."
+          },
+          "p": {
+            "type": "integer",
+            "description": "Page number, 1-based."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Page size."
+          }
+        }
+      },
+      "KnowledgeFileGetRequest": {
+        "type": "object",
+        "description": "Which file to fetch.",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "Knowledge pack ID; defaults to the caller's account-scope pack."
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "Path of the file relative to the pack root."
+          }
+        },
+        "required": [
+          "rel_path"
+        ]
+      },
+      "KnowledgeFilePutRequest": {
+        "type": "object",
+        "description": "File to create or overwrite. The body is base64 text in `content_b64`, not a multipart upload.",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "Knowledge pack ID; defaults to the caller's account-scope pack."
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "Destination path relative to the pack root; existing files are overwritten."
+          },
+          "content_b64": {
+            "type": "string",
+            "description": "Base64-encoded file content; must decode to valid UTF-8 text."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME type; inferred from the file extension when omitted."
+          }
+        },
+        "required": [
+          "rel_path"
+        ]
+      },
+      "KnowledgeGetResponse": {
+        "type": "object",
+        "description": "Account-scope pack metadata plus its file list.",
+        "properties": {
+          "pack": {
+            "$ref": "#/components/schemas/KnowledgePackItem"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeFileItem"
+            }
+          }
+        },
+        "required": [
+          "pack",
+          "files"
+        ]
+      },
+      "KnowledgePackListResponse": {
+        "type": "object",
+        "description": "Visible packs and the total after filtering.",
+        "properties": {
+          "packs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgePackItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of packs after filtering, before pagination.",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "packs",
+          "total"
+        ]
+      },
+      "KnowledgeFileListResponse": {
+        "type": "object",
+        "description": "Files in the pack.",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeFileItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of files in the pack.",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "files",
+          "total"
+        ]
+      },
+      "KnowledgeFileGetResponse": {
+        "type": "object",
+        "description": "File metadata plus its base64-encoded content.",
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/KnowledgeFileItem"
+          },
+          "content_b64": {
+            "type": "string",
+            "description": "Base64-encoded file content; decodes to UTF-8 text."
+          }
+        },
+        "required": [
+          "file",
+          "content_b64"
+        ]
+      },
+      "KnowledgeFilePutResponse": {
+        "type": "object",
+        "description": "The written file plus any non-blocking warnings.",
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/KnowledgeFileItem"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeWarning"
+            }
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "KnowledgeFileDeleteRequest": {
+        "type": "object",
+        "description": "File to remove from a knowledge pack.",
+        "properties": {
+          "pack_id": {
+            "type": "string",
+            "description": "Knowledge pack ID; defaults to the caller's account-scope pack."
+          },
+          "rel_path": {
+            "type": "string",
+            "description": "Path of the file relative to the pack root."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Delete even when other pack files reference this file; the referrers are then returned as warnings instead of blocking the delete."
+          }
+        },
+        "required": [
+          "rel_path"
+        ]
+      },
+      "KnowledgeFileDeleteResponse": {
+        "type": "object",
+        "description": "Deletion result; empty unless warnings were raised.",
+        "properties": {
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeWarning"
+            }
           }
         }
       }

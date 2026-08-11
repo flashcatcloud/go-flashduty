@@ -10,6 +10,7 @@ type service struct{ client *Client }
 type genServices struct {
 	A2aAgents                *A2aAgentsService
 	Automations              *AutomationsService
+	Knowledge                *KnowledgeService
 	McpServers               *McpServersService
 	Sessions                 *SessionsService
 	Skills                   *SkillsService
@@ -53,6 +54,7 @@ func (c *Client) initServices() {
 	c.common.client = c
 	c.A2aAgents = (*A2aAgentsService)(&c.common)
 	c.Automations = (*AutomationsService)(&c.common)
+	c.Knowledge = (*KnowledgeService)(&c.common)
 	c.McpServers = (*McpServersService)(&c.common)
 	c.Sessions = (*SessionsService)(&c.common)
 	c.Skills = (*SkillsService)(&c.common)
