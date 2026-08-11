@@ -16953,7 +16953,7 @@
           "RUM/Applications"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- `type` must be one of: `browser`, `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`.\n- `links.systems[].url` must start with `http` or `https`; `${var}` tokens are resolved from RUM event context.\n- `links.systems[].event_types` accepts: `crash`, `error`, `view`, `action`, `resource`, `session`, `all`.\n- `client_token` is auto-generated and used to initialize the RUM SDK.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Applications Manage** (`rum`) |\n\n## Usage\n\n- `type` must be one of: `browser`, `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`, `miniprogram`, `harmony`, `electron`.\n- `links.systems[].url` must start with `http` or `https`; `${var}` tokens are resolved from RUM event context.\n- `links.systems[].event_types` accepts: `crash`, `error`, `view`, `action`, `resource`, `session`, `all`.\n- `client_token` is auto-generated and used to initialize the RUM SDK.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
           "href": "/en/api-reference/rum/applications/rum-application-write-create",
           "metadata": {
             "sidebarTitle": "Create application"
@@ -30251,7 +30251,7 @@
               "Warning",
               "Critical"
             ],
-            "description": "Incident severity."
+            "description": "Incident severity: `Info`, `Warning` or `Critical` (most severe)."
           },
           "title": {
             "type": "string",
@@ -30270,7 +30270,7 @@
           },
           "assigned_to": {
             "type": "object",
-            "description": "Incident assignment target. Either `person_ids` or `escalate_rule_id` must be provided.",
+            "description": "Incident assignment target. May be omitted entirely: when unset or empty, the channel's default assignment applies; required when the account's create form is in effect. `person_ids`, `escalate_rule_id`, and `emails` can be combined — responders are the union.",
             "properties": {
               "person_ids": {
                 "type": "array",
@@ -30280,20 +30280,26 @@
                 },
                 "minItems": 1,
                 "maxItems": 100,
-                "description": "Member IDs to assign directly."
+                "description": "Member IDs to assign directly (1–100). Can be combined with `escalate_rule_id`."
               },
               "escalate_rule_id": {
                 "type": "string",
                 "pattern": "^[0-9a-fA-F]{24}$",
-                "description": "Escalation rule ID (MongoDB ObjectID) to drive assignment."
+                "description": "Escalation rule ID (MongoDB ObjectID); assigns the people at the rule's `layer_idx` layer."
               },
               "layer_idx": {
                 "type": "integer",
-                "description": "Starting layer index when using an escalation rule."
+                "description": "Zero-based starting layer index of the escalation rule (default 0, the first layer); an out-of-range value returns an error. Only takes effect with `escalate_rule_id`."
               },
               "type": {
                 "type": "string",
-                "description": "Assignment type."
+                "enum": [
+                  "assign",
+                  "reassign",
+                  "escalate",
+                  "reopen"
+                ],
+                "description": "Assignment type, derived by the server — callers should omit it: `assign` on manual create, `reassign` on reassignment, `escalate` when driven by escalation."
               },
               "emails": {
                 "type": "array",
@@ -30303,7 +30309,7 @@
                 },
                 "minItems": 1,
                 "maxItems": 100,
-                "description": "Email recipients, used for ServiceNow-style integrations."
+                "description": "Recipients to assign by email (1–100): resolved to account members and merged into `person_ids`; emails with no matching member are ignored."
               },
               "notify": {
                 "type": "object",
@@ -31292,7 +31298,7 @@
           "start_time": {
             "type": "integer",
             "format": "int64",
-            "description": "Window start, Unix seconds."
+            "description": "Start of the time window (Unix timestamp in seconds). The window with `end_time` may span at most 31 days and filters by incident start time."
           },
           "end_time": {
             "type": "integer",
@@ -31357,7 +31363,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Responder member IDs."
+            "description": "Filter by responder member IDs; obtain member IDs from `POST /member/list`."
           },
           "acker_ids": {
             "type": "array",
@@ -31365,7 +31371,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Acknowledger member IDs."
+            "description": "Filter by acker member IDs; obtain member IDs from `POST /member/list`."
           },
           "creator_ids": {
             "type": "array",
@@ -31395,7 +31401,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Restrict to the given short display identifiers."
+            "description": "Filter by incident short numbers (the numbers shown before incident titles in the console)."
           },
           "p": {
             "type": "integer",
@@ -31445,7 +31451,7 @@
               "type": "string",
               "pattern": "^[0-9a-fA-F]{24}$"
             },
-            "description": "Incident IDs to fetch."
+            "description": "Incident IDs to query; obtain them from `POST /incident/list`."
           }
         }
       },
@@ -32585,7 +32591,7 @@
           "target_incident_id": {
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
-            "description": "Target incident ID that source incidents will be merged into."
+            "description": "Target incident ID of the merge; obtain it from `POST /incident/list`."
           },
           "title": {
             "type": "string",
@@ -32674,7 +32680,7 @@
               "Warning",
               "Critical"
             ],
-            "description": "New severity."
+            "description": "New severity: `Info`, `Warning` or `Critical` (most severe)."
           }
         }
       },
@@ -32752,10 +32758,11 @@
             },
             "minItems": 1,
             "maxItems": 100,
-            "description": "Batch incident IDs."
+            "description": "Incident IDs to assign in bulk; obtain them from `POST /incident/list`."
           },
           "assigned_to": {
-            "$ref": "#/components/schemas/AssignedTo"
+            "$ref": "#/components/schemas/AssignedTo",
+            "description": "Assign target; at least one of `person_ids` and `escalate_rule_id` must be set."
           }
         }
       },
@@ -32871,7 +32878,7 @@
           },
           "chat_id": {
             "type": "string",
-            "description": "Chat/group ID on the IM side."
+            "description": "Chat ID of the IM group hosting the war room; obtain it from `POST /incident/war-room/list`."
           }
         }
       },
@@ -33002,7 +33009,7 @@
           "integration_id": {
             "type": "integer",
             "format": "int64",
-            "description": "IM integration ID."
+            "description": "IM integration ID; obtain it from `POST /datasource/im/war-room-enabled/list`."
           }
         }
       },
@@ -33038,13 +33045,13 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "Filter by creation time: lower bound in seconds."
+            "description": "Lower bound of post-mortem creation time (Unix timestamp in seconds)."
           },
           "created_at_end_seconds": {
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "Filter by creation time: upper bound in seconds."
+            "description": "Upper bound of post-mortem creation time (Unix timestamp in seconds)."
           },
           "order_by": {
             "type": "string",
@@ -33341,7 +33348,7 @@
         "properties": {
           "post_mortem_id": {
             "type": "string",
-            "description": "Post-mortem ID."
+            "description": "Post-mortem report ID; obtain it from `POST /incident/post-mortem/list`."
           }
         }
       },
@@ -33415,7 +33422,7 @@
           "team_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Owning team ID."
+            "description": "Owning team ID; obtain it from `POST /team/list`."
           },
           "managing_team_ids": {
             "type": "array",
@@ -33466,7 +33473,7 @@
                       "type": "integer",
                       "format": "int64"
                     },
-                    "description": "Member IDs to notify directly."
+                    "description": "Member IDs to notify directly; obtain member IDs from `POST /member/list`."
                   },
                   "team_ids": {
                     "type": "array",
@@ -33474,7 +33481,7 @@
                       "type": "integer",
                       "format": "int64"
                     },
-                    "description": "Team IDs to notify."
+                    "description": "Team IDs to notify; obtain team IDs from `POST /team/list`."
                   },
                   "schedule_to_role_ids": {
                     "type": "object",
@@ -33676,7 +33683,7 @@
               "trigger",
               "update"
             ],
-            "description": "Auto-resolve timer reset mode."
+            "description": "Auto-resolve timing mode: `trigger` starts the timer when the incident triggers, `update` restarts it on every alert update."
           },
           "plugin_ids": {
             "type": "array",
@@ -33717,7 +33724,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "priority": {
             "type": [
@@ -33782,7 +33789,7 @@
                         "type": "integer",
                         "format": "int64"
                       },
-                      "description": "Member IDs to notify directly."
+                      "description": "Member IDs to notify directly; obtain member IDs from `POST /member/list`."
                     },
                     "team_ids": {
                       "type": "array",
@@ -33790,7 +33797,7 @@
                         "type": "integer",
                         "format": "int64"
                       },
-                      "description": "Team IDs to notify."
+                      "description": "Team IDs to notify; obtain team IDs from `POST /team/list`."
                     },
                     "schedule_to_role_ids": {
                       "type": "object",
@@ -33962,7 +33969,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "priority": {
             "type": "integer",
@@ -34075,7 +34082,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "priority": {
             "type": "integer",
@@ -34206,7 +34213,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "priority": {
             "type": "integer",
@@ -35088,7 +35095,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel ID to fetch."
+            "description": "ID of the channel to query; obtain it from `POST /channel/list`."
           }
         }
       },
@@ -35191,7 +35198,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel ID to update."
+            "description": "ID of the channel to update; obtain it from `POST /channel/list`."
           },
           "team_id": {
             "type": [
@@ -35199,7 +35206,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "New owning team ID."
+            "description": "New owning team ID; obtain it from `POST /team/list`."
           },
           "managing_team_ids": {
             "type": "array",
@@ -35243,7 +35250,7 @@
               "trigger",
               "update"
             ],
-            "description": "Auto-resolve timer reset mode."
+            "description": "Auto-resolve timing mode: `trigger` starts the timer when the incident triggers, `update` restarts it on every alert update."
           },
           "is_private": {
             "type": [
@@ -35253,10 +35260,12 @@
             "description": "When true, the channel is visible only to its managing teams."
           },
           "group": {
-            "$ref": "#/components/schemas/Group"
+            "$ref": "#/components/schemas/Group",
+            "description": "Alert grouping configuration."
           },
           "flapping": {
-            "$ref": "#/components/schemas/Flapping"
+            "$ref": "#/components/schemas/Flapping",
+            "description": "Flapping detection configuration."
           },
           "disable_outlier_detection": {
             "type": [
@@ -35300,7 +35309,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel ID."
+            "description": "Channel ID; obtain it from `POST /channel/list`."
           }
         }
       },
@@ -35329,7 +35338,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "rule_id": {
             "type": "string",
@@ -35359,10 +35368,12 @@
             "description": "Recurring time windows. Mutually exclusive with `time_filter`."
           },
           "time_filter": {
-            "$ref": "#/components/schemas/OnceTimeFilter"
+            "$ref": "#/components/schemas/OnceTimeFilter",
+            "description": "One-off silence window. Mutually exclusive with `time_filters`; exactly one of the two must be set."
           },
           "filters": {
-            "$ref": "#/components/schemas/FilterGroup"
+            "$ref": "#/components/schemas/FilterGroup",
+            "description": "Match conditions for the alerts to silence; required and must not be empty."
           },
           "is_directly_discard": {
             "type": "boolean",
@@ -35384,7 +35395,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "rule_id": {
             "type": "string",
@@ -35406,7 +35417,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "rule_id": {
             "type": "string",
@@ -35436,10 +35447,12 @@
             "description": "Label keys used to pair source and target alerts."
           },
           "source_filters": {
-            "$ref": "#/components/schemas/FilterGroup"
+            "$ref": "#/components/schemas/FilterGroup",
+            "description": "Match conditions for source alerts; together with `equals`, determines which target alerts are suppressed."
           },
           "target_filters": {
-            "$ref": "#/components/schemas/FilterGroup"
+            "$ref": "#/components/schemas/FilterGroup",
+            "description": "Match conditions for target (suppressed) alerts."
           },
           "is_directly_discard": {
             "type": "boolean",
@@ -35459,7 +35472,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "rule_id": {
             "type": "string",
@@ -35482,7 +35495,8 @@
             "description": "Rule description, up to 500 characters."
           },
           "filters": {
-            "$ref": "#/components/schemas/FilterGroup"
+            "$ref": "#/components/schemas/FilterGroup",
+            "description": "Matching alerts are dropped and generate no notification."
           }
         }
       },
@@ -35500,7 +35514,7 @@
           "channel_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Channel the rule belongs to."
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
           "rule_id": {
             "type": "string",
@@ -35549,7 +35563,8 @@
             "description": "Optional recurring time windows during which the rule applies."
           },
           "filters": {
-            "$ref": "#/components/schemas/FilterGroup"
+            "$ref": "#/components/schemas/FilterGroup",
+            "description": "Match conditions for alerts this rule applies to; omit to apply it to all alerts in the channel."
           }
         }
       },
@@ -35937,7 +35952,8 @@
             "description": "Optional sections that group consecutive cases for display."
           },
           "default": {
-            "$ref": "#/components/schemas/RouteDefault"
+            "$ref": "#/components/schemas/RouteDefault",
+            "description": "Fallback branch used when no case matches."
           },
           "version": {
             "type": "integer",
@@ -36359,7 +36375,7 @@
         "properties": {
           "alert_id": {
             "type": "string",
-            "description": "Alert ID."
+            "description": "Alert ID; obtain it from `POST /alert/list`."
           },
           "p": {
             "type": "integer",
@@ -36381,7 +36397,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Filter by feed types."
+            "description": "Filter by feed type codes (e.g. `a_new`, `a_close`, `a_ack`)."
           }
         }
       },
@@ -36516,11 +36532,11 @@
             "items": {
               "type": "string"
             },
-            "description": "Alert IDs to merge."
+            "description": "Alert IDs to merge; obtain them from `POST /alert/list`."
           },
           "incident_id": {
             "type": "string",
-            "description": "Target incident ID."
+            "description": "Target incident ID; obtain it from `POST /incident/list`."
           },
           "comment": {
             "type": "string",
@@ -36533,7 +36549,7 @@
           "owner_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Optional new owner for the target incident."
+            "description": "Member ID of the new owner for the target incident; obtain it from `POST /member/list`."
           }
         }
       },
@@ -36709,7 +36725,7 @@
           },
           "search_after_ctx": {
             "type": "string",
-            "description": "Opaque cursor for the next page."
+            "description": "Pagination cursor: leave empty for the first page, then pass the `search_after_ctx` returned by the previous response."
           },
           "integration_ids": {
             "type": "array",
@@ -36740,7 +36756,7 @@
           },
           "orderby": {
             "type": "string",
-            "description": "Sort field (ES field name).",
+            "description": "Sort field; only `event_time` is supported.",
             "enum": [
               "event_time"
             ]
@@ -36881,14 +36897,14 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "Filter by integration ID."
+            "description": "Filter by webhook integration ID."
           },
           "event_types": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Filter by event type values."
+            "description": "Filter by event type codes (e.g. `i_new` incident created, `a_new` alert triggered)."
           },
           "status": {
             "type": "string",
@@ -36896,7 +36912,7 @@
               "success",
               "failed"
             ],
-            "description": "Filter by delivery status."
+            "description": "Filter by delivery status: `success` or `failed`."
           },
           "start_time": {
             "type": "integer",
@@ -37047,7 +37063,7 @@
             "type": "integer",
             "format": "int64",
             "minimum": 1,
-            "description": "Integration ID the event belongs to."
+            "description": "Integration ID the event belongs to; available in the items returned by `POST /webhook/history/list`."
           }
         }
       },
@@ -37199,7 +37215,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Schedule IDs to operate on."
+            "description": "Schedule IDs to operate on; obtain them from `POST /schedule/list`."
           }
         }
       },
@@ -37216,7 +37232,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Schedule ID list."
+            "description": "Schedule ID list; obtain IDs from `POST /schedule/list`."
           }
         }
       },
@@ -37232,7 +37248,7 @@
           "schedule_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Schedule ID."
+            "description": "Schedule ID; obtain it from `POST /schedule/list`."
           },
           "start": {
             "type": "integer",
@@ -37931,7 +37947,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Schedule ID. Required on update."
+            "description": "Schedule ID, required on update; obtain it from `POST /schedule/list`."
           },
           "schedule_name": {
             "type": [
@@ -37963,7 +37979,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Owning team ID."
+            "description": "Owning team ID; obtain it from `POST /team/list`."
           },
           "layers": {
             "type": "array",
@@ -37973,7 +37989,8 @@
             "description": "Rotation layers."
           },
           "notify": {
-            "$ref": "#/components/schemas/ScheduleNotify"
+            "$ref": "#/components/schemas/ScheduleNotify",
+            "description": "Rotation notification configuration."
           },
           "start": {
             "type": "integer",
@@ -38150,7 +38167,7 @@
         "properties": {
           "cal_id": {
             "type": "string",
-            "description": "Calendar ID."
+            "description": "Calendar ID; obtain it from `POST /calendar/list`."
           },
           "cal_name": {
             "type": [
@@ -38182,7 +38199,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "New owning team ID."
+            "description": "New owning team ID; obtain it from `POST /team/list`."
           },
           "workdays": {
             "type": "array",
@@ -38211,7 +38228,7 @@
         "properties": {
           "cal_id": {
             "type": "string",
-            "description": "Calendar ID."
+            "description": "Calendar ID; obtain it from `POST /calendar/list`."
           }
         }
       },
@@ -38366,7 +38383,7 @@
         "properties": {
           "cal_id": {
             "type": "string",
-            "description": "Calendar ID."
+            "description": "Calendar ID; obtain it from `POST /calendar/list`."
           },
           "event_id": {
             "type": "string",
@@ -38434,7 +38451,7 @@
         "properties": {
           "cal_id": {
             "type": "string",
-            "description": "Calendar ID."
+            "description": "Calendar ID; obtain it from `POST /calendar/list`."
           },
           "event_id": {
             "type": "string",
@@ -38451,7 +38468,7 @@
         "properties": {
           "cal_id": {
             "type": "string",
-            "description": "Calendar ID."
+            "description": "Calendar ID; obtain it from `POST /calendar/list`."
           },
           "year": {
             "type": "integer",
@@ -38777,7 +38794,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Filter by creator member ID."
+            "description": "Filter by creator member ID; obtain member IDs from `POST /member/list`."
           },
           "query": {
             "type": "string",
@@ -38900,7 +38917,8 @@
             "description": "Zoom bot message template source."
           },
           "incident_card_hidden_fields": {
-            "$ref": "#/components/schemas/IncidentCardHiddenFields"
+            "$ref": "#/components/schemas/IncidentCardHiddenFields",
+            "description": "Incident card fields hidden per IM app type."
           }
         }
       },
@@ -38935,7 +38953,7 @@
           "template_id": {
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
-            "description": "Target template ID.",
+            "description": "Target template ID; obtain it from `POST /template/list`.",
             "example": "6605a1b2c3d4e5f6a7b8c9d0"
           },
           "team_id": {
@@ -39019,7 +39037,8 @@
             "description": "Zoom bot message template source."
           },
           "incident_card_hidden_fields": {
-            "$ref": "#/components/schemas/IncidentCardHiddenFields"
+            "$ref": "#/components/schemas/IncidentCardHiddenFields",
+            "description": "Incident card fields hidden per IM app type."
           }
         }
       },
@@ -39699,7 +39718,7 @@
         "properties": {
           "schema_id": {
             "type": "string",
-            "description": "Mapping schema ID (query parameter)."
+            "description": "Mapping schema ID (passed as a query parameter); obtain it from `POST /enrichment/mapping/schema/list`."
           },
           "file": {
             "type": "string",
@@ -39764,7 +39783,7 @@
           "team_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Owning team ID."
+            "description": "Owning team ID; obtain it from `POST /team/list`."
           }
         }
       },
@@ -39853,7 +39872,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "New owning team ID."
+            "description": "New owning team ID; obtain it from `POST /team/list`."
           }
         }
       },
@@ -40985,12 +41004,12 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "change_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Target event ID."
+            "description": "Target change ID; obtain it from `POST /status-page/change/list`."
           },
           "title": {
             "type": [
@@ -41028,12 +41047,12 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "change_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Target event ID."
+            "description": "Target change ID; obtain it from `POST /status-page/change/list`."
           }
         }
       },
@@ -41062,16 +41081,16 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "change_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Parent event ID."
+            "description": "Owning change ID; obtain it from `POST /status-page/change/list`."
           },
           "update_id": {
             "type": "string",
-            "description": "Target timeline update ID."
+            "description": "Target timeline update ID; obtain it from `POST /status-page/change/info`."
           },
           "at_seconds": {
             "type": "integer",
@@ -41096,16 +41115,16 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "change_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Parent event ID."
+            "description": "Owning change ID; obtain it from `POST /status-page/change/list`."
           },
           "update_id": {
             "type": "string",
-            "description": "Timeline update ID to delete."
+            "description": "Timeline update ID to delete; obtain it from `POST /status-page/change/info`."
           }
         }
       },
@@ -41228,7 +41247,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Target status page ID."
+            "description": "Target status page ID; obtain it from `POST /status-page/list`."
           },
           "method": {
             "type": "string",
@@ -41294,7 +41313,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "component_ids": {
             "type": "array",
@@ -41508,7 +41527,7 @@
         "properties": {
           "job_id": {
             "type": "string",
-            "description": "Migration job ID."
+            "description": "Migration job ID, returned when the migration job is created; check progress via `POST /status-page/migration/status`."
           }
         }
       },
@@ -41526,7 +41545,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "type": {
             "type": "string",
@@ -41534,7 +41553,7 @@
               "incident",
               "maintenance"
             ],
-            "description": "Event type."
+            "description": "Change type: `incident` unplanned incident, `maintenance` planned maintenance."
           },
           "title": {
             "type": "string",
@@ -41569,7 +41588,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Member IDs responsible for this event."
+            "description": "Member IDs responsible for the change; obtain member IDs from `POST /member/list`."
           },
           "linked_changes": {
             "type": "array",
@@ -41626,7 +41645,7 @@
                     "properties": {
                       "component_id": {
                         "type": "string",
-                        "description": "Component ID."
+                        "description": "Component ID; obtain it from `POST /status-page/info`."
                       },
                       "status": {
                         "type": "string",
@@ -41673,12 +41692,12 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "change_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Target event ID."
+            "description": "Target change ID; obtain it from `POST /status-page/change/list`."
           },
           "at_seconds": {
             "type": "integer",
@@ -41713,7 +41732,7 @@
               "properties": {
                 "component_id": {
                   "type": "string",
-                  "description": "Component ID."
+                  "description": "Component ID; obtain it from `POST /status-page/info`."
                 },
                 "status": {
                   "type": "string",
@@ -42043,20 +42062,22 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "Rule ID. Required for update; omit for create (assigned by the server)."
           },
           "account_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "Account ID. Filled by the server from the authenticated identity; do not provide."
           },
           "folder_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Folder the rule belongs to."
+            "description": "ID of the folder the rule belongs to. Obtainable via `POST /monit/folder/list`."
           },
           "name": {
             "type": "string",
-            "description": "Rule name."
+            "description": "Rule name. Must be unique within the same folder."
           },
           "labels": {
             "type": "object",
@@ -42067,7 +42088,7 @@
           },
           "ds_type": {
             "type": "string",
-            "description": "Data source type."
+            "description": "Datasource type identifier; allowed values are listed by `POST /monit/rule/dstypes` (e.g. `prometheus`, `elasticsearch`)."
           },
           "ds_list": {
             "type": "array",
@@ -42082,20 +42103,23 @@
               "type": "integer",
               "format": "uint64"
             },
-            "description": "Specific data source IDs."
+            "description": "Datasource IDs, merged with `ds_list` to decide which datasources the rule monitors; IDs survive datasource renames. At least one of `ds_list` and `ds_ids` must be provided."
           },
           "enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the rule is enabled. Updating to `false` makes the server clean up the rule's active alerts."
           },
           "debug_log_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to enable debug logging; the edge emits detailed evaluation logs, useful for troubleshooting rules that do not trigger as expected."
           },
           "rule_configs": {
-            "$ref": "#/components/schemas/RuleConfigs"
+            "$ref": "#/components/schemas/RuleConfigs",
+            "description": "Check configuration: query list plus trigger/recovery conditions. Structure see `RuleConfigs`."
           },
           "cron_pattern": {
             "type": "string",
-            "description": "5-field cron schedule. Must not start with `CRON_TZ=` or `TZ=`; use the `timezone` field instead."
+            "description": "Schedule expression: a 6-field cron (with seconds) or an `@every 30s` interval descriptor. Must not start with `CRON_TZ=` or `TZ=`; use the `timezone` field instead."
           },
           "timezone": {
             "type": "string",
@@ -42103,7 +42127,8 @@
             "default": "Asia/Shanghai"
           },
           "delay_seconds": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Seconds to shift the evaluation query window backward, compensating for data ingestion latency."
           },
           "enabled_times": {
             "type": "array",
@@ -42148,7 +42173,8 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Annotation key-value pairs delivered with alert events; keys must not start with `$` (reserved for query fields)."
           },
           "description_type": {
             "type": "string",
@@ -42160,7 +42186,8 @@
             "description": "Format for the description. Defaults to `text` when omitted or empty."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule description, in Markdown."
           },
           "channel_ids": {
             "type": "array",
@@ -42182,25 +42209,31 @@
           },
           "creator_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "Creator user ID. Filled by the server from the current user; do not provide."
           },
           "creator_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Creator name. Filled by the server; do not provide."
           },
           "updater_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "Last updater user ID. Filled by the server; do not provide."
           },
           "updater_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Last updater name. Filled by the server; do not provide."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Creation time as a Unix timestamp in seconds. Generated by the server; do not provide."
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Last update time as a Unix timestamp in seconds. Generated by the server; do not provide."
           }
         }
       },
@@ -42238,7 +42271,7 @@
           "id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Rule ID."
+            "description": "Alert rule ID. Obtainable per folder via `POST /monit/rule/list/basic`."
           }
         }
       },
@@ -42287,7 +42320,7 @@
           "folder_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Folder ID. 0 for all."
+            "description": "Folder ID to summarize. Obtainable via `POST /monit/folder/list`. Trigger statistics are returned grouped by direct child folder."
           }
         }
       },
@@ -42309,40 +42342,64 @@
           "fields": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "labels",
+                "ds_type",
+                "ds_list",
+                "ds_ids",
+                "enabled",
+                "debug_log_enabled",
+                "cron_pattern",
+                "timezone",
+                "delay_seconds",
+                "enabled_times",
+                "annotations",
+                "description",
+                "channel_ids",
+                "repeat_interval",
+                "repeat_total"
+              ]
             },
-            "description": "Field names to update."
+            "description": "Field names to update. Only listed fields are updated, taking new values from the same-named request fields; values for unlisted fields are silently ignored."
           },
           "labels": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Custom label key-value pairs; replaces existing labels as a whole. Effective only when `fields` includes `labels`."
           },
           "ds_type": {
-            "type": "string"
+            "type": "string",
+            "description": "Datasource type identifier; allowed values are listed by `POST /monit/rule/dstypes`. Effective only when `fields` includes `ds_type`."
           },
           "ds_list": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Datasource name match patterns; wildcards supported. Effective only when `fields` includes `ds_list`."
           },
           "ds_ids": {
             "type": "array",
             "items": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "description": "Datasource IDs, merged with `ds_list` to decide which datasources the rule monitors; IDs survive datasource renames. Effective only when `fields` includes `ds_ids`."
           },
           "enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the rule is enabled. Setting it to `false` makes the server clean up the rule's active alerts. Effective only when `fields` includes `enabled`."
           },
           "debug_log_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to enable debug logging; the edge emits detailed evaluation logs for troubleshooting. Effective only when `fields` includes `debug_log_enabled`."
           },
           "cron_pattern": {
-            "type": "string"
+            "type": "string",
+            "description": "Schedule expression: a 6-field cron (with seconds) or an `@every 30s` interval descriptor; `CRON_TZ=`/`TZ=` prefixes are not allowed. Effective only when `fields` includes `cron_pattern`."
           },
           "timezone": {
             "type": "string",
@@ -42350,37 +42407,44 @@
             "default": "Asia/Shanghai"
           },
           "delay_seconds": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Seconds to shift the evaluation query window backward, compensating for data ingestion latency. Effective only when `fields` includes `delay_seconds`."
           },
           "enabled_times": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EnabledTime"
-            }
+            },
+            "description": "Time windows during which the rule is in effect; element structure see `EnabledTime`. Effective only when `fields` includes `enabled_times`."
           },
           "annotations": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Annotation key-value pairs delivered with alert events; keys must not start with `$` (reserved for query fields). Effective only when `fields` includes `annotations`."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule description (Markdown). Effective only when `fields` includes `description`."
           },
           "channel_ids": {
             "type": "array",
             "items": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "description": "IDs of the collaboration spaces alerts are sent to; may be empty. Effective only when `fields` includes `channel_ids`."
           },
           "repeat_interval": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Interval in seconds between repeated alert notifications. Effective only when `fields` includes `repeat_interval`."
           },
           "repeat_total": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Maximum number of repeated notifications. Effective only when `fields` includes `repeat_total`."
           }
         }
       },
@@ -42402,7 +42466,7 @@
           "dest_folder_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Destination folder ID."
+            "description": "Destination folder ID. Obtainable via `POST /monit/folder/list`."
           }
         }
       },
@@ -43288,7 +43352,7 @@
           },
           "name": {
             "type": "string",
-            "description": "Datasource display name."
+            "description": "Datasource display name. This is the name referenced as `ds_name` in query and diagnose APIs."
           },
           "note": {
             "type": "string",
@@ -43325,7 +43389,7 @@
           "id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Resource ID."
+            "description": "Numeric ID of the target resource; the exact meaning depends on the API being called (e.g. datasource ID, ruleset ID)."
           }
         }
       },
@@ -43336,11 +43400,11 @@
           "id": {
             "type": "integer",
             "format": "uint64",
-            "description": "SLS datasource ID."
+            "description": "ID of an SLS-type datasource. Obtainable via `POST /monit/datasource/list`."
           },
           "query": {
             "type": "string",
-            "description": "Name prefix filter."
+            "description": "Fuzzy filter on project description (maps to the `description` parameter of Aliyun SLS ListProject). Leave empty to return all."
           },
           "offset": {
             "type": "integer",
@@ -43348,7 +43412,7 @@
           },
           "size": {
             "type": "integer",
-            "description": "Page size."
+            "description": "Page size. Defaults to 200 server-side when 0."
           }
         }
       },
@@ -43366,11 +43430,11 @@
           "id": {
             "type": "integer",
             "format": "uint64",
-            "description": "SLS datasource ID."
+            "description": "ID of an SLS-type datasource. Obtainable via `POST /monit/datasource/list`."
           },
           "project": {
             "type": "string",
-            "description": "SLS project name."
+            "description": "SLS project name. Obtainable via `POST /monit/datasource/sls/projects`."
           },
           "offset": {
             "type": "integer",
@@ -43378,7 +43442,7 @@
           },
           "size": {
             "type": "integer",
-            "description": "Page size."
+            "description": "Page size. Defaults to 200 server-side when 0."
           }
         }
       },
@@ -43559,7 +43623,7 @@
               "created_at",
               "updated_at"
             ],
-            "description": "Sort field."
+            "description": "Sort field; defaults to `updated_at` when omitted."
           },
           "asc": {
             "type": "boolean",
@@ -43567,12 +43631,12 @@
           },
           "query": {
             "type": "string",
-            "description": "Search query to filter by application name."
+            "description": "Substring match on the application name."
           },
           "team_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Filter by team ID."
+            "description": "Filter by team ID. Get team IDs via `POST /team/list`."
           },
           "is_my_team": {
             "type": "boolean",
@@ -43817,7 +43881,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           }
         }
       },
@@ -43833,7 +43897,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Up to 200 application IDs."
+            "description": "Up to 200 application IDs. Get IDs via `POST /rum/application/list`."
           }
         }
       },
@@ -43872,14 +43936,17 @@
               "flutter",
               "kotlin-multiplatform",
               "roku",
-              "unity"
+              "unity",
+              "miniprogram",
+              "harmony",
+              "electron"
             ],
             "description": "Application type."
           },
           "team_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Owning team ID."
+            "description": "Owning team ID. Get team IDs via `POST /team/list`."
           },
           "is_private": {
             "type": "boolean",
@@ -43894,13 +43961,16 @@
             "description": "Do not infer geographic location."
           },
           "alerting": {
-            "$ref": "#/components/schemas/RumApplicationAlerting"
+            "$ref": "#/components/schemas/RumApplicationAlerting",
+            "description": "Alerting configuration; defaults to disabled (`enabled: false`) when omitted."
           },
           "tracing": {
-            "$ref": "#/components/schemas/RumApplicationTracing"
+            "$ref": "#/components/schemas/RumApplicationTracing",
+            "description": "Optional APM tracing integration configuration."
           },
           "links": {
-            "$ref": "#/components/schemas/RumApplicationLinks"
+            "$ref": "#/components/schemas/RumApplicationLinks",
+            "description": "Optional external-link integration configuration."
           }
         }
       },
@@ -43931,11 +44001,11 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "Application ID to update."
+            "description": "Application ID to update. Get application IDs via `POST /rum/application/list`."
           },
           "application_name": {
             "type": "string",
-            "description": "New application name."
+            "description": "New application name, 1–40 characters. Omit to leave unchanged."
           },
           "type": {
             "type": "string",
@@ -43947,30 +44017,41 @@
               "flutter",
               "kotlin-multiplatform",
               "roku",
-              "unity"
-            ]
+              "unity",
+              "miniprogram",
+              "harmony",
+              "electron"
+            ],
+            "description": "Application type. Omit to leave unchanged."
           },
           "team_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Owning team ID. Get team IDs via `POST /team/list`. Omit to leave unchanged."
           },
           "is_private": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Restrict access to members of the owning team. Omit to leave unchanged."
           },
           "no_ip": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "When `true`, stop collecting user IP addresses. Omit to leave unchanged."
           },
           "no_geo": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "When `true`, stop inferring geographic location from IP. Omit to leave unchanged."
           },
           "alerting": {
-            "$ref": "#/components/schemas/RumApplicationAlerting"
+            "$ref": "#/components/schemas/RumApplicationAlerting",
+            "description": "Alerting configuration. Omit to leave unchanged."
           },
           "tracing": {
-            "$ref": "#/components/schemas/RumApplicationTracing"
+            "$ref": "#/components/schemas/RumApplicationTracing",
+            "description": "APM tracing integration configuration. Omit to leave unchanged."
           },
           "links": {
-            "$ref": "#/components/schemas/RumApplicationLinks"
+            "$ref": "#/components/schemas/RumApplicationLinks",
+            "description": "External-link integration configuration. Omit to leave unchanged."
           }
         }
       },
@@ -44146,7 +44227,7 @@
           "start_time": {
             "type": "integer",
             "format": "int64",
-            "description": "Start of time range, millisecond timestamp."
+            "description": "Start of the time range, Unix epoch milliseconds."
           },
           "end_time": {
             "type": "integer",
@@ -44158,7 +44239,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Filter by application IDs."
+            "description": "Filter by application IDs. Get IDs via `POST /rum/application/list`."
           },
           "dql": {
             "type": "string",
@@ -44179,14 +44260,22 @@
                 "resolved"
               ]
             },
-            "description": "Filter by statuses."
+            "description": "Filter by status; only the enum values are accepted — any other value is rejected with a parameter error."
           },
           "suspected_causes": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "api.failed_request",
+                "network.error",
+                "code.exception",
+                "code.invalid_object_access",
+                "code.invalid_argument",
+                "unknown"
+              ]
             },
-            "description": "Filter by suspected causes."
+            "description": "Filter by suspected cause; see the enum for valid values."
           },
           "team_ids": {
             "type": "array",
@@ -44194,11 +44283,11 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Filter by team IDs."
+            "description": "Filter by team IDs. Get team IDs via `POST /team/list`."
           },
           "p": {
             "type": "integer",
-            "description": "Page number. Default: 1."
+            "description": "Page number (1-based). Default: 1."
           },
           "limit": {
             "type": "integer",
@@ -44211,17 +44300,20 @@
               "updated_at",
               "session_count",
               "error_count"
-            ]
+            ],
+            "description": "Sort field; defaults to `updated_at` when omitted."
           },
           "asc": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Sort ascending when `true`; descending by default."
           },
           "error_required": {
             "type": "boolean",
             "description": "If `true`, only return issues with at least one associated error event."
           },
           "by_intersection": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "When `true`, match by time-range overlap: return issues still active within the window (`last_seen_timestamp` >= `start_time`) even if created before it. Default `false` returns only issues created inside the window."
           }
         }
       },
@@ -44250,7 +44342,7 @@
         "properties": {
           "issue_id": {
             "type": "string",
-            "description": "Issue ID."
+            "description": "Issue ID. Get issue IDs via `POST /rum/issue/list`."
           }
         }
       },
@@ -44263,7 +44355,7 @@
         "properties": {
           "issue_id": {
             "type": "string",
-            "description": "Issue ID to update."
+            "description": "Issue ID to update. Get issue IDs via `POST /rum/issue/list`."
           },
           "status": {
             "type": "string",
@@ -44273,7 +44365,7 @@
               "ignored",
               "resolved"
             ],
-            "description": "New status."
+            "description": "New status. Setting `resolved` records the resolution time and operator; switching away from `resolved` clears them."
           },
           "suspected_cause": {
             "type": "string",
@@ -44285,7 +44377,7 @@
               "code.invalid_argument",
               "unknown"
             ],
-            "description": "Suspected cause."
+            "description": "New suspected cause; setting it marks the cause source as `user`, overriding the automatic classification."
           }
         }
       },
@@ -44358,7 +44450,7 @@
           },
           "orderby": {
             "type": "string",
-            "description": "Sort field.",
+            "description": "Sort field; defaults to `created_at` descending when omitted.",
             "enum": [
               "created_at",
               "updated_at"
@@ -44562,18 +44654,19 @@
           "role_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Filter by role ID"
+            "description": "Filter by role ID. Get role IDs from `POST /role/list` (built-in roles: 2=Admin, 6=Responder, 8=Viewer)"
           },
           "p": {
             "type": "integer",
             "minimum": 1,
-            "description": "Page number"
+            "description": "Page number, 1-based"
           },
           "limit": {
             "type": "integer",
             "minimum": 1,
             "maximum": 100,
-            "description": "Page size"
+            "description": "Page size. Defaults to 100 on the server when omitted or 0",
+            "default": 100
           },
           "orderby": {
             "type": "string",
@@ -44581,15 +44674,15 @@
               "created_at",
               "updated_at"
             ],
-            "description": "Sort field"
+            "description": "Sort field. Default: `updated_at`"
           },
           "asc": {
             "type": "boolean",
-            "description": "Ascending order"
+            "description": "Ascending order. Default: false (descending)"
           },
           "query": {
             "type": "string",
-            "description": "Search keyword"
+            "description": "Substring match on member name or email; if the keyword parses as a phone number, an exact phone match is also applied"
           }
         }
       },
@@ -44729,19 +44822,19 @@
           "member_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Member ID"
+            "description": "Member ID. When several lookup fields are provided, the first non-empty one wins in the order `member_id` > `member_name` > `email` > `phone` > `ref_id`"
           },
           "member_name": {
             "type": "string",
-            "description": "Member name"
+            "description": "Member name. Only used when `member_id` is not provided"
           },
           "email": {
             "type": "string",
-            "description": "Email address"
+            "description": "Email address. Only used when neither `member_id` nor `member_name` is provided"
           },
           "phone": {
             "type": "string",
-            "description": "Phone number"
+            "description": "Phone number. Only used when `member_id`, `member_name`, and `email` are all absent"
           },
           "country_code": {
             "type": "string",
@@ -44749,7 +44842,7 @@
           },
           "ref_id": {
             "type": "string",
-            "description": "External reference ID"
+            "description": "External reference ID. Only used when all other lookup fields are absent"
           },
           "is_force": {
             "type": "boolean",
@@ -44821,7 +44914,7 @@
           },
           "from": {
             "type": "string",
-            "description": "Invite source context"
+            "description": "Invite source. Only takes effect when the account has member invites disabled and the value is `api`: members are created directly in the enabled state with email/phone marked verified and no invitation sent. Any other value follows the normal invite flow"
           }
         }
       },
@@ -44918,7 +45011,7 @@
               "type": "integer",
               "format": "uint64"
             },
-            "description": "New set of role IDs"
+            "description": "New role ID set. Replaces the member's existing roles entirely (not additive); get IDs from `POST /role/list`. Leave empty to reset to the built-in Viewer role (ID 8)"
           }
         }
       },
@@ -44986,7 +45079,8 @@
             "description": "Set to `api` to mark an updated phone or email as verified. Only takes effect when the account has member invites disabled; any other value is ignored."
           },
           "updates": {
-            "$ref": "#/components/schemas/MemberResetInfoUpdates"
+            "$ref": "#/components/schemas/MemberResetInfoUpdates",
+            "description": "New profile values to write. Must include at least one field."
           }
         }
       },
@@ -45052,7 +45146,7 @@
               "type": "integer",
               "format": "uint64"
             },
-            "description": "List of person IDs"
+            "description": "Person IDs to look up — these are member IDs (get them from `POST /member/list`). Passing the account ID returns the account principal; unknown IDs are ignored"
           }
         }
       },
@@ -45230,15 +45324,15 @@
           "team_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Team ID."
+            "description": "Team ID. At least one of the three lookup fields is required; lowest priority — only used when neither `ref_id` nor `team_name` is provided."
           },
           "team_name": {
             "type": "string",
-            "description": "Team name."
+            "description": "Team name. Only used when `ref_id` is not provided; takes precedence over `team_id`."
           },
           "ref_id": {
             "type": "string",
-            "description": "External reference ID."
+            "description": "External reference ID. When provided, takes precedence over `team_name` and `team_id`."
           }
         }
       },
@@ -45313,7 +45407,7 @@
           },
           "orderby": {
             "type": "string",
-            "description": "Sort field.",
+            "description": "Sort field. Default: `updated_at`.",
             "enum": [
               "created_at",
               "updated_at",
@@ -45322,7 +45416,7 @@
           },
           "asc": {
             "type": "boolean",
-            "description": "Ascending sort order."
+            "description": "Ascending sort order. Default: false (descending)."
           },
           "person_id": {
             "type": "integer",
@@ -45402,14 +45496,14 @@
               "type": "string",
               "format": "email"
             },
-            "description": "Email addresses to invite as members."
+            "description": "Add existing members to the team by email. Addresses that don't match an existing member are silently ignored — no invitation is sent."
           },
           "phones": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Phone numbers to invite as members."
+            "description": "Add existing members to the team by phone number. Numbers that don't match an existing member are silently ignored; non-E.164 numbers are parsed with `countryCode`."
           },
           "countryCode": {
             "type": "string",
@@ -45451,15 +45545,15 @@
           "team_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Team ID."
+            "description": "Team ID. At least one of the three lookup fields is required; when several are provided, `team_id` wins."
           },
           "team_name": {
             "type": "string",
-            "description": "Team name."
+            "description": "Team name. Only used when `team_id` is not provided."
           },
           "ref_id": {
             "type": "string",
-            "description": "External reference ID."
+            "description": "External reference ID. Only used when neither `team_id` nor `team_name` is provided."
           }
         }
       },
@@ -45536,7 +45630,7 @@
           "role_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Role ID."
+            "description": "Role ID to query. Get IDs from `POST /role/list` (built-in roles: 2=Admin, 6=Responder, 8=Viewer)."
           }
         }
       },
@@ -45549,7 +45643,7 @@
           "role_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Role ID."
+            "description": "Role ID to operate on. Get IDs from `POST /role/list` (built-in roles: 2=Admin, 6=Responder, 8=Viewer)."
           }
         }
       },
@@ -45563,11 +45657,11 @@
               "created_at",
               "updated_at"
             ],
-            "description": "Sort field."
+            "description": "Sort field. Default: `updated_at`."
           },
           "asc": {
             "type": "boolean",
-            "description": "Ascending sort order."
+            "description": "Ascending sort order. Default: false (descending)."
           }
         }
       },
@@ -45803,7 +45897,7 @@
           "role_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Role ID to grant or revoke."
+            "description": "Role ID to grant or revoke. Get IDs from `POST /role/list`."
           }
         }
       },
@@ -45852,7 +45946,7 @@
           "person_id": {
             "type": "integer",
             "format": "uint64",
-            "description": "Filter by the member who performed the action."
+            "description": "Filter by the operator's member ID (get IDs from `POST /member/list`). Pass the account ID to match actions performed by the account principal itself."
           },
           "is_dangerous": {
             "type": [
@@ -46232,7 +46326,7 @@
               "single_select",
               "text"
             ],
-            "description": "Field input type. Immutable after creation."
+            "description": "Field type, immutable after creation: `text`, `single_select`, `multi_select` or `checkbox`."
           },
           "value_type": {
             "type": "string",
@@ -46495,7 +46589,8 @@
                 "type": "string",
                 "description": "Query expression. LogQL / VictoriaLogs query syntax for `log_patterns`; PromQL for `metric_trends`."
               }
-            }
+            },
+            "description": "Diagnose input. `query` is required: LogQL / VictoriaLogs query syntax for `log_patterns`; PromQL for `metric_trends`."
           },
           "options": {
             "type": "object",
@@ -47193,7 +47288,7 @@
               "description": "",
               "format": "int64"
             },
-            "description": "Filter by collaboration channel IDs."
+            "description": "Filter by channel IDs."
           },
           "integration_ids": {
             "type": "array",
@@ -47344,7 +47439,7 @@
         "properties": {
           "integration_id": {
             "type": "integer",
-            "description": "IM integration that hosts the war room.",
+            "description": "ID of the IM integration hosting the war room; obtain it from `POST /datasource/im/war-room-enabled/list`.",
             "format": "int64"
           },
           "chat_id": {
@@ -47468,7 +47563,8 @@
             "description": "Incident ID whose data is used to render the template; mock data is used when omitted. A MongoDB ObjectID hex string."
           },
           "incident_card_hidden_fields": {
-            "$ref": "#/components/schemas/IncidentCardHiddenFields"
+            "$ref": "#/components/schemas/IncidentCardHiddenFields",
+            "description": "Incident card fields to hide per IM app when previewing."
           }
         },
         "required": [
@@ -47646,7 +47742,7 @@
         "properties": {
           "template_id": {
             "type": "string",
-            "description": "Template ID."
+            "description": "Template ID; obtain it from `POST /incident/post-mortem/template/list`."
           }
         }
       },
@@ -47826,7 +47922,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Additional type-specific query arguments."
+            "description": "Additional datasource-type-specific query arguments (string keys and values), e.g. `sls.project` and `sls.logstore` for SLS, `es.type` for Elasticsearch, `loki.type` and `loki.limit` for Loki."
           }
         }
       },
@@ -47845,7 +47941,7 @@
         "properties": {
           "post_mortem_id": {
             "type": "string",
-            "description": "Post-mortem ID."
+            "description": "Post-mortem ID; obtain it from `POST /incident/post-mortem/list`."
           },
           "incidents_highest_severity": {
             "type": "string",
@@ -47891,7 +47987,7 @@
         "properties": {
           "post_mortem_id": {
             "type": "string",
-            "description": "Post-mortem ID to reset."
+            "description": "ID of the post-mortem to reset; obtain it from `POST /incident/post-mortem/list`."
           },
           "markdown": {
             "type": "string",
@@ -47923,7 +48019,7 @@
         "properties": {
           "post_mortem_id": {
             "type": "string",
-            "description": "Post-mortem ID."
+            "description": "Post-mortem ID; obtain it from `POST /incident/post-mortem/list`."
           },
           "follow_ups": {
             "type": "string",
@@ -47941,7 +48037,7 @@
         "properties": {
           "post_mortem_id": {
             "type": "string",
-            "description": "Post-mortem ID."
+            "description": "Post-mortem ID; obtain it from `POST /incident/post-mortem/list`."
           },
           "status": {
             "type": "string",
@@ -47949,7 +48045,7 @@
               "drafting",
               "published"
             ],
-            "description": "Target report status."
+            "description": "Target report status: `drafting` draft, `published` published."
           }
         }
       },
@@ -47963,7 +48059,7 @@
         "properties": {
           "post_mortem_id": {
             "type": "string",
-            "description": "Post-mortem ID."
+            "description": "Post-mortem ID; obtain it from `POST /incident/post-mortem/list`."
           },
           "title": {
             "type": "string",
@@ -47981,7 +48077,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "webhook_url": {
             "type": "string",
@@ -48023,7 +48119,7 @@
           "integration_id": {
             "type": "integer",
             "format": "int64",
-            "description": "IM integration ID."
+            "description": "IM integration ID; obtain it from `POST /datasource/im/war-room-enabled/list`."
           }
         }
       },
@@ -48090,14 +48186,14 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "component_ids": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "IDs of components to delete."
+            "description": "Component IDs to delete; obtain them from `POST /status-page/info`."
           }
         }
       },
@@ -48112,14 +48208,14 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "section_ids": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "IDs of sections to delete."
+            "description": "Section IDs to delete; obtain them from `POST /status-page/info`."
           }
         }
       },
@@ -48135,7 +48231,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "type": {
             "type": "string",
@@ -48143,11 +48239,11 @@
               "pre_defined",
               "message"
             ],
-            "description": "Template category."
+            "description": "Template kind: `pre_defined` predefined template, `message` message template."
           },
           "template_id": {
             "type": "string",
-            "description": "Template ID to delete."
+            "description": "ID of the template to delete; obtain it from `POST /status-page/template/list`."
           }
         }
       },
@@ -48162,7 +48258,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "components": {
             "type": "array",
@@ -48234,7 +48330,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "sections": {
             "type": "array",
@@ -48303,7 +48399,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "type": {
             "type": "string",
@@ -48336,7 +48432,7 @@
                   "incident",
                   "maintenance"
                 ],
-                "description": "Event type this template applies to."
+                "description": "Change type this template applies to: `incident` unplanned incident, `maintenance` planned maintenance."
               },
               "status": {
                 "type": "string",
@@ -48349,7 +48445,7 @@
                   "ongoing",
                   "completed"
                 ],
-                "description": "Event status this template represents."
+                "description": "Change status this template maps to. Incidents use `investigating`/`identified`/`monitoring`/`resolved`; maintenances use `scheduled`/`ongoing`/`completed`."
               },
               "description": {
                 "type": "string",
@@ -48642,7 +48738,7 @@
           },
           "facet_key": {
             "type": "string",
-            "description": "The field key to count value distribution for."
+            "description": "Field key whose value distribution to count; must be a registered field of the given `scope`. List available fields via `POST /rum/field/list`."
           },
           "facet_value": {
             "description": "When set, filter events where `facet_key` equals this value before counting. Accepts string, number, or boolean."
@@ -49078,7 +49174,7 @@
           },
           "type": {
             "type": "string",
-            "description": "Visibility type of the status page.",
+            "description": "Visibility type: `public` accessible to anyone, `internal` restricted to logged-in members of this account.",
             "enum": [
               "public",
               "internal"
@@ -49103,7 +49199,7 @@
           },
           "date_view": {
             "type": "string",
-            "description": "How event dates are displayed.",
+            "description": "How change dates are displayed: `calendar` calendar view, `list` list view.",
             "enum": [
               "calendar",
               "list"
@@ -49111,7 +49207,7 @@
           },
           "display_uptime_mode": {
             "type": "string",
-            "description": "How uptime is displayed.",
+            "description": "Uptime display mode: `chart_and_percentage` chart plus percentage, `chart` chart only, `none` hidden.",
             "enum": [
               "chart_and_percentage",
               "chart",
@@ -49133,7 +49229,8 @@
             "description": "Get-in-touch contact, such as a mailto or website URL."
           },
           "subscription": {
-            "$ref": "#/components/schemas/StatusPageSubscriptionItem"
+            "$ref": "#/components/schemas/StatusPageSubscriptionItem",
+            "description": "Subscription channel toggles."
           }
         },
         "required": [
@@ -49177,7 +49274,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           },
           "name": {
             "type": "string",
@@ -49254,7 +49351,8 @@
             "description": "Get-in-touch contact, such as a mailto or website URL. Omit to keep the existing value."
           },
           "subscription": {
-            "$ref": "#/components/schemas/StatusPageSubscriptionItem"
+            "$ref": "#/components/schemas/StatusPageSubscriptionItem",
+            "description": "Subscription channel toggles."
           },
           "template_preference": {
             "type": "string",
@@ -49272,7 +49370,7 @@
           "page_id": {
             "type": "integer",
             "format": "int64",
-            "description": "Status page ID."
+            "description": "Status page ID; obtain it from `POST /status-page/list`."
           }
         }
       },
@@ -49372,7 +49470,7 @@
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Target agent ID."
+            "description": "Target agent ID, from the list returned by `POST /safari/a2a-agent/list`."
           }
         },
         "required": [
@@ -49535,7 +49633,7 @@
         "properties": {
           "offset": {
             "type": "integer",
-            "description": "Row offset for pagination.",
+            "description": "Pagination offset — number of rows to skip, starting from 0.",
             "default": 0
           },
           "limit": {
@@ -49603,7 +49701,7 @@
         "properties": {
           "agent_id": {
             "type": "string",
-            "description": "Target agent ID."
+            "description": "Target agent ID, from the list returned by `POST /safari/a2a-agent/list`."
           },
           "agent_name": {
             "type": [
@@ -49806,7 +49904,7 @@
         "properties": {
           "rule_id": {
             "type": "string",
-            "description": "Rule ID."
+            "description": "Rule ID, from the list returned by `POST /safari/automation/rule/list`."
           }
         },
         "required": [
@@ -50016,7 +50114,7 @@
               "boolean",
               "null"
             ],
-            "description": "Filter by enabled status."
+            "description": "Filter by enabled state: `true` returns only enabled rules, `false` only disabled; omit or pass null for no filter."
           },
           "keyword": {
             "type": "string",
@@ -50051,7 +50149,7 @@
         "properties": {
           "rule_id": {
             "type": "string",
-            "description": "Target rule ID."
+            "description": "Target rule ID, from the list returned by `POST /safari/automation/rule/list`."
           },
           "name": {
             "type": [
@@ -50283,7 +50381,7 @@
         "properties": {
           "rule_id": {
             "type": "string",
-            "description": "Target rule ID."
+            "description": "Target rule ID, from the list returned by `POST /safari/automation/rule/list`."
           },
           "p": {
             "type": "integer",
@@ -50308,7 +50406,7 @@
               "skipped",
               "abandoned"
             ],
-            "description": "Run status filter."
+            "description": "Run status filter: `queued`, `running`, `retrying`, `succeeded`, `partial` (partially succeeded), `failed`, `skipped` (e.g. rule or trigger no longer valid), `abandoned` (stale run terminated by the system); omit for no filter."
           },
           "trigger_kind": {
             "type": "string",
@@ -50319,7 +50417,7 @@
               "http_post",
               "oncall_incident"
             ],
-            "description": "Trigger kind filter."
+            "description": "Trigger source filter: `schedule` cron trigger, `debug` debug run, `manual` manual run, `http_post` HTTP POST trigger, `oncall_incident` on-call incident trigger; omit for no filter."
           },
           "started_after_ms": {
             "type": "integer",
@@ -50596,7 +50694,7 @@
           },
           "transport": {
             "type": "string",
-            "description": "Transport protocol.",
+            "description": "Transport protocol: `stdio` launches a local process via `command`/`args`/`env`, `sse` / `streamable-http` connects to a remote service via `url`/`headers`.",
             "enum": [
               "stdio",
               "sse",
@@ -50654,7 +50752,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Initial status.",
+            "description": "Initial status: `enabled` (default) or `disabled` (created but kept off).",
             "enum": [
               "enabled",
               "disabled"
@@ -50702,7 +50800,7 @@
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Target MCP server ID."
+            "description": "Target MCP server ID, from the list returned by `POST /safari/mcp/server/list`."
           }
         },
         "required": [
@@ -50715,7 +50813,7 @@
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Target MCP server ID."
+            "description": "Target MCP server ID, from the list returned by `POST /safari/mcp/server/list`."
           }
         },
         "required": [
@@ -50977,7 +51075,7 @@
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Target MCP server ID."
+            "description": "Target MCP server ID, from the list returned by `POST /safari/mcp/server/list`."
           }
         },
         "required": [
@@ -50990,23 +51088,23 @@
         "properties": {
           "server_id": {
             "type": "string",
-            "description": "Target MCP server ID."
+            "description": "Target MCP server ID, from the list returned by `POST /safari/mcp/server/list`."
           },
           "server_name": {
             "type": "string",
-            "description": "New name.",
+            "description": "New name; omitted or empty leaves it unchanged.",
             "minLength": 1,
             "maxLength": 255
           },
           "description": {
             "type": "string",
-            "description": "New description.",
+            "description": "New description; omitted or empty leaves it unchanged.",
             "minLength": 1,
             "maxLength": 1024
           },
           "transport": {
             "type": "string",
-            "description": "Transport protocol.",
+            "description": "Transport protocol; when switching, also supply the matching fields (`command`/`args`/`env` for `stdio`, `url`/`headers` for `sse` / `streamable-http`); omitted or empty leaves it unchanged.",
             "enum": [
               "stdio",
               "sse",
@@ -51022,14 +51120,14 @@
             "items": {
               "type": "string"
             },
-            "description": "Command arguments (stdio transport)."
+            "description": "Command arguments (`stdio` transport); replaces the whole list — pass `[]` to clear, omit to leave unchanged."
           },
           "env": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Environment variables (stdio transport)."
+            "description": "Environment variables (`stdio` transport); replaces the whole map, but masked secret values sent back as-is keep their stored values; omit to leave unchanged."
           },
           "url": {
             "type": "string",
@@ -51214,7 +51312,7 @@
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "Target session ID.",
+            "description": "Target session ID, from the list returned by `POST /safari/session/list`.",
             "minLength": 1
           }
         },
@@ -51228,7 +51326,7 @@
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "Target session ID."
+            "description": "Target session ID, from the list returned by `POST /safari/session/list`."
           },
           "include_subagents": {
             "type": "boolean",
@@ -51245,7 +51343,7 @@
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "Target session ID.",
+            "description": "Target session ID, from the list returned by `POST /safari/session/list`.",
             "minLength": 1
           },
           "share_token": {
@@ -51559,7 +51657,7 @@
           },
           "orderby": {
             "type": "string",
-            "description": "Sort field.",
+            "description": "Sort field: `created_at` by creation time, `updated_at` by last update; defaults to `updated_at` when omitted.",
             "enum": [
               "created_at",
               "updated_at"
@@ -51567,7 +51665,7 @@
           },
           "asc": {
             "type": "boolean",
-            "description": "Ascending order when true; applies only when `orderby` is set."
+            "description": "Ascending order when true, descending when false; also applies when `orderby` is omitted (sorted by `updated_at`)."
           },
           "include_subagent_sessions": {
             "type": "boolean",
@@ -51687,7 +51785,7 @@
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Target skill ID."
+            "description": "Target skill ID, from the list returned by `POST /safari/skill/list`."
           }
         },
         "required": [
@@ -51700,7 +51798,7 @@
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Target skill ID."
+            "description": "Target skill ID, from the list returned by `POST /safari/skill/list`."
           }
         },
         "required": [
@@ -51911,7 +52009,7 @@
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Target skill ID."
+            "description": "Target skill ID, from the list returned by `POST /safari/skill/list`."
           }
         },
         "required": [
@@ -51924,7 +52022,7 @@
         "properties": {
           "skill_id": {
             "type": "string",
-            "description": "Target skill ID."
+            "description": "Target skill ID, from the list returned by `POST /safari/skill/list`."
           },
           "description": {
             "type": "string",
@@ -51988,7 +52086,7 @@
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "RUM session ID."
+            "description": "RUM session ID (the `session.id` attribute on RUM events)."
           },
           "ts": {
             "type": "integer",
@@ -52175,7 +52273,7 @@
         "properties": {
           "session_id": {
             "type": "string",
-            "description": "RUM session ID."
+            "description": "RUM session ID (the `session.id` attribute on RUM events)."
           },
           "view_id": {
             "type": "string",
@@ -53044,7 +53142,7 @@
               "success",
               "failed"
             ],
-            "description": "Synchronization status filter."
+            "description": "Filter by sync status: `success` or `failed`."
           },
           "channel_ids": {
             "type": "array",
@@ -53090,7 +53188,7 @@
           },
           "search_after_ctx": {
             "type": "string",
-            "description": "Cursor returned by the previous page."
+            "description": "Pagination cursor: leave empty for the first page, then pass the `search_after_ctx` returned by the previous response."
           }
         }
       },
@@ -53566,7 +53664,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Restrict results to one item type."
+            "description": "Filter by work item type: `action` action item, `follow_up` post-mortem follow-up."
           },
           "assignee_id": {
             "type": "integer",
@@ -55771,7 +55869,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "p": {
             "type": "integer",
@@ -55957,7 +56055,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           }
         }
       },
@@ -56037,7 +56135,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "rule_name": {
             "type": "string",
@@ -56052,7 +56150,7 @@
           },
           "filters": {
             "$ref": "#/components/schemas/RumErrorIngestionOrFilters",
-            "description": "Filter conditions the rule matches errors against."
+            "description": "Filter conditions (OR-of-ANDs) to match errors; matched errors are dropped and not ingested."
           }
         }
       },
@@ -56084,11 +56182,11 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "rule_id": {
             "type": "string",
-            "description": "Rule ID."
+            "description": "Rule ID. Get rule IDs via `POST /rum/error-ingestion/rules/list`."
           }
         }
       },
@@ -56102,11 +56200,11 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "version": {
             "type": "integer",
-            "description": "History version number to revert to.",
+            "description": "History version number to revert to. Get versions via `POST /rum/error-ingestion/rules/history/list`.",
             "minimum": 1
           }
         }
@@ -56121,11 +56219,11 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "rule_id": {
             "type": "string",
-            "description": "Rule ID to update."
+            "description": "Rule ID to update. Get rule IDs via `POST /rum/error-ingestion/rules/list`."
           },
           "rule_name": {
             "type": [
@@ -56279,7 +56377,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           }
         }
       },
@@ -56310,7 +56408,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "rule_name": {
             "type": "string",
@@ -56376,11 +56474,11 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "rule_id": {
             "type": "string",
-            "description": "Rule ID to update."
+            "description": "Rule ID to update. Get rule IDs via `POST /rum/issue/preset-severity/rules/list`."
           },
           "rule_name": {
             "type": [
@@ -56433,11 +56531,11 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "rule_id": {
             "type": "string",
-            "description": "Rule ID."
+            "description": "Rule ID. Get rule IDs via `POST /rum/issue/preset-severity/rules/list`."
           }
         }
       },
@@ -56452,11 +56550,11 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "drag_rule_id": {
             "type": "string",
-            "description": "ID of the rule being moved."
+            "description": "ID of the rule being moved. Get rule IDs via `POST /rum/issue/preset-severity/rules/list`."
           },
           "target_rule_id": {
             "type": "string",
@@ -56473,7 +56571,7 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "p": {
             "type": "integer",
@@ -56682,12 +56780,12 @@
         "properties": {
           "application_id": {
             "type": "string",
-            "description": "RUM application ID."
+            "description": "RUM application ID. Get application IDs via `POST /rum/application/list`."
           },
           "version": {
             "type": "integer",
             "minimum": 1,
-            "description": "Version number of the snapshot to revert to."
+            "description": "Snapshot version number to revert to. Get versions via `POST /rum/issue/preset-severity/rules/history/list`."
           }
         }
       },
