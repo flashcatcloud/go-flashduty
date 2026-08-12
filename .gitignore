@@ -6,3 +6,7 @@
 
 # stray binary from `go build ./internal/cmd/gen` at repo root
 /gen
+
+# Local-only scratch: editor/agent state and working notes
+docs/superpowers/
+.claude/
