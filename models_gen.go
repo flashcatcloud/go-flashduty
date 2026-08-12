@@ -1062,6 +1062,8 @@ type AssignedTo struct {
 	ID string `json:"id,omitempty" toon:"id,omitempty"`
 	// Current level index within the escalation rule.
 	LayerIdx int64 `json:"layer_idx,omitempty" toon:"layer_idx,omitempty"`
+	// Override the notification channels used for this assignment.
+	Notify AssignedToNotify `json:"notify,omitzero" toon:"notify,omitempty"`
 	// Member IDs to assign directly.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
 	// Assignment type: `assign` direct assignment, `reassign` reassignment, `escalate` escalation-rule driven, `reopen` automatic reassignment on reopen.
@@ -2945,6 +2947,8 @@ type FeedDetailIncidentAssign struct {
 	ID string `json:"id" toon:"id"`
 	// Current level index within the escalation rule.
 	LayerIdx int64 `json:"layer_idx" toon:"layer_idx"`
+	// Override the notification channels used for this assignment.
+	Notify FeedDetailIncidentAssignNotify `json:"notify" toon:"notify"`
 	// Member IDs to assign directly.
 	PersonIDs []int64 `json:"person_ids" toon:"person_ids"`
 	// Member IDs that received the assignment.
@@ -9938,8 +9942,8 @@ type AccountInfoRestrictions struct {
 
 // AddIncidentResponderRequestNotify is generated from the Flashduty OpenAPI schema.
 type AddIncidentResponderRequestNotify struct {
-	// When true, fall back to each responder's personal preference.
-	FollowPreference bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
+	// When false, use `personal_channels`; when true or omitted, use each responder's personal preference.
+	FollowPreference *bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
 	// Channels to use (e.g. `voice`, `sms`, `email`).
 	PersonalChannels []string `json:"personal_channels,omitempty" toon:"personal_channels,omitempty"`
 	// Notification template ID (MongoDB ObjectID).
@@ -9964,6 +9968,16 @@ type AlertRuleInfoResponseEnabledTimesItem struct {
 	Etime string `json:"etime" toon:"etime"`
 	// Start time, e.g. `09:00`.
 	Stime string `json:"stime" toon:"stime"`
+}
+
+// AssignedToNotify is generated from the Flashduty OpenAPI schema.
+type AssignedToNotify struct {
+	// When false, use `personal_channels`; when true or omitted, use each responder's personal preference.
+	FollowPreference *bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
+	// Channels to use (e.g. `voice`, `sms`, `email`).
+	PersonalChannels []string `json:"personal_channels,omitempty" toon:"personal_channels,omitempty"`
+	// Notification template ID (MongoDB ObjectID).
+	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
 }
 
 // AuditLogParamsItem is generated from the Flashduty OpenAPI schema.
@@ -10214,6 +10228,16 @@ type EscalateTargetWebhooksItem struct {
 	Settings map[string]any `json:"settings" toon:"settings"`
 	// Webhook type (e.g. `feishu`, `dingtalk_app`, `wecom_app`, `slack`, `teams`, `custom`).
 	Type string `json:"type" toon:"type"`
+}
+
+// FeedDetailIncidentAssignNotify is generated from the Flashduty OpenAPI schema.
+type FeedDetailIncidentAssignNotify struct {
+	// When false, use `personal_channels`; when true or omitted, use each responder's personal preference.
+	FollowPreference bool `json:"follow_preference" toon:"follow_preference"`
+	// Channels to use (e.g. `voice`, `sms`, `email`).
+	PersonalChannels []string `json:"personal_channels" toon:"personal_channels"`
+	// Notification template ID (MongoDB ObjectID).
+	TemplateID string `json:"template_id" toon:"template_id"`
 }
 
 // FieldDeleteReferenceErrorData is generated from the Flashduty OpenAPI schema.
@@ -10512,8 +10536,8 @@ type CreateEscalationRuleRequestLayersItemTarget struct {
 
 // CreateIncidentRequestAssignedToNotify is generated from the Flashduty OpenAPI schema.
 type CreateIncidentRequestAssignedToNotify struct {
-	// When true, fall back to each responder's personal preference.
-	FollowPreference bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
+	// When false, use `personal_channels`; when true or omitted, use each responder's personal preference.
+	FollowPreference *bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
 	// Channels to use (e.g. `voice`, `sms`, `email`).
 	PersonalChannels []string `json:"personal_channels,omitempty" toon:"personal_channels,omitempty"`
 	// Notification template ID (MongoDB ObjectID).
