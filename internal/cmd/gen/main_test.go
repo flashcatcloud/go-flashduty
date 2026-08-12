@@ -200,6 +200,25 @@ func TestEmitStructRequiredNullableRequestScalarOmitsNil(t *testing.T) {
 	}
 }
 
+func TestEmitStructOptionalNullableRequestBoolPreservesFalse(t *testing.T) {
+	g := newTestGen(map[string]any{})
+	g.reqGoNames["NotifyRequest"] = true
+
+	schema := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"follow_preference": map[string]any{
+				"type": []any{"boolean", "null"},
+			},
+		},
+	}
+
+	src := g.emitStruct("NotifyRequest", schema)
+	if !strings.Contains(src, `FollowPreference *bool `+"`"+`json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`+"`") {
+		t.Fatalf("optional nullable request bool must preserve explicit false; got:\n%s", src)
+	}
+}
+
 func TestMergeAllOfKeepsRequiredRequestFields(t *testing.T) {
 	g := newTestGen(map[string]any{
 		"BaseRequest": map[string]any{

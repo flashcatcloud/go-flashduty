@@ -31156,8 +31156,11 @@
                 "description": "Override the notification channels used for this assignment.",
                 "properties": {
                   "follow_preference": {
-                    "type": "boolean",
-                    "description": "When true, fall back to each responder's personal preference."
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "When false, use `personal_channels`; when true or omitted, use each responder's personal preference."
                   },
                   "personal_channels": {
                     "type": "array",
@@ -31255,6 +31258,31 @@
             "minItems": 1,
             "maxItems": 100,
             "description": "Email recipients, used by integrations such as ServiceNow."
+          },
+          "notify": {
+            "type": "object",
+            "description": "Override the notification channels used for this assignment.",
+            "properties": {
+              "follow_preference": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "When false, use `personal_channels`; when true or omitted, use each responder's personal preference."
+              },
+              "personal_channels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Channels to use (e.g. `voice`, `sms`, `email`)."
+              },
+              "template_id": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{24}$",
+                "description": "Notification template ID (MongoDB ObjectID)."
+              }
+            }
           },
           "escalate_rule_name": {
             "type": "string",
@@ -33632,8 +33660,11 @@
             "description": "Optional notification override. Defaults to following each person's personal preference.",
             "properties": {
               "follow_preference": {
-                "type": "boolean",
-                "description": "When true, fall back to each responder's personal preference."
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "When false, use `personal_channels`; when true or omitted, use each responder's personal preference."
               },
               "personal_channels": {
                 "type": "array",

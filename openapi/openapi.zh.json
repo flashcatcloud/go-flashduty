@@ -31148,8 +31148,11 @@
                 "description": "为本次指派覆盖的通知渠道。",
                 "properties": {
                   "follow_preference": {
-                    "type": "boolean",
-                    "description": "为 true 时跟随处理人员的个人偏好。"
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "为 false 时使用 `personal_channels`；为 true 或省略时跟随处理人员的个人偏好。"
                   },
                   "personal_channels": {
                     "type": "array",
@@ -31247,6 +31250,31 @@
             "minItems": 1,
             "maxItems": 100,
             "description": "邮箱接收人列表，用于 ServiceNow 等外部系统。"
+          },
+          "notify": {
+            "type": "object",
+            "description": "为本次指派覆盖通知渠道。",
+            "properties": {
+              "follow_preference": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "为 false 时使用 `personal_channels`；为 true 或省略时跟随处理人员的个人偏好。"
+              },
+              "personal_channels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "使用的通知渠道（如 `voice`、`sms`、`email`）。"
+              },
+              "template_id": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{24}$",
+                "description": "通知模板 ID（MongoDB ObjectID）。"
+              }
+            }
           },
           "escalate_rule_name": {
             "type": "string",
@@ -33623,8 +33651,11 @@
             "description": "通知配置，默认跟随每人的个人通知偏好。",
             "properties": {
               "follow_preference": {
-                "type": "boolean",
-                "description": "为 true 时跟随处理人员的个人偏好。"
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "为 false 时使用 `personal_channels`；为 true 或省略时跟随处理人员的个人偏好。"
               },
               "personal_channels": {
                 "type": "array",

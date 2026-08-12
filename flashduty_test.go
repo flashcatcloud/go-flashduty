@@ -2,6 +2,7 @@ package flashduty
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -130,6 +131,114 @@ func TestResetPostMortemContentSendsZeroExpectedRevision(t *testing.T) {
 	body, _ = io.ReadAll(req.Body)
 	if strings.Contains(string(body), `"expected_revision"`) {
 		t.Fatalf("nil ExpectedRevision must be omitted from the wire, got body = %s", body)
+	}
+}
+
+func TestIncidentNotificationOverridePreservesExplicitFalse(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+
+	tests := []struct {
+		name       string
+		path       string
+		body       any
+		notifyPath []string
+	}{
+		{
+			name: "create incident",
+			path: "/incident/create",
+			body: &CreateIncidentRequest{
+				IncidentSeverity: "Critical",
+				AssignedTo: CreateIncidentRequestAssignedTo{
+					PersonIDs: []int64{1},
+					Notify: CreateIncidentRequestAssignedToNotify{
+						FollowPreference: Bool(false),
+						PersonalChannels: []string{"sms"},
+					},
+				},
+			},
+			notifyPath: []string{"assigned_to", "notify"},
+		},
+		{
+			name: "add responder",
+			path: "/incident/responder/add",
+			body: &AddIncidentResponderRequest{
+				IncidentID: "0123456789abcdef01234567",
+				PersonIDs:  []int64{1},
+				Notify: AddIncidentResponderRequestNotify{
+					FollowPreference: Bool(false),
+					PersonalChannels: []string{"sms"},
+				},
+			},
+			notifyPath: []string{"notify"},
+		},
+		{
+			name: "assign incident",
+			path: "/incident/assign",
+			body: &AssignIncidentRequest{
+				IncidentID: "0123456789abcdef01234567",
+				AssignedTo: AssignedTo{
+					PersonIDs: []int64{1},
+					Notify: AssignedToNotify{
+						FollowPreference: Bool(false),
+						PersonalChannels: []string{"sms"},
+					},
+				},
+			},
+			notifyPath: []string{"assigned_to", "notify"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := c.newRequest(context.Background(), http.MethodPost, tt.path, tt.body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			var payload map[string]any
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Fatal(err)
+			}
+			notify := payload
+			for _, key := range tt.notifyPath {
+				value, ok := notify[key].(map[string]any)
+				if !ok {
+					t.Fatalf("%s is missing from request body: %s", key, body)
+				}
+				notify = value
+			}
+			follow, ok := notify["follow_preference"]
+			if !ok || follow != false {
+				t.Fatalf("follow_preference = %#v, present = %t, body = %s", follow, ok, body)
+			}
+		})
+	}
+}
+
+func TestIncidentNotificationOverrideOmitsUnsetPreference(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+	req, err := c.newRequest(context.Background(), http.MethodPost, "/incident/create", &CreateIncidentRequest{
+		IncidentSeverity: "Critical",
+		AssignedTo: CreateIncidentRequestAssignedTo{
+			PersonIDs: []int64{1},
+			Notify: CreateIncidentRequestAssignedToNotify{
+				PersonalChannels: []string{"sms"},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(body), `"follow_preference"`) {
+		t.Fatalf("nil FollowPreference must be omitted from the wire, got body = %s", body)
 	}
 }
 
