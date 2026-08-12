@@ -38505,9 +38505,12 @@
         ],
         "properties": {
           "advance_in_time": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
-            "description": "提前通知时间（秒）。"
+            "description": "提前通知时间（秒）；为 `0` 时在排班开始时通知；不传则不发送提前通知。"
           },
           "fixed_time": {
             "$ref": "#/components/schemas/ScheduleFixedTimeNotifyInfo"
@@ -39453,7 +39456,7 @@
           "wecom",
           "feishu",
           "feishu_app",
-          "feishu_app_card_table_enabled",
+          "feishu_app_card_v2_table_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -39520,7 +39523,7 @@
             "type": "string",
             "description": "飞书应用消息模板源。"
           },
-          "feishu_app_card_table_enabled": {
+          "feishu_app_card_v2_table_enabled": {
             "type": "boolean",
             "description": "是否在飞书应用卡片中以表格渲染告警标签。"
           },
@@ -39745,7 +39748,7 @@
             "type": "string",
             "description": "飞书应用消息模板源。"
           },
-          "feishu_app_card_table_enabled": {
+          "feishu_app_card_v2_table_enabled": {
             "type": "boolean",
             "default": false,
             "description": "是否在飞书应用卡片中以表格渲染告警标签，默认关闭。"
@@ -39863,7 +39866,7 @@
             "type": "string",
             "description": "飞书应用消息模板源。"
           },
-          "feishu_app_card_table_enabled": {
+          "feishu_app_card_v2_table_enabled": {
             "type": [
               "boolean",
               "null"
@@ -44511,7 +44514,10 @@
         "description": "应用的告警配置。",
         "properties": {
           "enabled": {
-            "type": "boolean",
+            "type": [
+              "boolean",
+              "null"
+            ],
             "description": "是否启用告警。"
           },
           "channel_ids": {
@@ -44892,16 +44898,25 @@
             "description": "应用所属团队 ID，可通过 `POST /team/list` 获取；不传则保持不变。"
           },
           "is_private": {
-            "type": "boolean",
-            "description": "是否仅限所属团队成员访问；不传则保持不变。"
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "是否仅限所属团队成员访问；`false` 显式改为公开访问；不传则保持不变。"
           },
           "no_ip": {
-            "type": "boolean",
-            "description": "为 `true` 时停止采集用户 IP 地址；不传则保持不变。"
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "为 `true` 时停止采集用户 IP 地址，为 `false` 时恢复采集；不传则保持不变。"
           },
           "no_geo": {
-            "type": "boolean",
-            "description": "为 `true` 时不再基于 IP 推断地理位置；不传则保持不变。"
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "为 `true` 时不再基于 IP 推断地理位置，为 `false` 时恢复推断；不传则保持不变。"
           },
           "alerting": {
             "$ref": "#/components/schemas/RumApplicationAlerting",
@@ -49772,8 +49787,11 @@
             "description": "按 RUM 数据 scope 过滤。合法值：`session`、`view`、`action`、`error`、`resource`、`long_task`、`vital`、`issue`、`sourcemap`。"
           },
           "is_facet": {
-            "type": "boolean",
-            "description": "为 true 时只返回支持分面查询的字段；为 false 或不传时返回所有字段。"
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "不传或为 `null` 时返回所有字段；为 `true` 时只返回支持分面查询的字段；为 `false` 时只返回不支持分面查询的字段。"
           }
         }
       },

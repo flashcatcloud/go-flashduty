@@ -426,3 +426,168 @@ func TestDoReturnsRateLimitErrorOn429(t *testing.T) {
 		t.Fatalf("Response.RateLimit not populated: %+v", resp.RateLimit)
 	}
 }
+
+// lookup walks a decoded JSON body along path and reports the value at the end
+// of it, plus whether every segment existed.
+func lookup(payload map[string]any, path ...string) (any, bool) {
+	var cur any = payload
+	for _, key := range path {
+		obj, ok := cur.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		cur, ok = obj[key]
+		if !ok {
+			return nil, false
+		}
+	}
+	return cur, true
+}
+
+// Fields whose zero value carries meaning are generated as pointers so the
+// caller can send it. Sending the zero value must put the key on the wire.
+func TestNullableRequestFieldsSendExplicitZero(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+
+	tests := []struct {
+		name string
+		path string
+		body any
+		at   []string
+		want any
+	}{
+		{
+			name: "rum application update clears is_private",
+			path: "/rum/application/update",
+			body: &RUMApplicationUpdateRequest{ApplicationID: "app-1", IsPrivate: Bool(false)},
+			at:   []string{"is_private"},
+			want: false,
+		},
+		{
+			name: "rum application update re-enables geo inference",
+			path: "/rum/application/update",
+			body: &RUMApplicationUpdateRequest{ApplicationID: "app-1", NoGeo: Bool(false)},
+			at:   []string{"no_geo"},
+			want: false,
+		},
+		{
+			name: "rum application update re-enables ip collection",
+			path: "/rum/application/update",
+			body: &RUMApplicationUpdateRequest{ApplicationID: "app-1", NoIP: Bool(false)},
+			at:   []string{"no_ip"},
+			want: false,
+		},
+		{
+			// A minimal alerting override is entirely zero-valued apart from
+			// Enabled; the pointer keeps the omitzero container on the wire.
+			name: "rum application update disables alerting",
+			path: "/rum/application/update",
+			body: &RUMApplicationUpdateRequest{ApplicationID: "app-1", Alerting: RUMApplicationAlerting{Enabled: Bool(false)}},
+			at:   []string{"alerting", "enabled"},
+			want: false,
+		},
+		{
+			name: "rum field list selects non-facet fields",
+			path: "/rum/field/list",
+			body: &RUMFieldListRequest{IsFacet: Bool(false)},
+			at:   []string{"is_facet"},
+			want: false,
+		},
+		{
+			name: "schedule notifies exactly at shift start",
+			path: "/schedule/create",
+			body: &ScheduleUpsertRequest{Notify: ScheduleNotify{AdvanceInTime: Int64(0)}},
+			at:   []string{"notify", "advance_in_time"},
+			want: float64(0),
+		},
+		{
+			name: "template update turns the feishu card table off",
+			path: "/template/update",
+			body: &TemplateUpdateRequest{TemplateID: "t-1", TemplateName: "t", FeishuAppCardV2TableEnabled: Bool(false)},
+			at:   []string{"feishu_app_card_v2_table_enabled"},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := c.newRequest(context.Background(), http.MethodPost, tt.path, tt.body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var payload map[string]any
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Fatal(err)
+			}
+			got, ok := lookup(payload, tt.at...)
+			if !ok {
+				t.Fatalf("%s missing from request body: %s", strings.Join(tt.at, "."), body)
+			}
+			if got != tt.want {
+				t.Fatalf("%s = %#v, want %#v, body = %s", strings.Join(tt.at, "."), got, tt.want, body)
+			}
+		})
+	}
+}
+
+// A nil pointer must stay off the wire so the server leaves the field alone.
+func TestNullableRequestFieldsOmitUnsetValues(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+
+	tests := []struct {
+		name    string
+		path    string
+		body    any
+		absent  []string
+		present []string
+	}{
+		{
+			name:    "rum application update leaves privacy toggles alone",
+			path:    "/rum/application/update",
+			body:    &RUMApplicationUpdateRequest{ApplicationID: "app-1", ApplicationName: "renamed"},
+			absent:  []string{`"is_private"`, `"no_geo"`, `"no_ip"`, `"alerting"`},
+			present: []string{`"application_name":"renamed"`},
+		},
+		{
+			name:    "rum field list returns every field",
+			path:    "/rum/field/list",
+			body:    &RUMFieldListRequest{Scopes: []string{"session"}},
+			absent:  []string{`"is_facet"`},
+			present: []string{`"scopes"`},
+		},
+		{
+			name:    "template update leaves the feishu card table alone",
+			path:    "/template/update",
+			body:    &TemplateUpdateRequest{TemplateID: "t-1", TemplateName: "t"},
+			absent:  []string{`"feishu_app_card_v2_table_enabled"`},
+			present: []string{`"template_id":"t-1"`},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := c.newRequest(context.Background(), http.MethodPost, tt.path, tt.body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, key := range tt.absent {
+				if strings.Contains(string(body), key) {
+					t.Fatalf("unset %s must be omitted from the wire, got body = %s", key, body)
+				}
+			}
+			for _, key := range tt.present {
+				if !strings.Contains(string(body), key) {
+					t.Fatalf("%s missing from request body: %s", key, body)
+				}
+			}
+		})
+	}
+}

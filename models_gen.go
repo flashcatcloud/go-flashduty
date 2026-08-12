@@ -6259,7 +6259,7 @@ type RUMApplicationAlerting struct {
 	// Channel IDs to send alerts to.
 	ChannelIDs []int64 `json:"channel_ids,omitempty" toon:"channel_ids,omitempty"`
 	// Whether alerting is enabled.
-	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	// Associated on-call integration ID (read-only, auto-assigned).
 	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
 }
@@ -6414,14 +6414,14 @@ type RUMApplicationUpdateRequest struct {
 	ApplicationID string `json:"application_id" toon:"application_id"`
 	// New application name, 1–40 characters. Omit to leave unchanged.
 	ApplicationName string `json:"application_name,omitempty" toon:"application_name,omitempty"`
-	// Restrict access to members of the owning team. Omit to leave unchanged.
-	IsPrivate bool `json:"is_private,omitempty" toon:"is_private,omitempty"`
+	// Restrict access to members of the owning team; `false` explicitly makes the application public. Omit to leave unchanged.
+	IsPrivate *bool `json:"is_private,omitempty" toon:"is_private,omitempty"`
 	// External-link integration configuration. Omit to leave unchanged.
 	Links RUMApplicationLinks `json:"links,omitzero" toon:"links,omitempty"`
-	// When `true`, stop inferring geographic location from IP. Omit to leave unchanged.
-	NoGeo bool `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
-	// When `true`, stop collecting user IP addresses. Omit to leave unchanged.
-	NoIP bool `json:"no_ip,omitempty" toon:"no_ip,omitempty"`
+	// When `true`, stop inferring geographic location from IP; when `false`, resume inferring it. Omit to leave unchanged.
+	NoGeo *bool `json:"no_geo,omitempty" toon:"no_geo,omitempty"`
+	// When `true`, stop collecting user IP addresses; when `false`, resume collecting them. Omit to leave unchanged.
+	NoIP *bool `json:"no_ip,omitempty" toon:"no_ip,omitempty"`
 	// Owning team ID. Get team IDs via `POST /team/list`. Omit to leave unchanged.
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	// APM tracing integration configuration. Omit to leave unchanged.
@@ -6732,8 +6732,8 @@ type RUMFieldItem struct {
 
 // RUMFieldListRequest is generated from the Flashduty OpenAPI schema.
 type RUMFieldListRequest struct {
-	// When true, return only facet-enabled fields. When false or omitted, return all fields.
-	IsFacet bool `json:"is_facet,omitempty" toon:"is_facet,omitempty"`
+	// When omitted or `null`, return all fields. When `true`, return only facet-enabled fields. When `false`, return only fields that are not facet-enabled.
+	IsFacet *bool `json:"is_facet,omitempty" toon:"is_facet,omitempty"`
 	// Filter by RUM data scopes. Valid values: `session`, `view`, `action`, `error`, `resource`, `long_task`, `vital`, `issue`, `sourcemap`.
 	Scopes []string `json:"scopes,omitempty" toon:"scopes,omitempty"`
 }
@@ -7462,8 +7462,8 @@ type ScheduleMember struct {
 
 // ScheduleNotify is generated from the Flashduty OpenAPI schema.
 type ScheduleNotify struct {
-	// Advance notification lead time (seconds).
-	AdvanceInTime int64                       `json:"advance_in_time,omitempty" toon:"advance_in_time,omitempty"`
+	// Advance notification lead time in seconds. `0` notifies exactly at shift start; omitting disables advance notification.
+	AdvanceInTime *int64                      `json:"advance_in_time,omitempty" toon:"advance_in_time,omitempty"`
 	By            ScheduleNotifyBy            `json:"by" toon:"by"`
 	FixedTime     ScheduleFixedTimeNotifyInfo `json:"fixed_time" toon:"fixed_time"`
 	// Legacy IM-type to token map.
@@ -9094,7 +9094,7 @@ type TemplateCreateRequest struct {
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
 	// Render alert labels as a table in Feishu app cards.
-	FeishuAppCardTableEnabled bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
+	FeishuAppCardV2TableEnabled bool `json:"feishu_app_card_v2_table_enabled,omitempty" toon:"feishu_app_card_v2_table_enabled,omitempty"`
 	// Incident card fields hidden per IM app type.
 	IncidentCardHiddenFields IncidentCardHiddenFields `json:"incident_card_hidden_fields,omitempty" toon:"incident_card_hidden_fields,omitempty"`
 	// Slack robot message template source.
@@ -9158,8 +9158,8 @@ type TemplateItem struct {
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app" toon:"feishu_app"`
 	// Whether alert labels use table rendering in Feishu app cards.
-	FeishuAppCardTableEnabled bool                     `json:"feishu_app_card_table_enabled" toon:"feishu_app_card_table_enabled"`
-	IncidentCardHiddenFields  IncidentCardHiddenFields `json:"incident_card_hidden_fields" toon:"incident_card_hidden_fields"`
+	FeishuAppCardV2TableEnabled bool                     `json:"feishu_app_card_v2_table_enabled" toon:"feishu_app_card_v2_table_enabled"`
+	IncidentCardHiddenFields    IncidentCardHiddenFields `json:"incident_card_hidden_fields" toon:"incident_card_hidden_fields"`
 	// Slack robot message template source.
 	Slack string `json:"slack" toon:"slack"`
 	// Slack app message template source.
@@ -9233,7 +9233,7 @@ type TemplateUpdateRequest struct {
 	// Feishu app message template source.
 	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
 	// When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting.
-	FeishuAppCardTableEnabled *bool `json:"feishu_app_card_table_enabled,omitempty" toon:"feishu_app_card_table_enabled,omitempty"`
+	FeishuAppCardV2TableEnabled *bool `json:"feishu_app_card_v2_table_enabled,omitempty" toon:"feishu_app_card_v2_table_enabled,omitempty"`
 	// Incident card fields hidden per IM app type.
 	IncidentCardHiddenFields IncidentCardHiddenFields `json:"incident_card_hidden_fields,omitempty" toon:"incident_card_hidden_fields,omitempty"`
 	// Slack robot message template source.
