@@ -17506,7 +17506,7 @@
           "平台/成员管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **成员管理**（`organization`） |",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **成员管理**（`organization`） |\n\n## 使用说明\n\n- `country_code` 必须是 ISO 3166-1 alpha-2 地区代码（如 \"CN\"）；写入前校验并统一转为大写，非法值返回 400。\n- 当成员的 `phone` 不带 \"+\" 前缀时，按该成员的 `country_code` 作为地区提示解析（未传时默认 \"CN\"）。",
           "href": "/zh/api-reference/platform/members/member-invite",
           "metadata": {
             "sidebarTitle": "邀请成员"
@@ -17576,6 +17576,13 @@
                     "role_ids": [
                       6
                     ]
+                  },
+                  {
+                    "member_name": "Dave",
+                    "phone": "13800138000",
+                    "country_code": "CN",
+                    "locale": "zh-CN",
+                    "time_zone": "Asia/Shanghai"
                   }
                 ]
               }
@@ -17813,7 +17820,7 @@
           "平台/成员管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 使用 `member_id`、`member_name`、`email`、`phone` 或 `ref_id` 中任一字段定位成员；如果同时传多个字段，服务端按上述顺序匹配。\n- 使用 `phone` 定位或更新手机号时，可同时传 `country_code` 辅助解析。\n- `updates` 承载要写入的新资料，支持 `member_name`、`password`、`phone`、`country_code`、`email`、`avatar`、`locale`、`time_zone`、`ref_id`。\n- 由 SSO 托管且不可编辑的成员不能通过此接口修改。\n- `updates` 至少要带一个字段；所有字段都不传的空对象会被拒绝。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 使用 `member_id`、`member_name`、`email`、`phone` 或 `ref_id` 中任一字段定位成员；如果同时传多个字段，服务端按上述顺序匹配。\n- `updates.country_code` 为 ISO 3166-1 alpha-2 地区代码（如 \"CN\"、\"US\"）。它是独立可更新字段：无需同时传 `updates.phone`，即使手机号不变也会写入新的地区代码；显式传空字符串会被拒绝（400）。\n- 当 `updates.phone` 不带 \"+\" 前缀时，按 `updates.country_code` 作为地区提示解析；未传时依次回退到成员已存的地区代码、默认值 \"CN\"。\"86\" 等数字电话区号仅在解析场景兼容，存储值一律为 ISO 地区代码。\n- 顶层的 `country_code` 仅作为定位用 `phone` 的解析提示，不会被存储。\n- `updates` 承载要写入的新资料，支持 `member_name`、`password`、`phone`、`country_code`、`email`、`avatar`、`locale`、`time_zone`、`ref_id`。\n- 由 SSO 托管且不可编辑的成员不能通过此接口修改。\n- `updates` 至少要带一个字段；所有字段都不传的空对象会被拒绝。",
           "href": "/zh/api-reference/platform/members/member-reset-info",
           "metadata": {
             "sidebarTitle": "重置成员信息"
@@ -19821,16 +19828,140 @@
         }
       }
     },
-    "/monit/query/rows": {
+    "/monit/query/data": {
       "post": {
-        "operationId": "monit-read-query-rows",
-        "summary": "查询数据源原始行",
-        "description": "对已配置的数据源执行同步即席查询并返回原始行。供 Flashduty AI SRE 及 UI 预览使用。请求通过 WebSocket 转发至 monit-edge,由其对底层数据源(Prometheus / Loki / VictoriaLogs / SLS / MySQL / Postgres / Oracle / ClickHouse / Elasticsearch)执行查询。",
+        "operationId": "monit-read-query-data",
+        "summary": "查询结构化数据",
+        "description": "对已配置的数据源执行同步即席查询，并返回稳定的 `query_result.v1` 结果；结果会按自然语义呈现为 frames、records 或 samples。此公开接口要求 monit-edge v0.65.0 或更高版本。",
         "tags": [
           "Monitors/诊断分析"
         ],
         "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **600 次/分钟**;**10 次/秒** 每账户 |\n| 权限 | 任意有效的 `app_key`(只读;不受特定权限分类约束) |\n\n## 使用说明\n\n- 请求通过 WebSocket 转发至 `monit-edge`;`ds_type` + `ds_name` 指定的数据源必须已在调用方账户下存在。\n- 请求体中的 `account_id` 为可选;若提供,必须与已认证账户一致,否则拒绝。\n- 请求参数校验失败使用标准错误信封返回。`monit-edge` 拒绝查询时,原始 `{\"error\": {\"code\": ..., \"message\": ...}}` 响应体会被保留,HTTP 状态码与边缘错误码一致;无效或缺失的错误码按 HTTP 500 返回。请同时检查 HTTP 状态与错误体。\n- monit-edge 强制行数上限;过大结果集会返回 `error.message = \"too many rows\"`。请收窄时间范围或在数据源端聚合。\n- `args` 是一个多态 `string→string` 映射,原样转发。语义取决于 `ds_type`(SLS 需要 `sls.project` + `sls.logstore`;Loki / VictoriaLogs 原始模式需要通过 `*.start`/`*.end` 或 `*.timespan.value`/`*.timespan.unit` 指定时间范围;Prometheus 与 SQL 类数据源忽略该字段)。各数据源的键列表见 monit-webapi query-api 文档。",
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | 每账户 **100 次/分钟**、**5 次/秒** |\n| 权限 | 任意有效的 `app_key`（只读，不受特定权限分类限制） |\n| Edge 版本要求 | 受支持的部署要求 **monit-edge v0.65.0 或更高版本** |\n\n## 使用说明\n\n- 此公开接口以 **monit-edge v0.65.0** 为最低受支持版本。迁移期间，WebAPI 仍保留旧版 Edge 适配器：query.v2 结果仍可能保留 frames、records 或 samples，而 legacy rows 只能提供其已保留的信息。这些适配器不会改变最低支持版本；旧协议缺少 query.v3 的取消和错误生命周期语义，legacy rows 已丢失的数据也无法恢复。\n- 公开响应格式固定为 `query_result.v1`，与 Edge 内部查询协议版本无关。必须根据 `result.kind`（`frames`、`records` 或 `samples`）分发结果，不要根据 `ds_type` 或 Edge 版本猜测结果形态。\n- `frames` 结果可以包含多个表格或时序 Frame。字段值按列组织，同一 Frame 中所有字段的值数量一致。\n- `records` 结果可以包含嵌套 JSON 和 null record。超出 JavaScript 安全整数范围的整数字面量会以十进制字符串返回。\n- `samples` 结果包含标签集合和瞬时值。值可以是数字，也可以是字符串 `NaN`、`+Inf` 或 `-Inf`。\n- 最终成功响应上限为 8 MiB，查询结果上限为 1,000 行。超限时请缩短时间范围、减少字段或在数据源侧聚合。\n- 查询失败使用非 2xx HTTP 状态码和标准错误 envelope。不要透明回退到已弃用的 `/monit/query/rows` 接口。\n- WebAPI 跨实例转发和 Edge 执行合计可能耗时 35 秒。客户端超时建议至少设为 40 秒，并在调用方放弃查询时向下传播取消信号。",
+          "href": "/zh/api-reference/monitors/diagnostics/monit-read-query-data",
+          "metadata": {
+            "sidebarTitle": "查询结构化数据"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryDataRequest"
+              },
+              "example": {
+                "ds_type": "prometheus",
+                "ds_name": "prod-prom",
+                "expr": "sum by (job) (rate(http_requests_total[5m]))",
+                "delay_seconds": 0,
+                "args": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/QueryDataResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "format": "query_result.v1",
+                    "result": {
+                      "kind": "samples",
+                      "samples": [
+                        {
+                          "labels": {
+                            "job": "api"
+                          },
+                          "value": 1.25
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "413": {
+            "description": "请求或最终响应超过大小限制。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "499": {
+            "description": "客户端已取消查询。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "description": "查询超时。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/query/rows": {
+      "post": {
+        "operationId": "monit-read-query-rows",
+        "summary": "查询数据源原始行",
+        "description": "已弃用。执行同步即席查询并返回历史扁平 rows 结构。现有调用方应迁移到 `/monit/query/data`；新接口会保留 frames、records 和 samples 的自然语义，不再把所有结果强制压成 legacy rows。",
+        "deprecated": true,
+        "tags": [
+          "Monitors/诊断分析"
+        ],
+        "x-mint": {
+          "content": "## 已弃用\n\n所有新集成请使用 [`POST /monit/query/data`](/zh/api-reference/monitors/diagnostics/monit-read-query-data)。本接口仅在现有前端和 AI SRE 调用方迁移期间保留。\n\n## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | 每账户 **100 次/分钟**、**5 次/秒** |\n| 权限 | 任意有效的 `app_key`（只读，不受特定权限分类限制） |\n\n## 使用说明\n\n- 请求通过 WebSocket 转发至 `monit-edge`；`ds_type` + `ds_name` 指定的数据源必须已存在于调用账户下。\n- 请求体中的 `account_id` 可选。若传入，必须与认证账户一致；不一致将被拒绝。\n- 参数校验失败使用标准错误 envelope。当 `monit-edge` 拒绝查询时，其 `{\"error\": {\"code\": ..., \"message\": ...}}` 响应体会被保留，HTTP 状态码与 Edge 错误码一致；错误码无效或缺失时返回 HTTP 500。请同时检查状态码和错误响应体。\n- monit-edge 强制行数上限；结果过多时返回 `error.message = \"too many rows\"`。请缩小时间范围或在数据源侧聚合。\n- `args` 是透传的多态 `string→string` 映射，语义取决于 `ds_type`（SLS 需要 `sls.project` + `sls.logstore`；Loki/VictoriaLogs 原始模式需要通过 `*.start`/`*.end` 或 `*.timespan.value`/`*.timespan.unit` 指定时间范围；Prometheus 和 SQL 数据源忽略该字段）。各数据源完整参数列表见 monit-webapi query-api 文档。",
           "href": "/zh/api-reference/monitors/diagnostics/monit-read-query-rows",
           "metadata": {
             "sidebarTitle": "查询数据源原始行"
@@ -21012,7 +21143,7 @@
                       "acme-corp"
                     ],
                     "phone": "138****8000",
-                    "country_code": "86",
+                    "country_code": "CN",
                     "email": "ops@acme.example",
                     "avatar": "https://cdn.flashcat.cloud/avatar/acme.png",
                     "locale": "zh-CN",
@@ -26162,7 +26293,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -45495,7 +45626,7 @@
           },
           "country_code": {
             "type": "string",
-            "description": "手机国家区号"
+            "description": "成员联系手机的 ISO 3166-1 alpha-2 地区代码（如 \"CN\"、\"US\"、\"HK\"）。"
           },
           "avatar": {
             "type": "string",
@@ -45600,7 +45731,7 @@
           },
           "country_code": {
             "type": "string",
-            "description": "手机国家区号"
+            "description": "成员联系手机的 ISO 3166-1 alpha-2 地区代码（如 \"CN\"、\"US\"、\"HK\"）。"
           },
           "phone": {
             "type": "string",
@@ -45715,7 +45846,7 @@
           },
           "country_code": {
             "type": "string",
-            "description": "国家区号，配合 phone 使用"
+            "description": "当 `phone` 不带 \"+\" 前缀时的解析地区提示 —— ISO 3166-1 alpha-2 地区代码（如 \"CN\"，未传时默认 \"CN\"）。此解析场景仍兼容 \"86\" 等数字电话区号。"
           },
           "ref_id": {
             "type": "string",
@@ -45748,7 +45879,7 @@
           },
           "country_code": {
             "type": "string",
-            "description": "国家区号"
+            "description": "`phone` 的 ISO 3166-1 alpha-2 地区代码（如 \"CN\"）；写入前校验并统一转为大写，非法值返回 400。当 `phone` 不带 \"+\" 前缀时兼作解析提示（未传时默认 \"CN\"）。"
           },
           "role_ids": {
             "type": "array",
@@ -45945,7 +46076,7 @@
           },
           "country_code": {
             "type": "string",
-            "description": "手机号对应的国家或地区区号，用于解析 phone。"
+            "description": "当 `phone` 不带 \"+\" 前缀时的解析地区提示 —— ISO 3166-1 alpha-2 地区代码（如 \"CN\"，未传时默认 \"CN\"）。此解析场景仍兼容 \"86\" 等数字电话区号。"
           },
           "ref_id": {
             "type": "string",
@@ -45981,7 +46112,7 @@
           },
           "country_code": {
             "type": "string",
-            "description": "新手机号对应的国家或地区区号。"
+            "description": "ISO 3166-1 alpha-2 地区代码（如 \"CN\"、\"US\"）。可独立更新（无需同时传 `phone`），并兼作解析 `phone` 的地区提示；非法值返回 400，显式传空字符串也会被拒绝。"
           },
           "email": {
             "type": "string",
@@ -46066,6 +46197,10 @@
           "email": {
             "type": "string",
             "description": "邮箱地址"
+          },
+          "country_code": {
+            "type": "string",
+            "description": "联系手机的 ISO 3166-1 alpha-2 地区代码（如 \"CN\"、\"US\"、\"HK\"）。"
           },
           "phone": {
             "type": "string",
@@ -47323,6 +47458,229 @@
           }
         }
       },
+      "QueryDataRequest": {
+        "description": "稳定结构化查询接口的请求。字段与已弃用的 rows 接口一致。",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/QueryRowsRequest"
+          }
+        ]
+      },
+      "QueryDataResponse": {
+        "type": "object",
+        "description": "与 Edge 版本无关的稳定结构化查询响应。",
+        "required": [
+          "format",
+          "result"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "query_result.v1"
+            ],
+            "description": "公开结果契约版本，与 monit-edge 内部查询协议版本相互独立。"
+          },
+          "result": {
+            "$ref": "#/components/schemas/QueryResult"
+          }
+        }
+      },
+      "QueryResult": {
+        "description": "由 `kind` 选择且严格互斥的自然结果形态。",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/QueryFramesResult"
+          },
+          {
+            "$ref": "#/components/schemas/QueryRecordsResult"
+          },
+          {
+            "$ref": "#/components/schemas/QuerySamplesResult"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "frames": "#/components/schemas/QueryFramesResult",
+            "records": "#/components/schemas/QueryRecordsResult",
+            "samples": "#/components/schemas/QuerySamplesResult"
+          }
+        }
+      },
+      "QueryFramesResult": {
+        "type": "object",
+        "required": [
+          "kind",
+          "frames"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "frames"
+            ]
+          },
+          "frames": {
+            "type": "array",
+            "description": "类型化表格或时序 Frame。一次响应可以包含多个 Frame。",
+            "items": {
+              "$ref": "#/components/schemas/QueryFrame"
+            }
+          }
+        }
+      },
+      "QueryFrame": {
+        "type": "object",
+        "description": "类型化列式表格或时序 Frame。同一 Frame 的所有字段拥有相同数量的值。`time_series` Frame 包含一个 time 字段和一个 float 字段，序列标签位于 float 字段。",
+        "required": [
+          "kind",
+          "fields"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "table",
+              "time_series"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueryField"
+            }
+          }
+        }
+      },
+      "QueryField": {
+        "type": "object",
+        "description": "一个类型化列。`string` 字段包含字符串或 null；`time` 字段包含 RFC 3339 Nano 字符串或 null；`float` 字段包含数字、null 或特殊字符串 `NaN`、`+Inf`、`-Inf`。",
+        "required": [
+          "name",
+          "type",
+          "values"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "float",
+              "time"
+            ]
+          },
+          "labels": {
+            "type": "object",
+            "description": "序列标签，出现在时序 Frame 的 float 字段上。",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "QueryRecordsResult": {
+        "type": "object",
+        "required": [
+          "kind",
+          "records"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "records"
+            ]
+          },
+          "records": {
+            "type": "array",
+            "description": "schema 灵活的 records。不同 record 可以拥有不同字段、包含嵌套 JSON 或为 null。超出 JavaScript 安全范围的整数会编码为十进制字符串。",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "QuerySamplesResult": {
+        "type": "object",
+        "required": [
+          "kind",
+          "samples"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "samples"
+            ]
+          },
+          "samples": {
+            "type": "array",
+            "description": "带完整标签集合的瞬时样本。",
+            "items": {
+              "$ref": "#/components/schemas/QuerySample"
+            }
+          }
+        }
+      },
+      "QuerySample": {
+        "type": "object",
+        "required": [
+          "labels",
+          "value"
+        ],
+        "properties": {
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "value": {
+            "description": "有限数值，或非有限浮点数的 JSON 安全表示。",
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "NaN",
+                  "+Inf",
+                  "-Inf"
+                ]
+              }
+            ]
+          }
+        }
+      },
       "QueryRowsRequest": {
         "type": "object",
         "required": [
@@ -48367,7 +48725,7 @@
           },
           "country_code": {
             "type": "string",
-            "description": "联系电话的国家区号。"
+            "description": "联系手机的 ISO 3166-1 alpha-2 地区代码（如 \"CN\"、\"US\"、\"HK\"）。"
           },
           "email": {
             "type": "string",

@@ -342,7 +342,7 @@ type AccountInfo struct {
 	AccountName string `json:"account_name" toon:"account_name"`
 	// Account avatar URL.
 	Avatar string `json:"avatar" toon:"avatar"`
-	// Calling country code for the contact phone.
+	// ISO 3166-1 alpha-2 region code of the contact phone (e.g. "CN", "US", "HK").
 	CountryCode string `json:"country_code" toon:"country_code"`
 	// Account creation time, Unix timestamp in seconds.
 	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
@@ -3986,7 +3986,7 @@ type InsightTopkAlertByLabelRequest struct {
 
 // InviteMemberItem is generated from the Flashduty OpenAPI schema.
 type InviteMemberItem struct {
-	// Country code
+	// ISO 3166-1 alpha-2 region code for `phone` (e.g. "CN"). Validated and normalized to upper case before storage; invalid values are rejected with a 400. Also the parsing hint when `phone` has no "+" prefix (defaults to "CN").
 	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
 	// Email address
 	Email string `json:"email,omitempty" toon:"email,omitempty"`
@@ -5079,7 +5079,7 @@ type MappingSchemaUpdateRequest struct {
 
 // MemberDeleteRequest is generated from the Flashduty OpenAPI schema.
 type MemberDeleteRequest struct {
-	// Phone country code, used with phone
+	// Region hint for parsing `phone` when it has no "+" prefix — an ISO 3166-1 alpha-2 code such as "CN" (the default when omitted). Legacy digit calling codes like "86" are still accepted in this parsing context.
 	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
 	// Email address. Only used when neither `member_id` nor `member_name` is provided
 	Email string `json:"email,omitempty" toon:"email,omitempty"`
@@ -5119,7 +5119,7 @@ type MemberInfoResponse struct {
 	AccountTimeZone string `json:"account_time_zone" toon:"account_time_zone"`
 	// Member avatar URL
 	Avatar string `json:"avatar" toon:"avatar"`
-	// Phone country code
+	// ISO 3166-1 alpha-2 region code of the member's contact phone (e.g. "CN", "US", "HK").
 	CountryCode string `json:"country_code" toon:"country_code"`
 	// Account domain
 	Domain string `json:"domain" toon:"domain"`
@@ -5167,7 +5167,7 @@ type MemberItem struct {
 	AccountRoleIDs []uint64 `json:"account_role_ids" toon:"account_role_ids"`
 	// Avatar URL
 	Avatar string `json:"avatar" toon:"avatar"`
-	// Phone country code
+	// ISO 3166-1 alpha-2 region code of the member's contact phone (e.g. "CN", "US", "HK").
 	CountryCode string `json:"country_code" toon:"country_code"`
 	// Creation timestamp (Unix seconds)
 	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
@@ -5221,7 +5221,7 @@ type MemberListResponse struct {
 
 // MemberResetInfoRequest is generated from the Flashduty OpenAPI schema.
 type MemberResetInfoRequest struct {
-	// Country or region code used to parse phone.
+	// Region hint for parsing `phone` when it has no "+" prefix — an ISO 3166-1 alpha-2 code such as "CN" (the default when omitted). Legacy digit calling codes like "86" are still accepted in this parsing context.
 	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
 	// Email address used to identify the member.
 	Email string `json:"email,omitempty" toon:"email,omitempty"`
@@ -5243,7 +5243,7 @@ type MemberResetInfoRequest struct {
 type MemberResetInfoUpdates struct {
 	// New avatar URL.
 	Avatar string `json:"avatar,omitempty" toon:"avatar,omitempty"`
-	// Country or region code for the new phone number.
+	// ISO 3166-1 alpha-2 region code (e.g. "CN", "US"). Updated independently — `phone` is not required — and also used as the parsing hint for `phone`. Invalid values are rejected with a 400; an explicit empty string is not allowed.
 	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
 	// New email address.
 	Email string `json:"email,omitempty" toon:"email,omitempty"`
@@ -5622,6 +5622,8 @@ type PersonItem struct {
 	As string `json:"as" toon:"as"`
 	// Avatar URL
 	Avatar string `json:"avatar" toon:"avatar"`
+	// ISO 3166-1 alpha-2 region code of the contact phone (e.g. "CN", "US", "HK").
+	CountryCode string `json:"country_code" toon:"country_code"`
 	// Email address
 	Email string `json:"email" toon:"email"`
 	// Email verified
@@ -5809,6 +5811,69 @@ type PreviewTemplateResponse struct {
 	Success bool `json:"success" toon:"success"`
 }
 
+// QueryDataRequest is generated from the Flashduty OpenAPI schema.
+type QueryDataRequest struct {
+	// Optional consistency check. Must equal the authenticated account when supplied; mismatched values are rejected. Business execution always uses the authenticated account.
+	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	// Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings, and keys are always namespaced by source (e.g. `sls.project`, `loki.type`). Validation depends on `ds_type`: SLS requires `sls.project` + `sls.logstore`. Elasticsearch accepts `es.type` of `sql`, or omitted — any other value is rejected. Loki and VictoriaLogs accept `<source>.type` of `stats`, `raw`, or omitted; `raw` additionally requires a time range, either `<source>.start` + `<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit` (unit one of `s`, `m`, `h`, `d`). Prometheus and the remaining SQL sources ignore `args` entirely.
+	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
+	// Look-back offset in seconds applied to point-in-time queries (Prometheus, Loki stats, VictoriaLogs stats). Ignored for raw / detail queries.
+	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
+	// Data source name; must match a configured data source under the tenant.
+	DsName string `json:"ds_name" toon:"ds_name"`
+	// Data source type; must match a configured data source under the tenant. Examples: `prometheus`, `loki`, `victorialogs`, `sls`, `elasticsearch`, `mysql`, `postgres`, `oracle`, `clickhouse`.
+	DsType string `json:"ds_type" toon:"ds_type"`
+	// Query expression. Syntax depends on `ds_type` and is interpreted by the corresponding monit-edge client (PromQL for Prometheus, LogQL for Loki, SQL for SQL sources, etc.).
+	Expr string `json:"expr" toon:"expr"`
+}
+
+// QueryDataResponse is generated from the Flashduty OpenAPI schema.
+type QueryDataResponse struct {
+	// Public result-contract version. It is independent of the internal monit-edge query protocol version.
+	Format string      `json:"format" toon:"format"`
+	Result QueryResult `json:"result" toon:"result"`
+}
+
+// QueryField is generated from the Flashduty OpenAPI schema.
+type QueryField struct {
+	// Series labels. Present on the float field of a time-series frame.
+	Labels map[string]string `json:"labels" toon:"labels"`
+	Name   string            `json:"name" toon:"name"`
+	Type   string            `json:"type" toon:"type"`
+	Values []any             `json:"values" toon:"values"`
+}
+
+// QueryFrame is generated from the Flashduty OpenAPI schema.
+type QueryFrame struct {
+	Fields []QueryField `json:"fields" toon:"fields"`
+	Kind   string       `json:"kind" toon:"kind"`
+}
+
+// QueryFramesResult is generated from the Flashduty OpenAPI schema.
+type QueryFramesResult struct {
+	// Typed table or time-series frames. A response can contain more than one frame.
+	Frames []QueryFrame `json:"frames" toon:"frames"`
+	Kind   string       `json:"kind" toon:"kind"`
+}
+
+// QueryRecordsResult is generated from the Flashduty OpenAPI schema.
+type QueryRecordsResult struct {
+	Kind string `json:"kind" toon:"kind"`
+	// Schema-flexible records. Records may have different fields, contain nested JSON, or be null. Integers outside JavaScript's safe range are encoded as decimal strings.
+	Records []any `json:"records" toon:"records"`
+}
+
+// QueryResult is generated from the Flashduty OpenAPI schema.
+type QueryResult struct {
+	// Typed table or time-series frames. A response can contain more than one frame.
+	Frames *[]QueryFrame `json:"frames,omitempty" toon:"frames,omitempty"`
+	Kind   string        `json:"kind" toon:"kind"`
+	// Schema-flexible records. Records may have different fields, contain nested JSON, or be null. Integers outside JavaScript's safe range are encoded as decimal strings.
+	Records *[]any `json:"records,omitempty" toon:"records,omitempty"`
+	// Instant samples with their complete label sets.
+	Samples *[]QuerySample `json:"samples,omitempty" toon:"samples,omitempty"`
+}
+
 // QueryRow is generated from the Flashduty OpenAPI schema.
 type QueryRow struct {
 	// String-valued fields (labels, log fields, SQL columns).
@@ -5831,6 +5896,20 @@ type QueryRowsRequest struct {
 	DsType string `json:"ds_type" toon:"ds_type"`
 	// Query expression. Syntax depends on `ds_type` and is interpreted by the corresponding monit-edge client (PromQL for Prometheus, LogQL for Loki, SQL for SQL sources, etc.).
 	Expr string `json:"expr" toon:"expr"`
+}
+
+// QuerySample is generated from the Flashduty OpenAPI schema.
+type QuerySample struct {
+	Labels map[string]string `json:"labels" toon:"labels"`
+	// Finite numeric value or a JSON-safe representation of a non-finite float.
+	Value any `json:"value" toon:"value"`
+}
+
+// QuerySamplesResult is generated from the Flashduty OpenAPI schema.
+type QuerySamplesResult struct {
+	Kind string `json:"kind" toon:"kind"`
+	// Instant samples with their complete label sets.
+	Samples []QuerySample `json:"samples" toon:"samples"`
 }
 
 // RemoveIncidentRequest is generated from the Flashduty OpenAPI schema.

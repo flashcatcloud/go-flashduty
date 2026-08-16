@@ -7,6 +7,20 @@ import "context"
 // DiagnosticsService handles the "Monitors/Diagnostics" API resource.
 type DiagnosticsService service
 
+// Query structured data.
+//
+// Run a synchronous ad-hoc query against a configured data source and return a stable `query_result.v1` result whose natural shape is frames, records, or samples. This public API requires monit-edge v0.65.0 or later.
+//
+// API: POST /monit/query/data (monit-read-query-data).
+func (s *DiagnosticsService) QueryData(ctx context.Context, req *QueryDataRequest) (*QueryDataResponse, *Response, error) {
+	out := new(QueryDataResponse)
+	resp, err := s.client.do(ctx, "/monit/query/data", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Diagnose data source.
 //
 // Run a synchronous diagnostic query (`log_patterns` for Loki/VictoriaLogs, `metric_trends` for Prometheus). Used by Flashduty AI SRE for log-pattern clustering and time-series trend analysis. Long-running — up to 35 s.
@@ -23,7 +37,7 @@ func (s *DiagnosticsService) QueryDiagnose(ctx context.Context, req *DiagnoseReq
 
 // Query data source rows.
 //
-// Run a synchronous ad-hoc query against a configured data source and get back its raw rows. Used by Flashduty AI SRE and by UI preview. The request is forwarded over WebSocket to monit-edge, which executes the query against the underlying source (Prometheus / Loki / VictoriaLogs / SLS / MySQL / Postgres / Oracle / ClickHouse / Elasticsearch).
+// Deprecated. Run a synchronous ad-hoc query and return the historical flattened rows shape. Existing consumers should migrate to `/monit/query/data`, which preserves frames, records, and samples without forcing every result into legacy rows.
 //
 // API: POST /monit/query/rows (monit-read-query-rows).
 func (s *DiagnosticsService) QueryRows(ctx context.Context, req *QueryRowsRequest) (*QueryRowsResponse, *Response, error) {
