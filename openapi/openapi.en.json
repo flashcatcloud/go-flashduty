@@ -11069,61 +11069,58 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "total": 2,
-                    "has_next_page": false,
+                    "total": 2363,
+                    "has_next_page": true,
+                    "search_after_ctx": "6a86b5d6f72de50ae1ce2ffb",
                     "items": [
                       {
-                        "incident_id": "67ca560c381a4fedb664f5f8",
-                        "title": "CPU spike on prod-web-01",
-                        "description": "CPU usage exceeded 90% threshold",
-                        "team_id": 4295771902131,
+                        "incident_id": "6a86b5d6f72de50ae1ce2ffb",
+                        "title": "CPU usage above 90% on prod-web-01",
+                        "description": "CPU usage stayed above the threshold for 5 minutes",
+                        "team_id": 2477033058131,
                         "team_name": "SRE Team",
-                        "channel_id": 4321322010131,
+                        "channel_id": 3047621227131,
                         "channel_name": "Production Alerts",
                         "progress": "Closed",
-                        "severity": "Info",
-                        "created_at": 1741313548,
+                        "severity": "Critical",
+                        "created_at": 1787213270,
+                        "alert_cnt": 3,
+                        "active_alert_cnt": 0,
+                        "alert_event_cnt": 5,
                         "closed_by": "manually",
-                        "seconds_to_ack": 1052085,
-                        "seconds_to_close": 1483880,
-                        "engaged_seconds": 1052085,
+                        "creator_id": 2477273692131,
+                        "creator_name": "alice",
+                        "closer_id": 2477273692131,
+                        "closer_name": "alice",
+                        "seconds_to_ack": 14,
+                        "seconds_to_close": 1830,
+                        "engaged_seconds": 1816,
                         "hours": "work",
                         "responders": [
                           {
-                            "person_id": 3790925372131,
-                            "assigned_at": 1741313548,
-                            "acknowledged_at": 1742365633,
+                            "person_id": 2477273692131,
+                            "assigned_at": 1787213270,
+                            "acknowledged_at": 1787213284,
                             "person_name": "alice",
                             "email": "alice@example.com"
                           }
                         ],
                         "assigned_to": {
-                          "person_ids": [
-                            3790925372131
-                          ],
-                          "escalate_rule_id": "000000000000000000000000",
+                          "escalate_rule_id": "66138789904a9027583dbc4e",
                           "layer_idx": 0,
-                          "type": "reassign"
+                          "type": "assign",
+                          "assigned_at": 1787213270,
+                          "id": "b8tyUoRvCv4wsPndFRpmNL",
+                          "escalate_rule_name": "On-call Policy"
                         },
-                        "labels": {},
-                        "fields": {},
-                        "notifications": 4,
-                        "interruptions": 2,
-                        "assignments": 2,
-                        "reassignments": 1,
+                        "notifications": 2,
+                        "interruptions": 1,
+                        "assignments": 1,
+                        "reassignments": 0,
                         "acknowledgements": 1,
                         "escalations": 0,
                         "timeout_escalations": 0,
-                        "manual_escalations": 0,
-                        "creator_id": 3790925372131,
-                        "creator_name": "alice",
-                        "owner_id": 3790925372132,
-                        "owner_name": "bob",
-                        "closer_id": 3790925372133,
-                        "closer_name": "carol",
-                        "snoozed_before": 1712608400,
-                        "ever_muted": false,
-                        "frequency": "rare"
+                        "manual_escalations": 0
                       }
                     ]
                   }
@@ -31182,7 +31179,8 @@
         "properties": {
           "request_id": {
             "type": "string",
-            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+            "description": "Unique trace ID of this request; include it when reporting issues so logs can be located."
           },
           "error": {
             "$ref": "#/components/schemas/DutyError"
@@ -31270,7 +31268,7 @@
                   "escalate",
                   "reopen"
                 ],
-                "description": "Assignment type, derived by the server — callers should omit it: `assign` on manual create, `reassign` on reassignment, `escalate` when driven by escalation."
+                "description": "Assignment type, derived server-side — callers do not set it: `assign` for manual creation, `reassign` for re-assignment, `escalate` for escalation-driven assignment.\n| Value | Meaning |\n|---|---|\n| `assign` | Initial assignment when the incident is created manually. |\n| `reassign` | Re-assignment of an existing incident. |\n| `escalate` | Assignment triggered by escalation policy advancement. |\n| `reopen` | Assignment restarted from the first layer after the incident is reopened. |"
               },
               "emails": {
                 "type": "array",
@@ -31516,7 +31514,7 @@
               "popup",
               "tab"
             ],
-            "description": "How the link should be opened."
+            "description": "How the link opens. `popup` opens it in a popup within the incident detail page; `tab` opens it in a new browser tab."
           }
         }
       },
@@ -32035,7 +32033,7 @@
               "Processing",
               "Closed"
             ],
-            "description": "Incident progress state."
+            "description": "Incident progress. `Triggered` means fired and unacknowledged; `Processing` means acknowledged and being handled (un-acknowledging moves it back to `Triggered`); `Closed` means resolved."
           },
           "title": {
             "type": "string",
@@ -32728,7 +32726,7 @@
               "autorefresh",
               "escalation"
             ],
-            "description": "Source that triggered the resolve action."
+            "description": "Source that triggered the resolve.\n| Value | Meaning |\n|---|---|\n| `voice` | Phone-call (voice DTMF) action. |\n| `console` | Console (Web UI) action. |\n| `card` | IM notification card button (DingTalk/Feishu/Slack/Teams). |\n| `wcard` | WeCom notification card button. |\n| `event` | Event-driven: auto-close when all related alerts recover to Ok, or a close synced from an external ITSM system. |\n| `autorslv` | Auto-resolve: closed by the system after no new alerts within the channel's auto-resolve timeout. |\n| `autorefresh` | Card auto-refresh (reserved; never appears on resolve feeds). |\n| `escalation` | Escalation flow (reserved; never appears on resolve feeds). |"
           }
         },
         "title": "i_rslv"
@@ -32918,7 +32916,7 @@
               "fire",
               "refire"
             ],
-            "description": "Whether this is the first fire or a refire."
+            "description": "Whether this is the first fire or a refire. `fire`: the first notification for this escalation layer; `refire`: a repeat notification to the same layer when the incident remains unhandled, sent at the layer's notify interval and capped by the layer's maximum refire count."
           },
           "escalate_rule_name": {
             "type": "string",
@@ -34025,7 +34023,7 @@
               "drafting",
               "published"
             ],
-            "description": "Report status. Defaults to `published` on the server when omitted."
+            "description": "Post-mortem status filter; the server defaults to `published` when omitted. `drafting` returns only drafts; `published` returns only published post-mortems."
           },
           "team_ids": {
             "type": "array",
@@ -34124,7 +34122,7 @@
               "drafting",
               "published"
             ],
-            "description": "Report status."
+            "description": "Post-mortem status. `drafting` means still being edited; `published` means published."
           },
           "post_mortem_id": {
             "type": "string",
@@ -34321,7 +34319,8 @@
                 },
                 "description": "Responders involved in the incident(s)."
               }
-            }
+            },
+            "description": "Basics aggregated automatically from the linked incidents: highest severity, earliest start / latest close time, total duration, and responders."
           },
           "content": {
             "type": "object",
@@ -34333,7 +34332,8 @@
                 "type": "string",
                 "description": "Report body content (BlockNote JSON)."
               }
-            }
+            },
+            "description": "Post-mortem body; the object holds a single `content` field whose value is a BlockNote JSON string."
           },
           "follow_ups": {
             "type": "string",
@@ -34611,7 +34611,7 @@
                   "tumbling",
                   "sliding"
                 ],
-                "description": "Window type. Defaults to `tumbling`."
+                "description": "Window type, default `tumbling`. `tumbling` is a fixed window counted from incident creation — once it expires, new alerts open a new incident; `sliding` is a sliding window counted from the incident's most recent alert, extended each time a new alert merges in."
               },
               "storm_threshold": {
                 "type": "integer",
@@ -34973,10 +34973,6 @@
             "format": "int64",
             "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
-          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -35085,10 +35081,6 @@
             "type": "integer",
             "format": "int64",
             "description": "Owning channel ID; obtain it from `POST /channel/list`."
-          },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
           },
           "rule_name": {
             "type": "string",
@@ -35502,7 +35494,7 @@
               "tumbling",
               "sliding"
             ],
-            "description": "Window type. Defaults to `tumbling`."
+            "description": "Window type, default `tumbling`. `tumbling` is a fixed window counted from incident creation — once it expires, new alerts open a new incident; `sliding` is a sliding window counted from the incident's most recent alert, extended each time a new alert merges in."
           },
           "storm_threshold": {
             "type": "integer",
@@ -35637,7 +35629,7 @@
               "disabled",
               "deleted"
             ],
-            "description": "Channel status."
+            "description": "Channel status. `enabled` receives and processes events normally; `disabled` drops incoming events outright; `deleted` is returned only when fetching a channel by ID — list endpoints never return it."
           },
           "deleted_at": {
             "type": "integer",
@@ -35665,7 +35657,7 @@
               "trigger",
               "update"
             ],
-            "description": "Auto-resolve timer reset mode."
+            "description": "How the auto-resolve timer is reset. `trigger` (default) starts the timer once when the incident is triggered — later merged alerts do not affect it; `update` restarts the timer from the latest alert time whenever a new alert merges into the incident."
           },
           "is_private": {
             "type": "boolean",
@@ -35866,21 +35858,21 @@
         "properties": {
           "account_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the account the rule belongs to."
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
+            "format": "int64",
+            "description": "ID of the channel the rule belongs to."
           },
           "rule_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule name."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule description."
           },
           "from_incident_id": {
             "type": "string",
@@ -35909,27 +35901,28 @@
             "enum": [
               "enabled",
               "disabled"
-            ]
+            ],
+            "description": "Rule status: `enabled` or `disabled`; deleted rules never appear in the list."
           },
           "rule_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Rule ID (MongoDB ObjectID)."
           },
           "updated_by": {
             "type": "integer",
-            "format": "int64"
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the user who last updated the rule."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Creation time, Unix timestamp in seconds."
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Last update time, Unix timestamp in seconds."
           },
           "is_effective": {
             "type": "boolean",
@@ -35962,20 +35955,21 @@
         "properties": {
           "account_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the account the rule belongs to."
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "priority": {
-            "type": "integer"
+            "format": "int64",
+            "description": "ID of the channel the rule belongs to."
           },
           "rule_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule name."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule description."
           },
           "source_filters": {
             "$ref": "#/components/schemas/FilterGroup"
@@ -35991,34 +35985,36 @@
             "description": "Label keys used to pair source and target alerts."
           },
           "is_directly_discard": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "When true, the inhibited target alert is discarded outright; when false, the alert is still created but muted — no incident is triggered and no notification is sent."
           },
           "status": {
             "type": "string",
             "enum": [
               "enabled",
               "disabled"
-            ]
+            ],
+            "description": "Rule status: `enabled` or `disabled`; deleted rules never appear in the list."
           },
           "rule_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Rule ID (MongoDB ObjectID)."
           },
           "updated_by": {
             "type": "integer",
-            "format": "int64"
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the user who last updated the rule."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Creation time, Unix timestamp in seconds."
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Last update time, Unix timestamp in seconds."
           }
         }
       },
@@ -36041,20 +36037,21 @@
         "properties": {
           "account_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the account the rule belongs to."
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "priority": {
-            "type": "integer"
+            "format": "int64",
+            "description": "ID of the channel the rule belongs to."
           },
           "rule_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule name."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule description."
           },
           "filters": {
             "$ref": "#/components/schemas/FilterGroup"
@@ -36064,27 +36061,28 @@
             "enum": [
               "enabled",
               "disabled"
-            ]
+            ],
+            "description": "Rule status: `enabled` or `disabled`; deleted rules never appear in the list."
           },
           "rule_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Rule ID (MongoDB ObjectID)."
           },
           "updated_by": {
             "type": "integer",
-            "format": "int64"
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the user who last updated the rule."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Creation time, Unix timestamp in seconds."
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Last update time, Unix timestamp in seconds."
           }
         }
       },
@@ -36347,10 +36345,6 @@
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "Silence rule ID (MongoDB ObjectID)."
           },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
-          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -36425,10 +36419,6 @@
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "Inhibit rule ID (MongoDB ObjectID)."
-          },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
           },
           "rule_name": {
             "type": "string",
@@ -36582,7 +36572,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ChannelItem"
-            }
+            },
+            "description": "Channels on the current page."
           },
           "total": {
             "type": "integer",
@@ -36605,7 +36596,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ChannelShort"
-            }
+            },
+            "description": "Brief info for the requested `channel_ids` that actually exist; IDs not found are ignored."
           }
         }
       },
@@ -36619,7 +36611,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SilenceRuleItem"
-            }
+            },
+            "description": "All silence rules of the channel, excluding deleted ones, ordered by creation time ascending."
           }
         }
       },
@@ -36633,7 +36626,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/InhibitRuleItem"
-            }
+            },
+            "description": "All inhibit rules of the channel, excluding deleted ones, ordered by creation time ascending."
           }
         }
       },
@@ -36647,7 +36641,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UnsubscribeRuleItem"
-            }
+            },
+            "description": "All drop (unsubscribe) rules of the channel, excluding deleted ones, ordered by creation time ascending."
           }
         }
       },
@@ -36661,7 +36656,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EscalateRuleItem"
-            }
+            },
+            "description": "All escalation rules of the channel, excluding deleted ones, ordered by priority ascending."
           }
         }
       },
@@ -36846,7 +36842,7 @@
               "enabled",
               "deleted"
             ],
-            "description": "Rule status."
+            "description": "Route status. `enabled` means active; `deleted` means removed, visible only in historical versions."
           },
           "version": {
             "type": "integer",
@@ -37270,7 +37266,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertItem"
-            }
+            },
+            "description": "Alerts on the current page."
           }
         }
       },
@@ -37405,10 +37402,14 @@
       },
       "AlertFeedType": {
         "type": "string",
-        "description": "Alert activity feed entry type. Each value identifies one alert lifecycle event; the matching `detail` payload shape is determined by this field.\n\n| Type | Meaning |\n|---|---|\n| `a_new` | Alert triggered. |\n| `a_comm` | Comment added on the alert. |\n| `a_close` | Alert closed. |",
+        "description": "Alert activity feed entry type. Each value identifies one alert lifecycle event; the matching `detail` payload shape is determined by this field.\n\n| Type | Meaning |\n|---|---|\n| `a_new` | Alert triggered. |\n| `a_update` | Alert updated by an incoming event (e.g. severity or status change). |\n| `a_merge` | Alert merged. |\n| `a_comm` | Comment added on the alert. |\n| `a_m_silence` | Alert muted by a silence rule. |\n| `a_m_inhibit` | Alert muted by an inhibit rule. |\n| `a_close` | Alert closed (historical data only; no longer produced). |",
         "enum": [
           "a_new",
+          "a_update",
+          "a_merge",
           "a_comm",
+          "a_m_silence",
+          "a_m_inhibit",
           "a_close"
         ]
       },
@@ -37512,13 +37513,15 @@
         "type": "object",
         "properties": {
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether a next page exists."
           },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FeedItem"
-            }
+            },
+            "description": "Alert feed records on the current page."
           }
         }
       },
@@ -37581,7 +37584,7 @@
               "alert_drop",
               "alert_inhibit"
             ],
-            "description": "Rule type."
+            "description": "Rule type. Rules run in array order; when the `if` condition matches, the event is processed according to `kind`.\n| Value | Meaning |\n|---|---|\n| `title_reset` | Rewrites the event title from the `settings.title` template. |\n| `description_reset` | Rewrites the event description from the `settings.description` template. |\n| `severity_reset` | Resets the event severity and status to `settings.severity` (`Critical`/`Warning`/`Info`). |\n| `alert_drop` | Discards the matching event outright; no alert is created. |\n| `alert_inhibit` | Discards the event (inhibition) when an active source alert matching `settings.source_filters` and correlated via `settings.equals` exists. |"
           },
           "if": {
             "$ref": "#/components/schemas/OrFilterGroup",
@@ -37675,7 +37678,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertPipelineItem"
-            }
+            },
+            "description": "Alert pipeline configuration of each requested integration, one item per configured integration."
           }
         }
       },
@@ -37774,19 +37778,23 @@
         "properties": {
           "total": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Total number of matching events, capped at 1000."
           },
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether a next page exists (probed by fetching limit+1 rows)."
           },
           "search_after_ctx": {
-            "type": "string"
+            "type": "string",
+            "description": "Cursor for the next page — the ObjectID of the last event on this page; pass it back as `search_after_ctx`. Omitted when there are no more results or the result is empty."
           },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertEventItem"
-            }
+            },
+            "description": "Raw alert events on the current page."
           }
         }
       },
@@ -37945,7 +37953,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/WebhookHistoryItem"
-            }
+            },
+            "description": "Webhook delivery records on the current page."
           },
           "total": {
             "type": "integer",
@@ -38433,7 +38442,7 @@
           "handoff_time": {
             "type": "integer",
             "format": "int64",
-            "description": "Handoff time inside the rotation cycle (seconds)."
+            "description": "Rotation handoff time, as a Unix timestamp in seconds."
           },
           "enable_time": {
             "type": "integer",
@@ -38518,7 +38527,7 @@
           },
           "rotation_unit": {
             "type": "string",
-            "description": "Rotation unit.",
+            "description": "Rotation unit. On-call assignees rotate in turn by this unit.\n| Value | Meaning |\n|---|---|\n| `hour` | Rotates hourly. |\n| `day` | Rotates daily. |\n| `week` | Rotates weekly. |\n| `month` | Rotates monthly. |",
             "enum": [
               "hour",
               "day",
@@ -39283,7 +39292,7 @@
           },
           "kind": {
             "type": "string",
-            "description": "Calendar kind.",
+            "description": "Calendar kind. `region.official.holiday` is a public regional holiday calendar (served by the central holiday service), `religion.holiday` is a public religious holiday calendar (reserved, currently no data), and `personal` is an account-created personal/team calendar.",
             "enum": [
               "region.official.holiday",
               "religion.holiday",
@@ -39328,7 +39337,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Calendar status.",
+            "description": "Calendar status. `enabled` means usable; `deleted` means removed and never returned by list endpoints.",
             "enum": [
               "enabled",
               "deleted"
@@ -39342,7 +39351,7 @@
         "properties": {
           "kind": {
             "type": "string",
-            "description": "Calendar kind filter. Defaults to personal when empty.",
+            "description": "Calendar kind filter; defaults to personal when empty. `region.official.holiday` queries public regional holiday calendars (filtered by the caller's locale); `personal` queries account-created calendars.",
             "enum": [
               "region.official.holiday",
               "personal"
@@ -39700,7 +39709,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Template lifecycle status.",
+            "description": "Template lifecycle status. `enabled` templates can be referenced by escalation policies for notifications; `disabled` templates are no longer used for new notifications; `deleted` templates are never returned by list endpoints.",
             "enum": [
               "enabled",
               "disabled",
@@ -39831,7 +39840,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TemplateItem"
-            }
+            },
+            "description": "Notification templates on the current page; the first item of the first page is always the built-in preset template."
           }
         }
       },
@@ -41069,7 +41079,7 @@
             "enum": [
               "created_at"
             ],
-            "description": "Field to sort the underlying incident set by."
+            "description": "Sort field of the underlying incident set. Currently only `created_at` (incident creation time) is supported."
           },
           "asc": {
             "type": "boolean",
@@ -41171,7 +41181,7 @@
                   "week",
                   "month"
                 ],
-                "description": "Aggregate metrics into time buckets. When set, the time range must cover at least 24 hours; `day` additionally caps the range at 31 days."
+                "description": "Aggregates metrics by time granularity. When set, the time range must be at least 24 hours; with `day` granularity the range must not exceed 31 days. `day` buckets by calendar day, `week` by calendar week, and `month` by calendar month, with boundaries aligned to `time_zone`."
               }
             }
           }
@@ -41227,7 +41237,7 @@
                   "check",
                   "resource"
                 ],
-                "description": "Dimension to aggregate by."
+                "description": "Aggregation dimension. `check` aggregates by the event's `labels.check` label (monitoring check); `resource` aggregates by the `labels.resource` label (monitored resource identifier)."
               },
               "k": {
                 "type": "integer",
@@ -41239,7 +41249,7 @@
                   "total_alert_cnt",
                   "total_alert_event_cnt"
                 ],
-                "description": "Field to sort results by."
+                "description": "Sort field. `total_alert_cnt` sorts by alert count; `total_alert_event_cnt` sorts by raw alert event count."
               },
               "asc": {
                 "type": "boolean",
@@ -41260,7 +41270,7 @@
               "sleep",
               "off"
             ],
-            "description": "Hour bucket when `split_hours` is enabled."
+            "description": "Hour bucket when `split_hours` is enabled. `work` is Mon–Fri 08:00–19:00, `sleep` is daily 23:00–08:00, and `off` is everything else, all evaluated in the account timezone (`sleep` takes precedence over `work`)."
           },
           "ts": {
             "type": "integer",
@@ -41269,28 +41279,30 @@
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Channel ID, returned only when aggregating by channel (`/insight/channel`)."
           },
           "team_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Team ID, returned only when aggregating by team (`/insight/team`)."
           },
           "responder_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "account_id": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Responder (person) ID, returned only when aggregating by responder (`/insight/responder`)."
           },
           "team_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Team name, returned when aggregating by team; omitted when the name cannot be resolved (e.g. team deleted)."
           },
           "channel_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Channel name, returned when aggregating by channel; omitted when the name cannot be resolved."
           },
           "responder_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Responder name, returned when aggregating by responder; omitted when the name cannot be resolved."
           }
         }
       },
@@ -41305,87 +41317,108 @@
             "properties": {
               "total_incident_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total number of incidents."
               },
               "total_incidents_acknowledged": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents that were acknowledged at least once."
               },
               "total_incidents_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents that are closed."
               },
               "total_incidents_auto_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents closed automatically because all alerts recovered."
               },
               "total_incidents_manually_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents closed manually."
               },
               "total_incidents_timeout_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents closed automatically on timeout."
               },
               "total_incidents_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents that were escalated at least once."
               },
               "total_incidents_manually_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents escalated manually at least once."
               },
               "total_incidents_timeout_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents escalated on timeout at least once."
               },
               "total_incidents_reassigned": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents that were reassigned at least once."
               },
               "total_interruptions": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total interruptions: notifications sent via app push, SMS, or voice call; consecutive notifications to the same responder within 60 seconds count as one."
               },
               "total_notifications": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total number of notifications sent."
               },
               "total_engaged_seconds": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total engaged time in seconds: each incident contributes the sum of close time minus acknowledgement time across its acknowledged responders."
               },
               "total_seconds_to_ack": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total time to first acknowledgement in seconds."
               },
               "total_seconds_to_close": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total time to close in seconds."
               },
               "mean_seconds_to_ack": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "Mean time to first acknowledgement in seconds."
               },
               "mean_seconds_to_close": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "Mean time to close in seconds."
               },
               "noise_reduction_pct": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "Noise reduction ratio (%): `100 − incidents ÷ alert events × 100`; 0 when no alert-event comparison data exists."
               },
               "acknowledgement_pct": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "Acknowledgement rate (%): acknowledged incidents ÷ total incidents × 100, rounded to two decimals; 100 when there are no incidents."
               },
               "total_alert_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total number of alerts."
               },
               "total_alert_event_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total number of alert events."
               }
             }
           }
@@ -41402,51 +41435,63 @@
             "properties": {
               "total_incident_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents this responder was involved in."
               },
               "total_incidents_acknowledged": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents acknowledged by this responder."
               },
               "total_incidents_reassigned": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Incidents reassigned away from this responder."
               },
               "total_incidents_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "This responder's incidents that were escalated at least once."
               },
               "total_incidents_timeout_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "This responder's incidents escalated on timeout."
               },
               "total_incidents_manually_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "This responder's incidents escalated manually."
               },
               "total_interruptions": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Interruptions for this responder: notifications sent via app push, SMS, or voice call; consecutive notifications within 60 seconds count as one."
               },
               "total_notifications": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Total notifications sent to this responder."
               },
               "total_engaged_seconds": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "This responder's total engaged time in seconds: each incident contributes close time minus their acknowledgement time."
               },
               "total_seconds_to_ack": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "This responder's total time to acknowledgement in seconds: each incident contributes acknowledgement time minus assignment time."
               },
               "mean_seconds_to_ack": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "This responder's mean time to acknowledgement in seconds."
               },
               "acknowledgement_pct": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "This responder's acknowledgement rate (%): acknowledged incidents ÷ involved incidents × 100, rounded to two decimals."
               }
             }
           }
@@ -41459,7 +41504,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DimensionInsightItem"
-            }
+            },
+            "description": "Insight metric rows aggregated by the endpoint's dimension (account/team/channel); further split by hour bucket or time bucket when `split_hours` or `aggregate_unit` is enabled."
           }
         }
       },
@@ -41470,7 +41516,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResponderInsightItem"
-            }
+            },
+            "description": "Incident response metric rows aggregated by responder; further split by hour bucket or time bucket when `split_hours` or `aggregate_unit` is enabled."
           }
         }
       },
@@ -41480,27 +41527,34 @@
         "properties": {
           "incident_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Incident ID, unique within the account."
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "Incident title."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Incident description. Omitted when empty."
           },
           "team_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the team that owns the incident."
           },
           "team_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the team that owns the incident."
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the channel the incident belongs to."
           },
           "channel_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the channel the incident belongs to."
           },
           "progress": {
             "type": "string",
@@ -41511,42 +41565,142 @@
             "enum": [
               "Critical",
               "Warning",
-              "Info",
-              "Ok"
-            ]
+              "Info"
+            ],
+            "description": "Incident severity."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Incident creation time, as a Unix timestamp in seconds."
+          },
+          "alert_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of alerts aggregated into the incident."
+          },
+          "active_alert_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of alerts still active (not recovered)."
+          },
+          "alert_event_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of alert events associated with the incident; each report of an alert counts as one event."
           },
           "closed_by": {
             "type": "string",
             "enum": [
+              "",
               "auto",
               "timeout",
               "manually"
-            ]
+            ],
+            "description": "How the incident was closed: `auto`, `timeout`, or `manually`. Empty string while the incident is still open."
+          },
+          "owner_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Member ID of the incident owner."
+          },
+          "owner_name": {
+            "type": "string",
+            "description": "Display name of the incident owner."
+          },
+          "creator_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Person ID of the incident creator."
+          },
+          "creator_name": {
+            "type": "string",
+            "description": "Display name of the incident creator."
+          },
+          "closer_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Member ID of the person who closed the incident."
+          },
+          "closer_name": {
+            "type": "string",
+            "description": "Display name of the person who closed the incident."
           },
           "seconds_to_ack": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Seconds from incident creation to the first acknowledgement; 0 if never acknowledged."
           },
           "seconds_to_close": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Seconds from incident creation to close; 0 if not closed."
           },
           "engaged_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Total engaged time in seconds across acknowledged responders, each contributing close time minus their acknowledgement time; 0 if not closed."
           },
           "hours": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "work",
+              "off",
+              "sleep"
+            ],
+            "description": "Time-of-day bucket of the creation time in the account timezone: `work` = Mon–Fri 08:00–19:00, `sleep` = 23:00–08:00 daily, `off` = all other times."
+          },
+          "snoozed_before": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds until which the incident is snoozed."
+          },
+          "ever_muted": {
+            "type": "boolean",
+            "description": "Whether the incident was ever muted by flapping-based noise reduction."
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "frequent",
+              "rare"
+            ],
+            "description": "Frequency classification: `frequent` or `rare`."
           },
           "responders": {
             "type": "array",
+            "description": "Responders with per-person assignment and acknowledgement times.",
             "items": {
               "type": "object",
-              "description": "Responder entry (see Incident module for full shape)."
+              "properties": {
+                "person_id": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Person ID of the responder."
+                },
+                "assigned_at": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Assignment time, as a Unix timestamp in seconds."
+                },
+                "acknowledged_at": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Acknowledgement time, as a Unix timestamp in seconds; 0 if not acknowledged."
+                },
+                "person_name": {
+                  "type": "string",
+                  "description": "Responder display name. Omitted when empty."
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Responder email. Omitted when empty."
+                },
+                "as": {
+                  "type": "string",
+                  "description": "Responder's identity in an external chat tool (e.g. Slack); only present when backfilled by an external system."
+                }
+              }
             }
           },
           "assigned_to": {
@@ -41582,7 +41736,7 @@
                   "escalate",
                   "reopen"
                 ],
-                "description": "Assignment type."
+                "description": "Assignment type.\n| Value | Meaning |\n|---|---|\n| `assign` | Initial assignment when the incident is created manually. |\n| `reassign` | Re-assignment of an existing incident. |\n| `escalate` | Assignment triggered by escalation policy advancement. |\n| `reopen` | Assignment restarted from the first layer after the incident is reopened. |"
               },
               "assigned_at": {
                 "type": "integer",
@@ -41599,85 +41753,53 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Incident labels as key-value pairs. Omitted when empty."
           },
           "fields": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "Custom fields of the incident. Omitted when empty."
           },
           "notifications": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Total number of notifications sent."
           },
           "interruptions": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Number of interruptions: notifications sent via app push, SMS, or voice call; consecutive notifications to the same responder within 60 seconds count as one."
           },
           "assignments": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Number of assignments."
           },
           "reassignments": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Number of reassignments."
           },
           "acknowledgements": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Number of acknowledgements."
           },
           "escalations": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Total escalations, the sum of `timeout_escalations` and `manual_escalations`."
           },
           "timeout_escalations": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Escalations triggered by timeout."
           },
           "manual_escalations": {
             "type": "integer",
-            "format": "int64"
-          },
-          "creator_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "creator_name": {
-            "type": "string"
-          },
-          "owner_id": {
-            "type": "integer",
             "format": "int64",
-            "description": "Member ID of the incident owner."
-          },
-          "owner_name": {
-            "type": "string",
-            "description": "Display name of the incident owner."
-          },
-          "closer_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Member ID of the person who closed the incident."
-          },
-          "closer_name": {
-            "type": "string",
-            "description": "Display name of the person who closed the incident."
-          },
-          "snoozed_before": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unix timestamp in seconds until which the incident is snoozed."
-          },
-          "ever_muted": {
-            "type": "boolean",
-            "description": "Whether the incident has ever been muted."
-          },
-          "frequency": {
-            "type": "string",
-            "enum": [
-              "frequent",
-              "rare"
-            ],
-            "description": "Incident frequency classification."
+            "description": "Manually triggered escalations."
           }
         }
       },
@@ -41690,7 +41812,8 @@
             "description": "Total matching incidents."
           },
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether another page of results is available."
           },
           "search_after_ctx": {
             "type": "string",
@@ -41700,7 +41823,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/IncidentRawItem"
-            }
+            },
+            "description": "Incident items."
           }
         }
       },
@@ -41717,11 +41841,13 @@
           },
           "total_alert_cnt": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Total number of alerts in this label-value bucket."
           },
           "total_alert_event_cnt": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Total number of raw alert events in this label-value bucket."
           }
         }
       },
@@ -41732,7 +41858,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/InsightAlertByLabelItem"
-            }
+            },
+            "description": "Top-K statistic rows aggregated by the requested label's values."
           }
         }
       },
@@ -41761,7 +41888,7 @@
               "incident",
               "maintenance"
             ],
-            "description": "Event type."
+            "description": "Change type. `incident` is an unplanned outage; `maintenance` is a planned maintenance. The type determines which status values are valid."
           },
           "title": {
             "type": "string",
@@ -41888,7 +42015,7 @@
               "full_outage",
               "under_maintenance"
             ],
-            "description": "Current component status resulting from the event."
+            "description": "Current status of the component affected by the change. Severity increases: `operational` < `degraded` = `under_maintenance` < `partial_outage` < `full_outage`; incident-type changes may use the first four, maintenance-type changes only `operational` and `under_maintenance`.\n| Value | Meaning |\n|---|---|\n| `operational` | Operating normally. |\n| `degraded` | Degraded performance. |\n| `partial_outage` | Partial outage. |\n| `full_outage` | Full outage. |\n| `under_maintenance` | Under maintenance. |"
           }
         }
       },
@@ -41920,7 +42047,7 @@
               "ongoing",
               "completed"
             ],
-            "description": "Event status after this update. Omitted when the update does not change the overall status."
+            "description": "Change status after this update. Omitted when the update does not change the overall status. The first four values apply to incident-type changes, the last three to maintenance-type changes.\n| Value | Meaning |\n|---|---|\n| `investigating` | Investigating (incident). |\n| `identified` | Root cause identified (incident). |\n| `monitoring` | Fix deployed, monitoring (incident). |\n| `resolved` | Resolved (incident). |\n| `scheduled` | Scheduled (maintenance). |\n| `ongoing` | In progress (maintenance). |\n| `completed` | Completed (maintenance). |"
           },
           "description": {
             "type": "string",
@@ -41975,7 +42102,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/StatusPageChangeItem"
-            }
+            },
+            "description": "Status page changes (incidents/maintenances) matching the filters."
           }
         }
       },
@@ -42155,7 +42283,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ExportedStatusPageSubscriberItem"
-            }
+            },
+            "description": "Subscribers on the current page."
           }
         }
       },
@@ -42179,7 +42308,7 @@
               "email",
               "im"
             ],
-            "description": "Subscription delivery method."
+            "description": "Subscription notification method. `email` is email subscription (public pages); `im` is IM subscription (internal pages). Determined by the page type."
           },
           "components": {
             "type": "array",
@@ -42436,7 +42565,7 @@
               "history",
               "subscribers"
             ],
-            "description": "Current migration phase."
+            "description": "Current migration phase. `structure` imports the page structure (sections and components); `history` imports historical incidents, maintenances, and incident templates; `subscribers` imports email subscribers."
           },
           "status": {
             "type": "string",
@@ -42447,7 +42576,7 @@
               "failed",
               "cancelled"
             ],
-            "description": "Current job status."
+            "description": "Current job status.\n| Value | Meaning |\n|---|---|\n| `pending` | Created, waiting to run. |\n| `running` | In progress. |\n| `completed` | Finished successfully. |\n| `failed` | Failed; the `error` field holds the reason. |\n| `cancelled` | Canceled by request. |"
           },
           "progress": {
             "$ref": "#/components/schemas/StatusPageMigrationProgress",
@@ -42493,22 +42622,28 @@
             "description": "Steps completed so far."
           },
           "components_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of components imported from the source status page."
           },
           "sections_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of sections (Atlassian component groups) imported from the source status page."
           },
           "incidents_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of historical incidents imported."
           },
           "maintenances_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of scheduled maintenances imported."
           },
           "subscribers_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of email subscribers successfully imported."
           },
           "templates_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of incident templates successfully imported; templates that fail are skipped and recorded in `warnings`."
           },
           "subscribers_skipped": {
             "type": "integer",
@@ -42633,7 +42768,7 @@
                     "ongoing",
                     "completed"
                   ],
-                  "description": "Change status after this update. Omit if the overall status does not change."
+                  "description": "Change status after this update. May be omitted when the overall status does not change. The first four values apply to incident-type changes, the last three to maintenance-type changes.\n| Value | Meaning |\n|---|---|\n| `investigating` | Investigating (incident). |\n| `identified` | Root cause identified (incident). |\n| `monitoring` | Fix deployed, monitoring (incident). |\n| `resolved` | Resolved (incident). |\n| `scheduled` | Scheduled (maintenance). |\n| `ongoing` | In progress (maintenance). |\n| `completed` | Completed (maintenance). |"
                 },
                 "description": {
                   "type": "string",
@@ -42720,7 +42855,7 @@
               "ongoing",
               "completed"
             ],
-            "description": "New event status. Must match the event type. When the status transitions to `resolved` or `completed`, all referenced components must become `operational`."
+            "description": "Change status after this update; must match the change type. When transitioning to `resolved` or `completed`, all affected components must be back to `operational`.\n| Value | Meaning |\n|---|---|\n| `investigating` | Investigating (incident). |\n| `identified` | Root cause identified (incident). |\n| `monitoring` | Fix deployed, monitoring (incident). |\n| `scheduled` | Scheduled (maintenance). |\n| `ongoing` | In progress (maintenance). |"
           },
           "description": {
             "type": "string",
@@ -42842,25 +42977,31 @@
           },
           "creator_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of the user who created the rule."
           },
           "creator_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the user who created the rule."
           },
           "updater_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of the user who last modified the rule."
           },
           "updater_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the user who last modified the rule."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Creation time, as a Unix timestamp in seconds."
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Last modification time, as a Unix timestamp in seconds."
           },
           "triggered": {
             "type": "boolean",
@@ -42896,22 +43037,26 @@
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "description": "Result fields that become alert event labels — identical label sets collapse into one alert; must not overlap `value_fields`; applies to table-shaped results (SQL/ES-style datasources)."
                 },
                 "value_fields": {
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "description": "Numeric result fields used in threshold evaluation (referenced as `$A.<field>` in threshold expressions); required for threshold checks unless the datasource is `prometheus`/`loki`/`victorialogs`; field names must not contain `.`."
                 },
                 "args": {
                   "type": "object",
                   "additionalProperties": {
                     "type": "string"
-                  }
+                  },
+                  "description": "Datasource-specific query options keyed by the `<datasource>.<option>` convention (e.g. `es.type`, `tencent_cls.limit`); most datasources need none."
                 }
               }
-            }
+            },
+            "description": "Query list with at least one entry; each needs a unique `name` (`R` and `__all__` are reserved) and a non-empty, non-duplicate `expr`."
           },
           "relate_queries": {
             "type": "array",
@@ -42931,7 +43076,8 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "string"
-                  }
+                  },
+                  "description": "Datasource-specific options for the auxiliary query, same convention as `queries[].args`."
                 }
               }
             }
@@ -42941,25 +43087,32 @@
             "description": "Threshold check configuration.",
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether threshold checking is enabled."
               },
               "alerting_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Number of consecutive evaluations that must satisfy the condition before alerting; minimum 1."
               },
               "recovery_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Number of consecutive evaluations that must satisfy the recovery condition before resolving; minimum 1."
               },
               "push_recovery_event": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether to push a recovery event notification when the alert resolves."
               },
               "critical": {
-                "type": "string"
+                "type": "string",
+                "description": "Critical threshold expression referencing query results via `$<query>` or `$<query>.<value_field>`, e.g. `$A > 90`; at least one severity must be configured."
               },
               "warning": {
-                "type": "string"
+                "type": "string",
+                "description": "Warning threshold expression, same syntax as `critical`."
               },
               "info": {
-                "type": "string"
+                "type": "string",
+                "description": "Info threshold expression, same syntax as `critical`."
               },
               "recovery": {
                 "type": "object",
@@ -42970,12 +43123,15 @@
                       "invert",
                       "threshold",
                       "ql"
-                    ]
+                    ],
+                    "description": "Recovery mode: `invert` = resolve when the alert expression no longer holds (`condition` stays empty); `threshold` = resolve when the `condition` threshold expression holds; `ql` = resolve when the `condition` query expression evaluates true."
                   },
                   "condition": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Recovery condition expression; required when `mode` is `threshold` or `ql`, and must be empty for `invert`."
                   }
-                }
+                },
+                "description": "Recovery evaluation configuration for threshold checks."
               }
             }
           },
@@ -42984,16 +43140,20 @@
             "description": "Any-data check configuration. Fires when the query returns any data rows.",
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether any-data checking is enabled: any returned data row triggers an alert."
               },
               "alerting_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Number of consecutive evaluations that must satisfy the condition before alerting; minimum 1."
               },
               "recovery_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Number of consecutive evaluations that must satisfy the recovery condition before resolving; minimum 1."
               },
               "push_recovery_event": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether to push a recovery event notification when the alert resolves."
               },
               "severity": {
                 "type": "string",
@@ -43001,7 +43161,8 @@
                   "Critical",
                   "Warning",
                   "Info"
-                ]
+                ],
+                "description": "Severity of any-data alert events; case-sensitive."
               },
               "recovery": {
                 "type": "object",
@@ -43023,7 +43184,8 @@
                     "type": "object",
                     "additionalProperties": {
                       "type": "string"
-                    }
+                    },
+                    "description": "Datasource-specific options for the recovery query, same convention as `queries[].args`; required for Elasticsearch datasources when `mode` is `ql`."
                   }
                 }
               }
@@ -43034,16 +43196,20 @@
             "description": "No-data check configuration.",
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether no-data checking is enabled: a previously-seen series that stops returning data triggers an alert."
               },
               "alerting_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Number of consecutive evaluations that must satisfy the condition before alerting; minimum 1."
               },
               "recovery_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Number of consecutive evaluations that must satisfy the recovery condition before resolving; minimum 1."
               },
               "push_recovery_event": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether to push a recovery event notification when the alert resolves."
               },
               "severity": {
                 "type": "string",
@@ -43051,11 +43217,25 @@
                   "Critical",
                   "Warning",
                   "Info"
-                ]
+                ],
+                "description": "Severity of no-data alert events; case-sensitive."
               },
               "resolve_timeout": {
                 "type": "integer",
                 "description": "Auto-resolve after N seconds."
+              },
+              "alert_on_empty_result": {
+                "type": "boolean",
+                "description": "Whether to trigger an alert when every query returns an empty result."
+              },
+              "alert_on_empty_result_severity": {
+                "type": "string",
+                "enum": [
+                  "Critical",
+                  "Warning",
+                  "Info"
+                ],
+                "description": "Severity of empty-result alerts, case-sensitive; only effective when `alert_on_empty_result` is enabled."
               }
             }
           }
@@ -43188,7 +43368,7 @@
               "markdown"
             ],
             "default": "text",
-            "description": "Format for the description. Defaults to `text` when omitted or empty."
+            "description": "Format for the description. Defaults to `text` when omitted or empty. `text` = plain text; `markdown` = Markdown, rendered as Markdown in alert details."
           },
           "description": {
             "type": "string",
@@ -43500,10 +43680,12 @@
         "properties": {
           "folder_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of the folder (grouping node)."
           },
           "folder_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Folder name; omitted by some endpoints (`omitempty`)."
           },
           "rule_total": {
             "type": "integer",
@@ -43543,7 +43725,8 @@
           },
           "account_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of the account that owns the rule."
           },
           "alert_rule_id": {
             "type": "integer",
@@ -43560,14 +43743,17 @@
           },
           "creator_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of the user who made this change (taken from the rule's `updater_id` at change time)."
           },
           "creator_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the user who made this change (taken from the rule's `updater_name` at change time)."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "When this audit record was produced, as a Unix timestamp in seconds; equals the rule's `updated_at` at change time."
           }
         }
       },
@@ -43591,7 +43777,8 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of the datasource type record."
           },
           "name": {
             "type": "string",
@@ -43631,11 +43818,13 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of this snapshot record."
           },
           "account_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "ID of the account this snapshot belongs to."
           },
           "num": {
             "type": "integer",
@@ -43709,41 +43898,49 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule name, up to 128 characters when imported."
           },
           "labels": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Custom label key-value pairs attached to alert events produced by this rule."
           },
           "ds_type": {
-            "type": "string"
+            "type": "string",
+            "description": "Datasource type ident, e.g. `prometheus`; must be a datasource type (`ident`) that exists in the import target environment."
           },
           "ds_list": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Datasource name list with wildcard support; merged with `ds_ids` to decide which datasources the rule monitors — must be maintained by hand if a datasource is renamed."
           },
           "ds_ids": {
             "type": "array",
             "items": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "description": "Datasource ID list, merged with `ds_list`; references by ID and is therefore immune to datasource renames."
           },
           "enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the rule is enabled; rules imported as disabled are not evaluated."
           },
           "debug_log_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to emit debug logs for this rule's evaluations; enable when troubleshooting."
           },
           "rule_configs": {
             "$ref": "#/components/schemas/RuleConfigs"
           },
           "cron_pattern": {
-            "type": "string"
+            "type": "string",
+            "description": "Evaluation schedule as a 6-field cron expression (seconds included) or `@every <duration>` (an integral number of seconds, at least 1s); `CRON_TZ=`/`TZ=` prefixes are rejected — set the timezone in `timezone` instead."
           },
           "timezone": {
             "type": "string",
@@ -43751,37 +43948,44 @@
             "default": "Asia/Shanghai"
           },
           "delay_seconds": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Query time offset in seconds: each evaluation reads data as of `schedule time − delay_seconds` to tolerate ingestion lag; `0` means no offset."
           },
           "enabled_times": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EnabledTime"
-            }
+            },
+            "description": "Effective time windows; each entry has `days` (0–6, 0 = Sunday) and `stime`/`etime` (`HH:MM`), interpreted in the rule's `timezone`; an empty list disables the rule."
           },
           "annotations": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Custom annotation key-value pairs attached to alert events; keys must not start with `$` (reserved for query field references)."
           },
           "description_type": {
             "type": "string",
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "description": "Format of `description`, `text` or `markdown`; treated as `text` when omitted."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Rule description in the format given by `description_type`, shown with alert events."
           },
           "repeat_interval": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Interval in seconds between repeated notifications for a firing alert; values below 1 fall back to the default of 3600."
           },
           "repeat_total": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Maximum number of repeated notifications for the same alert; values below 1 fall back to the default of 3."
           }
         }
       },
@@ -43887,25 +44091,32 @@
             "description": "Custom query parameters in `key=value` format."
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded CA certificate used to verify the server certificate."
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`."
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client private key; must be configured together with `tls_cert`."
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to skip server certificate verification (insecure, for self-signed setups only)."
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty."
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`."
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint."
           }
         }
       },
@@ -43914,46 +44125,58 @@
         "description": "Loki datasource configuration. TLS fields are inherited from TLSClientConfig.",
         "properties": {
           "basic_auth_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether HTTP Basic Auth is enabled; when `false`, `basic_auth_username`/`basic_auth_password` are ignored."
           },
           "basic_auth_username": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth username, effective when `basic_auth_enabled` is `true`."
           },
           "basic_auth_password": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth password, effective when `basic_auth_enabled` is `true`."
           },
           "headers": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Custom HTTP headers added to every request, each entry formatted as `Key: Value`; usable for tenancy headers such as `X-Scope-OrgID`."
           },
           "params": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Custom query parameters appended to every request URL, each entry formatted as `key=value`."
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded CA certificate used to verify the server certificate."
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`."
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client private key; must be configured together with `tls_cert`."
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to skip server certificate verification (insecure, for self-signed setups only)."
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty."
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`."
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint."
           }
         }
       },
@@ -43962,10 +44185,12 @@
         "description": "MySQL datasource configuration. TLS fields are inherited from TLSClientConfig.",
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "MySQL authentication username."
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "MySQL authentication password."
           },
           "open_conns": {
             "type": "integer",
@@ -43992,28 +44217,35 @@
               "require",
               "verify-full"
             ],
-            "description": "TLS mode for the MySQL connection. Empty keeps the legacy per-field TLS behavior."
+            "description": "TLS mode for the MySQL connection. Empty keeps the legacy per-field TLS behavior. `disable` = no TLS (all `tls_*` fields are cleared on save); `require` = TLS without server certificate verification; `verify-full` = TLS with full server verification (CA chain and hostname). MySQL has no `verify-ca` — verifying the CA implies verifying the hostname."
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded CA certificate used to verify the server certificate; only allowed when `tls_mode` is `verify-full` (or empty legacy mode)."
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`."
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client private key; must be configured together with `tls_cert`."
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to skip server certificate verification; derived from `tls_mode` when set (`require` → `true`, `verify-full` → `false`) — only manually effective under legacy empty `tls_mode`."
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty."
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`."
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint."
           }
         }
       },
@@ -44022,10 +44254,12 @@
         "description": "Oracle datasource configuration.",
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "Oracle authentication username."
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "Oracle authentication password."
           },
           "options": {
             "type": "object",
@@ -44035,18 +44269,22 @@
             "description": "Extra connection options as key-value pairs."
           },
           "open_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum number of open connections in the pool; `0` or omitted uses the default of 32."
           },
           "idle_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum number of idle connections in the pool; `0` or omitted uses the default of 4."
           },
           "lifetime_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Maximum connection lifetime in seconds; `0` or omitted uses the default of 600 (10 minutes)."
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds)."
           }
         }
       },
@@ -44055,24 +44293,30 @@
         "description": "PostgreSQL datasource configuration.",
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "PostgreSQL authentication username."
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "PostgreSQL authentication password."
           },
           "open_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum number of open connections in the pool; `0` or omitted uses the default of 32."
           },
           "idle_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum number of idle connections in the pool; `0` or omitted uses the default of 4."
           },
           "lifetime_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Maximum connection lifetime in seconds; `0` or omitted uses the default of 600 (10 minutes)."
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds)."
           },
           "ssl_mode": {
             "type": "string",
@@ -44082,16 +44326,19 @@
               "verify-ca",
               "verify-full"
             ],
-            "description": "SSL mode for the PostgreSQL connection. Empty keeps the legacy behavior inferred from `tls_ca`."
+            "description": "SSL mode for the PostgreSQL connection. Empty keeps the legacy behavior inferred from `tls_ca`. `disable` = no TLS (all `tls_*` fields are cleared on save); `require` = TLS without server certificate verification (`tls_ca` not allowed); `verify-ca` = verify the server certificate CA chain but not the hostname; `verify-full` = verify both CA chain and hostname."
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded CA certificate used to verify the server certificate; used with `ssl_mode` `verify-ca`/`verify-full` and rejected under `require`."
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`."
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client private key; must be configured together with `tls_cert`."
           }
         }
       },
@@ -44104,24 +44351,30 @@
             "description": "Default database for authentication."
           },
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "ClickHouse authentication username."
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "ClickHouse authentication password."
           },
           "open_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum number of open connections in the pool; `0` or omitted uses the default of 32."
           },
           "idle_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum number of idle connections in the pool; `0` or omitted uses the default of 4."
           },
           "lifetime_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Maximum connection lifetime in seconds; `0` or omitted uses the default of 600 (10 minutes)."
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds)."
           },
           "max_execution_seconds": {
             "type": "integer",
@@ -44134,28 +44387,36 @@
             "description": "Dial timeout in milliseconds."
           },
           "tls_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether TLS is enabled; when `false`, all `tls_*` fields are cleared before saving."
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded CA certificate used to verify the server certificate."
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`."
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client private key; must be configured together with `tls_cert`."
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to skip server certificate verification (insecure, for self-signed setups only)."
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty."
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`."
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint."
           }
         }
       },
@@ -44173,7 +44434,8 @@
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds)."
           },
           "cloud_id": {
             "type": "string",
@@ -44188,23 +44450,27 @@
             "description": "Username for `self-managed` deployment."
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "Authentication password for self-managed clusters; ignored when `service_token` is set."
           },
           "service_token": {
             "type": "string",
             "description": "Service token; overrides username/password if set."
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded CA certificate used to verify the Elasticsearch server certificate."
           },
           "certificate_fingerprint": {
-            "type": "string"
+            "type": "string",
+            "description": "SHA-256 fingerprint of the Elasticsearch CA certificate, used to verify the server chain (the recommended check for ES 8 default security)."
           },
           "headers": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Custom HTTP headers added to every request, each entry formatted as `Key: Value`."
           }
         }
       },
@@ -44234,46 +44500,58 @@
         "description": "VictoriaLogs datasource configuration. TLS fields are inherited from TLSClientConfig.",
         "properties": {
           "basic_auth_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether HTTP Basic Auth is enabled; when `false`, `basic_auth_username`/`basic_auth_password` are ignored."
           },
           "basic_auth_username": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth username, effective when `basic_auth_enabled` is `true`."
           },
           "basic_auth_password": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth password, effective when `basic_auth_enabled` is `true`."
           },
           "headers": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Custom HTTP headers added to every request, each entry formatted as `Key: Value`; usable for tenancy headers such as `AccountID`/`ProjectID`."
           },
           "params": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Custom query parameters appended to every request URL, each entry formatted as `key=value`."
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded CA certificate used to verify the server certificate."
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`."
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM-encoded client private key; must be configured together with `tls_cert`."
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether to skip server certificate verification (insecure, for self-signed setups only)."
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty."
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`."
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint."
           }
         }
       },
@@ -44762,7 +45040,7 @@
               "popup",
               "tab"
             ],
-            "description": "How to open the trace link."
+            "description": "How to open the trace link. One of `popup` (open trace details in a popup) or `tab` (open in a new browser tab)."
           },
           "endpoint": {
             "type": "string",
@@ -44797,9 +45075,12 @@
               "flutter",
               "kotlin-multiplatform",
               "roku",
-              "unity"
+              "unity",
+              "miniprogram",
+              "harmony",
+              "electron"
             ],
-            "description": "Application type."
+            "description": "Application type. Platform identifier, one of `browser` (web), `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`. Note: the create API also accepts `miniprogram`, `harmony`, and `electron`, and applications of those types appear in responses too (see Enum gaps)."
           },
           "client_token": {
             "type": "string",
@@ -44838,7 +45119,7 @@
               "disabled",
               "deleted"
             ],
-            "description": "Application status."
+            "description": "Application status. One of `enabled` (active, receiving data), `disabled` (deactivated), `deleted` (soft-delete marker; every query filters it out, so it never actually appears in responses)."
           },
           "created_by": {
             "type": "integer",
@@ -44867,16 +45148,19 @@
         "description": "Paginated list of RUM applications.",
         "properties": {
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether more pages exist; `true` when matching records remain beyond the current page."
           },
           "total": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Total number of applications matching the filter conditions."
           },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumApplicationItem"
-            }
+            },
+            "description": "RUM applications of the current page."
           }
         }
       },
@@ -44917,7 +45201,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumApplicationItem"
-            }
+            },
+            "description": "Application info items matching the requested `application_ids` (max 200, deduplicated)."
           }
         }
       },
@@ -44949,7 +45234,7 @@
               "harmony",
               "electron"
             ],
-            "description": "Application type."
+            "description": "Application type. Platform identifier, one of `browser` (web), `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`, `miniprogram` (WeChat mini program), `harmony` (HarmonyOS), `electron`."
           },
           "team_id": {
             "type": "integer",
@@ -45030,7 +45315,7 @@
               "harmony",
               "electron"
             ],
-            "description": "Application type. Omit to leave unchanged."
+            "description": "Application type. Omit to leave unchanged. Platform identifier, one of `browser` (web), `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`, `miniprogram` (WeChat mini program), `harmony` (HarmonyOS), `electron`."
           },
           "team_id": {
             "type": "integer",
@@ -45078,20 +45363,24 @@
         "properties": {
           "team_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "ID of the team owning this issue, copied from the owning application's `team_id` at issue creation."
           },
           "issue_id": {
             "type": "string",
             "description": "Unique issue ID."
           },
           "application_id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the RUM application this issue belongs to."
           },
           "application_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the owning application, resolved by `application_id` at query time (reflects the application's current name)."
           },
           "service": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the service that produced this issue, taken from the error event's `service` field."
           },
           "status": {
             "type": "string",
@@ -45100,7 +45389,8 @@
               "reviewed",
               "ignored",
               "resolved"
-            ]
+            ],
+            "description": "Triage status of the issue: `for_review`, `reviewed`, `ignored`, or `resolved`; soft-deleted (`deleted`) issues are never returned."
           },
           "error_count": {
             "type": "integer",
@@ -45118,58 +45408,72 @@
           },
           "age": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Time span between the first and most recent occurrence, in seconds. Note: the struct comment at `model/issue/issue.go:40` says millisecond, but the value is computed and consumed (severity rules) in seconds — the comment is stale."
           },
           "resolved_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Time the issue was marked resolved, Unix timestamp in milliseconds; 0 while unresolved."
           },
           "resolved_by": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Person ID of the user who marked the issue resolved; 0 while unresolved."
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Issue creation time (client time of the first error event), Unix timestamp in milliseconds."
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Time the issue was last updated, Unix timestamp in milliseconds."
           },
           "first_seen": {
             "type": "object",
             "properties": {
               "timestamp": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Client time of the first error event, Unix timestamp in milliseconds."
               },
               "version": {
-                "type": "string"
+                "type": "string",
+                "description": "Application version at first occurrence; empty string when the event carries no version."
               }
-            }
+            },
+            "description": "Information about the issue's first occurrence (time and application version)."
           },
           "last_seen": {
             "type": "object",
             "properties": {
               "timestamp": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Client time of the most recent error event, Unix timestamp in milliseconds."
               },
               "version": {
-                "type": "string"
+                "type": "string",
+                "description": "Application version at the most recent occurrence; empty string when the event carries no version."
               }
-            }
+            },
+            "description": "Information about the issue's most recent occurrence (time and application version)."
           },
           "error": {
             "type": "object",
             "properties": {
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "Normalized error message, truncated to at most 512 characters."
               },
               "type": {
-                "type": "string"
+                "type": "string",
+                "description": "Error type, from the error event's `error_type` field as reported by the SDK."
               }
-            }
+            },
+            "description": "Representative error of this issue, taken from the error event that created it."
           },
           "suspected_cause": {
             "type": "object",
@@ -45179,7 +45483,8 @@
                 "enum": [
                   "auto",
                   "user"
-                ]
+                ],
+                "description": "Origin of the cause: `auto` for system-determined, `user` for manually set."
               },
               "value": {
                 "type": "string",
@@ -45190,16 +45495,20 @@
                   "code.invalid_object_access",
                   "code.invalid_argument",
                   "unknown"
-                ]
+                ],
+                "description": "Suspected cause category. One of:\n\n| Value | Meaning |\n|---|---|\n| `api.failed_request` | API request failure (e.g. HTTP 4xx/5xx responses) |\n| `network.error` | Network connectivity error (offline, aborted requests, etc.) |\n| `code.exception` | Code exception (Syntax/Reference/Range and similar runtime errors) |\n| `code.invalid_object_access` | Invalid object access (e.g. reading a property of `undefined`/`null`) |\n| `code.invalid_argument` | Invalid argument passed to a function |\n| `unknown` | Cause could not be determined |"
               },
               "reason": {
-                "type": "string"
+                "type": "string",
+                "description": "Explanation for the cause determination, generated only by AI analysis; empty string when AI is disabled or analysis has not run."
               },
               "person_id": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "Person ID of the user who manually set the cause; 0 when `source` is `auto`."
               }
-            }
+            },
+            "description": "Suspected root cause analysis, determined automatically (rules or AI) or set manually by a user."
           },
           "regression": {
             "type": "object",
@@ -45217,7 +45526,7 @@
               "resolved_at": {
                 "type": "integer",
                 "format": "int64",
-                "description": "Timestamp of the previous resolution before the regression."
+                "description": "When the issue was resolved before this regression, as a Unix timestamp in milliseconds."
               }
             }
           },
@@ -45225,7 +45534,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Deduplicated list of application versions in which this issue has occurred; may contain an empty string for events without version info."
           },
           "severity": {
             "type": "string",
@@ -45341,13 +45651,16 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumIssueItem"
-            }
+            },
+            "description": "Issues of the current page."
           },
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether more pages exist; `true` when matching records remain beyond the current page."
           },
           "total": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Total number of issues matching the filter conditions."
           }
         }
       },
@@ -45382,7 +45695,7 @@
               "ignored",
               "resolved"
             ],
-            "description": "New status. Setting `resolved` records the resolution time and operator; switching away from `resolved` clears them."
+            "description": "New status. Setting `resolved` records the resolution time and operator; switching away from `resolved` clears them. One of `for_review` (pending triage), `reviewed`, `ignored`, `resolved`."
           },
           "suspected_cause": {
             "type": "string",
@@ -45394,7 +45707,7 @@
               "code.invalid_argument",
               "unknown"
             ],
-            "description": "New suspected cause; setting it marks the cause source as `user`, overriding the automatic classification."
+            "description": "New suspected cause; setting it marks the cause source as `user`, overriding the automatic classification. One of:\n\n| Value | Meaning |\n|---|---|\n| `api.failed_request` | API request failure |\n| `network.error` | Network connectivity error |\n| `code.exception` | Code exception |\n| `code.invalid_object_access` | Invalid object access |\n| `code.invalid_argument` | Invalid argument |\n| `unknown` | Unknown cause |"
           }
         }
       },
@@ -45418,7 +45731,7 @@
           },
           "type": {
             "type": "string",
-            "description": "Platform type. Defaults to `browser` when omitted.",
+            "description": "Platform type. Defaults to `browser` when omitted. One of `browser` (JavaScript sourcemaps), `android` (ProGuard/R8 mappings or NDK native symbols, distinguishable via `kind`), `ios` (dSYM symbol files).",
             "enum": [
               "browser",
               "android",
@@ -45553,7 +45866,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SourcemapItem"
-            }
+            },
+            "description": "Sourcemap records of the current page (including iOS dSYM and miniprogram symbol files)."
           }
         }
       },
@@ -45903,7 +46217,7 @@
               "zh-CN",
               "en-US"
             ],
-            "description": "Locale"
+            "description": "Locale. One of: `zh-CN` (Simplified Chinese), `en-US` (English); other values are rejected with a 400."
           },
           "time_zone": {
             "type": "string",
@@ -46138,7 +46452,7 @@
               "zh-CN",
               "en-US"
             ],
-            "description": "New locale preference."
+            "description": "New locale preference. One of: `zh-CN` (Simplified Chinese), `en-US` (English); other values are rejected with a 400."
           },
           "time_zone": {
             "type": "string",
@@ -46380,17 +46694,20 @@
         "properties": {
           "team_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "Team ID."
           },
           "team_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Team name."
           },
           "person_ids": {
             "type": "array",
             "items": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "description": "Array of person IDs belonging to the team; empty array (never null) when the team has no members."
           }
         }
       },
@@ -46405,7 +46722,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TeamBriefItem"
-            }
+            },
+            "description": "Array of brief team info for the matched `team_ids`; may be null when no ID matches."
           }
         }
       },
@@ -46476,7 +46794,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TeamItem"
-            }
+            },
+            "description": "Array of teams for the current page, used with `p`, `limit` and `total` for pagination; empty array on an empty page."
           }
         }
       },
@@ -46702,7 +47021,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RoleItem"
-            }
+            },
+            "description": "Array of roles; includes account roles plus built-in global roles unless `no_global=true`; empty array when no results."
           }
         }
       },
@@ -46804,7 +47124,7 @@
               "read",
               "manage"
             ],
-            "description": "Whether this is a read or manage permission."
+            "description": "Whether this is a read or manage permission. `read`: view-only permission (read/list/query); `manage`: administrative permission covering mutations (create, update, delete, configure)."
           },
           "description": {
             "type": "string",
@@ -46843,7 +47163,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PermissionItem"
-            }
+            },
+            "description": "Array of permission items: system-level permissions plus the caller's account-scoped custom-menu permissions (never other tenants' rows)."
           }
         }
       },
@@ -46888,7 +47209,7 @@
               "menu",
               "url"
             ],
-            "description": "Factor type."
+            "description": "Factor type. `api`: backend API factor — `factor_name` is the API name (e.g. `skill:write:upload`), enforced at the gateway; `button`: UI action factor, used by the role-config page to render action toggles; `visit`: page-visit factor (custom menu pages use this type); `menu`: menu-visibility factor (legacy, no current seed data); `url`: page route-path factor (legacy, no current seed data)."
           }
         }
       },
@@ -47048,10 +47369,12 @@
               "type": "object",
               "properties": {
                 "Key": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Name of a URL path parameter (the `:xxx` placeholder in the route)."
                 },
                 "Value": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "The actual value of that path parameter in this request."
                 }
               }
             },
@@ -47130,7 +47453,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AuditOperationTypeItem"
-            }
+            },
+            "description": "Array of all auditable operation types (only APIs flagged for audit); always an array, possibly empty."
           }
         }
       },
@@ -47172,7 +47496,7 @@
               "single_select",
               "text"
             ],
-            "description": "Field input type."
+            "description": "Field type.\n| Value | Meaning |\n|---|---|\n| `checkbox` | Checkbox; value is a bool, options are not supported. |\n| `multi_select` | Multi-select; value is a string array, each element must be one of options. |\n| `single_select` | Single-select; value is a string from options. |\n| `text` | Free text; value is a string. |"
           },
           "value_type": {
             "type": "string",
@@ -47181,7 +47505,7 @@
               "bool",
               "float"
             ],
-            "description": "Stored value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`."
+            "description": "Value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`. `float` is reserved and never occurs today."
           },
           "options": {
             "type": [
@@ -47356,7 +47680,7 @@
               "bool",
               "float"
             ],
-            "description": "Stored value type. `checkbox` requires `bool`; `single_select`/`multi_select`/`text` require `string`. Immutable after creation."
+            "description": "Value type. `checkbox` requires `bool`; all other types require `string`. Immutable after creation. `float` is a reserved value currently rejected for every `field_type`."
           },
           "options": {
             "type": "array",
@@ -47488,7 +47812,7 @@
             "enum": [
               "query_result.v1"
             ],
-            "description": "Public result-contract version. It is independent of the internal monit-edge query protocol version."
+            "description": "Public result-contract version. It is independent of the internal monit-edge query protocol version. Fixed at `query_result.v1`, which defines the structure of the `result` field."
           },
           "result": {
             "$ref": "#/components/schemas/QueryResult"
@@ -47528,7 +47852,8 @@
             "type": "string",
             "enum": [
               "frames"
-            ]
+            ],
+            "description": "Result-kind discriminator, always `frames`, indicating the `frames` payload of typed table/time-series frames."
           },
           "frames": {
             "type": "array",
@@ -47552,13 +47877,15 @@
             "enum": [
               "table",
               "time_series"
-            ]
+            ],
+            "description": "Frame type: `table` for a generic table, `time_series` for a series (exactly one time field and one float field)."
           },
           "fields": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/QueryField"
-            }
+            },
+            "description": "Columns of the frame; all fields share the same `values` length and row i is composed of each field's `values[i]`."
           }
         }
       },
@@ -47572,7 +47899,8 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Column name; on a time-series float field, series are distinguished by `labels` and `name` is usually the metric name."
           },
           "type": {
             "type": "string",
@@ -47580,7 +47908,8 @@
               "string",
               "float",
               "time"
-            ]
+            ],
+            "description": "Value type governing `values` encoding: `string` = strings or null, `float` = numbers or `NaN`/`±Inf` strings or null, `time` = RFC 3339 Nano strings or null."
           },
           "labels": {
             "type": "object",
@@ -47603,7 +47932,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "description": "All values of this column in row order; length matches the other fields in the frame."
           }
         }
       },
@@ -47618,7 +47948,8 @@
             "type": "string",
             "enum": [
               "records"
-            ]
+            ],
+            "description": "Result-kind discriminator, always `records`, indicating the `records` payload of schemaless record objects."
           },
           "records": {
             "type": "array",
@@ -47648,7 +47979,8 @@
             "type": "string",
             "enum": [
               "samples"
-            ]
+            ],
+            "description": "Result-kind discriminator, always `samples`, indicating the `samples` payload of labeled instant samples."
           },
           "samples": {
             "type": "array",
@@ -47670,7 +48002,8 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "The sample's full label set; may be an empty object but is always present."
           },
           "value": {
             "description": "Finite numeric value or a JSON-safe representation of a non-finite float.",
@@ -47818,7 +48151,7 @@
                     "same_window_yesterday",
                     "same_window_last_week"
                   ],
-                  "description": "Only meaningful for compare-style methods. Defaults to `previous_window`."
+                  "description": "Only meaningful for compare-style methods. Defaults to `previous_window`. `previous_window` = the equal-length window immediately before the current window; `same_window_yesterday` = the current window shifted back 24 hours; `same_window_last_week` = the current window shifted back 7 days."
                 }
               }
             }
@@ -47919,10 +48252,12 @@
             "description": "Resolved target. Omitted when `target_kind` was not supplied and the locator could not be uniquely inferred.",
             "properties": {
               "kind": {
-                "type": "string"
+                "type": "string",
+                "description": "Resolved target kind, e.g. `host` or `mysql`; matches the `target_kind` inferred from or given in the request."
               },
               "locator": {
-                "type": "string"
+                "type": "string",
+                "description": "Echo of the target locator from the request."
               }
             },
             "x-flashduty-preserve-absence": true
@@ -47964,10 +48299,12 @@
                   "forward_failed",
                   "invalid_tool_result",
                   "ambiguous_target_kind"
-                ]
+                ],
+                "description": "Request-level error code: `target_unavailable` target unreachable, `timeout` resolution timed out, `forward_failed` cross-instance forwarding failed, `invalid_tool_result` agent returned an invalid result, `ambiguous_target_kind` target kind not uniquely inferable."
               },
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "Human-readable error detail."
               },
               "target_kinds": {
                 "type": "array",
@@ -48035,10 +48372,12 @@
             "description": "Resolved target. Omitted when `target_kind` was not supplied and the locator could not be uniquely inferred.",
             "properties": {
               "kind": {
-                "type": "string"
+                "type": "string",
+                "description": "Resolved target kind, e.g. `host` or `mysql`; matches the `target_kind` inferred from or given in the request."
               },
               "locator": {
-                "type": "string"
+                "type": "string",
+                "description": "Echo of the target locator from the request."
               }
             },
             "x-flashduty-preserve-absence": true
@@ -48092,7 +48431,8 @@
                       "description": "Common WebAPI codes: `timeout`, `target_unavailable`, `invalid_tool_result`, `internal`, `invalid_args`, `unsupported_syntax`, `path_not_found`, and `catalog_changed`. Agent-specific tool errors may also be returned unchanged."
                     },
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Human-readable detail for this tool's failure; agent-side messages may be forwarded verbatim."
                     }
                   },
                   "x-flashduty-preserve-absence": true
@@ -48110,17 +48450,20 @@
                   "target_unavailable",
                   "forward_failed",
                   "ambiguous_target_kind"
-                ]
+                ],
+                "description": "Request-level error code: `target_unavailable` target unreachable, `forward_failed` cross-instance forwarding failed, `ambiguous_target_kind` target kind not uniquely inferable."
               },
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "Human-readable error detail."
               },
               "target_kinds": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 },
-                "x-flashduty-preserve-absence": true
+                "x-flashduty-preserve-absence": true,
+                "description": "Returned only when `code` is `ambiguous_target_kind`, listing the candidate target kinds matched by the locator; omitted otherwise."
               }
             },
             "x-flashduty-preserve-absence": true
@@ -48185,7 +48528,8 @@
                   "description": "Last route-projection upsert time, Unix seconds. Treat as 'most recently observed', not a live-online indicator."
                 }
               }
-            }
+            },
+            "description": "The current page of invocable targets, sorted ascending by `target_locator`."
           },
           "total": {
             "type": "integer",
@@ -48341,7 +48685,7 @@
           },
           "change_status": {
             "type": "string",
-            "description": "Lifecycle status of the change event.",
+            "description": "Lifecycle status of the change event, reported by the change source as execution progresses.\n| Value | Meaning |\n|---|---|\n| `Planned` | Planned, not started. |\n| `Ready` | Ready for execution. |\n| `Processing` | Being executed. |\n| `Canceled` | Canceled. |\n| `Done` | Completed. |",
             "enum": [
               "Planned",
               "Ready",
@@ -48846,7 +49190,7 @@
           },
           "type": {
             "type": "string",
-            "description": "Visibility type of the status page.",
+            "description": "Page visibility type. `public` pages are accessible to anyone and use email subscriptions; `internal` pages are restricted to account members and use IM subscriptions.",
             "enum": [
               "public",
               "internal"
@@ -48882,7 +49226,7 @@
           },
           "date_view": {
             "type": "string",
-            "description": "How the timeline is displayed.",
+            "description": "How the timeline displays change dates. `calendar` uses a calendar view; `list` uses a list view.",
             "enum": [
               "calendar",
               "list"
@@ -48890,7 +49234,7 @@
           },
           "display_uptime_mode": {
             "type": "string",
-            "description": "How uptime is displayed.",
+            "description": "How uptime is displayed. `chart_and_percentage` shows both the uptime chart and the percentage figure; `chart` shows only the chart; `none` hides uptime entirely.",
             "enum": [
               "chart_and_percentage",
               "chart",
@@ -49967,7 +50311,7 @@
         "properties": {
           "scope": {
             "type": "string",
-            "description": "RUM data scope to query.",
+            "description": "RUM data scope to query. One of:\n\n| Value | Meaning |\n|---|---|\n| `session` | User sessions |\n| `view` | Page views |\n| `action` | User actions |\n| `error` | Error events |\n| `resource` | Resource loads |\n| `long_task` | Long tasks |\n| `vital` | Performance vitals (Web Vitals, etc.) |\n| `issue` | Aggregated error-tracking issues |\n| `sourcemap` | Sourcemap / symbol files |",
             "enum": [
               "session",
               "view",
@@ -50026,7 +50370,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FacetCountItem"
-            }
+            },
+            "description": "Facet values with their occurrence counts, sorted by count descending, capped at `limit` (max 100)."
           }
         }
       },
@@ -50074,7 +50419,7 @@
           },
           "value_type": {
             "type": "string",
-            "description": "Data type of the field value.",
+            "description": "Data type of the field value. One of:\n\n| Value | Meaning |\n|---|---|\n| `string` | String |\n| `number` | Numeric |\n| `boolean` | Boolean |\n| `array<string>` | Array of strings |\n| `array<number>` | Array of numbers |\n| `array<boolean>` | Array of booleans |",
             "enum": [
               "string",
               "number",
@@ -50086,7 +50431,7 @@
           },
           "show_type": {
             "type": "string",
-            "description": "Display type in the analytics UI.",
+            "description": "Display type in the analytics UI. One of `list` (shown as an enumerated value list; only this type supports facet counting) or `range` (filtered and shown as a numeric/time range).",
             "enum": [
               "list",
               "range"
@@ -50173,7 +50518,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumFieldItem"
-            }
+            },
+            "description": "RUM field definitions matching the `scopes` / `is_facet` filters, with names and descriptions localized to the request locale."
           }
         }
       },
@@ -50294,9 +50640,11 @@
               "android",
               "ios",
               "miniprogram",
-              "harmony"
+              "harmony",
+              "flutter",
+              "electron"
             ],
-            "description": "Source platform. Defaults to `browser` when omitted."
+            "description": "Source platform. Defaults to `browser` when omitted. One of `browser` (JS stacks, sourcemap-based), `android` (mapping/NDK symbolication), `ios` (dSYM symbolication), `miniprogram` (WeChat mini program, sourcemap-based), `harmony` (HarmonyOS, sourcemap/native symbolication), `flutter` (Flutter stack symbolication), `electron` (Electron, sourcemap-based)."
           },
           "service": {
             "type": "string",
@@ -50356,7 +50704,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SourcemapEnrichedFrame"
-            }
+            },
+            "description": "Error stack frames after symbolication (via sourcemap, dSYM, NDK symbol tables, etc.)."
           }
         }
       },
@@ -50568,7 +50917,7 @@
           },
           "date_view": {
             "type": "string",
-            "description": "How event dates are displayed. Omit to keep the existing value.",
+            "description": "How change dates are displayed. Leave empty to keep the current value. `calendar` uses a calendar view; `list` uses a list view.",
             "enum": [
               "calendar",
               "list"
@@ -50576,7 +50925,7 @@
           },
           "display_uptime_mode": {
             "type": "string",
-            "description": "How uptime is displayed. Omit to keep the existing value.",
+            "description": "How uptime is displayed. Leave empty to keep the current value. `chart_and_percentage` shows both chart and percentage; `chart` shows only the chart; `none` hides uptime.",
             "enum": [
               "chart_and_percentage",
               "chart",
@@ -50815,7 +51164,7 @@
           },
           "auth_mode": {
             "type": "string",
-            "description": "Authentication mode.",
+            "description": "Authentication mode. One of: `shared` (a single static credential saved on the resource and shared by all callers in the account; the default — an empty value behaves the same), `per_user_secret` (each user stores their own secret per `secret_schema`, injected per user at runtime), `per_user_oauth` (each user completes their own OAuth grant; discovery and registration run lazily on first use).",
             "enum": [
               "shared",
               "per_user_secret",
@@ -51099,7 +51448,7 @@
           },
           "environment_kind": {
             "type": "string",
-            "description": "Runtime environment kind. Omit or send an empty value for automatic selection.",
+            "description": "Runtime environment kind. Omit or send an empty value for automatic selection. One of: `cloud` (platform-hosted cloud sandbox), `byoc` (a self-hosted BYOC runner in the account, used with `environment_id`); automatic selection prefers an online BYOC runner and falls back to the cloud sandbox.",
             "enum": [
               "",
               "cloud",
@@ -51195,7 +51544,7 @@
               "person",
               "team"
             ],
-            "description": "Hidden session run scope."
+            "description": "Hidden session run scope. One of: `person` (personal rule, team_id=0, runs as the creator; disabled when the creator leaves the account), `team` (team rule, team_id>0, owned by the team and shared with its members; survives the creator leaving). Derived from the rule's team_id."
           },
           "cron_expr": {
             "type": "string",
@@ -51211,7 +51560,7 @@
           },
           "environment_kind": {
             "type": "string",
-            "description": "Runtime environment kind. Omit or send an empty value for automatic selection.",
+            "description": "Runtime environment kind. Omit or send an empty value for automatic selection. One of: `cloud` (platform-hosted cloud sandbox), `byoc` (self-hosted BYOC runner in the account); an empty value means automatic selection (prefers an online BYOC runner, falls back to the cloud sandbox).",
             "enum": [
               "",
               "cloud",
@@ -51382,7 +51731,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AutomationRuleItem"
-            }
+            },
+            "description": "Array of automation rules for the current page, used with `total` for pagination."
           }
         },
         "required": [
@@ -51543,7 +51893,7 @@
               "http_post",
               "oncall_incident"
             ],
-            "description": "Trigger kind."
+            "description": "Trigger kind. One of:\n| Value | Meaning |\n| --- | --- |\n| `schedule` | Fired by the rule's schedule trigger |\n| `debug` | Debug run (reserved; current rule runs never carry this kind) |\n| `manual` | Triggered manually by a user |\n| `http_post` | Fired via the rule's HTTP POST webhook |\n| `oncall_incident` | Fired by an on-call incident event |"
           },
           "occurrence_key": {
             "type": "string",
@@ -51561,7 +51911,7 @@
               "skipped",
               "abandoned"
             ],
-            "description": "Run status."
+            "description": "Run status. One of (the first three are in-flight, the rest terminal):\n| Value | Meaning |\n| --- | --- |\n| `queued` | Enqueued, waiting for a worker |\n| `running` | Executing |\n| `retrying` | An attempt failed and a retry is scheduled |\n| `succeeded` | Completed successfully |\n| `partial` | Partially succeeded (currently only produced by memory-consolidation runs; rule runs never reach it) |\n| `failed` | Terminal failure, no further retries |\n| `skipped` | Not executed (e.g. grace period expired, trigger or rule invalid); the reason is kept on the run record |\n| `abandoned` | Still in-flight past the stale threshold and swept as never-completed (e.g. worker died) |"
           },
           "attempts": {
             "type": "integer",
@@ -51693,7 +52043,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AutomationRunItem"
-            }
+            },
+            "description": "Array of run records for the given `rule_id`, filtered by the request's status/trigger-kind/time-range and paginated."
           }
         },
         "required": [
@@ -51767,7 +52118,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AutomationTemplateItem"
-            }
+            },
+            "description": "Array of built-in automation templates, with display text localized by the request `locale` (falling back to request headers)."
           }
         },
         "required": [
@@ -51903,7 +52255,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Event status.",
+            "description": "Event status. One of: `normal` (a live event included in the context fed to the model), `compressed` (folded into a compaction summary boundary event; no longer loaded for the model, kept as history only).",
             "enum": [
               "normal",
               "compressed"
@@ -52013,7 +52365,7 @@
           },
           "environment_kind": {
             "type": "string",
-            "description": "Pin the server to a specific BYOC runner (`environment_id` required). Omit or send empty for automatic selection; `cloud` is not supported for MCP servers.",
+            "description": "Pin the server to a specific BYOC runner (`environment_id` required). Omit or send empty for automatic selection; `cloud` is not supported for MCP servers. The only accepted value: `byoc` (a self-hosted BYOC runner in the account; the MCP server process runs on the customer's own infrastructure).",
             "enum": [
               "byoc"
             ]
@@ -52115,7 +52467,7 @@
           },
           "transport": {
             "type": "string",
-            "description": "Transport protocol.",
+            "description": "Transport protocol. One of: `stdio` (standard I/O to a local subprocess), `sse` (standalone SSE, the legacy MCP transport), `streamable-http` (the newer HTTP streaming transport).",
             "enum": [
               "stdio",
               "sse",
@@ -52196,7 +52548,7 @@
           },
           "auth_mode": {
             "type": "string",
-            "description": "Authentication mode.",
+            "description": "Authentication mode. One of: `shared` (a single static credential saved on the resource and shared by all callers in the account; the default — an empty value behaves the same), `per_user_secret` (each user stores their own secret per `secret_schema`, injected per user at runtime), `per_user_oauth` (each user completes their own OAuth grant; discovery and registration run lazily on first use).",
             "enum": [
               "shared",
               "per_user_secret",
@@ -52520,7 +52872,7 @@
               "person",
               "team"
             ],
-            "description": "Resolved run scope for this run; mirrors the rule's run_scope."
+            "description": "Resolved run scope for this run; mirrors the rule's run_scope. One of: `person` (personal rule, runs as its creator), `team` (team rule, runs under the owning team)."
           },
           "owner_id": {
             "type": "integer",
@@ -52676,7 +53028,7 @@
           },
           "entry_kind": {
             "type": "string",
-            "description": "Surface that created the session.",
+            "description": "Surface that created the session. One of:\n| Value | Meaning |\n| --- | --- |\n| `web` | Created from the web console |\n| `im` | Created from an IM client (IM bot / IM H5) |\n| `api` | Created via the public API |\n| `automation` | Created by an automation rule (unattended run) |\n| `subagent` | Child session spawned by a parent's agent_dispatch (audit label; at runtime it executes on the web tool surface) |",
             "enum": [
               "web",
               "im",
@@ -52720,12 +53072,13 @@
           },
           "access_source": {
             "type": "string",
-            "description": "How the caller received access to this session. Omitted when no access source is resolved.",
+            "description": "How the caller received access to this session. Omitted when no access source is resolved. One of:\n| Value | Meaning |\n| --- | --- |\n| `owner` | Caller is the session creator (full access) |\n| `team_member` | Caller belongs to the session's bound team (full access) |\n| `manager` | Manager grant (reserved; never produced by the current version) |\n| `share_link` | Granted via a valid share link (view/fork only; cannot continue or manage) |\n| `participant` | Same-account non-member granted via a participable team session (view/continue/fork only) |",
             "enum": [
               "owner",
               "team_member",
               "manager",
-              "share_link"
+              "share_link",
+              "participant"
             ]
           },
           "share_enabled": {
@@ -52749,7 +53102,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Lifecycle status.",
+            "description": "Lifecycle status. One of: `enabled` (active), `deleted` (soft-deleted, no longer accessible).",
             "enum": [
               "enabled",
               "deleted"
@@ -52878,7 +53231,7 @@
         "properties": {
           "app_name": {
             "type": "string",
-            "description": "Agent app whose sessions to list.",
+            "description": "Agent app whose sessions to list. One of:\n| Value | Meaning |\n| --- | --- |\n| `ask-ai` | Ask AI assistant |\n| `support` | Customer-support agent |\n| `support-website` | Website support agent (exposed over A2A, not built into the console) |\n| `support-flashcat` | Flashcat-site support agent (exposed over A2A) |\n| `ai-sre` | The AI SRE main app |\n| `template-assistant` | Notification-template assistant (template editing/validation) |\n| `swe` | Internal benchmarking app (not customer-facing) |",
             "enum": [
               "ask-ai",
               "support",
@@ -53385,7 +53738,7 @@
               "roku",
               "unity"
             ],
-            "description": "SDK platform that recorded the session."
+            "description": "SDK platform that recorded the session. Platform identifier, one of `browser`, `android`, `ios`, `miniprogram`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`."
           },
           "start": {
             "type": "integer",
@@ -53415,7 +53768,7 @@
               "roku",
               "unity"
             ],
-            "description": "SDK platform that recorded the view."
+            "description": "SDK platform that recorded the view. Platform identifier, one of `browser`, `android`, `ios`, `miniprogram`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`."
           },
           "view_id": {
             "type": "string",
@@ -53638,7 +53991,7 @@
               "responders",
               "aggregate_alert_count"
             ],
-            "description": "Incident-card field name."
+            "description": "Incident-card field name.\n\n| Value | Meaning |\n|---|---|\n| `channel` | Name of the alert channel that produced the incident; returned only when non-empty. |\n| `snoozed_before` | Snooze-until timestamp formatted as `YYYY-MM-DD HH:MM:SS`; returned only while the incident is snoozed. |\n| `severity` | Incident severity label; returned only when non-empty. |\n| `responders` | Names of the current responders, separated by spaces; returned only when the incident has responders. |\n| `aggregate_alert_count` | Number of alerts aggregated into the incident; returned only when greater than 1. |"
           },
           "value": {
             "type": "string",
@@ -53681,7 +54034,8 @@
         "properties": {
           "request_id": {
             "type": "string",
-            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+            "description": "Trace ID of this request, identical to the `Flashcat-Request-Id` response header."
           },
           "error": {
             "$ref": "#/components/schemas/DutyError"
@@ -53696,9 +54050,11 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/FieldDeleteReference"
-                }
+                },
+                "description": "Custom forms that still reference the field, each with `kind`/`name`/`href`; all references must be removed before the field can be deleted."
               }
-            }
+            },
+            "description": "Supplementary error payload; for this error it always contains the `refs` field."
           }
         }
       },
@@ -53757,14 +54113,14 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "description": "Schema version of the edge diagnostic result.",
+            "description": "Schema version of the edge diagnostic result. Fixed at `2`, identifying the response-structure version; bumped on incompatible structural changes.",
             "enum": [
               "2"
             ]
           },
           "operation": {
             "type": "string",
-            "description": "Diagnostic operation that produced the result.",
+            "description": "Diagnostic operation that produced the result. Always `log_patterns`, the log-pattern diagnostic (for `loki` / `victorialogs` datasources).",
             "enum": [
               "log_patterns"
             ]
@@ -53813,7 +54169,7 @@
         "properties": {
           "method": {
             "type": "string",
-            "description": "Diagnostic method that produced this evidence.",
+            "description": "Diagnostic method that produced this evidence. `pattern_snapshot` = pattern aggregation snapshot of the current window only, no baseline involved; `pattern_compare` = pattern comparison between the current window and the baseline window (see `baseline`).",
             "enum": [
               "pattern_snapshot",
               "pattern_compare"
@@ -53821,7 +54177,7 @@
           },
           "baseline": {
             "type": "string",
-            "description": "Baseline window kind used by a comparison method.",
+            "description": "Baseline window kind used by a comparison method. `previous_window` = the equal-length window immediately before the current window; `same_window_yesterday` = the current window shifted back 24 hours; `same_window_last_week` = the current window shifted back 7 days. Only present on `pattern_compare` results.",
             "enum": [
               "previous_window",
               "same_window_yesterday",
@@ -53881,14 +54237,14 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "description": "Schema version of the edge diagnostic result.",
+            "description": "Schema version of the edge diagnostic result. Fixed at `2`, identifying the response-structure version; bumped on incompatible structural changes.",
             "enum": [
               "2"
             ]
           },
           "operation": {
             "type": "string",
-            "description": "Diagnostic operation that produced the result.",
+            "description": "Diagnostic operation that produced the result. Always `metric_trends`, the metric-trend diagnostic (for `prometheus`-compatible datasources).",
             "enum": [
               "metric_trends"
             ]
@@ -53933,7 +54289,7 @@
         "properties": {
           "method": {
             "type": "string",
-            "description": "Diagnostic method that produced this evidence.",
+            "description": "Diagnostic method that produced this evidence. `single_window_shape` = within-window trend/shape analysis only, no baseline involved; `window_compare` = per-series comparison between the current window and the baseline window (see `baseline`).",
             "enum": [
               "single_window_shape",
               "window_compare"
@@ -53941,7 +54297,7 @@
           },
           "baseline": {
             "type": "string",
-            "description": "Baseline window kind used by a comparison method.",
+            "description": "Baseline window kind used by a comparison method. `previous_window` = the equal-length window immediately before the current window; `same_window_yesterday` = the current window shifted back 24 hours; `same_window_last_week` = the current window shifted back 7 days. Only present on `window_compare` results.",
             "enum": [
               "previous_window",
               "same_window_yesterday",
@@ -54064,7 +54420,7 @@
           },
           "comparison_status": {
             "type": "string",
-            "description": "Observed comparability between the current and baseline windows.",
+            "description": "Observed comparability between the current and baseline windows.\n\n| Value | Meaning |\n|---|---|\n| `comparable` | The pattern was observed in both windows and can be compared normally. |\n| `observed_only_current` | Observed only in the current window (a newly appeared pattern). |\n| `observed_only_baseline` | Observed only in the baseline window (disappeared from the current window). |\n| `comparison_limited_by_incomplete_evidence` | Observed on both sides, but the evidence is incomplete (e.g. log volume hit the aggregation cap or sampling was truncated), so the comparison is limited. |",
             "enum": [
               "comparable",
               "observed_only_current",
@@ -54278,7 +54634,7 @@
           },
           "comparison_status": {
             "type": "string",
-            "description": "Comparability of the current and baseline series.",
+            "description": "Comparability of the current and baseline series.\n\n| Value | Meaning |\n|---|---|\n| `comparable` | Both windows have enough finite samples for a normal comparison. |\n| `new_series` | The series exists only in the current window (new series). |\n| `disappeared_series` | The series exists only in the baseline window (gone from the current window). |\n| `insufficient_current_points` | Fewer than 3 finite samples in the current window; not comparable. |\n| `insufficient_baseline_points` | Fewer than 3 finite samples in the baseline window; not comparable. |",
             "enum": [
               "comparable",
               "new_series",
@@ -55229,7 +55585,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type."
+            "description": "Work item type. `action`: an action item anchored to the incident itself, convertible to `follow_up` later; `follow_up`: an improvement item anchored to a post-mortem, requiring the incident to be linked to that post-mortem at creation."
           },
           "title": {
             "type": "string",
@@ -55268,7 +55624,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type."
+            "description": "Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem."
           },
           "title": {
             "type": "string",
@@ -55319,7 +55675,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type."
+            "description": "Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem."
           },
           "title": {
             "type": "string",
@@ -55366,7 +55722,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type."
+            "description": "Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem."
           },
           "title": {
             "type": "string",
@@ -55405,7 +55761,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type before the conversion."
+            "description": "Work item type before the conversion. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem. Conversion currently only supports `action` → `follow_up`, so `from_type` is always `action` in this event."
           },
           "to_type": {
             "type": "string",
@@ -55413,7 +55769,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type after the conversion."
+            "description": "Work item type after the conversion. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem. Conversion currently only supports `action` → `follow_up`, so `to_type` is always `follow_up` in this event, and a successful conversion immediately tries to bind the incident's post-mortem."
           },
           "post_mortem_id": {
             "type": "string",
@@ -55440,7 +55796,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type."
+            "description": "Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem."
           },
           "title": {
             "type": "string",
@@ -55467,7 +55823,7 @@
               "action",
               "follow_up"
             ],
-            "description": "Work item type."
+            "description": "Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem."
           },
           "title": {
             "type": "string",
@@ -55579,7 +55935,7 @@
               "stale",
               "unknown"
             ],
-            "description": "Freshness classification."
+            "description": "Freshness classification. `fresh` = the latest snapshot was received within 2× the report interval; `stale` = no new snapshot within 2× the report interval; `unknown` = no snapshot data, undecidable."
           },
           "newest_received_at_ms": {
             "type": "integer",
@@ -55648,7 +56004,7 @@
               "partial",
               "unavailable"
             ],
-            "description": "Aggregate network-inventory enrichment coverage across loaded hosts."
+            "description": "Aggregate network-inventory enrichment coverage across loaded hosts (worst per-host status wins).\n\n| Value | Meaning |\n|---|---|\n| `complete` | Every requested network namespace on every host was scanned successfully with no errors. |\n| `partial` | At least one host failed to scan some namespaces, or scanning raised errors. |\n| `unavailable` | At least one host failed to scan all of its namespaces. |\n| `unknown` | No host loaded, or a host reported an unrecognized status. |"
           },
           "kubernetes_enrichment_status": {
             "type": "string",
@@ -55658,7 +56014,7 @@
               "partial",
               "unavailable"
             ],
-            "description": "Aggregate Kubernetes enrichment coverage across loaded hosts."
+            "description": "Aggregate Kubernetes enrichment coverage across loaded hosts (worst per-host status wins).\n\n| Value | Meaning |\n|---|---|\n| `complete` | Every host has full pod-binding metadata for its entities. |\n| `partial` | At least one host has bindings but some pod metadata is missing or bindings were dropped. |\n| `unavailable` | At least one host has no pod bindings at all. |\n| `unknown` | No host loaded, or a host reported an unrecognized status. |"
           },
           "listener_address_family_status": {
             "type": "string",
@@ -55668,7 +56024,7 @@
               "partial",
               "unavailable"
             ],
-            "description": "Aggregate coverage of IPv4/IPv6 listener address-family resolution across loaded hosts."
+            "description": "Aggregate listener address-family (IPv4/IPv6) resolution coverage across loaded hosts (worst per-host status wins).\n\n| Value | Meaning |\n|---|---|\n| `complete` | On every host, the IPv6-only attribute of all IPv6 wildcard listeners is known. |\n| `partial` | At least one host knows the IPv6-only attribute for only some IPv6 wildcard listeners. |\n| `unavailable` | At least one host knows the IPv6-only attribute of none of its IPv6 wildcard listeners. |\n| `unknown` | No host loaded, or a host reported an unrecognized status. |"
           },
           "ipv6_wildcard_listener_count": {
             "type": "integer",
@@ -56075,7 +56431,7 @@
               "summary",
               "full"
             ],
-            "description": "The `unresolved_mode` that was applied."
+            "description": "The `unresolved_mode` that was applied. `full` = unresolved destinations are listed completely in `unresolved_endpoints` and their edges stay in `edges` (default); `summary` = unresolved edges are excluded from `edges` and `unresolved_endpoints` keeps at most 20 samples, complemented by the `by_reason` counts."
           },
           "total": {
             "type": "integer",
@@ -56227,7 +56583,7 @@
               "ambiguous",
               "unresolved"
             ],
-            "description": "Resolution outcome for this relation's destination."
+            "description": "Resolution outcome for this relation's destination. `resolved` = uniquely resolved to a listening entity on a host — the relation is reliable; `ambiguous` = multiple candidates exist (or the listener address family is unknown) — treat the relation as a lead to verify; `unresolved` = no candidate found, the destination identity is unknown."
           },
           "target_host_id": {
             "type": "string",
@@ -56247,7 +56603,7 @@
               "tcp",
               "udp"
             ],
-            "description": "Transport protocol of the destination."
+            "description": "Transport protocol of the destination. `tcp` = TCP connection; `udp` = UDP session. Collectors currently only report `tcp`; `udp` is reserved."
           },
           "destination_ip": {
             "type": "string",
@@ -56315,7 +56671,7 @@
               "unsupported",
               "no_data"
             ],
-            "description": "ServiceMap collection status of the anchor host."
+            "description": "ServiceMap collection status of the anchor host.\n\n| Value | Meaning |\n|---|---|\n| `active` | Collection healthy: a fresh snapshot exists with no degradation. |\n| `degraded` | Collecting but quality is impaired: health reports are newer than the snapshot, the snapshot is truncated/degraded, or collection is failing. |\n| `stale` | A snapshot exists but is outdated (not updated within 2× the report interval). |\n| `initializing` | The agent has reported the capability but the first snapshot is not ready yet. |\n| `disabled` | Topology collection is disabled on this host. |\n| `unsupported` | The agent or kernel does not support this collection. |\n| `no_data` | No snapshot or health data received at all. |"
           },
           "authoritative": {
             "type": "boolean",
@@ -56529,7 +56885,7 @@
               "unsupported",
               "no_data"
             ],
-            "description": "Overall ServiceMap collection status."
+            "description": "Overall ServiceMap collection status.\n\n| Value | Meaning |\n|---|---|\n| `active` | Collection healthy: a fresh snapshot exists with no degradation. |\n| `degraded` | Collecting but quality is impaired: health reports are newer than the snapshot, the snapshot is truncated/degraded, or collection is failing. |\n| `stale` | A snapshot exists but is outdated (not updated within 2× the report interval). |\n| `initializing` | The agent has reported the capability but the first snapshot is not ready yet. |\n| `disabled` | Topology collection is disabled on this host. |\n| `unsupported` | The agent or kernel does not support this collection. |\n| `no_data` | No snapshot or health data received at all. |"
           },
           "authoritative": {
             "type": "boolean",
@@ -56762,7 +57118,7 @@
               "unsupported",
               "no_data"
             ],
-            "description": "Overall ServiceMap collection status."
+            "description": "Overall ServiceMap collection status.\n\n| Value | Meaning |\n|---|---|\n| `active` | Collection healthy: a fresh snapshot exists with no degradation. |\n| `degraded` | Collecting but quality is impaired: health reports are newer than the snapshot, the snapshot is truncated/degraded, or collection is failing. |\n| `stale` | A snapshot exists but is outdated (not updated within 2× the report interval). |\n| `initializing` | The agent has reported the capability but the first snapshot is not ready yet. |\n| `disabled` | Topology collection is disabled on this host. |\n| `unsupported` | The agent or kernel does not support this collection. |\n| `no_data` | No snapshot or health data received at all. |"
           },
           "capability_status": {
             "type": "string",
@@ -56796,7 +57152,7 @@
               "stale",
               "unknown"
             ],
-            "description": "Freshness classification of the host's graph."
+            "description": "Freshness classification of the host's graph. `fresh` = the latest snapshot was received within 2× the report interval; `stale` = no new snapshot within 2× the report interval; `unknown` = no topology snapshot ever received, freshness undecidable."
           },
           "max_age_ms": {
             "type": "integer",
@@ -57525,7 +57881,7 @@
               "error.browser_name",
               "error.is_crash"
             ],
-            "description": "Filter attribute key. Only these Error-level attributes are supported for preset severity rules."
+            "description": "Filter attribute key. Only these Error-level attributes are supported for preset severity rules.\n\n| Value | Meaning |\n|---|---|\n| `error.usr_id` | User ID |\n| `error.usr_email` | User email |\n| `error.view_url` | Full URL of the page where the error occurred |\n| `error.view_url_path` | URL path of the page where the error occurred |\n| `error.error_type` | Error type |\n| `error.error_message` | Error message |\n| `error.env` | Environment (e.g. production/staging) |\n| `error.service` | Service name |\n| `error.device_type` | Device type |\n| `error.os_name` | Operating system name |\n| `error.browser_name` | Browser name |\n| `error.is_crash` | Whether the error is a crash (boolean) |"
           },
           "oper": {
             "type": "string",
@@ -58013,7 +58369,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumPresetSeverityRuleHistoryItem"
-            }
+            },
+            "description": "Preset severity rule history snapshots of the current page."
           }
         }
       },
@@ -58108,7 +58465,7 @@
               "free",
               "professional"
             ],
-            "description": "Plan version of this resource."
+            "description": "Plan version of this resource. One of `free` (free plan) or `professional` (professional plan)."
           },
           "offering_id": {
             "type": "integer",
@@ -58349,7 +58706,7 @@
         "properties": {
           "code": {
             "type": "string",
-            "description": "Warning code.",
+            "description": "Warning code. One of: `unresolved_reference` (an @ref in the written file's content points to a file that does not exist in the pack; `ref` carries it), `still_referenced_by` (the deleted file is still @ref-referenced by other files in the pack; `refs` lists the referrers).",
             "enum": [
               "unresolved_reference",
               "still_referenced_by"
@@ -58390,7 +58747,7 @@
           },
           "scope": {
             "type": "string",
-            "description": "Restrict to one scope; `all` (default) overrides `include_account`.",
+            "description": "Restrict to one scope; `all` (default) overrides `include_account`. One of: `all` (account scope plus visible team scopes), `account` (account-level packs only), `team` (team-level packs only, can be combined with `team_ids`).",
             "enum": [
               "all",
               "account",
@@ -58425,7 +58782,7 @@
         "properties": {
           "scope": {
             "type": "string",
-            "description": "Scope of the pack to ensure.",
+            "description": "Scope of the pack to ensure. One of: `account` (account-level pack; scope_id is forced to the caller's account ID and only account admins may create it; first creation seeds a default DUTY.md), `team` (team-level pack; the `scope_id` team ID is required and the caller must belong to that team).",
             "enum": [
               "account",
               "team"
@@ -58571,7 +58928,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeFileItem"
-            }
+            },
+            "description": "Array of files in this knowledge pack; empty array when the pack has no files."
           }
         },
         "required": [
@@ -58587,7 +58945,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgePackItem"
-            }
+            },
+            "description": "Array of visible knowledge packs after filtering (current page), used with `total` for pagination."
           },
           "total": {
             "type": "integer",
@@ -58608,7 +58967,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeFileItem"
-            }
+            },
+            "description": "Array of files in the specified knowledge pack; empty array when the pack has no files."
           },
           "total": {
             "type": "integer",
@@ -58649,7 +59009,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeWarning"
-            }
+            },
+            "description": "Non-blocking warnings after a successful write; `code=unresolved_reference` means an @ref in the file content points to a file that does not exist in the pack. Absent when there are no warnings (omitempty)."
           }
         },
         "required": [
@@ -58685,7 +59046,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeWarning"
-            }
+            },
+            "description": "Non-blocking warnings after deletion; `code=still_referenced_by` means the (force-)deleted file is still @ref-referenced by other files in the pack (`refs` lists the referrers). Absent when there are no warnings (omitempty)."
           }
         }
       }
