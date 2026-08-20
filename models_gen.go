@@ -6,9 +6,13 @@ package flashduty
 type AlertFeedType string
 
 const (
-	AlertFeedTypeANew   AlertFeedType = "a_new"
-	AlertFeedTypeAComm  AlertFeedType = "a_comm"
-	AlertFeedTypeAClose AlertFeedType = "a_close"
+	AlertFeedTypeANew      AlertFeedType = "a_new"
+	AlertFeedTypeAUpdate   AlertFeedType = "a_update"
+	AlertFeedTypeAMerge    AlertFeedType = "a_merge"
+	AlertFeedTypeAComm     AlertFeedType = "a_comm"
+	AlertFeedTypeAMSilence AlertFeedType = "a_m_silence"
+	AlertFeedTypeAMInhibit AlertFeedType = "a_m_inhibit"
+	AlertFeedTypeAClose    AlertFeedType = "a_close"
 )
 
 // String returns the underlying string value, implementing fmt.Stringer.
@@ -240,7 +244,7 @@ type A2aAgentItem struct {
 	AllowInsecureTlsSkipVerify bool `json:"allow_insecure_tls_skip_verify" toon:"allow_insecure_tls_skip_verify"`
 	// Authentication config; sensitive values (`api_key`, `token`, `client_secret`) are masked.
 	AuthConfig map[string]string `json:"auth_config" toon:"auth_config"`
-	// Authentication mode.
+	// Authentication mode. One of: `shared` (a single static credential saved on the resource and shared by all callers in the account; the default — an empty value behaves the same), `per_user_secret` (each user stores their own secret per `secret_schema`, injected per user at runtime), `per_user_oauth` (each user completes their own OAuth grant; discovery and registration run lazily on first use).
 	AuthMode string `json:"auth_mode" toon:"auth_mode"`
 	// Authentication type for reaching the remote agent: `none`, `api_key`, or `bearer`.
 	AuthType string `json:"auth_type" toon:"auth_type"`
@@ -416,7 +420,14 @@ type AffectedStatusPageComponentItem struct {
 	OrderID int64 `json:"order_id" toon:"order_id"`
 	// Parent section ID.
 	SectionID string `json:"section_id" toon:"section_id"`
-	// Current component status resulting from the event.
+	// Current status of the component affected by the change. Severity increases: `operational` < `degraded` = `under_maintenance` < `partial_outage` < `full_outage`; incident-type changes may use the first four, maintenance-type changes only `operational` and `under_maintenance`.
+	// | Value | Meaning |
+	// |---|---|
+	// | `operational` | Operating normally. |
+	// | `degraded` | Degraded performance. |
+	// | `partial_outage` | Partial outage. |
+	// | `full_outage` | Full outage. |
+	// | `under_maintenance` | Under maintenance. |
 	Status string `json:"status" toon:"status"`
 }
 
@@ -443,10 +454,14 @@ type AlertEventGlobalListRequest struct {
 
 // AlertEventGlobalListResponse is generated from the Flashduty OpenAPI schema.
 type AlertEventGlobalListResponse struct {
-	HasNextPage    bool             `json:"has_next_page" toon:"has_next_page"`
-	Items          []AlertEventItem `json:"items" toon:"items"`
-	SearchAfterCtx string           `json:"search_after_ctx" toon:"search_after_ctx"`
-	Total          int64            `json:"total" toon:"total"`
+	// Whether a next page exists (probed by fetching limit+1 rows).
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Raw alert events on the current page.
+	Items []AlertEventItem `json:"items" toon:"items"`
+	// Cursor for the next page — the ObjectID of the last event on this page; pass it back as `search_after_ctx`. Omitted when there are no more results or the result is empty.
+	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
+	// Total number of matching events, capped at 1000.
+	Total int64 `json:"total" toon:"total"`
 }
 
 // AlertEventItem is generated from the Flashduty OpenAPI schema.
@@ -525,8 +540,10 @@ type AlertFeedRequest struct {
 
 // AlertFeedResponse is generated from the Flashduty OpenAPI schema.
 type AlertFeedResponse struct {
-	HasNextPage bool       `json:"has_next_page" toon:"has_next_page"`
-	Items       []FeedItem `json:"items" toon:"items"`
+	// Whether a next page exists.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Alert feed records on the current page.
+	Items []FeedItem `json:"items" toon:"items"`
 }
 
 // AlertImage is generated from the Flashduty OpenAPI schema.
@@ -721,8 +738,9 @@ type AlertListRequest struct {
 // AlertListResponse is generated from the Flashduty OpenAPI schema.
 type AlertListResponse struct {
 	// True if more pages are available.
-	HasNextPage bool        `json:"has_next_page" toon:"has_next_page"`
-	Items       []AlertItem `json:"items" toon:"items"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Alerts on the current page.
+	Items []AlertItem `json:"items" toon:"items"`
 	// Cursor for the next page.
 	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching alerts.
@@ -747,7 +765,14 @@ type AlertMergeRequest struct {
 type AlertPipeline struct {
 	// Optional OR-of-AND filter. When omitted, the rule applies to all alerts.
 	If OrFilterGroup `json:"if,omitempty" toon:"if,omitempty"`
-	// Rule type.
+	// Rule type. Rules run in array order; when the `if` condition matches, the event is processed according to `kind`.
+	// | Value | Meaning |
+	// |---|---|
+	// | `title_reset` | Rewrites the event title from the `settings.title` template. |
+	// | `description_reset` | Rewrites the event description from the `settings.description` template. |
+	// | `severity_reset` | Resets the event severity and status to `settings.severity` (`Critical`/`Warning`/`Info`). |
+	// | `alert_drop` | Discards the matching event outright; no alert is created. |
+	// | `alert_inhibit` | Discards the event (inhibition) when an active source alert matching `settings.source_filters` and correlated via `settings.equals` exists. |
 	Kind string `json:"kind,omitempty" toon:"kind,omitempty"`
 	// Kind-specific settings. Shape depends on `kind`:
 	// - `title_reset`: `{ "title": "<string>" }`
@@ -790,6 +815,7 @@ type AlertPipelineListRequest struct {
 
 // AlertPipelineListResponse is generated from the Flashduty OpenAPI schema.
 type AlertPipelineListResponse struct {
+	// Alert pipeline configuration of each requested integration, one item per configured integration.
 	Items []AlertPipelineItem `json:"items" toon:"items"`
 }
 
@@ -823,7 +849,7 @@ type AlertRule struct {
 	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
 	// Rule description, in Markdown.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// Format for the description. Defaults to `text` when omitted or empty.
+	// Format for the description. Defaults to `text` when omitted or empty. `text` = plain text; `markdown` = Markdown, rendered as Markdown in alert details.
 	DescriptionType string `json:"description_type,omitempty" toon:"description_type,omitempty"`
 	// Datasource IDs, merged with `ds_list` to decide which datasources the rule monitors; IDs survive datasource renames. At least one of `ds_list` and `ds_ids` must be provided.
 	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
@@ -861,15 +887,19 @@ type AlertRule struct {
 
 // AlertRuleAudit is generated from the Flashduty OpenAPI schema.
 type AlertRuleAudit struct {
+	// ID of the account that owns the rule.
 	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Action performed, e.g. `create`, `update`.
 	Action string `json:"action" toon:"action"`
 	// ID of the alert rule this record belongs to.
 	AlertRuleID uint64 `json:"alert_rule_id" toon:"alert_rule_id"`
 	// JSON string of the full rule snapshot at audit time. Populated on `/monit/rule/audit/detail`, omitted on list responses.
-	Content     string `json:"content" toon:"content"`
-	CreatedAt   int64  `json:"created_at" toon:"created_at"`
-	CreatorID   uint64 `json:"creator_id" toon:"creator_id"`
+	Content string `json:"content" toon:"content"`
+	// When this audit record was produced, as a Unix timestamp in seconds; equals the rule's `updated_at` at change time.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// ID of the user who made this change (taken from the rule's `updater_id` at change time).
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
+	// Name of the user who made this change (taken from the rule's `updater_name` at change time).
 	CreatorName string `json:"creator_name" toon:"creator_name"`
 	// Audit record ID.
 	ID uint64 `json:"id" toon:"id"`
@@ -878,9 +908,12 @@ type AlertRuleAudit struct {
 // AlertRuleBasic is generated from the Flashduty OpenAPI schema.
 type AlertRuleBasic struct {
 	// Account ID.
-	AccountID   uint64 `json:"account_id" toon:"account_id"`
-	CreatedAt   int64  `json:"created_at" toon:"created_at"`
-	CreatorID   uint64 `json:"creator_id" toon:"creator_id"`
+	AccountID uint64 `json:"account_id" toon:"account_id"`
+	// Creation time, as a Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// ID of the user who created the rule.
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
+	// Name of the user who created the rule.
 	CreatorName string `json:"creator_name" toon:"creator_name"`
 	// 5-field cron schedule, e.g. `* * * * *`. Must not start with `CRON_TZ=` or `TZ=`; use the `timezone` field instead.
 	CronPattern string `json:"cron_pattern" toon:"cron_pattern"`
@@ -903,40 +936,60 @@ type AlertRuleBasic struct {
 	// Timezone in which the rule executes. Determines how the cron schedule and effective time windows are interpreted. Only IANA timezone names are accepted (e.g. `Asia/Shanghai`, `UTC`, `Europe/London`); shortcuts and offsets such as `Local`, `UTC+8`, or `CST` are rejected. Treated as `Asia/Shanghai` if empty.
 	Timezone string `json:"timezone" toon:"timezone"`
 	// True if the rule currently has active alerts.
-	Triggered   bool   `json:"triggered" toon:"triggered"`
-	UpdatedAt   int64  `json:"updated_at" toon:"updated_at"`
-	UpdaterID   uint64 `json:"updater_id" toon:"updater_id"`
+	Triggered bool `json:"triggered" toon:"triggered"`
+	// Last modification time, as a Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// ID of the user who last modified the rule.
+	UpdaterID uint64 `json:"updater_id" toon:"updater_id"`
+	// Name of the user who last modified the rule.
 	UpdaterName string `json:"updater_name" toon:"updater_name"`
 }
 
 // AlertRuleCounter is generated from the Flashduty OpenAPI schema.
 type AlertRuleCounter struct {
+	// ID of the account this snapshot belongs to.
 	AccountID uint64 `json:"account_id" toon:"account_id"`
 	// Sample timestamp, Unix epoch seconds.
 	Clock Timestamp `json:"clock" toon:"clock"`
-	ID    uint64    `json:"id" toon:"id"`
+	// ID of this snapshot record.
+	ID uint64 `json:"id" toon:"id"`
 	// Rule count at the sample time.
 	Num int64 `json:"num" toon:"num"`
 }
 
 // AlertRuleExport is generated from the Flashduty OpenAPI schema.
 type AlertRuleExport struct {
-	Annotations     map[string]string `json:"annotations" toon:"annotations"`
-	CronPattern     string            `json:"cron_pattern" toon:"cron_pattern"`
-	DebugLogEnabled bool              `json:"debug_log_enabled" toon:"debug_log_enabled"`
-	DelaySeconds    int64             `json:"delay_seconds" toon:"delay_seconds"`
-	Description     string            `json:"description" toon:"description"`
-	DescriptionType string            `json:"description_type" toon:"description_type"`
-	DsIDs           []uint64          `json:"ds_ids" toon:"ds_ids"`
-	DsList          []string          `json:"ds_list" toon:"ds_list"`
-	DsType          string            `json:"ds_type" toon:"ds_type"`
-	Enabled         bool              `json:"enabled" toon:"enabled"`
-	EnabledTimes    []EnabledTime     `json:"enabled_times" toon:"enabled_times"`
-	Labels          map[string]string `json:"labels" toon:"labels"`
-	Name            string            `json:"name" toon:"name"`
-	RepeatInterval  int64             `json:"repeat_interval" toon:"repeat_interval"`
-	RepeatTotal     int64             `json:"repeat_total" toon:"repeat_total"`
-	RuleConfigs     RuleConfigs       `json:"rule_configs" toon:"rule_configs"`
+	// Custom annotation key-value pairs attached to alert events; keys must not start with `$` (reserved for query field references).
+	Annotations map[string]string `json:"annotations" toon:"annotations"`
+	// Evaluation schedule as a 6-field cron expression (seconds included) or `@every <duration>` (an integral number of seconds, at least 1s); `CRON_TZ=`/`TZ=` prefixes are rejected — set the timezone in `timezone` instead.
+	CronPattern string `json:"cron_pattern" toon:"cron_pattern"`
+	// Whether to emit debug logs for this rule's evaluations; enable when troubleshooting.
+	DebugLogEnabled bool `json:"debug_log_enabled" toon:"debug_log_enabled"`
+	// Query time offset in seconds: each evaluation reads data as of `schedule time − delay_seconds` to tolerate ingestion lag; `0` means no offset.
+	DelaySeconds int64 `json:"delay_seconds" toon:"delay_seconds"`
+	// Rule description in the format given by `description_type`, shown with alert events.
+	Description string `json:"description" toon:"description"`
+	// Format of `description`, `text` or `markdown`; treated as `text` when omitted.
+	DescriptionType string `json:"description_type" toon:"description_type"`
+	// Datasource ID list, merged with `ds_list`; references by ID and is therefore immune to datasource renames.
+	DsIDs []uint64 `json:"ds_ids" toon:"ds_ids"`
+	// Datasource name list with wildcard support; merged with `ds_ids` to decide which datasources the rule monitors — must be maintained by hand if a datasource is renamed.
+	DsList []string `json:"ds_list" toon:"ds_list"`
+	// Datasource type ident, e.g. `prometheus`; must be a datasource type (`ident`) that exists in the import target environment.
+	DsType string `json:"ds_type" toon:"ds_type"`
+	// Whether the rule is enabled; rules imported as disabled are not evaluated.
+	Enabled bool `json:"enabled" toon:"enabled"`
+	// Effective time windows; each entry has `days` (0–6, 0 = Sunday) and `stime`/`etime` (`HH:MM`), interpreted in the rule's `timezone`; an empty list disables the rule.
+	EnabledTimes []EnabledTime `json:"enabled_times" toon:"enabled_times"`
+	// Custom label key-value pairs attached to alert events produced by this rule.
+	Labels map[string]string `json:"labels" toon:"labels"`
+	// Rule name, up to 128 characters when imported.
+	Name string `json:"name" toon:"name"`
+	// Interval in seconds between repeated notifications for a firing alert; values below 1 fall back to the default of 3600.
+	RepeatInterval int64 `json:"repeat_interval" toon:"repeat_interval"`
+	// Maximum number of repeated notifications for the same alert; values below 1 fall back to the default of 3.
+	RepeatTotal int64       `json:"repeat_total" toon:"repeat_total"`
+	RuleConfigs RuleConfigs `json:"rule_configs" toon:"rule_configs"`
 	// Timezone in which the rule executes. IANA timezone name; defaults to `Asia/Shanghai`.
 	Timezone string `json:"timezone" toon:"timezone"`
 }
@@ -963,7 +1016,7 @@ type AlertRuleInfoResponse struct {
 	DelaySeconds int64 `json:"delay_seconds" toon:"delay_seconds"`
 	// Rule description, in Markdown.
 	Description string `json:"description" toon:"description"`
-	// Format for the description. Defaults to `text` when omitted or empty.
+	// Format for the description. Defaults to `text` when omitted or empty. `text` = plain text; `markdown` = Markdown, rendered as Markdown in alert details.
 	DescriptionType string `json:"description_type" toon:"description_type"`
 	// Datasource IDs, merged with `ds_list` to decide which datasources the rule monitors; IDs survive datasource renames. At least one of `ds_list` and `ds_ids` must be provided.
 	DsIDs []uint64 `json:"ds_ids" toon:"ds_ids"`
@@ -1001,7 +1054,9 @@ type AlertRuleInfoResponse struct {
 
 // AlertRuleStatus is generated from the Flashduty OpenAPI schema.
 type AlertRuleStatus struct {
-	FolderID   uint64 `json:"folder_id" toon:"folder_id"`
+	// ID of the folder (grouping node).
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Folder name; omitted by some endpoints (`omitempty`).
 	FolderName string `json:"folder_name" toon:"folder_name"`
 	// Total rules in the folder family.
 	RuleTotal int64 `json:"rule_total" toon:"rule_total"`
@@ -1103,6 +1158,7 @@ type AuditOperationListRequest struct{}
 
 // AuditOperationListResponse is generated from the Flashduty OpenAPI schema.
 type AuditOperationListResponse struct {
+	// Array of all auditable operation types (only APIs flagged for audit); always an array, possibly empty.
 	Items []AuditOperationTypeItem `json:"items" toon:"items"`
 }
 
@@ -1160,7 +1216,7 @@ type AutomationRuleCreateRequest struct {
 	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	// BYOC Runner ID. Used only when `environment_kind=byoc`.
 	EnvironmentID string `json:"environment_id,omitempty" toon:"environment_id,omitempty"`
-	// Runtime environment kind. Omit or send an empty value for automatic selection.
+	// Runtime environment kind. Omit or send an empty value for automatic selection. One of: `cloud` (platform-hosted cloud sandbox), `byoc` (a self-hosted BYOC runner in the account, used with `environment_id`); automatic selection prefers an online BYOC runner and falls back to the cloud sandbox.
 	EnvironmentKind string `json:"environment_kind,omitempty" toon:"environment_kind,omitempty"`
 	// Whether to create and enable an HTTP POST trigger. When enabled, the response includes a one-time token.
 	HTTPPostTriggerEnabled bool `json:"http_post_trigger_enabled,omitempty" toon:"http_post_trigger_enabled,omitempty"`
@@ -1202,7 +1258,7 @@ type AutomationRuleItem struct {
 	Enabled bool `json:"enabled" toon:"enabled"`
 	// BYOC Runner ID.
 	EnvironmentID string `json:"environment_id" toon:"environment_id"`
-	// Runtime environment kind. Omit or send an empty value for automatic selection.
+	// Runtime environment kind. Omit or send an empty value for automatic selection. One of: `cloud` (platform-hosted cloud sandbox), `byoc` (self-hosted BYOC runner in the account); an empty value means automatic selection (prefers an online BYOC runner, falls back to the cloud sandbox).
 	EnvironmentKind string `json:"environment_kind" toon:"environment_kind"`
 	// HTTP POST trigger token. Returned only on create or token rotation; save it immediately.
 	HTTPPostToken string `json:"http_post_token" toon:"http_post_token"`
@@ -1228,7 +1284,7 @@ type AutomationRuleItem struct {
 	Prompt string `json:"prompt" toon:"prompt"`
 	// Rule ID.
 	RuleID string `json:"rule_id" toon:"rule_id"`
-	// Hidden session run scope.
+	// Hidden session run scope. One of: `person` (personal rule, team_id=0, runs as the creator; disabled when the creator leaves the account), `team` (team rule, team_id>0, owned by the team and shared with its members; survives the creator leaving). Derived from the rule's team_id.
 	RunScope string `json:"run_scope" toon:"run_scope"`
 	// Next scheduled fire time, Unix milliseconds. 0 means no future scheduled fire is available.
 	ScheduleNextFireAtMs TimestampMilli `json:"schedule_next_fire_at_ms" toon:"schedule_next_fire_at_ms"`
@@ -1261,6 +1317,7 @@ type AutomationRuleListRequest struct {
 
 // AutomationRuleListResponse is generated from the Flashduty OpenAPI schema.
 type AutomationRuleListResponse struct {
+	// Array of automation rules for the current page, used with `total` for pagination.
 	Rules []AutomationRuleItem `json:"rules" toon:"rules"`
 	// Total count.
 	Total int64 `json:"total" toon:"total"`
@@ -1296,9 +1353,26 @@ type AutomationRunItem struct {
 	StartedAt TimestampMilli `json:"started_at" toon:"started_at"`
 	// Run stats JSON.
 	StatsJSON any `json:"stats_json" toon:"stats_json"`
-	// Run status.
+	// Run status. One of (the first three are in-flight, the rest terminal):
+	// | Value | Meaning |
+	// | --- | --- |
+	// | `queued` | Enqueued, waiting for a worker |
+	// | `running` | Executing |
+	// | `retrying` | An attempt failed and a retry is scheduled |
+	// | `succeeded` | Completed successfully |
+	// | `partial` | Partially succeeded (currently only produced by memory-consolidation runs; rule runs never reach it) |
+	// | `failed` | Terminal failure, no further retries |
+	// | `skipped` | Not executed (e.g. grace period expired, trigger or rule invalid); the reason is kept on the run record |
+	// | `abandoned` | Still in-flight past the stale threshold and swept as never-completed (e.g. worker died) |
 	Status string `json:"status" toon:"status"`
-	// Trigger kind.
+	// Trigger kind. One of:
+	// | Value | Meaning |
+	// | --- | --- |
+	// | `schedule` | Fired by the rule's schedule trigger |
+	// | `debug` | Debug run (reserved; current rule runs never carry this kind) |
+	// | `manual` | Triggered manually by a user |
+	// | `http_post` | Fired via the rule's HTTP POST webhook |
+	// | `oncall_incident` | Fired by an on-call incident event |
 	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
 	// Last update time, Unix milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
@@ -1321,6 +1395,7 @@ type AutomationRunListRequest struct {
 
 // AutomationRunListResponse is generated from the Flashduty OpenAPI schema.
 type AutomationRunListResponse struct {
+	// Array of run records for the given `rule_id`, filtered by the request's status/trigger-kind/time-range and paginated.
 	Runs []AutomationRunItem `json:"runs" toon:"runs"`
 	// Total count.
 	Total int64 `json:"total" toon:"total"`
@@ -1356,6 +1431,7 @@ type AutomationTemplateListRequest struct {
 
 // AutomationTemplateListResponse is generated from the Flashduty OpenAPI schema.
 type AutomationTemplateListResponse struct {
+	// Array of built-in automation templates, with display text localized by the request `locale` (falling back to request headers).
 	Templates []AutomationTemplateItem `json:"templates" toon:"templates"`
 }
 
@@ -1500,9 +1576,9 @@ type CalendarItem struct {
 	Description string `json:"description" toon:"description"`
 	// Inherited public-holiday calendar IDs.
 	ExtraCalIDs []string `json:"extra_cal_ids" toon:"extra_cal_ids"`
-	// Calendar kind.
+	// Calendar kind. `region.official.holiday` is a public regional holiday calendar (served by the central holiday service), `religion.holiday` is a public religious holiday calendar (reserved, currently no data), and `personal` is an account-created personal/team calendar.
 	Kind string `json:"kind" toon:"kind"`
-	// Calendar status.
+	// Calendar status. `enabled` means usable; `deleted` means removed and never returned by list endpoints.
 	Status string `json:"status" toon:"status"`
 	// Owning team ID (0 when not assigned).
 	TeamID uint64 `json:"team_id" toon:"team_id"`
@@ -1518,7 +1594,7 @@ type CalendarItem struct {
 
 // CalendarListRequest is generated from the Flashduty OpenAPI schema.
 type CalendarListRequest struct {
-	// Calendar kind filter. Defaults to personal when empty.
+	// Calendar kind filter; defaults to personal when empty. `region.official.holiday` queries public regional holiday calendars (filtered by the caller's locale); `personal` queries account-created calendars.
 	Kind string `json:"kind,omitempty" toon:"kind,omitempty"`
 	// Disable locale filtering when listing public-holiday calendars.
 	NoLocale bool `json:"no_locale,omitempty" toon:"no_locale,omitempty"`
@@ -1562,7 +1638,14 @@ type ChangeEventItem struct {
 	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Stable key that groups events belonging to the same change.
 	ChangeKey string `json:"change_key" toon:"change_key"`
-	// Lifecycle status of the change event.
+	// Lifecycle status of the change event, reported by the change source as execution progresses.
+	// | Value | Meaning |
+	// |---|---|
+	// | `Planned` | Planned, not started. |
+	// | `Ready` | Ready for execution. |
+	// | `Processing` | Being executed. |
+	// | `Canceled` | Canceled. |
+	// | `Done` | Completed. |
 	ChangeStatus string `json:"change_status" toon:"change_status"`
 	// Collaboration channel this change event is routed to.
 	ChannelID int64 `json:"channel_id" toon:"channel_id"`
@@ -1656,6 +1739,7 @@ type ChannelInfosRequest struct {
 
 // ChannelInfosResponse is generated from the Flashduty OpenAPI schema.
 type ChannelInfosResponse struct {
+	// Brief info for the requested `channel_ids` that actually exist; IDs not found are ignored.
 	Items []ChannelShort `json:"items" toon:"items"`
 }
 
@@ -1665,7 +1749,7 @@ type ChannelItem struct {
 	AccountID int64 `json:"account_id" toon:"account_id"`
 	// Highest severity among active incidents in the channel.
 	ActiveIncidentHighestSeverity string `json:"active_incident_highest_severity" toon:"active_incident_highest_severity"`
-	// Auto-resolve timer reset mode.
+	// How the auto-resolve timer is reset. `trigger` (default) starts the timer once when the incident is triggered — later merged alerts do not affect it; `update` restarts the timer from the latest alert time whenever a new alert merges into the incident.
 	AutoResolveMode string `json:"auto_resolve_mode" toon:"auto_resolve_mode"`
 	// Auto-resolve timeout in seconds. 0 disables auto-resolve.
 	AutoResolveTimeout int64 `json:"auto_resolve_timeout" toon:"auto_resolve_timeout"`
@@ -1702,7 +1786,7 @@ type ChannelItem struct {
 	// Additional teams that can manage the channel.
 	ManagingTeamIDs        []int64         `json:"managing_team_ids" toon:"managing_team_ids"`
 	ProgressToIncidentCnts IncProgressCnts `json:"progress_to_incident_cnts" toon:"progress_to_incident_cnts"`
-	// Channel status.
+	// Channel status. `enabled` receives and processes events normally; `disabled` drops incoming events outright; `deleted` is returned only when fetching a channel by ID — list endpoints never return it.
 	Status string `json:"status" toon:"status"`
 	// Owning team ID.
 	TeamID int64 `json:"team_id" toon:"team_id"`
@@ -1868,7 +1952,7 @@ type CreateFieldRequest struct {
 	FieldType string `json:"field_type" toon:"field_type"`
 	// Required and non-empty for `single_select`/`multi_select` (unique strings, each 1–200 chars). Must be omitted or empty for `checkbox`/`text`.
 	Options []string `json:"options,omitempty" toon:"options,omitempty"`
-	// Stored value type. `checkbox` requires `bool`; `single_select`/`multi_select`/`text` require `string`. Immutable after creation.
+	// Value type. `checkbox` requires `bool`; all other types require `string`. Immutable after creation. `float` is a reserved value currently rejected for every `field_type`.
 	ValueType string `json:"value_type" toon:"value_type"`
 }
 
@@ -1929,8 +2013,6 @@ type CreateInhibitRuleRequest struct {
 	Equals []string `json:"equals" toon:"equals"`
 	// When true, suppressed target alerts are dropped instead of merged.
 	IsDirectlyDiscard bool `json:"is_directly_discard,omitempty" toon:"is_directly_discard,omitempty"`
-	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Rule name, 1 to 39 characters.
 	RuleName string `json:"rule_name" toon:"rule_name"`
 	// Or-of-and filter tree. Each outer element is an AND group; within each group, all conditions must match.
@@ -1953,8 +2035,6 @@ type CreateSilenceRuleRequest struct {
 	IsAutoDelete bool `json:"is_auto_delete,omitempty" toon:"is_auto_delete,omitempty"`
 	// When true, silenced alerts are dropped instead of suppressed into incidents.
 	IsDirectlyDiscard bool `json:"is_directly_discard,omitempty" toon:"is_directly_discard,omitempty"`
-	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Rule name, 1 to 39 characters.
 	RuleName string `json:"rule_name" toon:"rule_name"`
 	// One-off time window defined by unix seconds.
@@ -2005,7 +2085,14 @@ type CreateStatusPageChangeTimelineRequest struct {
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
 	// Status page ID; obtain it from `POST /status-page/list`.
 	PageID int64 `json:"page_id" toon:"page_id"`
-	// New event status. Must match the event type. When the status transitions to `resolved` or `completed`, all referenced components must become `operational`.
+	// Change status after this update; must match the change type. When transitioning to `resolved` or `completed`, all affected components must be back to `operational`.
+	// | Value | Meaning |
+	// |---|---|
+	// | `investigating` | Investigating (incident). |
+	// | `identified` | Root cause identified (incident). |
+	// | `monitoring` | Fix deployed, monitoring (incident). |
+	// | `scheduled` | Scheduled (maintenance). |
+	// | `ongoing` | In progress (maintenance). |
 	Status string `json:"status" toon:"status"`
 }
 
@@ -2090,57 +2177,88 @@ type DsClickHouseConfig struct {
 	Database string `json:"database,omitempty" toon:"database,omitempty"`
 	// Dial timeout in milliseconds.
 	DialTimeoutMills int64 `json:"dial_timeout_mills,omitempty" toon:"dial_timeout_mills,omitempty"`
-	IdleConns        int64 `json:"idle_conns,omitempty" toon:"idle_conns,omitempty"`
-	LifetimeSeconds  int64 `json:"lifetime_seconds,omitempty" toon:"lifetime_seconds,omitempty"`
+	// Maximum number of idle connections in the pool; `0` or omitted uses the default of 4.
+	IdleConns int64 `json:"idle_conns,omitempty" toon:"idle_conns,omitempty"`
+	// Maximum connection lifetime in seconds; `0` or omitted uses the default of 600 (10 minutes).
+	LifetimeSeconds int64 `json:"lifetime_seconds,omitempty" toon:"lifetime_seconds,omitempty"`
 	// Max query execution time in seconds.
-	MaxExecutionSeconds int64  `json:"max_execution_seconds,omitempty" toon:"max_execution_seconds,omitempty"`
-	OpenConns           int64  `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
-	Password            string `json:"password,omitempty" toon:"password,omitempty"`
-	TimeoutMills        int64  `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
-	TlsCa               string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
-	TlsCert             string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
-	TlsEnabled          bool   `json:"tls_enabled,omitempty" toon:"tls_enabled,omitempty"`
-	TlsKey              string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsMaxVersion       string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
-	TlsMinVersion       string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
-	TlsServerName       string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
-	TlsSkipVerify       bool   `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
-	Username            string `json:"username,omitempty" toon:"username,omitempty"`
+	MaxExecutionSeconds int64 `json:"max_execution_seconds,omitempty" toon:"max_execution_seconds,omitempty"`
+	// Maximum number of open connections in the pool; `0` or omitted uses the default of 32.
+	OpenConns int64 `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
+	// ClickHouse authentication password.
+	Password string `json:"password,omitempty" toon:"password,omitempty"`
+	// Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds).
+	TimeoutMills int64 `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
+	// PEM-encoded CA certificate used to verify the server certificate.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`.
+	TlsCert string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	// Whether TLS is enabled; when `false`, all `tls_*` fields are cleared before saving.
+	TlsEnabled bool `json:"tls_enabled,omitempty" toon:"tls_enabled,omitempty"`
+	// PEM-encoded client private key; must be configured together with `tls_cert`.
+	TlsKey string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	// Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint.
+	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
+	// Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`.
+	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
+	// Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty.
+	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
+	// Whether to skip server certificate verification (insecure, for self-signed setups only).
+	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+	// ClickHouse authentication username.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsElasticSearchConfig is generated from the Flashduty OpenAPI schema.
 type DsElasticSearchConfig struct {
 	// Elastic Cloud API key. Only for `cloud` deployment.
-	APIKey                 string `json:"api_key,omitempty" toon:"api_key,omitempty"`
+	APIKey string `json:"api_key,omitempty" toon:"api_key,omitempty"`
+	// SHA-256 fingerprint of the Elasticsearch CA certificate, used to verify the server chain (the recommended check for ES 8 default security).
 	CertificateFingerprint string `json:"certificate_fingerprint,omitempty" toon:"certificate_fingerprint,omitempty"`
 	// Elastic Cloud deployment ID. Only for `cloud` deployment.
 	CloudID string `json:"cloud_id,omitempty" toon:"cloud_id,omitempty"`
 	// Deployment type. `cloud` uses Elastic Cloud; `self-managed` uses a self-hosted cluster.
-	Deployment string   `json:"deployment,omitempty" toon:"deployment,omitempty"`
-	Headers    []string `json:"headers,omitempty" toon:"headers,omitempty"`
-	Password   string   `json:"password,omitempty" toon:"password,omitempty"`
+	Deployment string `json:"deployment,omitempty" toon:"deployment,omitempty"`
+	// Custom HTTP headers added to every request, each entry formatted as `Key: Value`.
+	Headers []string `json:"headers,omitempty" toon:"headers,omitempty"`
+	// Authentication password for self-managed clusters; ignored when `service_token` is set.
+	Password string `json:"password,omitempty" toon:"password,omitempty"`
 	// Service token; overrides username/password if set.
 	ServiceToken string `json:"service_token,omitempty" toon:"service_token,omitempty"`
-	TimeoutMills int64  `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
-	TlsCa        string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds).
+	TimeoutMills int64 `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
+	// PEM-encoded CA certificate used to verify the Elasticsearch server certificate.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
 	// Username for `self-managed` deployment.
 	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsLokiConfig is generated from the Flashduty OpenAPI schema.
 type DsLokiConfig struct {
-	BasicAuthEnabled  bool     `json:"basic_auth_enabled,omitempty" toon:"basic_auth_enabled,omitempty"`
-	BasicAuthPassword string   `json:"basic_auth_password,omitempty" toon:"basic_auth_password,omitempty"`
-	BasicAuthUsername string   `json:"basic_auth_username,omitempty" toon:"basic_auth_username,omitempty"`
-	Headers           []string `json:"headers,omitempty" toon:"headers,omitempty"`
-	Params            []string `json:"params,omitempty" toon:"params,omitempty"`
-	TlsCa             string   `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
-	TlsCert           string   `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
-	TlsKey            string   `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsMaxVersion     string   `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
-	TlsMinVersion     string   `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
-	TlsServerName     string   `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
-	TlsSkipVerify     bool     `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+	// Whether HTTP Basic Auth is enabled; when `false`, `basic_auth_username`/`basic_auth_password` are ignored.
+	BasicAuthEnabled bool `json:"basic_auth_enabled,omitempty" toon:"basic_auth_enabled,omitempty"`
+	// Basic Auth password, effective when `basic_auth_enabled` is `true`.
+	BasicAuthPassword string `json:"basic_auth_password,omitempty" toon:"basic_auth_password,omitempty"`
+	// Basic Auth username, effective when `basic_auth_enabled` is `true`.
+	BasicAuthUsername string `json:"basic_auth_username,omitempty" toon:"basic_auth_username,omitempty"`
+	// Custom HTTP headers added to every request, each entry formatted as `Key: Value`; usable for tenancy headers such as `X-Scope-OrgID`.
+	Headers []string `json:"headers,omitempty" toon:"headers,omitempty"`
+	// Custom query parameters appended to every request URL, each entry formatted as `key=value`.
+	Params []string `json:"params,omitempty" toon:"params,omitempty"`
+	// PEM-encoded CA certificate used to verify the server certificate.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`.
+	TlsCert string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	// PEM-encoded client private key; must be configured together with `tls_cert`.
+	TlsKey string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	// Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint.
+	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
+	// Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`.
+	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
+	// Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty.
+	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
+	// Whether to skip server certificate verification (insecure, for self-signed setups only).
+	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
 }
 
 // DsMySqlConfig is generated from the Flashduty OpenAPI schema.
@@ -2150,32 +2268,47 @@ type DsMySqlConfig struct {
 	// Connection maximum lifetime in seconds.
 	LifetimeSeconds int64 `json:"lifetime_seconds,omitempty" toon:"lifetime_seconds,omitempty"`
 	// Maximum open connections.
-	OpenConns int64  `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
-	Password  string `json:"password,omitempty" toon:"password,omitempty"`
+	OpenConns int64 `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
+	// MySQL authentication password.
+	Password string `json:"password,omitempty" toon:"password,omitempty"`
 	// Query timeout in milliseconds.
-	TimeoutMills  int64  `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
-	TlsCa         string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
-	TlsCert       string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
-	TlsKey        string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	TimeoutMills int64 `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
+	// PEM-encoded CA certificate used to verify the server certificate; only allowed when `tls_mode` is `verify-full` (or empty legacy mode).
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`.
+	TlsCert string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	// PEM-encoded client private key; must be configured together with `tls_cert`.
+	TlsKey string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	// Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint.
 	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
+	// Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`.
 	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
-	// TLS mode for the MySQL connection. Empty keeps the legacy per-field TLS behavior.
-	TlsMode       string `json:"tls_mode,omitempty" toon:"tls_mode,omitempty"`
+	// TLS mode for the MySQL connection. Empty keeps the legacy per-field TLS behavior. `disable` = no TLS (all `tls_*` fields are cleared on save); `require` = TLS without server certificate verification; `verify-full` = TLS with full server verification (CA chain and hostname). MySQL has no `verify-ca` — verifying the CA implies verifying the hostname.
+	TlsMode string `json:"tls_mode,omitempty" toon:"tls_mode,omitempty"`
+	// Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty.
 	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
-	TlsSkipVerify bool   `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
-	Username      string `json:"username,omitempty" toon:"username,omitempty"`
+	// Whether to skip server certificate verification; derived from `tls_mode` when set (`require` → `true`, `verify-full` → `false`) — only manually effective under legacy empty `tls_mode`.
+	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+	// MySQL authentication username.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsOracleConfig is generated from the Flashduty OpenAPI schema.
 type DsOracleConfig struct {
-	IdleConns       int64 `json:"idle_conns,omitempty" toon:"idle_conns,omitempty"`
+	// Maximum number of idle connections in the pool; `0` or omitted uses the default of 4.
+	IdleConns int64 `json:"idle_conns,omitempty" toon:"idle_conns,omitempty"`
+	// Maximum connection lifetime in seconds; `0` or omitted uses the default of 600 (10 minutes).
 	LifetimeSeconds int64 `json:"lifetime_seconds,omitempty" toon:"lifetime_seconds,omitempty"`
-	OpenConns       int64 `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
+	// Maximum number of open connections in the pool; `0` or omitted uses the default of 32.
+	OpenConns int64 `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
 	// Extra connection options as key-value pairs.
-	Options      map[string]string `json:"options,omitempty" toon:"options,omitempty"`
-	Password     string            `json:"password,omitempty" toon:"password,omitempty"`
-	TimeoutMills int64             `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
-	Username     string            `json:"username,omitempty" toon:"username,omitempty"`
+	Options map[string]string `json:"options,omitempty" toon:"options,omitempty"`
+	// Oracle authentication password.
+	Password string `json:"password,omitempty" toon:"password,omitempty"`
+	// Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds).
+	TimeoutMills int64 `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
+	// Oracle authentication username.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsPayload is generated from the Flashduty OpenAPI schema.
@@ -2193,17 +2326,26 @@ type DsPayload struct {
 
 // DsPostgresConfig is generated from the Flashduty OpenAPI schema.
 type DsPostgresConfig struct {
-	IdleConns       int64  `json:"idle_conns,omitempty" toon:"idle_conns,omitempty"`
-	LifetimeSeconds int64  `json:"lifetime_seconds,omitempty" toon:"lifetime_seconds,omitempty"`
-	OpenConns       int64  `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
-	Password        string `json:"password,omitempty" toon:"password,omitempty"`
-	// SSL mode for the PostgreSQL connection. Empty keeps the legacy behavior inferred from `tls_ca`.
-	SslMode      string `json:"ssl_mode,omitempty" toon:"ssl_mode,omitempty"`
-	TimeoutMills int64  `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
-	TlsCa        string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
-	TlsCert      string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
-	TlsKey       string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	Username     string `json:"username,omitempty" toon:"username,omitempty"`
+	// Maximum number of idle connections in the pool; `0` or omitted uses the default of 4.
+	IdleConns int64 `json:"idle_conns,omitempty" toon:"idle_conns,omitempty"`
+	// Maximum connection lifetime in seconds; `0` or omitted uses the default of 600 (10 minutes).
+	LifetimeSeconds int64 `json:"lifetime_seconds,omitempty" toon:"lifetime_seconds,omitempty"`
+	// Maximum number of open connections in the pool; `0` or omitted uses the default of 32.
+	OpenConns int64 `json:"open_conns,omitempty" toon:"open_conns,omitempty"`
+	// PostgreSQL authentication password.
+	Password string `json:"password,omitempty" toon:"password,omitempty"`
+	// SSL mode for the PostgreSQL connection. Empty keeps the legacy behavior inferred from `tls_ca`. `disable` = no TLS (all `tls_*` fields are cleared on save); `require` = TLS without server certificate verification (`tls_ca` not allowed); `verify-ca` = verify the server certificate CA chain but not the hostname; `verify-full` = verify both CA chain and hostname.
+	SslMode string `json:"ssl_mode,omitempty" toon:"ssl_mode,omitempty"`
+	// Per-query timeout in milliseconds; `0` or omitted uses the default of 10000 (10 seconds).
+	TimeoutMills int64 `json:"timeout_mills,omitempty" toon:"timeout_mills,omitempty"`
+	// PEM-encoded CA certificate used to verify the server certificate; used with `ssl_mode` `verify-ca`/`verify-full` and rejected under `require`.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`.
+	TlsCert string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	// PEM-encoded client private key; must be configured together with `tls_cert`.
+	TlsKey string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	// PostgreSQL authentication username.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsPrometheusConfig is generated from the Flashduty OpenAPI schema.
@@ -2217,14 +2359,21 @@ type DsPrometheusConfig struct {
 	// Custom HTTP headers in `Key: Value` format.
 	Headers []string `json:"headers,omitempty" toon:"headers,omitempty"`
 	// Custom query parameters in `key=value` format.
-	Params        []string `json:"params,omitempty" toon:"params,omitempty"`
-	TlsCa         string   `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
-	TlsCert       string   `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
-	TlsKey        string   `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsMaxVersion string   `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
-	TlsMinVersion string   `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
-	TlsServerName string   `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
-	TlsSkipVerify bool     `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+	Params []string `json:"params,omitempty" toon:"params,omitempty"`
+	// PEM-encoded CA certificate used to verify the server certificate.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`.
+	TlsCert string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	// PEM-encoded client private key; must be configured together with `tls_cert`.
+	TlsKey string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	// Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint.
+	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
+	// Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`.
+	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
+	// Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty.
+	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
+	// Whether to skip server certificate verification (insecure, for self-signed setups only).
+	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
 }
 
 // DsslsConfig is generated from the Flashduty OpenAPI schema.
@@ -2241,7 +2390,8 @@ type DsslsConfig struct {
 type DsType struct {
 	// Owning account ID. `0` for global types.
 	AccountID uint64 `json:"account_id" toon:"account_id"`
-	ID        uint64 `json:"id" toon:"id"`
+	// ID of the datasource type record.
+	ID uint64 `json:"id" toon:"id"`
 	// Identifier used as the `ds_type` of rules, e.g. `prometheus`.
 	Ident string `json:"ident" toon:"ident"`
 	// Display name, e.g. `Prometheus`.
@@ -2252,18 +2402,30 @@ type DsType struct {
 
 // DsVictoriaLogsConfig is generated from the Flashduty OpenAPI schema.
 type DsVictoriaLogsConfig struct {
-	BasicAuthEnabled  bool     `json:"basic_auth_enabled,omitempty" toon:"basic_auth_enabled,omitempty"`
-	BasicAuthPassword string   `json:"basic_auth_password,omitempty" toon:"basic_auth_password,omitempty"`
-	BasicAuthUsername string   `json:"basic_auth_username,omitempty" toon:"basic_auth_username,omitempty"`
-	Headers           []string `json:"headers,omitempty" toon:"headers,omitempty"`
-	Params            []string `json:"params,omitempty" toon:"params,omitempty"`
-	TlsCa             string   `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
-	TlsCert           string   `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
-	TlsKey            string   `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
-	TlsMaxVersion     string   `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
-	TlsMinVersion     string   `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
-	TlsServerName     string   `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
-	TlsSkipVerify     bool     `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+	// Whether HTTP Basic Auth is enabled; when `false`, `basic_auth_username`/`basic_auth_password` are ignored.
+	BasicAuthEnabled bool `json:"basic_auth_enabled,omitempty" toon:"basic_auth_enabled,omitempty"`
+	// Basic Auth password, effective when `basic_auth_enabled` is `true`.
+	BasicAuthPassword string `json:"basic_auth_password,omitempty" toon:"basic_auth_password,omitempty"`
+	// Basic Auth username, effective when `basic_auth_enabled` is `true`.
+	BasicAuthUsername string `json:"basic_auth_username,omitempty" toon:"basic_auth_username,omitempty"`
+	// Custom HTTP headers added to every request, each entry formatted as `Key: Value`; usable for tenancy headers such as `AccountID`/`ProjectID`.
+	Headers []string `json:"headers,omitempty" toon:"headers,omitempty"`
+	// Custom query parameters appended to every request URL, each entry formatted as `key=value`.
+	Params []string `json:"params,omitempty" toon:"params,omitempty"`
+	// PEM-encoded CA certificate used to verify the server certificate.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// PEM-encoded client certificate for mutual TLS; must be configured together with `tls_key`.
+	TlsCert string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	// PEM-encoded client private key; must be configured together with `tls_cert`.
+	TlsKey string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	// Maximum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint.
+	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
+	// Minimum TLS version, one of `1.0`, `1.1`, `1.2`, `1.3`; empty means no constraint and it must not exceed `tls_max_version`.
+	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
+	// Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty.
+	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
+	// Whether to skip server certificate verification (insecure, for self-signed setups only).
+	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
 }
 
 // DataSourceItem is generated from the Flashduty OpenAPI schema.
@@ -2428,13 +2590,13 @@ type DiagnoseLogPatternResponse struct {
 	DsName string `json:"ds_name" toon:"ds_name"`
 	// Data source type.
 	DsType string `json:"ds_type" toon:"ds_type"`
-	// Diagnostic operation that produced the result.
+	// Diagnostic operation that produced the result. Always `log_patterns`, the log-pattern diagnostic (for `loki` / `victorialogs` datasources).
 	Operation string `json:"operation" toon:"operation"`
 	// Query string echoed from the request.
 	Query string `json:"query" toon:"query"`
 	// Diagnostic evidence from one method; `method` determines the schema of the remaining fields.
 	Results []DiagnoseResult `json:"results" toon:"results"`
-	// Schema version of the edge diagnostic result.
+	// Schema version of the edge diagnostic result. Fixed at `2`, identifying the response-structure version; bumped on incompatible structural changes.
 	SchemaVersion string `json:"schema_version" toon:"schema_version"`
 	// Current analysis window using RFC 3339 UTC timestamps.
 	Window DiagnoseEvidenceWindow `json:"window" toon:"window"`
@@ -2442,11 +2604,11 @@ type DiagnoseLogPatternResponse struct {
 
 // DiagnoseLogPatternResult is generated from the Flashduty OpenAPI schema.
 type DiagnoseLogPatternResult struct {
-	// Baseline window kind used by a comparison method.
+	// Baseline window kind used by a comparison method. `previous_window` = the equal-length window immediately before the current window; `same_window_yesterday` = the current window shifted back 24 hours; `same_window_last_week` = the current window shifted back 7 days. Only present on `pattern_compare` results.
 	Baseline *string `json:"baseline,omitempty" toon:"baseline,omitempty"`
 	// Baseline time window used by a comparison method.
 	BaselineWindow *DiagnoseEvidenceWindow `json:"baseline_window,omitempty" toon:"baseline_window,omitempty"`
-	// Diagnostic method that produced this evidence.
+	// Diagnostic method that produced this evidence. `pattern_snapshot` = pattern aggregation snapshot of the current window only, no baseline involved; `pattern_compare` = pattern comparison between the current window and the baseline window (see `baseline`).
 	Method string `json:"method" toon:"method"`
 	// Log-pattern evidence ordered for RCA use.
 	PatternEvidence []LogPatternEvidence  `json:"pattern_evidence" toon:"pattern_evidence"`
@@ -2491,13 +2653,13 @@ type DiagnoseMetricTrendResponse struct {
 	DsName string `json:"ds_name" toon:"ds_name"`
 	// Data source type.
 	DsType string `json:"ds_type" toon:"ds_type"`
-	// Diagnostic operation that produced the result.
+	// Diagnostic operation that produced the result. Always `metric_trends`, the metric-trend diagnostic (for `prometheus`-compatible datasources).
 	Operation string `json:"operation" toon:"operation"`
 	// Query string echoed from the request.
 	Query string `json:"query" toon:"query"`
 	// Diagnostic evidence from one method; `method` determines the schema of the remaining fields.
 	Results []DiagnoseResult `json:"results" toon:"results"`
-	// Schema version of the edge diagnostic result.
+	// Schema version of the edge diagnostic result. Fixed at `2`, identifying the response-structure version; bumped on incompatible structural changes.
 	SchemaVersion string `json:"schema_version" toon:"schema_version"`
 	// Current analysis window using RFC 3339 UTC timestamps.
 	Window DiagnoseEvidenceWindow `json:"window" toon:"window"`
@@ -2505,11 +2667,11 @@ type DiagnoseMetricTrendResponse struct {
 
 // DiagnoseMetricTrendResult is generated from the Flashduty OpenAPI schema.
 type DiagnoseMetricTrendResult struct {
-	// Baseline window kind used by a comparison method.
+	// Baseline window kind used by a comparison method. `previous_window` = the equal-length window immediately before the current window; `same_window_yesterday` = the current window shifted back 24 hours; `same_window_last_week` = the current window shifted back 7 days. Only present on `window_compare` results.
 	Baseline *string `json:"baseline,omitempty" toon:"baseline,omitempty"`
 	// Baseline time window used by a comparison method.
 	BaselineWindow *DiagnoseEvidenceWindow `json:"baseline_window,omitempty" toon:"baseline_window,omitempty"`
-	// Diagnostic method that produced this evidence.
+	// Diagnostic method that produced this evidence. `single_window_shape` = within-window trend/shape analysis only, no baseline involved; `window_compare` = per-series comparison between the current window and the baseline window (see `baseline`).
 	Method string `json:"method" toon:"method"`
 	// Metric evidence for each returned series.
 	SeriesEvidence []MetricTrendSeriesEvidence `json:"series_evidence" toon:"series_evidence"`
@@ -2547,13 +2709,13 @@ type DiagnoseResponse struct {
 	DsName string `json:"ds_name" toon:"ds_name"`
 	// Data source type.
 	DsType string `json:"ds_type" toon:"ds_type"`
-	// Diagnostic operation that produced the result.
+	// Diagnostic operation that produced the result. Always `metric_trends`, the metric-trend diagnostic (for `prometheus`-compatible datasources).
 	Operation string `json:"operation" toon:"operation"`
 	// Query string echoed from the request.
 	Query string `json:"query" toon:"query"`
 	// Diagnostic evidence from one method; `method` determines the schema of the remaining fields.
 	Results []DiagnoseResult `json:"results" toon:"results"`
-	// Schema version of the edge diagnostic result.
+	// Schema version of the edge diagnostic result. Fixed at `2`, identifying the response-structure version; bumped on incompatible structural changes.
 	SchemaVersion string `json:"schema_version" toon:"schema_version"`
 	// Current analysis window using RFC 3339 UTC timestamps.
 	Window DiagnoseEvidenceWindow `json:"window" toon:"window"`
@@ -2561,11 +2723,11 @@ type DiagnoseResponse struct {
 
 // DiagnoseResult is generated from the Flashduty OpenAPI schema.
 type DiagnoseResult struct {
-	// Baseline window kind used by a comparison method.
+	// Baseline window kind used by a comparison method. `previous_window` = the equal-length window immediately before the current window; `same_window_yesterday` = the current window shifted back 24 hours; `same_window_last_week` = the current window shifted back 7 days. Only present on `window_compare` results.
 	Baseline *string `json:"baseline,omitempty" toon:"baseline,omitempty"`
 	// Baseline time window used by a comparison method.
 	BaselineWindow *DiagnoseEvidenceWindow `json:"baseline_window,omitempty" toon:"baseline_window,omitempty"`
-	// Diagnostic method that produced this evidence.
+	// Diagnostic method that produced this evidence. `single_window_shape` = within-window trend/shape analysis only, no baseline involved; `window_compare` = per-series comparison between the current window and the baseline window (see `baseline`).
 	Method string `json:"method" toon:"method"`
 	// Log-pattern evidence ordered for RCA use.
 	PatternEvidence *[]LogPatternEvidence `json:"pattern_evidence,omitempty" toon:"pattern_evidence,omitempty"`
@@ -2580,42 +2742,69 @@ type DiagnoseResult struct {
 
 // DimensionInsightItem is generated from the Flashduty OpenAPI schema.
 type DimensionInsightItem struct {
-	AccountID          int64   `json:"account_id" toon:"account_id"`
+	// Acknowledgement rate (%): acknowledged incidents ÷ total incidents × 100, rounded to two decimals; 100 when there are no incidents.
 	AcknowledgementPct float64 `json:"acknowledgement_pct" toon:"acknowledgement_pct"`
-	ChannelID          int64   `json:"channel_id" toon:"channel_id"`
-	ChannelName        string  `json:"channel_name" toon:"channel_name"`
-	// Hour bucket when `split_hours` is enabled.
-	Hours                           string  `json:"hours" toon:"hours"`
-	MeanSecondsToAck                float64 `json:"mean_seconds_to_ack" toon:"mean_seconds_to_ack"`
-	MeanSecondsToClose              float64 `json:"mean_seconds_to_close" toon:"mean_seconds_to_close"`
-	NoiseReductionPct               float64 `json:"noise_reduction_pct" toon:"noise_reduction_pct"`
-	ResponderID                     int64   `json:"responder_id" toon:"responder_id"`
-	ResponderName                   string  `json:"responder_name" toon:"responder_name"`
-	TeamID                          int64   `json:"team_id" toon:"team_id"`
-	TeamName                        string  `json:"team_name" toon:"team_name"`
-	TotalAlertCnt                   int64   `json:"total_alert_cnt" toon:"total_alert_cnt"`
-	TotalAlertEventCnt              int64   `json:"total_alert_event_cnt" toon:"total_alert_event_cnt"`
-	TotalEngagedSeconds             int64   `json:"total_engaged_seconds" toon:"total_engaged_seconds"`
-	TotalIncidentCnt                int64   `json:"total_incident_cnt" toon:"total_incident_cnt"`
-	TotalIncidentsAcknowledged      int64   `json:"total_incidents_acknowledged" toon:"total_incidents_acknowledged"`
-	TotalIncidentsAutoClosed        int64   `json:"total_incidents_auto_closed" toon:"total_incidents_auto_closed"`
-	TotalIncidentsClosed            int64   `json:"total_incidents_closed" toon:"total_incidents_closed"`
-	TotalIncidentsEscalated         int64   `json:"total_incidents_escalated" toon:"total_incidents_escalated"`
-	TotalIncidentsManuallyClosed    int64   `json:"total_incidents_manually_closed" toon:"total_incidents_manually_closed"`
-	TotalIncidentsManuallyEscalated int64   `json:"total_incidents_manually_escalated" toon:"total_incidents_manually_escalated"`
-	TotalIncidentsReassigned        int64   `json:"total_incidents_reassigned" toon:"total_incidents_reassigned"`
-	TotalIncidentsTimeoutClosed     int64   `json:"total_incidents_timeout_closed" toon:"total_incidents_timeout_closed"`
-	TotalIncidentsTimeoutEscalated  int64   `json:"total_incidents_timeout_escalated" toon:"total_incidents_timeout_escalated"`
-	TotalInterruptions              int64   `json:"total_interruptions" toon:"total_interruptions"`
-	TotalNotifications              int64   `json:"total_notifications" toon:"total_notifications"`
-	TotalSecondsToAck               int64   `json:"total_seconds_to_ack" toon:"total_seconds_to_ack"`
-	TotalSecondsToClose             int64   `json:"total_seconds_to_close" toon:"total_seconds_to_close"`
+	// Channel ID, returned only when aggregating by channel (`/insight/channel`).
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Channel name, returned when aggregating by channel; omitted when the name cannot be resolved.
+	ChannelName string `json:"channel_name" toon:"channel_name"`
+	// Hour bucket when `split_hours` is enabled. `work` is Mon–Fri 08:00–19:00, `sleep` is daily 23:00–08:00, and `off` is everything else, all evaluated in the account timezone (`sleep` takes precedence over `work`).
+	Hours string `json:"hours" toon:"hours"`
+	// Mean time to first acknowledgement in seconds.
+	MeanSecondsToAck float64 `json:"mean_seconds_to_ack" toon:"mean_seconds_to_ack"`
+	// Mean time to close in seconds.
+	MeanSecondsToClose float64 `json:"mean_seconds_to_close" toon:"mean_seconds_to_close"`
+	// Noise reduction ratio (%): `100 − incidents ÷ alert events × 100`; 0 when no alert-event comparison data exists.
+	NoiseReductionPct float64 `json:"noise_reduction_pct" toon:"noise_reduction_pct"`
+	// Responder (person) ID, returned only when aggregating by responder (`/insight/responder`).
+	ResponderID int64 `json:"responder_id" toon:"responder_id"`
+	// Responder name, returned when aggregating by responder; omitted when the name cannot be resolved.
+	ResponderName string `json:"responder_name" toon:"responder_name"`
+	// Team ID, returned only when aggregating by team (`/insight/team`).
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Team name, returned when aggregating by team; omitted when the name cannot be resolved (e.g. team deleted).
+	TeamName string `json:"team_name" toon:"team_name"`
+	// Total number of alerts.
+	TotalAlertCnt int64 `json:"total_alert_cnt" toon:"total_alert_cnt"`
+	// Total number of alert events.
+	TotalAlertEventCnt int64 `json:"total_alert_event_cnt" toon:"total_alert_event_cnt"`
+	// Total engaged time in seconds: each incident contributes the sum of close time minus acknowledgement time across its acknowledged responders.
+	TotalEngagedSeconds int64 `json:"total_engaged_seconds" toon:"total_engaged_seconds"`
+	// Total number of incidents.
+	TotalIncidentCnt int64 `json:"total_incident_cnt" toon:"total_incident_cnt"`
+	// Incidents that were acknowledged at least once.
+	TotalIncidentsAcknowledged int64 `json:"total_incidents_acknowledged" toon:"total_incidents_acknowledged"`
+	// Incidents closed automatically because all alerts recovered.
+	TotalIncidentsAutoClosed int64 `json:"total_incidents_auto_closed" toon:"total_incidents_auto_closed"`
+	// Incidents that are closed.
+	TotalIncidentsClosed int64 `json:"total_incidents_closed" toon:"total_incidents_closed"`
+	// Incidents that were escalated at least once.
+	TotalIncidentsEscalated int64 `json:"total_incidents_escalated" toon:"total_incidents_escalated"`
+	// Incidents closed manually.
+	TotalIncidentsManuallyClosed int64 `json:"total_incidents_manually_closed" toon:"total_incidents_manually_closed"`
+	// Incidents escalated manually at least once.
+	TotalIncidentsManuallyEscalated int64 `json:"total_incidents_manually_escalated" toon:"total_incidents_manually_escalated"`
+	// Incidents that were reassigned at least once.
+	TotalIncidentsReassigned int64 `json:"total_incidents_reassigned" toon:"total_incidents_reassigned"`
+	// Incidents closed automatically on timeout.
+	TotalIncidentsTimeoutClosed int64 `json:"total_incidents_timeout_closed" toon:"total_incidents_timeout_closed"`
+	// Incidents escalated on timeout at least once.
+	TotalIncidentsTimeoutEscalated int64 `json:"total_incidents_timeout_escalated" toon:"total_incidents_timeout_escalated"`
+	// Total interruptions: notifications sent via app push, SMS, or voice call; consecutive notifications to the same responder within 60 seconds count as one.
+	TotalInterruptions int64 `json:"total_interruptions" toon:"total_interruptions"`
+	// Total number of notifications sent.
+	TotalNotifications int64 `json:"total_notifications" toon:"total_notifications"`
+	// Total time to first acknowledgement in seconds.
+	TotalSecondsToAck int64 `json:"total_seconds_to_ack" toon:"total_seconds_to_ack"`
+	// Total time to close in seconds.
+	TotalSecondsToClose int64 `json:"total_seconds_to_close" toon:"total_seconds_to_close"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
 	TS Timestamp `json:"ts" toon:"ts"`
 }
 
 // DimensionInsightResponse is generated from the Flashduty OpenAPI schema.
 type DimensionInsightResponse struct {
+	// Insight metric rows aggregated by the endpoint's dimension (account/team/channel); further split by hour bucket or time bucket when `split_hours` or `aggregate_unit` is enabled.
 	Items []DimensionInsightItem `json:"items" toon:"items"`
 }
 
@@ -2868,7 +3057,7 @@ type EventItem struct {
 	Partial bool `json:"partial" toon:"partial"`
 	// Owning session id.
 	SessionID string `json:"session_id" toon:"session_id"`
-	// Event status.
+	// Event status. One of: `normal` (a live event included in the context fed to the model), `compressed` (folded into a compaction summary boundary event; no longer loaded for the model, kept as history only).
 	Status string `json:"status" toon:"status"`
 	// True on the terminal event of a turn.
 	TurnComplete bool `json:"turn_complete" toon:"turn_complete"`
@@ -2892,7 +3081,7 @@ type ExportedStatusPageSubscriberItem struct {
 	Components []StatusPageComponentItem `json:"components" toon:"components"`
 	// Preferred locale for notifications.
 	Locale string `json:"locale" toon:"locale"`
-	// Subscription delivery method.
+	// Subscription notification method. `email` is email subscription (public pages); `im` is IM subscription (internal pages). Determined by the page type.
 	Method string `json:"method" toon:"method"`
 	// Subscriber recipient: email address for public pages, user ID for internal pages.
 	Recipient string `json:"recipient" toon:"recipient"`
@@ -3028,7 +3217,7 @@ type FeedDetailIncidentNotify struct {
 	EscalateRuleID string `json:"escalate_rule_id" toon:"escalate_rule_id"`
 	// Escalation rule display name.
 	EscalateRuleName string `json:"escalate_rule_name" toon:"escalate_rule_name"`
-	// Whether this is the first fire or a refire.
+	// Whether this is the first fire or a refire. `fire`: the first notification for this escalation layer; `refire`: a repeat notification to the same layer when the incident remains unhandled, sent at the layer's notify interval and capped by the layer's maximum refire count.
 	FireType string `json:"fire_type" toon:"fire_type"`
 	// Escalation level index used for this notification.
 	LayerIdx int64 `json:"layer_idx" toon:"layer_idx"`
@@ -3084,7 +3273,17 @@ type FeedDetailIncidentResetTitle struct {
 
 // FeedDetailIncidentResolve is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentResolve struct {
-	// Source that triggered the resolve action.
+	// Source that triggered the resolve.
+	// | Value | Meaning |
+	// |---|---|
+	// | `voice` | Phone-call (voice DTMF) action. |
+	// | `console` | Console (Web UI) action. |
+	// | `card` | IM notification card button (DingTalk/Feishu/Slack/Teams). |
+	// | `wcard` | WeCom notification card button. |
+	// | `event` | Event-driven: auto-close when all related alerts recover to Ok, or a close synced from an external ITSM system. |
+	// | `autorslv` | Auto-resolve: closed by the system after no new alerts within the channel's auto-resolve timeout. |
+	// | `autorefresh` | Card auto-refresh (reserved; never appears on resolve feeds). |
+	// | `escalation` | Escalation flow (reserved; never appears on resolve feeds). |
 	From string `json:"from" toon:"from"`
 }
 
@@ -3148,7 +3347,7 @@ type FeedDetailWorkItemAssigneesChanged struct {
 	AddedAssigneeIDs []int64 `json:"added_assignee_ids" toon:"added_assignee_ids"`
 	// Assignee member IDs after the change.
 	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
-	// Work item type.
+	// Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// Member IDs removed from assignees.
 	RemovedAssigneeIDs []int64 `json:"removed_assignee_ids" toon:"removed_assignee_ids"`
@@ -3160,7 +3359,7 @@ type FeedDetailWorkItemAssigneesChanged struct {
 
 // FeedDetailWorkItemBound is generated from the Flashduty OpenAPI schema.
 type FeedDetailWorkItemBound struct {
-	// Work item type.
+	// Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// ID of the post-mortem the work item is bound to.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
@@ -3174,7 +3373,7 @@ type FeedDetailWorkItemBound struct {
 type FeedDetailWorkItemCompleted struct {
 	// Status label before completion.
 	FromStatus string `json:"from_status" toon:"from_status"`
-	// Work item type.
+	// Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// ID of the post-mortem the work item is bound to.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
@@ -3188,7 +3387,7 @@ type FeedDetailWorkItemCompleted struct {
 
 // FeedDetailWorkItemConverted is generated from the Flashduty OpenAPI schema.
 type FeedDetailWorkItemConverted struct {
-	// Work item type before the conversion.
+	// Work item type before the conversion. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem. Conversion currently only supports `action` → `follow_up`, so `from_type` is always `action` in this event.
 	FromType string `json:"from_type" toon:"from_type"`
 	// ID of the post-mortem the work item is bound to.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
@@ -3196,7 +3395,7 @@ type FeedDetailWorkItemConverted struct {
 	Status string `json:"status" toon:"status"`
 	// Work item title.
 	Title string `json:"title" toon:"title"`
-	// Work item type after the conversion.
+	// Work item type after the conversion. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem. Conversion currently only supports `action` → `follow_up`, so `to_type` is always `follow_up` in this event, and a successful conversion immediately tries to bind the incident's post-mortem.
 	ToType string `json:"to_type" toon:"to_type"`
 	// Work item ID.
 	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
@@ -3206,7 +3405,7 @@ type FeedDetailWorkItemConverted struct {
 type FeedDetailWorkItemCreated struct {
 	// Assignee member IDs.
 	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
-	// Work item type.
+	// Work item type. `action`: an action item anchored to the incident itself, convertible to `follow_up` later; `follow_up`: an improvement item anchored to a post-mortem, requiring the incident to be linked to that post-mortem at creation.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// ID of the post-mortem the work item is bound to.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
@@ -3220,7 +3419,7 @@ type FeedDetailWorkItemCreated struct {
 
 // FeedDetailWorkItemDeleted is generated from the Flashduty OpenAPI schema.
 type FeedDetailWorkItemDeleted struct {
-	// Work item type.
+	// Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// ID of the post-mortem the work item is bound to.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
@@ -3240,7 +3439,7 @@ type FeedDetailWorkItemUpdated struct {
 	FromStatus string `json:"from_status" toon:"from_status"`
 	// Title before the update.
 	FromTitle string `json:"from_title" toon:"from_title"`
-	// Work item type.
+	// Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// Work item title.
 	Title string `json:"title" toon:"title"`
@@ -3283,9 +3482,11 @@ type FieldDeleteReference struct {
 
 // FieldDeleteReferenceError is generated from the Flashduty OpenAPI schema.
 type FieldDeleteReferenceError struct {
-	Data      FieldDeleteReferenceErrorData `json:"data" toon:"data"`
-	Error     any                           `json:"error" toon:"error"`
-	RequestID string                        `json:"request_id" toon:"request_id"`
+	// Supplementary error payload; for this error it always contains the `refs` field.
+	Data  FieldDeleteReferenceErrorData `json:"data" toon:"data"`
+	Error any                           `json:"error" toon:"error"`
+	// Trace ID of this request, identical to the `Flashcat-Request-Id` response header.
+	RequestID string `json:"request_id" toon:"request_id"`
 }
 
 // FieldInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -3314,7 +3515,13 @@ type FieldItem struct {
 	FieldID string `json:"field_id" toon:"field_id"`
 	// Machine name used in incident payloads under `fields.<field_name>`. Immutable.
 	FieldName string `json:"field_name" toon:"field_name"`
-	// Field input type.
+	// Field type.
+	// | Value | Meaning |
+	// |---|---|
+	// | `checkbox` | Checkbox; value is a bool, options are not supported. |
+	// | `multi_select` | Multi-select; value is a string array, each element must be one of options. |
+	// | `single_select` | Single-select; value is a string from options. |
+	// | `text` | Free text; value is a string. |
 	FieldType string `json:"field_type" toon:"field_type"`
 	// Allowed choices for `single_select`/`multi_select` (non-empty unique string array). `null` or empty for `checkbox`/`text`.
 	Options []string `json:"options" toon:"options"`
@@ -3324,7 +3531,7 @@ type FieldItem struct {
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
-	// Stored value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`.
+	// Value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`. `float` is reserved and never occurs today.
 	ValueType string `json:"value_type" toon:"value_type"`
 }
 
@@ -3416,7 +3623,7 @@ type Group struct {
 	StormThresholds []int64 `json:"storm_thresholds,omitempty" toon:"storm_thresholds,omitempty"`
 	// Grouping time window in minutes. Default max is 1440 minutes (24 h); extended accounts may allow up to 43200 minutes (30 days).
 	TimeWindow int64 `json:"time_window,omitempty" toon:"time_window,omitempty"`
-	// Window type. Defaults to `tumbling`.
+	// Window type, default `tumbling`. `tumbling` is a fixed window counted from incident creation — once it expires, new alerts open a new incident; `sliding` is a sliding window counted from the incident's most recent alert, extended each time a new alert merges in.
 	WindowType string `json:"window_type,omitempty" toon:"window_type,omitempty"`
 }
 
@@ -3633,7 +3840,7 @@ type IncidentInfo struct {
 	OwnerID int64 `json:"owner_id" toon:"owner_id"`
 	// Associated post-mortem ID, if any. One incident can only link to a single post-mortem.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
-	// Incident progress state.
+	// Incident progress. `Triggered` means fired and unacknowledged; `Processing` means acknowledged and being handled (un-acknowledging moves it back to `Triggered`); `Closed` means resolved.
 	Progress string `json:"progress" toon:"progress"`
 	// Reporter email for manually created incidents.
 	ReporterEmail string `json:"reporter_email" toon:"reporter_email"`
@@ -3677,51 +3884,84 @@ type IncidentListResponse struct {
 
 // IncidentRawItem is generated from the Flashduty OpenAPI schema.
 type IncidentRawItem struct {
+	// Number of acknowledgements.
 	Acknowledgements int64 `json:"acknowledgements" toon:"acknowledgements"`
+	// Number of alerts still active (not recovered).
+	ActiveAlertCnt int64 `json:"active_alert_cnt" toon:"active_alert_cnt"`
+	// Total number of alerts aggregated into the incident.
+	AlertCnt int64 `json:"alert_cnt" toon:"alert_cnt"`
+	// Total number of alert events associated with the incident; each report of an alert counts as one event.
+	AlertEventCnt int64 `json:"alert_event_cnt" toon:"alert_event_cnt"`
 	// Current assignment target for the incident.
-	AssignedTo  IncidentRawItemAssignedTo `json:"assigned_to" toon:"assigned_to"`
-	Assignments int64                     `json:"assignments" toon:"assignments"`
-	ChannelID   int64                     `json:"channel_id" toon:"channel_id"`
-	ChannelName string                    `json:"channel_name" toon:"channel_name"`
-	ClosedBy    string                    `json:"closed_by" toon:"closed_by"`
+	AssignedTo IncidentRawItemAssignedTo `json:"assigned_to" toon:"assigned_to"`
+	// Number of assignments.
+	Assignments int64 `json:"assignments" toon:"assignments"`
+	// ID of the channel the incident belongs to.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Name of the channel the incident belongs to.
+	ChannelName string `json:"channel_name" toon:"channel_name"`
+	// How the incident was closed: `auto`, `timeout`, or `manually`. Empty string while the incident is still open.
+	ClosedBy string `json:"closed_by" toon:"closed_by"`
 	// Member ID of the person who closed the incident.
 	CloserID int64 `json:"closer_id" toon:"closer_id"`
 	// Display name of the person who closed the incident.
-	CloserName     string `json:"closer_name" toon:"closer_name"`
-	CreatedAt      int64  `json:"created_at" toon:"created_at"`
-	CreatorID      int64  `json:"creator_id" toon:"creator_id"`
-	CreatorName    string `json:"creator_name" toon:"creator_name"`
-	Description    string `json:"description" toon:"description"`
-	EngagedSeconds int64  `json:"engaged_seconds" toon:"engaged_seconds"`
-	Escalations    int64  `json:"escalations" toon:"escalations"`
-	// Whether the incident has ever been muted.
-	EverMuted bool           `json:"ever_muted" toon:"ever_muted"`
-	Fields    map[string]any `json:"fields" toon:"fields"`
-	// Incident frequency classification.
-	Frequency         string            `json:"frequency" toon:"frequency"`
-	Hours             string            `json:"hours" toon:"hours"`
-	IncidentID        string            `json:"incident_id" toon:"incident_id"`
-	Interruptions     int64             `json:"interruptions" toon:"interruptions"`
-	Labels            map[string]string `json:"labels" toon:"labels"`
-	ManualEscalations int64             `json:"manual_escalations" toon:"manual_escalations"`
-	Notifications     int64             `json:"notifications" toon:"notifications"`
+	CloserName string `json:"closer_name" toon:"closer_name"`
+	// Incident creation time, as a Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Person ID of the incident creator.
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
+	// Display name of the incident creator.
+	CreatorName string `json:"creator_name" toon:"creator_name"`
+	// Incident description. Omitted when empty.
+	Description string `json:"description" toon:"description"`
+	// Total engaged time in seconds across acknowledged responders, each contributing close time minus their acknowledgement time; 0 if not closed.
+	EngagedSeconds int64 `json:"engaged_seconds" toon:"engaged_seconds"`
+	// Total escalations, the sum of `timeout_escalations` and `manual_escalations`.
+	Escalations int64 `json:"escalations" toon:"escalations"`
+	// Whether the incident was ever muted by flapping-based noise reduction.
+	EverMuted bool `json:"ever_muted" toon:"ever_muted"`
+	// Custom fields of the incident. Omitted when empty.
+	Fields map[string]any `json:"fields" toon:"fields"`
+	// Frequency classification: `frequent` or `rare`.
+	Frequency string `json:"frequency" toon:"frequency"`
+	// Time-of-day bucket of the creation time in the account timezone: `work` = Mon–Fri 08:00–19:00, `sleep` = 23:00–08:00 daily, `off` = all other times.
+	Hours string `json:"hours" toon:"hours"`
+	// Incident ID, unique within the account.
+	IncidentID string `json:"incident_id" toon:"incident_id"`
+	// Number of interruptions: notifications sent via app push, SMS, or voice call; consecutive notifications to the same responder within 60 seconds count as one.
+	Interruptions int64 `json:"interruptions" toon:"interruptions"`
+	// Incident labels as key-value pairs. Omitted when empty.
+	Labels map[string]string `json:"labels" toon:"labels"`
+	// Manually triggered escalations.
+	ManualEscalations int64 `json:"manual_escalations" toon:"manual_escalations"`
+	// Total number of notifications sent.
+	Notifications int64 `json:"notifications" toon:"notifications"`
 	// Member ID of the incident owner.
 	OwnerID int64 `json:"owner_id" toon:"owner_id"`
 	// Display name of the incident owner.
 	OwnerName string `json:"owner_name" toon:"owner_name"`
 	// Incident progress state — one of `Triggered`, `Processing`, `Closed`.
-	Progress       string           `json:"progress" toon:"progress"`
-	Reassignments  int64            `json:"reassignments" toon:"reassignments"`
-	Responders     []map[string]any `json:"responders" toon:"responders"`
-	SecondsToAck   int64            `json:"seconds_to_ack" toon:"seconds_to_ack"`
-	SecondsToClose int64            `json:"seconds_to_close" toon:"seconds_to_close"`
-	Severity       string           `json:"severity" toon:"severity"`
+	Progress string `json:"progress" toon:"progress"`
+	// Number of reassignments.
+	Reassignments int64 `json:"reassignments" toon:"reassignments"`
+	// Responders with per-person assignment and acknowledgement times.
+	Responders []IncidentRawItemRespondersItem `json:"responders" toon:"responders"`
+	// Seconds from incident creation to the first acknowledgement; 0 if never acknowledged.
+	SecondsToAck int64 `json:"seconds_to_ack" toon:"seconds_to_ack"`
+	// Seconds from incident creation to close; 0 if not closed.
+	SecondsToClose int64 `json:"seconds_to_close" toon:"seconds_to_close"`
+	// Incident severity.
+	Severity string `json:"severity" toon:"severity"`
 	// Unix timestamp in seconds until which the incident is snoozed.
-	SnoozedBefore      Timestamp `json:"snoozed_before" toon:"snoozed_before"`
-	TeamID             int64     `json:"team_id" toon:"team_id"`
-	TeamName           string    `json:"team_name" toon:"team_name"`
-	TimeoutEscalations int64     `json:"timeout_escalations" toon:"timeout_escalations"`
-	Title              string    `json:"title" toon:"title"`
+	SnoozedBefore Timestamp `json:"snoozed_before" toon:"snoozed_before"`
+	// ID of the team that owns the incident.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Name of the team that owns the incident.
+	TeamName string `json:"team_name" toon:"team_name"`
+	// Escalations triggered by timeout.
+	TimeoutEscalations int64 `json:"timeout_escalations" toon:"timeout_escalations"`
+	// Incident title.
+	Title string `json:"title" toon:"title"`
 }
 
 // IncidentShort is generated from the Flashduty OpenAPI schema.
@@ -3736,22 +3976,30 @@ type IncidentShort struct {
 
 // InhibitRuleItem is generated from the Flashduty OpenAPI schema.
 type InhibitRuleItem struct {
-	AccountID   int64  `json:"account_id" toon:"account_id"`
-	ChannelID   int64  `json:"channel_id" toon:"channel_id"`
-	CreatedAt   int64  `json:"created_at" toon:"created_at"`
-	DeletedAt   int64  `json:"deleted_at" toon:"deleted_at"`
+	// ID of the account the rule belongs to.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// ID of the channel the rule belongs to.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Creation time, Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Rule description.
 	Description string `json:"description" toon:"description"`
 	// Label keys used to pair source and target alerts.
-	Equals            []string    `json:"equals" toon:"equals"`
-	IsDirectlyDiscard bool        `json:"is_directly_discard" toon:"is_directly_discard"`
-	Priority          int64       `json:"priority" toon:"priority"`
-	RuleID            string      `json:"rule_id" toon:"rule_id"`
-	RuleName          string      `json:"rule_name" toon:"rule_name"`
-	SourceFilters     FilterGroup `json:"source_filters" toon:"source_filters"`
-	Status            string      `json:"status" toon:"status"`
-	TargetFilters     FilterGroup `json:"target_filters" toon:"target_filters"`
-	UpdatedAt         int64       `json:"updated_at" toon:"updated_at"`
-	UpdatedBy         int64       `json:"updated_by" toon:"updated_by"`
+	Equals []string `json:"equals" toon:"equals"`
+	// When true, the inhibited target alert is discarded outright; when false, the alert is still created but muted — no incident is triggered and no notification is sent.
+	IsDirectlyDiscard bool `json:"is_directly_discard" toon:"is_directly_discard"`
+	// Rule ID (MongoDB ObjectID).
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Rule name.
+	RuleName      string      `json:"rule_name" toon:"rule_name"`
+	SourceFilters FilterGroup `json:"source_filters" toon:"source_filters"`
+	// Rule status: `enabled` or `disabled`; deleted rules never appear in the list.
+	Status        string      `json:"status" toon:"status"`
+	TargetFilters FilterGroup `json:"target_filters" toon:"target_filters"`
+	// Last update time, Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// ID of the user who last updated the rule.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // InitPostMortemRequest is generated from the Flashduty OpenAPI schema.
@@ -3767,13 +4015,16 @@ type InsightAlertByLabelItem struct {
 	// Hour bucket when `split_hours` is enabled.
 	Hours string `json:"hours" toon:"hours"`
 	// Aggregation key value (check name or resource identifier).
-	Label              string `json:"label" toon:"label"`
-	TotalAlertCnt      int64  `json:"total_alert_cnt" toon:"total_alert_cnt"`
-	TotalAlertEventCnt int64  `json:"total_alert_event_cnt" toon:"total_alert_event_cnt"`
+	Label string `json:"label" toon:"label"`
+	// Total number of alerts in this label-value bucket.
+	TotalAlertCnt int64 `json:"total_alert_cnt" toon:"total_alert_cnt"`
+	// Total number of raw alert events in this label-value bucket.
+	TotalAlertEventCnt int64 `json:"total_alert_event_cnt" toon:"total_alert_event_cnt"`
 }
 
 // InsightAlertByLabelResponse is generated from the Flashduty OpenAPI schema.
 type InsightAlertByLabelResponse struct {
+	// Top-K statistic rows aggregated by the requested label's values.
 	Items []InsightAlertByLabelItem `json:"items" toon:"items"`
 }
 
@@ -3799,7 +4050,7 @@ type InsightFilter struct {
 	IsMyTeam bool `json:"is_my_team,omitempty" toon:"is_my_team,omitempty"`
 	// Label filters (exact match).
 	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
-	// Field to sort the underlying incident set by.
+	// Sort field of the underlying incident set. Currently only `created_at` (incident creation time) is supported.
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
 	// Full-text query applied to incident title and description.
 	Query string `json:"query,omitempty" toon:"query,omitempty"`
@@ -3846,7 +4097,7 @@ type InsightIncidentListRequest struct {
 	IsMyTeam bool `json:"is_my_team,omitempty" toon:"is_my_team,omitempty"`
 	// Label filters (exact match).
 	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
-	// Field to sort the underlying incident set by.
+	// Sort field of the underlying incident set. Currently only `created_at` (incident creation time) is supported.
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
 	// Full-text query applied to incident title and description.
 	Query string `json:"query,omitempty" toon:"query,omitempty"`
@@ -3872,8 +4123,10 @@ type InsightIncidentListRequest struct {
 
 // InsightIncidentListResponse is generated from the Flashduty OpenAPI schema.
 type InsightIncidentListResponse struct {
-	HasNextPage bool              `json:"has_next_page" toon:"has_next_page"`
-	Items       []IncidentRawItem `json:"items" toon:"items"`
+	// Whether another page of results is available.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Incident items.
+	Items []IncidentRawItem `json:"items" toon:"items"`
 	// Cursor token to fetch the next page. Pass it back in the next request's `search_after_ctx`.
 	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching incidents.
@@ -3882,7 +4135,7 @@ type InsightIncidentListResponse struct {
 
 // InsightQueryRequest is generated from the Flashduty OpenAPI schema.
 type InsightQueryRequest struct {
-	// Aggregate metrics into time buckets. When set, the time range must cover at least 24 hours; `day` additionally caps the range at 31 days.
+	// Aggregates metrics by time granularity. When set, the time range must be at least 24 hours; with `day` granularity the range must not exceed 31 days. `day` buckets by calendar day, `week` by calendar week, and `month` by calendar month, with boundaries aligned to `time_zone`.
 	AggregateUnit string `json:"aggregate_unit,omitempty" toon:"aggregate_unit,omitempty"`
 	// Sort ascending when `true`, descending otherwise.
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
@@ -3904,7 +4157,7 @@ type InsightQueryRequest struct {
 	IsMyTeam bool `json:"is_my_team,omitempty" toon:"is_my_team,omitempty"`
 	// Label filters (exact match).
 	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
-	// Field to sort the underlying incident set by.
+	// Sort field of the underlying incident set. Currently only `created_at` (incident creation time) is supported.
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
 	// Full-text query applied to incident title and description.
 	Query string `json:"query,omitempty" toon:"query,omitempty"`
@@ -3932,7 +4185,7 @@ type InsightQueryRequest struct {
 
 // InsightTopkAlertByLabelRequest is generated from the Flashduty OpenAPI schema.
 type InsightTopkAlertByLabelRequest struct {
-	// Aggregate metrics into time buckets. When set, the time range must cover at least 24 hours; `day` additionally caps the range at 31 days.
+	// Aggregates metrics by time granularity. When set, the time range must be at least 24 hours; with `day` granularity the range must not exceed 31 days. `day` buckets by calendar day, `week` by calendar week, and `month` by calendar month, with boundaries aligned to `time_zone`.
 	AggregateUnit string `json:"aggregate_unit,omitempty" toon:"aggregate_unit,omitempty"`
 	// Sort ascending when `true`, descending otherwise.
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
@@ -3954,11 +4207,11 @@ type InsightTopkAlertByLabelRequest struct {
 	IsMyTeam bool `json:"is_my_team,omitempty" toon:"is_my_team,omitempty"`
 	// Number of top entries to return, between 1 and 100.
 	K int64 `json:"k,omitempty" toon:"k,omitempty"`
-	// Dimension to aggregate by.
+	// Aggregation dimension. `check` aggregates by the event's `labels.check` label (monitoring check); `resource` aggregates by the `labels.resource` label (monitored resource identifier).
 	Label string `json:"label" toon:"label"`
 	// Label filters (exact match).
 	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
-	// Field to sort results by.
+	// Sort field. `total_alert_cnt` sorts by alert count; `total_alert_event_cnt` sorts by raw alert event count.
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
 	// Full-text query applied to incident title and description.
 	Query string `json:"query,omitempty" toon:"query,omitempty"`
@@ -3990,7 +4243,7 @@ type InviteMemberItem struct {
 	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
 	// Email address
 	Email string `json:"email,omitempty" toon:"email,omitempty"`
-	// Locale
+	// Locale. One of: `zh-CN` (Simplified Chinese), `en-US` (English); other values are rejected with a 400.
 	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
 	// Display name
 	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
@@ -4016,6 +4269,7 @@ type KnowledgeFileDeleteRequest struct {
 
 // KnowledgeFileDeleteResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeFileDeleteResponse struct {
+	// Non-blocking warnings after deletion; `code=still_referenced_by` means the (force-)deleted file is still @ref-referenced by other files in the pack (`refs` lists the referrers). Absent when there are no warnings (omitempty).
 	Warnings []KnowledgeWarning `json:"warnings" toon:"warnings"`
 }
 
@@ -4063,6 +4317,7 @@ type KnowledgeFileListRequest struct {
 
 // KnowledgeFileListResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeFileListResponse struct {
+	// Array of files in the specified knowledge pack; empty array when the pack has no files.
 	Files []KnowledgeFileItem `json:"files" toon:"files"`
 	// Total number of files in the pack.
 	Total int64 `json:"total" toon:"total"`
@@ -4082,7 +4337,8 @@ type KnowledgeFilePutRequest struct {
 
 // KnowledgeFilePutResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeFilePutResponse struct {
-	File     KnowledgeFileItem  `json:"file" toon:"file"`
+	File KnowledgeFileItem `json:"file" toon:"file"`
+	// Non-blocking warnings after a successful write; `code=unresolved_reference` means an @ref in the file content points to a file that does not exist in the pack. Absent when there are no warnings (omitempty).
 	Warnings []KnowledgeWarning `json:"warnings" toon:"warnings"`
 }
 
@@ -4091,6 +4347,7 @@ type KnowledgeGetRequest struct{}
 
 // KnowledgeGetResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeGetResponse struct {
+	// Array of files in this knowledge pack; empty array when the pack has no files.
 	Files []KnowledgeFileItem `json:"files" toon:"files"`
 	Pack  KnowledgePackItem   `json:"pack" toon:"pack"`
 }
@@ -4109,7 +4366,7 @@ type KnowledgePackDeleteResponse struct {
 
 // KnowledgePackEnsureRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgePackEnsureRequest struct {
-	// Scope of the pack to ensure.
+	// Scope of the pack to ensure. One of: `account` (account-level pack; scope_id is forced to the caller's account ID and only account admins may create it; first creation seeds a default DUTY.md), `team` (team-level pack; the `scope_id` team ID is required and the caller must belong to that team).
 	Scope string `json:"scope" toon:"scope"`
 	// Team ID; required for `team` scope, ignored for `account` scope.
 	ScopeID int64 `json:"scope_id,omitempty" toon:"scope_id,omitempty"`
@@ -4150,7 +4407,7 @@ type KnowledgePackListRequest struct {
 	IncludeAccount *bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
 	// Case-insensitive substring filter over pack ID, scope, and team name.
 	Query string `json:"query,omitempty" toon:"query,omitempty"`
-	// Restrict to one scope; `all` (default) overrides `include_account`.
+	// Restrict to one scope; `all` (default) overrides `include_account`. One of: `all` (account scope plus visible team scopes), `account` (account-level packs only), `team` (team-level packs only, can be combined with `team_ids`).
 	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
 	// Restrict to these team IDs; for non-admins the list is intersected with their own teams.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
@@ -4158,6 +4415,7 @@ type KnowledgePackListRequest struct {
 
 // KnowledgePackListResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgePackListResponse struct {
+	// Array of visible knowledge packs after filtering (current page), used with `total` for pagination.
 	Packs []KnowledgePackItem `json:"packs" toon:"packs"`
 	// Total number of packs after filtering, before pagination.
 	Total int64 `json:"total" toon:"total"`
@@ -4175,7 +4433,7 @@ type KnowledgePackUpdateRequest struct {
 
 // KnowledgeWarning is generated from the Flashduty OpenAPI schema.
 type KnowledgeWarning struct {
-	// Warning code.
+	// Warning code. One of: `unresolved_reference` (an @ref in the written file's content points to a file that does not exist in the pack; `ref` carries it), `still_referenced_by` (the deleted file is still @ref-referenced by other files in the pack; `refs` lists the referrers).
 	Code string `json:"code" toon:"code"`
 	// Single reference related to the warning.
 	Ref string `json:"ref" toon:"ref"`
@@ -4213,7 +4471,7 @@ type LinkItem struct {
 	Endpoint string `json:"endpoint" toon:"endpoint"`
 	// Display name of the link.
 	Name string `json:"name" toon:"name"`
-	// How the link should be opened.
+	// How the link opens. `popup` opens it in a popup within the incident detail page; `tab` opens it in a new browser tab.
 	OpenType string `json:"open_type" toon:"open_type"`
 }
 
@@ -4276,19 +4534,22 @@ type ListChannelsRequest struct {
 // ListChannelsResponse is generated from the Flashduty OpenAPI schema.
 type ListChannelsResponse struct {
 	// Whether more pages are available.
-	HasNextPage bool          `json:"has_next_page" toon:"has_next_page"`
-	Items       []ChannelItem `json:"items" toon:"items"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Channels on the current page.
+	Items []ChannelItem `json:"items" toon:"items"`
 	// Total matching channels.
 	Total int64 `json:"total" toon:"total"`
 }
 
 // ListDropRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListDropRulesResponse struct {
+	// All drop (unsubscribe) rules of the channel, excluding deleted ones, ordered by creation time ascending.
 	Items []UnsubscribeRuleItem `json:"items" toon:"items"`
 }
 
 // ListEscalationRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListEscalationRulesResponse struct {
+	// All escalation rules of the channel, excluding deleted ones, ordered by priority ascending.
 	Items []EscalateRuleItem `json:"items" toon:"items"`
 }
 
@@ -4390,6 +4651,7 @@ type ListIncidentsRequest struct {
 
 // ListInhibitRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListInhibitRulesResponse struct {
+	// All inhibit rules of the channel, excluding deleted ones, ordered by creation time ascending.
 	Items []InhibitRuleItem `json:"items" toon:"items"`
 }
 
@@ -4441,7 +4703,7 @@ type ListPostMortemsRequest struct {
 	CreatedAtStartSeconds int64 `json:"created_at_start_seconds,omitempty" toon:"created_at_start_seconds,omitempty"`
 	// Field used to order results.
 	OrderBy string `json:"order_by,omitempty" toon:"order_by,omitempty"`
-	// Report status. Defaults to `published` on the server when omitted.
+	// Post-mortem status filter; the server defaults to `published` when omitted. `drafting` returns only drafts; `published` returns only published post-mortems.
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
 	// Team IDs to restrict the query to.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
@@ -4473,6 +4735,7 @@ type ListRoutesResponse struct {
 
 // ListSilenceRulesResponse is generated from the Flashduty OpenAPI schema.
 type ListSilenceRulesResponse struct {
+	// All silence rules of the channel, excluding deleted ones, ordered by creation time ascending.
 	Items []SilenceRuleItem `json:"items" toon:"items"`
 }
 
@@ -4528,6 +4791,7 @@ type ListWebhookHistoryRequest struct {
 
 // ListWebhookHistoryResponse is generated from the Flashduty OpenAPI schema.
 type ListWebhookHistoryResponse struct {
+	// Webhook delivery records on the current page.
 	Items []WebhookHistoryItem `json:"items" toon:"items"`
 	// Cursor to pass as `search_after_ctx` to fetch the next page. Empty when no further pages are available.
 	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
@@ -4574,6 +4838,13 @@ type LogPatternEvidence struct {
 	// Evidence for this pattern in the baseline window.
 	BaselineWindow *LogPatternWindowEvidence `json:"baseline_window,omitempty" toon:"baseline_window,omitempty"`
 	// Observed comparability between the current and baseline windows.
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `comparable` | The pattern was observed in both windows and can be compared normally. |
+	// | `observed_only_current` | Observed only in the current window (a newly appeared pattern). |
+	// | `observed_only_baseline` | Observed only in the baseline window (disappeared from the current window). |
+	// | `comparison_limited_by_incomplete_evidence` | Observed on both sides, but the evidence is incomplete (e.g. log volume hit the aggregation cap or sampling was truncated), so the comparison is limited. |
 	ComparisonStatus *string `json:"comparison_status,omitempty" toon:"comparison_status,omitempty"`
 	// Evidence for this pattern in the current window.
 	CurrentWindow *LogPatternWindowEvidence `json:"current_window,omitempty" toon:"current_window,omitempty"`
@@ -4651,7 +4922,7 @@ type McpServerCreateRequest struct {
 	Env map[string]string `json:"env,omitempty" toon:"env,omitempty"`
 	// Runner ID; required when environment_kind is byoc.
 	EnvironmentID string `json:"environment_id,omitempty" toon:"environment_id,omitempty"`
-	// Pin the server to a specific BYOC runner (`environment_id` required). Omit or send empty for automatic selection; `cloud` is not supported for MCP servers.
+	// Pin the server to a specific BYOC runner (`environment_id` required). Omit or send empty for automatic selection; `cloud` is not supported for MCP servers. The only accepted value: `byoc` (a self-hosted BYOC runner in the account; the MCP server process runs on the customer's own infrastructure).
 	EnvironmentKind string `json:"environment_kind,omitempty" toon:"environment_kind,omitempty"`
 	// HTTP headers (sse / streamable-http).
 	Headers map[string]string `json:"headers,omitempty" toon:"headers,omitempty"`
@@ -4697,7 +4968,7 @@ type McpServerItem struct {
 	AllowInsecureTlsSkipVerify bool `json:"allow_insecure_tls_skip_verify" toon:"allow_insecure_tls_skip_verify"`
 	// Command arguments (stdio transport).
 	Args []string `json:"args" toon:"args"`
-	// Authentication mode.
+	// Authentication mode. One of: `shared` (a single static credential saved on the resource and shared by all callers in the account; the default — an empty value behaves the same), `per_user_secret` (each user stores their own secret per `secret_schema`, injected per user at runtime), `per_user_oauth` (each user completes their own OAuth grant; discovery and registration run lazily on first use).
 	AuthMode string `json:"auth_mode" toon:"auth_mode"`
 	// Tool-call timeout in seconds (0 = server default, 60s).
 	CallTimeout int64 `json:"call_timeout" toon:"call_timeout"`
@@ -4743,7 +5014,7 @@ type McpServerItem struct {
 	ToolCount int64 `json:"tool_count" toon:"tool_count"`
 	// Live tool list; populated by the get/test endpoints.
 	Tools []McpToolInfo `json:"tools" toon:"tools"`
-	// Transport protocol.
+	// Transport protocol. One of: `stdio` (standard I/O to a local subprocess), `sse` (standalone SSE, the legacy MCP transport), `streamable-http` (the newer HTTP streaming transport).
 	Transport string `json:"transport" toon:"transport"`
 	// Last update time. Unix timestamp in milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
@@ -5247,7 +5518,7 @@ type MemberResetInfoUpdates struct {
 	CountryCode string `json:"country_code,omitempty" toon:"country_code,omitempty"`
 	// New email address.
 	Email string `json:"email,omitempty" toon:"email,omitempty"`
-	// New locale preference.
+	// New locale preference. One of: `zh-CN` (Simplified Chinese), `en-US` (English); other values are rejected with a 400.
 	Locale string `json:"locale,omitempty" toon:"locale,omitempty"`
 	// New display name.
 	MemberName string `json:"member_name,omitempty" toon:"member_name,omitempty"`
@@ -5322,6 +5593,14 @@ type MetricTrendSeriesEvidence struct {
 	// Finite-sample statistics for the baseline window. Omitted when no finite samples exist.
 	BaselineWindowStats *MetricTrendWindowStats `json:"baseline_window_stats,omitempty" toon:"baseline_window_stats,omitempty"`
 	// Comparability of the current and baseline series.
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `comparable` | Both windows have enough finite samples for a normal comparison. |
+	// | `new_series` | The series exists only in the current window (new series). |
+	// | `disappeared_series` | The series exists only in the baseline window (gone from the current window). |
+	// | `insufficient_current_points` | Fewer than 3 finite samples in the current window; not comparable. |
+	// | `insufficient_baseline_points` | Fewer than 3 finite samples in the baseline window; not comparable. |
 	ComparisonStatus *string `json:"comparison_status,omitempty" toon:"comparison_status,omitempty"`
 	// Finite-sample statistics for the current window. Omitted when no finite samples exist.
 	CurrentWindowStats *MetricTrendWindowStats `json:"current_window_stats,omitempty" toon:"current_window_stats,omitempty"`
@@ -5353,15 +5632,20 @@ type MetricTrendWindowStats struct {
 
 // MetricsBase is generated from the Flashduty OpenAPI schema.
 type MetricsBase struct {
-	AccountID   int64  `json:"account_id" toon:"account_id"`
-	ChannelID   int64  `json:"channel_id" toon:"channel_id"`
+	// Channel ID, returned only when aggregating by channel (`/insight/channel`).
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Channel name, returned when aggregating by channel; omitted when the name cannot be resolved.
 	ChannelName string `json:"channel_name" toon:"channel_name"`
-	// Hour bucket when `split_hours` is enabled.
-	Hours         string `json:"hours" toon:"hours"`
-	ResponderID   int64  `json:"responder_id" toon:"responder_id"`
+	// Hour bucket when `split_hours` is enabled. `work` is Mon–Fri 08:00–19:00, `sleep` is daily 23:00–08:00, and `off` is everything else, all evaluated in the account timezone (`sleep` takes precedence over `work`).
+	Hours string `json:"hours" toon:"hours"`
+	// Responder (person) ID, returned only when aggregating by responder (`/insight/responder`).
+	ResponderID int64 `json:"responder_id" toon:"responder_id"`
+	// Responder name, returned when aggregating by responder; omitted when the name cannot be resolved.
 	ResponderName string `json:"responder_name" toon:"responder_name"`
-	TeamID        int64  `json:"team_id" toon:"team_id"`
-	TeamName      string `json:"team_name" toon:"team_name"`
+	// Team ID, returned only when aggregating by team (`/insight/team`).
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Team name, returned when aggregating by team; omitted when the name cannot be resolved (e.g. team deleted).
+	TeamName string `json:"team_name" toon:"team_name"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
 	TS Timestamp `json:"ts" toon:"ts"`
 }
@@ -5544,7 +5828,7 @@ type PastIncidentItem struct {
 	OwnerID int64 `json:"owner_id" toon:"owner_id"`
 	// Associated post-mortem ID, if any. One incident can only link to a single post-mortem.
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
-	// Incident progress state.
+	// Incident progress. `Triggered` means fired and unacknowledged; `Processing` means acknowledged and being handled (un-acknowledging moves it back to `Triggered`); `Closed` means resolved.
 	Progress string `json:"progress" toon:"progress"`
 	// Reporter email for manually created incidents.
 	ReporterEmail string `json:"reporter_email" toon:"reporter_email"`
@@ -5572,7 +5856,7 @@ type PastIncidentItem struct {
 type PermissionFactorItem struct {
 	// Factor identifier (e.g., 'template:read:info').
 	FactorName string `json:"factor_name" toon:"factor_name"`
-	// Factor type.
+	// Factor type. `api`: backend API factor — `factor_name` is the API name (e.g. `skill:write:upload`), enforced at the gateway; `button`: UI action factor, used by the role-config page to render action toggles; `visit`: page-visit factor (custom menu pages use this type); `menu`: menu-visibility factor (legacy, no current seed data); `url`: page route-path factor (legacy, no current seed data).
 	FactorType string `json:"factor_type" toon:"factor_type"`
 }
 
@@ -5594,7 +5878,7 @@ type PermissionItem struct {
 	IsGranted bool `json:"is_granted" toon:"is_granted"`
 	// Permission display name.
 	PermissionName string `json:"permission_name" toon:"permission_name"`
-	// Whether this is a read or manage permission.
+	// Whether this is a read or manage permission. `read`: view-only permission (read/list/query); `manage`: administrative permission covering mutations (create, update, delete, configure).
 	PermissionType string `json:"permission_type" toon:"permission_type"`
 	// Permission scope (e.g., 'on-call', 'organization').
 	Scope string `json:"scope" toon:"scope"`
@@ -5679,7 +5963,9 @@ type PostMortemContentResetResponse struct {
 
 // PostMortemItem is generated from the Flashduty OpenAPI schema.
 type PostMortemItem struct {
-	Basics  PostMortemItemBasics  `json:"basics" toon:"basics"`
+	// Basics aggregated automatically from the linked incidents: highest severity, earliest start / latest close time, total duration, and responders.
+	Basics PostMortemItemBasics `json:"basics" toon:"basics"`
+	// Post-mortem body; the object holds a single `content` field whose value is a BlockNote JSON string.
 	Content PostMortemItemContent `json:"content" toon:"content"`
 	// Follow-up action items rendered as a single string.
 	FollowUps string         `json:"follow_ups" toon:"follow_ups"`
@@ -5710,7 +5996,7 @@ type PostMortemMeta struct {
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
 	// Content revision for optimistic concurrency. Monotonically increases on collaborative saves and full content resets.
 	Revision int64 `json:"revision" toon:"revision"`
-	// Report status.
+	// Post-mortem status. `drafting` means still being edited; `published` means published.
 	Status string `json:"status" toon:"status"`
 	// Owning team ID. 0 if none.
 	TeamID int64 `json:"team_id" toon:"team_id"`
@@ -5754,7 +6040,7 @@ type PreflightResult struct {
 	OK bool `json:"ok" toon:"ok"`
 	// Rule owner person ID.
 	OwnerID int64 `json:"owner_id" toon:"owner_id"`
-	// Resolved run scope for this run; mirrors the rule's run_scope.
+	// Resolved run scope for this run; mirrors the rule's run_scope. One of: `person` (personal rule, runs as its creator), `team` (team rule, runs under the owning team).
 	Scope string `json:"scope" toon:"scope"`
 	// Rule's scope team ID; 0 means a personal rule.
 	TeamID int64 `json:"team_id" toon:"team_id"`
@@ -5765,6 +6051,14 @@ type PreflightResult struct {
 // PreviewIncidentCardFixedField is generated from the Flashduty OpenAPI schema.
 type PreviewIncidentCardFixedField struct {
 	// Incident-card field name.
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `channel` | Name of the alert channel that produced the incident; returned only when non-empty. |
+	// | `snoozed_before` | Snooze-until timestamp formatted as `YYYY-MM-DD HH:MM:SS`; returned only while the incident is snoozed. |
+	// | `severity` | Incident severity label; returned only when non-empty. |
+	// | `responders` | Names of the current responders, separated by spaces; returned only when the incident has responders. |
+	// | `aggregate_alert_count` | Number of alerts aggregated into the incident; returned only when greater than 1. |
 	Field string `json:"field" toon:"field"`
 	// Rendered display value for the fixed field.
 	Value string `json:"value" toon:"value"`
@@ -5829,7 +6123,7 @@ type QueryDataRequest struct {
 
 // QueryDataResponse is generated from the Flashduty OpenAPI schema.
 type QueryDataResponse struct {
-	// Public result-contract version. It is independent of the internal monit-edge query protocol version.
+	// Public result-contract version. It is independent of the internal monit-edge query protocol version. Fixed at `query_result.v1`, which defines the structure of the `result` field.
 	Format string      `json:"format" toon:"format"`
 	Result QueryResult `json:"result" toon:"result"`
 }
@@ -5838,26 +6132,33 @@ type QueryDataResponse struct {
 type QueryField struct {
 	// Series labels. Present on the float field of a time-series frame.
 	Labels map[string]string `json:"labels" toon:"labels"`
-	Name   string            `json:"name" toon:"name"`
-	Type   string            `json:"type" toon:"type"`
-	Values []any             `json:"values" toon:"values"`
+	// Column name; on a time-series float field, series are distinguished by `labels` and `name` is usually the metric name.
+	Name string `json:"name" toon:"name"`
+	// Value type governing `values` encoding: `string` = strings or null, `float` = numbers or `NaN`/`±Inf` strings or null, `time` = RFC 3339 Nano strings or null.
+	Type string `json:"type" toon:"type"`
+	// All values of this column in row order; length matches the other fields in the frame.
+	Values []any `json:"values" toon:"values"`
 }
 
 // QueryFrame is generated from the Flashduty OpenAPI schema.
 type QueryFrame struct {
+	// Columns of the frame; all fields share the same `values` length and row i is composed of each field's `values[i]`.
 	Fields []QueryField `json:"fields" toon:"fields"`
-	Kind   string       `json:"kind" toon:"kind"`
+	// Frame type: `table` for a generic table, `time_series` for a series (exactly one time field and one float field).
+	Kind string `json:"kind" toon:"kind"`
 }
 
 // QueryFramesResult is generated from the Flashduty OpenAPI schema.
 type QueryFramesResult struct {
 	// Typed table or time-series frames. A response can contain more than one frame.
 	Frames []QueryFrame `json:"frames" toon:"frames"`
-	Kind   string       `json:"kind" toon:"kind"`
+	// Result-kind discriminator, always `frames`, indicating the `frames` payload of typed table/time-series frames.
+	Kind string `json:"kind" toon:"kind"`
 }
 
 // QueryRecordsResult is generated from the Flashduty OpenAPI schema.
 type QueryRecordsResult struct {
+	// Result-kind discriminator, always `records`, indicating the `records` payload of schemaless record objects.
 	Kind string `json:"kind" toon:"kind"`
 	// Schema-flexible records. Records may have different fields, contain nested JSON, or be null. Integers outside JavaScript's safe range are encoded as decimal strings.
 	Records []any `json:"records" toon:"records"`
@@ -5867,7 +6168,8 @@ type QueryRecordsResult struct {
 type QueryResult struct {
 	// Typed table or time-series frames. A response can contain more than one frame.
 	Frames *[]QueryFrame `json:"frames,omitempty" toon:"frames,omitempty"`
-	Kind   string        `json:"kind" toon:"kind"`
+	// Result-kind discriminator, always `samples`, indicating the `samples` payload of labeled instant samples.
+	Kind string `json:"kind" toon:"kind"`
 	// Schema-flexible records. Records may have different fields, contain nested JSON, or be null. Integers outside JavaScript's safe range are encoded as decimal strings.
 	Records *[]any `json:"records,omitempty" toon:"records,omitempty"`
 	// Instant samples with their complete label sets.
@@ -5900,6 +6202,7 @@ type QueryRowsRequest struct {
 
 // QuerySample is generated from the Flashduty OpenAPI schema.
 type QuerySample struct {
+	// The sample's full label set; may be an empty object but is always present.
 	Labels map[string]string `json:"labels" toon:"labels"`
 	// Finite numeric value or a JSON-safe representation of a non-finite float.
 	Value any `json:"value" toon:"value"`
@@ -5907,6 +6210,7 @@ type QuerySample struct {
 
 // QuerySamplesResult is generated from the Flashduty OpenAPI schema.
 type QuerySamplesResult struct {
+	// Result-kind discriminator, always `samples`, indicating the `samples` payload of labeled instant samples.
 	Kind string `json:"kind" toon:"kind"`
 	// Instant samples with their complete label sets.
 	Samples []QuerySample `json:"samples" toon:"samples"`
@@ -6040,33 +6344,51 @@ type Responder struct {
 
 // ResponderInsightItem is generated from the Flashduty OpenAPI schema.
 type ResponderInsightItem struct {
-	AccountID          int64   `json:"account_id" toon:"account_id"`
+	// This responder's acknowledgement rate (%): acknowledged incidents ÷ involved incidents × 100, rounded to two decimals.
 	AcknowledgementPct float64 `json:"acknowledgement_pct" toon:"acknowledgement_pct"`
-	ChannelID          int64   `json:"channel_id" toon:"channel_id"`
-	ChannelName        string  `json:"channel_name" toon:"channel_name"`
-	// Hour bucket when `split_hours` is enabled.
-	Hours                           string  `json:"hours" toon:"hours"`
-	MeanSecondsToAck                float64 `json:"mean_seconds_to_ack" toon:"mean_seconds_to_ack"`
-	ResponderID                     int64   `json:"responder_id" toon:"responder_id"`
-	ResponderName                   string  `json:"responder_name" toon:"responder_name"`
-	TeamID                          int64   `json:"team_id" toon:"team_id"`
-	TeamName                        string  `json:"team_name" toon:"team_name"`
-	TotalEngagedSeconds             int64   `json:"total_engaged_seconds" toon:"total_engaged_seconds"`
-	TotalIncidentCnt                int64   `json:"total_incident_cnt" toon:"total_incident_cnt"`
-	TotalIncidentsAcknowledged      int64   `json:"total_incidents_acknowledged" toon:"total_incidents_acknowledged"`
-	TotalIncidentsEscalated         int64   `json:"total_incidents_escalated" toon:"total_incidents_escalated"`
-	TotalIncidentsManuallyEscalated int64   `json:"total_incidents_manually_escalated" toon:"total_incidents_manually_escalated"`
-	TotalIncidentsReassigned        int64   `json:"total_incidents_reassigned" toon:"total_incidents_reassigned"`
-	TotalIncidentsTimeoutEscalated  int64   `json:"total_incidents_timeout_escalated" toon:"total_incidents_timeout_escalated"`
-	TotalInterruptions              int64   `json:"total_interruptions" toon:"total_interruptions"`
-	TotalNotifications              int64   `json:"total_notifications" toon:"total_notifications"`
-	TotalSecondsToAck               int64   `json:"total_seconds_to_ack" toon:"total_seconds_to_ack"`
+	// Channel ID, returned only when aggregating by channel (`/insight/channel`).
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Channel name, returned when aggregating by channel; omitted when the name cannot be resolved.
+	ChannelName string `json:"channel_name" toon:"channel_name"`
+	// Hour bucket when `split_hours` is enabled. `work` is Mon–Fri 08:00–19:00, `sleep` is daily 23:00–08:00, and `off` is everything else, all evaluated in the account timezone (`sleep` takes precedence over `work`).
+	Hours string `json:"hours" toon:"hours"`
+	// This responder's mean time to acknowledgement in seconds.
+	MeanSecondsToAck float64 `json:"mean_seconds_to_ack" toon:"mean_seconds_to_ack"`
+	// Responder (person) ID, returned only when aggregating by responder (`/insight/responder`).
+	ResponderID int64 `json:"responder_id" toon:"responder_id"`
+	// Responder name, returned when aggregating by responder; omitted when the name cannot be resolved.
+	ResponderName string `json:"responder_name" toon:"responder_name"`
+	// Team ID, returned only when aggregating by team (`/insight/team`).
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Team name, returned when aggregating by team; omitted when the name cannot be resolved (e.g. team deleted).
+	TeamName string `json:"team_name" toon:"team_name"`
+	// This responder's total engaged time in seconds: each incident contributes close time minus their acknowledgement time.
+	TotalEngagedSeconds int64 `json:"total_engaged_seconds" toon:"total_engaged_seconds"`
+	// Incidents this responder was involved in.
+	TotalIncidentCnt int64 `json:"total_incident_cnt" toon:"total_incident_cnt"`
+	// Incidents acknowledged by this responder.
+	TotalIncidentsAcknowledged int64 `json:"total_incidents_acknowledged" toon:"total_incidents_acknowledged"`
+	// This responder's incidents that were escalated at least once.
+	TotalIncidentsEscalated int64 `json:"total_incidents_escalated" toon:"total_incidents_escalated"`
+	// This responder's incidents escalated manually.
+	TotalIncidentsManuallyEscalated int64 `json:"total_incidents_manually_escalated" toon:"total_incidents_manually_escalated"`
+	// Incidents reassigned away from this responder.
+	TotalIncidentsReassigned int64 `json:"total_incidents_reassigned" toon:"total_incidents_reassigned"`
+	// This responder's incidents escalated on timeout.
+	TotalIncidentsTimeoutEscalated int64 `json:"total_incidents_timeout_escalated" toon:"total_incidents_timeout_escalated"`
+	// Interruptions for this responder: notifications sent via app push, SMS, or voice call; consecutive notifications within 60 seconds count as one.
+	TotalInterruptions int64 `json:"total_interruptions" toon:"total_interruptions"`
+	// Total notifications sent to this responder.
+	TotalNotifications int64 `json:"total_notifications" toon:"total_notifications"`
+	// This responder's total time to acknowledgement in seconds: each incident contributes acknowledgement time minus assignment time.
+	TotalSecondsToAck int64 `json:"total_seconds_to_ack" toon:"total_seconds_to_ack"`
 	// Aggregation bucket start time, Unix seconds. Present when `aggregate_unit` is used.
 	TS Timestamp `json:"ts" toon:"ts"`
 }
 
 // ResponderInsightResponse is generated from the Flashduty OpenAPI schema.
 type ResponderInsightResponse struct {
+	// Incident response metric rows aggregated by responder; further split by hour bucket or time bucket when `split_hours` or `aggregate_unit` is enabled.
 	Items []ResponderInsightItem `json:"items" toon:"items"`
 }
 
@@ -6129,6 +6451,7 @@ type RoleListRequest struct {
 
 // RoleListResponse is generated from the Flashduty OpenAPI schema.
 type RoleListResponse struct {
+	// Array of roles; includes account roles plus built-in global roles unless `no_global=true`; empty array when no results.
 	Items []RoleItem `json:"items" toon:"items"`
 	// Total role count.
 	Total int64 `json:"total" toon:"total"`
@@ -6144,6 +6467,7 @@ type RolePermissionListRequest struct {
 
 // RolePermissionListResponse is generated from the Flashduty OpenAPI schema.
 type RolePermissionListResponse struct {
+	// Array of permission items: system-level permissions plus the caller's account-scoped custom-menu permissions (never other tenants' rows).
 	Items []PermissionItem `json:"items" toon:"items"`
 }
 
@@ -6208,7 +6532,7 @@ type RouteItem struct {
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Optional sections that visually group cases.
 	Sections []RouteSection `json:"sections" toon:"sections"`
-	// Rule status.
+	// Route status. `enabled` means active; `deleted` means removed, visible only in historical versions.
 	Status string `json:"status" toon:"status"`
 	// Last update time, Unix timestamp in seconds.
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
@@ -6244,7 +6568,8 @@ type RuleConfigs struct {
 	CheckNodata RuleConfigsCheckNodata `json:"check_nodata,omitzero" toon:"check_nodata,omitempty"`
 	// Threshold check configuration.
 	CheckThreshold RuleConfigsCheckThreshold `json:"check_threshold,omitzero" toon:"check_threshold,omitempty"`
-	Queries        []RuleConfigsQueriesItem  `json:"queries,omitempty" toon:"queries,omitempty"`
+	// Query list with at least one entry; each needs a unique `name` (`R` and `__all__` are reserved) and a non-empty, non-duplicate `expr`.
+	Queries []RuleConfigsQueriesItem `json:"queries,omitempty" toon:"queries,omitempty"`
 	// Optional auxiliary queries whose results are attached to alert events as context. Each entry must have a unique `name` (not duplicating any query name) and a non-empty `expr`.
 	RelateQueries []RuleConfigsRelateQueriesItem `json:"relate_queries,omitempty" toon:"relate_queries,omitempty"`
 }
@@ -6361,7 +6686,7 @@ type RUMApplicationCreateRequest struct {
 	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Optional APM tracing integration configuration.
 	Tracing RUMApplicationTracing `json:"tracing,omitzero" toon:"tracing,omitempty"`
-	// Application type.
+	// Application type. Platform identifier, one of `browser` (web), `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`, `miniprogram` (WeChat mini program), `harmony` (HarmonyOS), `electron`.
 	Type string `json:"type" toon:"type"`
 }
 
@@ -6389,6 +6714,7 @@ type RUMApplicationInfosRequest struct {
 
 // RUMApplicationInfosResponse is generated from the Flashduty OpenAPI schema.
 type RUMApplicationInfosResponse struct {
+	// Application info items matching the requested `application_ids` (max 200, deduplicated).
 	Items []RUMApplicationItem `json:"items" toon:"items"`
 }
 
@@ -6414,12 +6740,12 @@ type RUMApplicationItem struct {
 	NoGeo bool `json:"no_geo" toon:"no_geo"`
 	// If `true`, IP addresses are not collected.
 	NoIP bool `json:"no_ip" toon:"no_ip"`
-	// Application status.
+	// Application status. One of `enabled` (active, receiving data), `disabled` (deactivated), `deleted` (soft-delete marker; every query filters it out, so it never actually appears in responses).
 	Status string `json:"status" toon:"status"`
 	// Owning team ID.
 	TeamID  int64                 `json:"team_id" toon:"team_id"`
 	Tracing RUMApplicationTracing `json:"tracing" toon:"tracing"`
-	// Application type.
+	// Application type. Platform identifier, one of `browser` (web), `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`. Note: the create API also accepts `miniprogram`, `harmony`, and `electron`, and applications of those types appear in responses too (see Enum gaps).
 	Type string `json:"type" toon:"type"`
 	// Last update timestamp, Unix epoch milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
@@ -6470,9 +6796,12 @@ type RUMApplicationListRequest struct {
 
 // RUMApplicationListResponse is generated from the Flashduty OpenAPI schema.
 type RUMApplicationListResponse struct {
-	HasNextPage bool                 `json:"has_next_page" toon:"has_next_page"`
-	Items       []RUMApplicationItem `json:"items" toon:"items"`
-	Total       int64                `json:"total" toon:"total"`
+	// Whether more pages exist; `true` when matching records remain beyond the current page.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// RUM applications of the current page.
+	Items []RUMApplicationItem `json:"items" toon:"items"`
+	// Total number of applications matching the filter conditions.
+	Total int64 `json:"total" toon:"total"`
 }
 
 // RUMApplicationTracing is generated from the Flashduty OpenAPI schema.
@@ -6481,7 +6810,7 @@ type RUMApplicationTracing struct {
 	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	// Trace endpoint URL (http or https).
 	Endpoint string `json:"endpoint,omitempty" toon:"endpoint,omitempty"`
-	// How to open the trace link.
+	// How to open the trace link. One of `popup` (open trace details in a popup) or `tab` (open in a new browser tab).
 	OpenType string `json:"open_type,omitempty" toon:"open_type,omitempty"`
 }
 
@@ -6505,7 +6834,7 @@ type RUMApplicationUpdateRequest struct {
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	// APM tracing integration configuration. Omit to leave unchanged.
 	Tracing RUMApplicationTracing `json:"tracing,omitzero" toon:"tracing,omitempty"`
-	// Application type. Omit to leave unchanged.
+	// Application type. Omit to leave unchanged. Platform identifier, one of `browser` (web), `ios`, `android`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`, `miniprogram` (WeChat mini program), `harmony` (HarmonyOS), `electron`.
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
 
@@ -6762,7 +7091,19 @@ type RUMFacetCountRequest struct {
 	FacetValue any `json:"facet_value,omitempty" toon:"facet_value,omitempty"`
 	// Maximum number of top values to return. Default 100, maximum 100.
 	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
-	// RUM data scope to query.
+	// RUM data scope to query. One of:
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `session` | User sessions |
+	// | `view` | Page views |
+	// | `action` | User actions |
+	// | `error` | Error events |
+	// | `resource` | Resource loads |
+	// | `long_task` | Long tasks |
+	// | `vital` | Performance vitals (Web Vitals, etc.) |
+	// | `issue` | Aggregated error-tracking issues |
+	// | `sourcemap` | Sourcemap / symbol files |
 	Scope string `json:"scope" toon:"scope"`
 	// SQL WHERE clause (no SELECT) for additional filtering.
 	Sql string `json:"sql,omitempty" toon:"sql,omitempty"`
@@ -6772,6 +7113,7 @@ type RUMFacetCountRequest struct {
 
 // RUMFacetCountResponse is generated from the Flashduty OpenAPI schema.
 type RUMFacetCountResponse struct {
+	// Facet values with their occurrence counts, sorted by count descending, capped at `limit` (max 100).
 	Items []FacetCountItem `json:"items" toon:"items"`
 }
 
@@ -6797,7 +7139,7 @@ type RUMFieldItem struct {
 	Queryable bool `json:"queryable" toon:"queryable"`
 	// RUM scopes this field appears in.
 	Scopes []string `json:"scopes" toon:"scopes"`
-	// Display type in the analytics UI.
+	// Display type in the analytics UI. One of `list` (shown as an enumerated value list; only this type supports facet counting) or `range` (filtered and shown as a numeric/time range).
 	ShowType string `json:"show_type" toon:"show_type"`
 	// Field status, e.g. `active`.
 	Status string `json:"status" toon:"status"`
@@ -6805,7 +7147,16 @@ type RUMFieldItem struct {
 	UnitFamily string `json:"unit_family" toon:"unit_family"`
 	// Specific measurement unit, e.g. `millisecond`, `byte`.
 	UnitName string `json:"unit_name" toon:"unit_name"`
-	// Data type of the field value.
+	// Data type of the field value. One of:
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `string` | String |
+	// | `number` | Numeric |
+	// | `boolean` | Boolean |
+	// | `array<string>` | Array of strings |
+	// | `array<number>` | Array of numbers |
+	// | `array<boolean>` | Array of booleans |
 	ValueType string `json:"value_type" toon:"value_type"`
 }
 
@@ -6819,6 +7170,7 @@ type RUMFieldListRequest struct {
 
 // RUMFieldListResponse is generated from the Flashduty OpenAPI schema.
 type RUMFieldListResponse struct {
+	// RUM field definitions matching the `scopes` / `is_facet` filters, with names and descriptions localized to the request locale.
 	Items []RUMFieldItem `json:"items" toon:"items"`
 }
 
@@ -6830,33 +7182,48 @@ type RUMIssueIDRequest struct {
 
 // RUMIssueItem is generated from the Flashduty OpenAPI schema.
 type RUMIssueItem struct {
-	Age             int64             `json:"age" toon:"age"`
-	ApplicationID   string            `json:"application_id" toon:"application_id"`
-	ApplicationName string            `json:"application_name" toon:"application_name"`
-	CreatedAt       int64             `json:"created_at" toon:"created_at"`
-	Error           RUMIssueItemError `json:"error" toon:"error"`
+	// Time span between the first and most recent occurrence, in seconds. Note: the struct comment at `model/issue/issue.go:40` says millisecond, but the value is computed and consumed (severity rules) in seconds — the comment is stale.
+	Age int64 `json:"age" toon:"age"`
+	// ID of the RUM application this issue belongs to.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Name of the owning application, resolved by `application_id` at query time (reflects the application's current name).
+	ApplicationName string `json:"application_name" toon:"application_name"`
+	// Issue creation time (client time of the first error event), Unix timestamp in milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Representative error of this issue, taken from the error event that created it.
+	Error RUMIssueItemError `json:"error" toon:"error"`
 	// Total error occurrences.
-	ErrorCount int64                 `json:"error_count" toon:"error_count"`
-	FirstSeen  RUMIssueItemFirstSeen `json:"first_seen" toon:"first_seen"`
+	ErrorCount int64 `json:"error_count" toon:"error_count"`
+	// Information about the issue's first occurrence (time and application version).
+	FirstSeen RUMIssueItemFirstSeen `json:"first_seen" toon:"first_seen"`
 	// Whether the error caused an app crash.
 	IsCrash bool `json:"is_crash" toon:"is_crash"`
 	// Unique issue ID.
-	IssueID  string               `json:"issue_id" toon:"issue_id"`
+	IssueID string `json:"issue_id" toon:"issue_id"`
+	// Information about the issue's most recent occurrence (time and application version).
 	LastSeen RUMIssueItemLastSeen `json:"last_seen" toon:"last_seen"`
 	// Regression metadata. Present only when a previously resolved issue re-occurred.
 	Regression RUMIssueItemRegression `json:"regression" toon:"regression"`
-	ResolvedAt int64                  `json:"resolved_at" toon:"resolved_at"`
-	ResolvedBy int64                  `json:"resolved_by" toon:"resolved_by"`
-	Service    string                 `json:"service" toon:"service"`
+	// Time the issue was marked resolved, Unix timestamp in milliseconds; 0 while unresolved.
+	ResolvedAt TimestampMilli `json:"resolved_at" toon:"resolved_at"`
+	// Person ID of the user who marked the issue resolved; 0 while unresolved.
+	ResolvedBy int64 `json:"resolved_by" toon:"resolved_by"`
+	// Name of the service that produced this issue, taken from the error event's `service` field.
+	Service string `json:"service" toon:"service"`
 	// Affected user sessions.
 	SessionCount int64 `json:"session_count" toon:"session_count"`
 	// Issue severity level.
-	Severity       string                     `json:"severity" toon:"severity"`
-	Status         string                     `json:"status" toon:"status"`
+	Severity string `json:"severity" toon:"severity"`
+	// Triage status of the issue: `for_review`, `reviewed`, `ignored`, or `resolved`; soft-deleted (`deleted`) issues are never returned.
+	Status string `json:"status" toon:"status"`
+	// Suspected root cause analysis, determined automatically (rules or AI) or set manually by a user.
 	SuspectedCause RUMIssueItemSuspectedCause `json:"suspected_cause" toon:"suspected_cause"`
-	TeamID         int64                      `json:"team_id" toon:"team_id"`
-	UpdatedAt      int64                      `json:"updated_at" toon:"updated_at"`
-	Versions       []string                   `json:"versions" toon:"versions"`
+	// ID of the team owning this issue, copied from the owning application's `team_id` at issue creation.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Time the issue was last updated, Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Deduplicated list of application versions in which this issue has occurred; may contain an empty string for events without version info.
+	Versions []string `json:"versions" toon:"versions"`
 }
 
 // RUMIssueListRequest is generated from the Flashduty OpenAPI schema.
@@ -6890,18 +7257,30 @@ type RUMIssueListRequest struct {
 
 // RUMIssueListResponse is generated from the Flashduty OpenAPI schema.
 type RUMIssueListResponse struct {
-	HasNextPage bool           `json:"has_next_page" toon:"has_next_page"`
-	Items       []RUMIssueItem `json:"items" toon:"items"`
-	Total       int64          `json:"total" toon:"total"`
+	// Whether more pages exist; `true` when matching records remain beyond the current page.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Issues of the current page.
+	Items []RUMIssueItem `json:"items" toon:"items"`
+	// Total number of issues matching the filter conditions.
+	Total int64 `json:"total" toon:"total"`
 }
 
 // RUMIssueUpdateRequest is generated from the Flashduty OpenAPI schema.
 type RUMIssueUpdateRequest struct {
 	// Issue ID to update. Get issue IDs via `POST /rum/issue/list`.
 	IssueID string `json:"issue_id" toon:"issue_id"`
-	// New status. Setting `resolved` records the resolution time and operator; switching away from `resolved` clears them.
+	// New status. Setting `resolved` records the resolution time and operator; switching away from `resolved` clears them. One of `for_review` (pending triage), `reviewed`, `ignored`, `resolved`.
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
-	// New suspected cause; setting it marks the cause source as `user`, overriding the automatic classification.
+	// New suspected cause; setting it marks the cause source as `user`, overriding the automatic classification. One of:
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `api.failed_request` | API request failure |
+	// | `network.error` | Network connectivity error |
+	// | `code.exception` | Code exception |
+	// | `code.invalid_object_access` | Invalid object access |
+	// | `code.invalid_argument` | Invalid argument |
+	// | `unknown` | Unknown cause |
 	SuspectedCause string `json:"suspected_cause,omitempty" toon:"suspected_cause,omitempty"`
 }
 
@@ -6932,6 +7311,21 @@ type RUMPresetSeverityRuleCreateResponse struct {
 // RUMPresetSeverityRuleFilterCondition is generated from the Flashduty OpenAPI schema.
 type RUMPresetSeverityRuleFilterCondition struct {
 	// Filter attribute key. Only these Error-level attributes are supported for preset severity rules.
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `error.usr_id` | User ID |
+	// | `error.usr_email` | User email |
+	// | `error.view_url` | Full URL of the page where the error occurred |
+	// | `error.view_url_path` | URL path of the page where the error occurred |
+	// | `error.error_type` | Error type |
+	// | `error.error_message` | Error message |
+	// | `error.env` | Environment (e.g. production/staging) |
+	// | `error.service` | Service name |
+	// | `error.device_type` | Device type |
+	// | `error.os_name` | Operating system name |
+	// | `error.browser_name` | Browser name |
+	// | `error.is_crash` | Whether the error is a crash (boolean) |
 	Key string `json:"key" toon:"key"`
 	// Match semantics: `IN` matches when the field's value matches any of `vals`; `NOTIN` matches when it matches none of them (and matches when the field is absent).
 	Oper string `json:"oper" toon:"oper"`
@@ -6967,8 +7361,9 @@ type RUMPresetSeverityRuleHistoryListRequest struct {
 // RUMPresetSeverityRuleHistoryListResponse is generated from the Flashduty OpenAPI schema.
 type RUMPresetSeverityRuleHistoryListResponse struct {
 	// Whether another page is available after this one.
-	HasNextPage bool                               `json:"has_next_page" toon:"has_next_page"`
-	Items       []RUMPresetSeverityRuleHistoryItem `json:"items" toon:"items"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Preset severity rule history snapshots of the current page.
+	Items []RUMPresetSeverityRuleHistoryItem `json:"items" toon:"items"`
 	// Total number of history snapshots for the application.
 	Total int64 `json:"total" toon:"total"`
 }
@@ -7113,7 +7508,7 @@ type RUMReplaySession struct {
 	IsActive bool `json:"is_active" toon:"is_active"`
 	// Clock skew in milliseconds between the client and Flashduty's servers, added to client timestamps for correction.
 	ServerTimeDelta int64 `json:"server_time_delta" toon:"server_time_delta"`
-	// SDK platform that recorded the session.
+	// SDK platform that recorded the session. Platform identifier, one of `browser`, `android`, `ios`, `miniprogram`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`.
 	Source string `json:"source" toon:"source"`
 	// Unix timestamp in milliseconds when the session started.
 	Start TimestampMilli `json:"start" toon:"start"`
@@ -7135,7 +7530,7 @@ type RUMReplayView struct {
 	Name string `json:"name" toon:"name"`
 	// Clock skew in milliseconds between the client and Flashduty's servers, added to client timestamps for correction.
 	ServerTimeDelta int64 `json:"server_time_delta" toon:"server_time_delta"`
-	// SDK platform that recorded the view.
+	// SDK platform that recorded the view. Platform identifier, one of `browser`, `android`, `ios`, `miniprogram`, `react-native`, `flutter`, `kotlin-multiplatform`, `roku`, `unity`.
 	Source string `json:"source" toon:"source"`
 	// Unix timestamp in milliseconds when the view started.
 	Start TimestampMilli `json:"start" toon:"start"`
@@ -7197,7 +7592,7 @@ type RUMResourceItem struct {
 	Status string `json:"status" toon:"status"`
 	// Unix timestamp in seconds when the resource was last updated.
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
-	// Plan version of this resource.
+	// Plan version of this resource. One of `free` (free plan) or `professional` (professional plan).
 	Version string `json:"version" toon:"version"`
 	// Retention period in days for view (page/screen) data.
 	ViewDays int64 `json:"view.days" toon:"view.days"`
@@ -7466,7 +7861,7 @@ type ScheduleLayer struct {
 	FairRotation bool `json:"fair_rotation" toon:"fair_rotation"`
 	// Oncall groups participating in the rotation.
 	Groups []ScheduleGroup `json:"groups" toon:"groups"`
-	// Handoff time inside the rotation cycle (seconds).
+	// Rotation handoff time, as a Unix timestamp in seconds.
 	HandoffTime int64 `json:"handoff_time" toon:"handoff_time"`
 	// Whether the layer is hidden in the UI (0 = no, 1 = yes).
 	Hidden int64 `json:"hidden" toon:"hidden"`
@@ -7492,7 +7887,13 @@ type ScheduleLayer struct {
 	RestrictStart int64 `json:"restrict_start" toon:"restrict_start"`
 	// Rotation duration in seconds.
 	RotationDuration int64 `json:"rotation_duration" toon:"rotation_duration"`
-	// Rotation unit.
+	// Rotation unit. On-call assignees rotate in turn by this unit.
+	// | Value | Meaning |
+	// |---|---|
+	// | `hour` | Rotates hourly. |
+	// | `day` | Rotates daily. |
+	// | `week` | Rotates weekly. |
+	// | `month` | Rotates monthly. |
 	RotationUnit string `json:"rotation_unit" toon:"rotation_unit"`
 	// Rotation quantity (number of rotation_unit per cycle).
 	RotationValue int64 `json:"rotation_value" toon:"rotation_value"`
@@ -7829,7 +8230,7 @@ type ServiceMapFleetHostCapability struct {
 	Enabled bool `json:"enabled" toon:"enabled"`
 	// Set to `status_unavailable` when this host's live status could not be read; other fields fall back to inventory-derived defaults in that case.
 	ErrorCode string `json:"error_code" toon:"error_code"`
-	// Freshness classification of the host's graph.
+	// Freshness classification of the host's graph. `fresh` = the latest snapshot was received within 2× the report interval; `stale` = no new snapshot within 2× the report interval; `unknown` = no topology snapshot ever received, freshness undecidable.
 	FreshnessStatus string `json:"freshness_status" toon:"freshness_status"`
 	// True if a current graph can be fetched for this host right now.
 	GraphAvailable bool `json:"graph_available" toon:"graph_available"`
@@ -7848,6 +8249,16 @@ type ServiceMapFleetHostCapability struct {
 	// True if the agent has produced at least one full snapshot.
 	SnapshotReady bool `json:"snapshot_ready" toon:"snapshot_ready"`
 	// Overall ServiceMap collection status.
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `active` | Collection healthy: a fresh snapshot exists with no degradation. |
+	// | `degraded` | Collecting but quality is impaired: health reports are newer than the snapshot, the snapshot is truncated/degraded, or collection is failing. |
+	// | `stale` | A snapshot exists but is outdated (not updated within 2× the report interval). |
+	// | `initializing` | The agent has reported the capability but the first snapshot is not ready yet. |
+	// | `disabled` | Topology collection is disabled on this host. |
+	// | `unsupported` | The agent or kernel does not support this collection. |
+	// | `no_data` | No snapshot or health data received at all. |
 	Status string `json:"status" toon:"status"`
 }
 
@@ -7901,7 +8312,7 @@ type ServiceMapFreshness struct {
 	NewestReceivedAtMs TimestampMilli `json:"newest_received_at_ms" toon:"newest_received_at_ms"`
 	// Unix timestamp in milliseconds of the least recently received graph among the hosts covered.
 	OldestReceivedAtMs TimestampMilli `json:"oldest_received_at_ms" toon:"oldest_received_at_ms"`
-	// Freshness classification.
+	// Freshness classification. `fresh` = the latest snapshot was received within 2× the report interval; `stale` = no new snapshot within 2× the report interval; `unknown` = no snapshot data, undecidable.
 	Status string `json:"status" toon:"status"`
 }
 
@@ -8044,6 +8455,16 @@ type ServiceMapStatusItem struct {
 	// Configured reporting interval in milliseconds.
 	ReportIntervalMs int64 `json:"report_interval_ms" toon:"report_interval_ms"`
 	// Overall ServiceMap collection status.
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `active` | Collection healthy: a fresh snapshot exists with no degradation. |
+	// | `degraded` | Collecting but quality is impaired: health reports are newer than the snapshot, the snapshot is truncated/degraded, or collection is failing. |
+	// | `stale` | A snapshot exists but is outdated (not updated within 2× the report interval). |
+	// | `initializing` | The agent has reported the capability but the first snapshot is not ready yet. |
+	// | `disabled` | Topology collection is disabled on this host. |
+	// | `unsupported` | The agent or kernel does not support this collection. |
+	// | `no_data` | No snapshot or health data received at all. |
 	Status string `json:"status" toon:"status"`
 }
 
@@ -8081,13 +8502,13 @@ type ServiceMapSummaryNeighbor struct {
 	DestinationIP string `json:"destination_ip" toon:"destination_ip"`
 	// Destination port.
 	DestinationPort int64 `json:"destination_port" toon:"destination_port"`
-	// Transport protocol of the destination.
+	// Transport protocol of the destination. `tcp` = TCP connection; `udp` = UDP session. Collectors currently only report `tcp`; `udp` is reserved.
 	DestinationProtocol string `json:"destination_protocol" toon:"destination_protocol"`
 	// Edge ID.
 	EdgeID string `json:"edge_id" toon:"edge_id"`
 	// Timestamp this relation was last observed.
 	LastSeen string `json:"last_seen" toon:"last_seen"`
-	// Resolution outcome for this relation's destination.
+	// Resolution outcome for this relation's destination. `resolved` = uniquely resolved to a listening entity on a host — the relation is reliable; `ambiguous` = multiple candidates exist (or the listener address family is unknown) — treat the relation as a lead to verify; `unresolved` = no candidate found, the destination identity is unknown.
 	ResolutionStatus string `json:"resolution_status" toon:"resolution_status"`
 	// Display name of the source node, when known.
 	SourceDisplayName string `json:"source_display_name" toon:"source_display_name"`
@@ -8140,6 +8561,16 @@ type ServiceMapSummaryResponse struct {
 	// Counts of the anchor host's outbound relations by resolution outcome.
 	ResolutionCounts ServiceMapResolutionCounts `json:"resolution_counts" toon:"resolution_counts"`
 	// ServiceMap collection status of the anchor host.
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `active` | Collection healthy: a fresh snapshot exists with no degradation. |
+	// | `degraded` | Collecting but quality is impaired: health reports are newer than the snapshot, the snapshot is truncated/degraded, or collection is failing. |
+	// | `stale` | A snapshot exists but is outdated (not updated within 2× the report interval). |
+	// | `initializing` | The agent has reported the capability but the first snapshot is not ready yet. |
+	// | `disabled` | Topology collection is disabled on this host. |
+	// | `unsupported` | The agent or kernel does not support this collection. |
+	// | `no_data` | No snapshot or health data received at all. |
 	Status string `json:"status" toon:"status"`
 	// True if the fixed-size summary omitted any neighbor or coverage detail to stay within its bounds.
 	Truncated bool `json:"truncated" toon:"truncated"`
@@ -8163,11 +8594,32 @@ type ServiceMapTopologyCoverage struct {
 	Ipv6OnlyUnknownListenerCount int64 `json:"ipv6_only_unknown_listener_count" toon:"ipv6_only_unknown_listener_count"`
 	// Number of IPv6 wildcard (unspecified-address) listeners observed.
 	Ipv6WildcardListenerCount int64 `json:"ipv6_wildcard_listener_count" toon:"ipv6_wildcard_listener_count"`
-	// Aggregate Kubernetes enrichment coverage across loaded hosts.
+	// Aggregate Kubernetes enrichment coverage across loaded hosts (worst per-host status wins).
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `complete` | Every host has full pod-binding metadata for its entities. |
+	// | `partial` | At least one host has bindings but some pod metadata is missing or bindings were dropped. |
+	// | `unavailable` | At least one host has no pod bindings at all. |
+	// | `unknown` | No host loaded, or a host reported an unrecognized status. |
 	KubernetesEnrichmentStatus string `json:"kubernetes_enrichment_status" toon:"kubernetes_enrichment_status"`
-	// Aggregate coverage of IPv4/IPv6 listener address-family resolution across loaded hosts.
+	// Aggregate listener address-family (IPv4/IPv6) resolution coverage across loaded hosts (worst per-host status wins).
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `complete` | On every host, the IPv6-only attribute of all IPv6 wildcard listeners is known. |
+	// | `partial` | At least one host knows the IPv6-only attribute for only some IPv6 wildcard listeners. |
+	// | `unavailable` | At least one host knows the IPv6-only attribute of none of its IPv6 wildcard listeners. |
+	// | `unknown` | No host loaded, or a host reported an unrecognized status. |
 	ListenerAddressFamilyStatus string `json:"listener_address_family_status" toon:"listener_address_family_status"`
-	// Aggregate network-inventory enrichment coverage across loaded hosts.
+	// Aggregate network-inventory enrichment coverage across loaded hosts (worst per-host status wins).
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `complete` | Every requested network namespace on every host was scanned successfully with no errors. |
+	// | `partial` | At least one host failed to scan some namespaces, or scanning raised errors. |
+	// | `unavailable` | At least one host failed to scan all of its namespaces. |
+	// | `unknown` | No host loaded, or a host reported an unrecognized status. |
 	NetworkInventoryStatus string `json:"network_inventory_status" toon:"network_inventory_status"`
 	// Machine-readable reason codes explaining any degraded or truncated state among loaded hosts.
 	Reasons []string `json:"reasons" toon:"reasons"`
@@ -8247,7 +8699,7 @@ type ServiceMapUnresolvedEndpoint struct {
 type ServiceMapUnresolvedProjection struct {
 	// Breakdown of `total` unresolved edges by reason code.
 	ByReason []ServiceMapUnresolvedReasonCount `json:"by_reason" toon:"by_reason"`
-	// The `unresolved_mode` that was applied.
+	// The `unresolved_mode` that was applied. `full` = unresolved destinations are listed completely in `unresolved_endpoints` and their edges stay in `edges` (default); `summary` = unresolved edges are excluded from `edges` and `unresolved_endpoints` keeps at most 20 samples, complemented by the `by_reason` counts.
 	Mode string `json:"mode" toon:"mode"`
 	// Number of unresolved edges found but not returned (`total - returned`).
 	Omitted int64 `json:"omitted" toon:"omitted"`
@@ -8308,7 +8760,14 @@ type SessionGetResponse struct {
 
 // SessionItem is generated from the Flashduty OpenAPI schema.
 type SessionItem struct {
-	// How the caller received access to this session. Omitted when no access source is resolved.
+	// How the caller received access to this session. Omitted when no access source is resolved. One of:
+	// | Value | Meaning |
+	// | --- | --- |
+	// | `owner` | Caller is the session creator (full access) |
+	// | `team_member` | Caller belongs to the session's bound team (full access) |
+	// | `manager` | Manager grant (reserved; never produced by the current version) |
+	// | `share_link` | Granted via a valid share link (view/fork only; cannot continue or manage) |
+	// | `participant` | Same-account non-member granted via a participable team session (view/continue/fork only) |
 	AccessSource string `json:"access_source" toon:"access_source"`
 	// Agent app that owns the session.
 	AppName string `json:"app_name" toon:"app_name"`
@@ -8338,7 +8797,14 @@ type SessionItem struct {
 	CurrentTurnTokens int64 `json:"current_turn_tokens" toon:"current_turn_tokens"`
 	// Accumulated ask_user human-wait duration in milliseconds for the current round; resets to 0 at the start of each new round.
 	CurrentTurnWaitMs int64 `json:"current_turn_wait_ms" toon:"current_turn_wait_ms"`
-	// Surface that created the session.
+	// Surface that created the session. One of:
+	// | Value | Meaning |
+	// | --- | --- |
+	// | `web` | Created from the web console |
+	// | `im` | Created from an IM client (IM bot / IM H5) |
+	// | `api` | Created via the public API |
+	// | `automation` | Created by an automation rule (unattended run) |
+	// | `subagent` | Child session spawned by a parent's agent_dispatch (audit label; at runtime it executes on the web tool surface) |
 	EntryKind string `json:"entry_kind" toon:"entry_kind"`
 	// True when there is assistant output the caller has not yet viewed.
 	HasUnread bool `json:"has_unread" toon:"has_unread"`
@@ -8370,7 +8836,7 @@ type SessionItem struct {
 	SharedBy int64 `json:"shared_by" toon:"shared_by"`
 	// Raw session-state bag (session-scoped keys). Omitted when empty.
 	State map[string]any `json:"state" toon:"state"`
-	// Lifecycle status.
+	// Lifecycle status. One of: `enabled` (active), `deleted` (soft-deleted, no longer accessible).
 	Status string `json:"status" toon:"status"`
 	// Owning team id; 0 means no team is bound. Immutable after create.
 	TeamID int64 `json:"team_id" toon:"team_id"`
@@ -8386,7 +8852,16 @@ type SessionItem struct {
 // SessionListRequest is generated from the Flashduty OpenAPI schema.
 type SessionListRequest struct {
 	ListOptions
-	// Agent app whose sessions to list.
+	// Agent app whose sessions to list. One of:
+	// | Value | Meaning |
+	// | --- | --- |
+	// | `ask-ai` | Ask AI assistant |
+	// | `support` | Customer-support agent |
+	// | `support-website` | Website support agent (exposed over A2A, not built into the console) |
+	// | `support-flashcat` | Flashcat-site support agent (exposed over A2A) |
+	// | `ai-sre` | The AI SRE main app |
+	// | `template-assistant` | Notification-template assistant (template editing/validation) |
+	// | `swe` | Internal benchmarking app (not customer-facing) |
 	AppName string `json:"app_name" toon:"app_name"`
 	// Ascending order when true, descending when false; also applies when `orderby` is omitted (sorted by `updated_at`).
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
@@ -8430,10 +8905,13 @@ type SessionTokenUsage struct {
 
 // SilenceRuleItem is generated from the Flashduty OpenAPI schema.
 type SilenceRuleItem struct {
-	AccountID   int64       `json:"account_id" toon:"account_id"`
-	ChannelID   int64       `json:"channel_id" toon:"channel_id"`
-	CreatedAt   int64       `json:"created_at" toon:"created_at"`
-	DeletedAt   int64       `json:"deleted_at" toon:"deleted_at"`
+	// ID of the account the rule belongs to.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// ID of the channel the rule belongs to.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Creation time, Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Rule description.
 	Description string      `json:"description" toon:"description"`
 	Filters     FilterGroup `json:"filters" toon:"filters"`
 	// Source incident ID when the silence was created from an incident.
@@ -8444,16 +8922,19 @@ type SilenceRuleItem struct {
 	IsDirectlyDiscard bool `json:"is_directly_discard" toon:"is_directly_discard"`
 	// Whether the rule is currently in effect.
 	IsEffective bool `json:"is_effective" toon:"is_effective"`
-	// Evaluation priority. Lower runs first.
-	Priority   int64          `json:"priority" toon:"priority"`
-	RuleID     string         `json:"rule_id" toon:"rule_id"`
-	RuleName   string         `json:"rule_name" toon:"rule_name"`
+	// Rule ID (MongoDB ObjectID).
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Rule name.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+	// Rule status: `enabled` or `disabled`; deleted rules never appear in the list.
 	Status     string         `json:"status" toon:"status"`
 	TimeFilter OnceTimeFilter `json:"time_filter" toon:"time_filter"`
 	// Recurring time windows.
 	TimeFilters []TimeFilter `json:"time_filters" toon:"time_filters"`
-	UpdatedAt   int64        `json:"updated_at" toon:"updated_at"`
-	UpdatedBy   int64        `json:"updated_by" toon:"updated_by"`
+	// Last update time, Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// ID of the user who last updated the rule.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // SkillDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -8675,7 +9156,7 @@ type SourcemapListRequest struct {
 	Services []string `json:"services,omitempty" toon:"services,omitempty"`
 	// Start of upload time range, Unix epoch milliseconds. Must be > 0 and before `end_time`.
 	StartTime int64 `json:"start_time" toon:"start_time"`
-	// Platform type. Defaults to `browser` when omitted.
+	// Platform type. Defaults to `browser` when omitted. One of `browser` (JavaScript sourcemaps), `android` (ProGuard/R8 mappings or NDK native symbols, distinguishable via `kind`), `ios` (dSYM symbol files).
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 	// iOS only. Filter by dSYM bundle UUID. Max 200 characters.
 	Uuid string `json:"uuid,omitempty" toon:"uuid,omitempty"`
@@ -8685,6 +9166,7 @@ type SourcemapListRequest struct {
 
 // SourcemapListResponse is generated from the Flashduty OpenAPI schema.
 type SourcemapListResponse struct {
+	// Sourcemap records of the current page (including iOS dSYM and miniprogram symbol files).
 	Items []SourcemapItem `json:"items" toon:"items"`
 	// Total number of matching records.
 	Total int64 `json:"total" toon:"total"`
@@ -8708,7 +9190,7 @@ type SourcemapStackEnrichRequest struct {
 	SourceType string `json:"source_type,omitempty" toon:"source_type,omitempty"`
 	// Raw stack trace to parse and enrich.
 	Stack string `json:"stack,omitempty" toon:"stack,omitempty"`
-	// Source platform. Defaults to `browser` when omitted.
+	// Source platform. Defaults to `browser` when omitted. One of `browser` (JS stacks, sourcemap-based), `android` (mapping/NDK symbolication), `ios` (dSYM symbolication), `miniprogram` (WeChat mini program, sourcemap-based), `harmony` (HarmonyOS, sourcemap/native symbolication), `flutter` (Flutter stack symbolication), `electron` (Electron, sourcemap-based).
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 	// Android build variant used by older Gradle plugin versions.
 	Variant string `json:"variant,omitempty" toon:"variant,omitempty"`
@@ -8718,6 +9200,7 @@ type SourcemapStackEnrichRequest struct {
 
 // SourcemapStackEnrichResponse is generated from the Flashduty OpenAPI schema.
 type SourcemapStackEnrichResponse struct {
+	// Error stack frames after symbolication (via sourcemap, dSYM, NDK symbol tables, etc.).
 	Frames []SourcemapEnrichedFrame `json:"frames" toon:"frames"`
 }
 
@@ -8781,7 +9264,7 @@ type StatusPageChangeItem struct {
 	Status string `json:"status" toon:"status"`
 	// Event title.
 	Title string `json:"title" toon:"title"`
-	// Event type.
+	// Change type. `incident` is an unplanned outage; `maintenance` is a planned maintenance. The type determines which status values are valid.
 	Type string `json:"type" toon:"type"`
 	// Timeline updates attached to this event, ordered by time.
 	Updates []StatusPageChangeUpdateItem `json:"updates" toon:"updates"`
@@ -8789,6 +9272,7 @@ type StatusPageChangeItem struct {
 
 // StatusPageChangeListResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageChangeListResponse struct {
+	// Status page changes (incidents/maintenances) matching the filters.
 	Items []StatusPageChangeItem `json:"items" toon:"items"`
 }
 
@@ -8806,7 +9290,16 @@ type StatusPageChangeUpdateItem struct {
 	ComponentChanges []StatusPageComponentChangeItem `json:"component_changes" toon:"component_changes"`
 	// Update description (Markdown).
 	Description string `json:"description" toon:"description"`
-	// Event status after this update. Omitted when the update does not change the overall status.
+	// Change status after this update. Omitted when the update does not change the overall status. The first four values apply to incident-type changes, the last three to maintenance-type changes.
+	// | Value | Meaning |
+	// |---|---|
+	// | `investigating` | Investigating (incident). |
+	// | `identified` | Root cause identified (incident). |
+	// | `monitoring` | Fix deployed, monitoring (incident). |
+	// | `resolved` | Resolved (incident). |
+	// | `scheduled` | Scheduled (maintenance). |
+	// | `ongoing` | In progress (maintenance). |
+	// | `completed` | Completed (maintenance). |
 	Status string `json:"status" toon:"status"`
 	// Update ID.
 	UpdateID string `json:"update_id" toon:"update_id"`
@@ -8854,9 +9347,9 @@ type StatusPageItem struct {
 	CustomLinks []map[string]string `json:"custom_links" toon:"custom_links"`
 	// Dark-mode logo image of the status page.
 	DarkLogo string `json:"dark_logo" toon:"dark_logo"`
-	// How the timeline is displayed.
+	// How the timeline displays change dates. `calendar` uses a calendar view; `list` uses a list view.
 	DateView string `json:"date_view" toon:"date_view"`
-	// How uptime is displayed.
+	// How uptime is displayed. `chart_and_percentage` shows both the uptime chart and the percentage figure; `chart` shows only the chart; `none` hides uptime entirely.
 	DisplayUptimeMode string `json:"display_uptime_mode" toon:"display_uptime_mode"`
 	// Favicon of the status page.
 	Favicon string `json:"favicon" toon:"favicon"`
@@ -8877,7 +9370,7 @@ type StatusPageItem struct {
 	Subscription StatusPageSubscriptionItem `json:"subscription" toon:"subscription"`
 	// Preferred change-event template type.
 	TemplatePreference string `json:"template_preference" toon:"template_preference"`
-	// Visibility type of the status page.
+	// Page visibility type. `public` pages are accessible to anyone and use email subscriptions; `internal` pages are restricted to account members and use IM subscriptions.
 	Type string `json:"type" toon:"type"`
 	// URL-safe slug, unique per account.
 	URLName string `json:"url_name" toon:"url_name"`
@@ -8893,13 +9386,20 @@ type StatusPageMigrationJob struct {
 	Error string `json:"error" toon:"error"`
 	// Migration job ID.
 	JobID string `json:"job_id" toon:"job_id"`
-	// Current migration phase.
+	// Current migration phase. `structure` imports the page structure (sections and components); `history` imports historical incidents, maintenances, and incident templates; `subscribers` imports email subscribers.
 	Phase string `json:"phase" toon:"phase"`
 	// Per-entity progress counters.
 	Progress StatusPageMigrationProgress `json:"progress" toon:"progress"`
 	// Atlassian Statuspage source page ID.
 	SourcePageID string `json:"source_page_id" toon:"source_page_id"`
 	// Current job status.
+	// | Value | Meaning |
+	// |---|---|
+	// | `pending` | Created, waiting to run. |
+	// | `running` | In progress. |
+	// | `completed` | Finished successfully. |
+	// | `failed` | Failed; the `error` field holds the reason. |
+	// | `cancelled` | Canceled by request. |
 	Status string `json:"status" toon:"status"`
 	// Flashduty target status page ID. Set once the job produces one, or supplied up front for subscriber migration.
 	TargetPageID int64 `json:"target_page_id" toon:"target_page_id"`
@@ -8910,15 +9410,21 @@ type StatusPageMigrationJob struct {
 // StatusPageMigrationProgress is generated from the Flashduty OpenAPI schema.
 type StatusPageMigrationProgress struct {
 	// Steps completed so far.
-	CompletedSteps       int64 `json:"completed_steps" toon:"completed_steps"`
-	ComponentsImported   int64 `json:"components_imported" toon:"components_imported"`
-	IncidentsImported    int64 `json:"incidents_imported" toon:"incidents_imported"`
+	CompletedSteps int64 `json:"completed_steps" toon:"completed_steps"`
+	// Number of components imported from the source status page.
+	ComponentsImported int64 `json:"components_imported" toon:"components_imported"`
+	// Number of historical incidents imported.
+	IncidentsImported int64 `json:"incidents_imported" toon:"incidents_imported"`
+	// Number of scheduled maintenances imported.
 	MaintenancesImported int64 `json:"maintenances_imported" toon:"maintenances_imported"`
-	SectionsImported     int64 `json:"sections_imported" toon:"sections_imported"`
-	SubscribersImported  int64 `json:"subscribers_imported" toon:"subscribers_imported"`
+	// Number of sections (Atlassian component groups) imported from the source status page.
+	SectionsImported int64 `json:"sections_imported" toon:"sections_imported"`
+	// Number of email subscribers successfully imported.
+	SubscribersImported int64 `json:"subscribers_imported" toon:"subscribers_imported"`
 	// Number of subscribers skipped (e.g. because they would create duplicates).
 	SubscribersSkipped int64 `json:"subscribers_skipped" toon:"subscribers_skipped"`
-	TemplatesImported  int64 `json:"templates_imported" toon:"templates_imported"`
+	// Number of incident templates successfully imported; templates that fail are skipped and recorded in `warnings`.
+	TemplatesImported int64 `json:"templates_imported" toon:"templates_imported"`
 	// Total steps this job will perform.
 	TotalSteps int64 `json:"total_steps" toon:"total_steps"`
 	// Non-fatal warnings recorded during the job.
@@ -8950,8 +9456,9 @@ type StatusPageSectionItem struct {
 // StatusPageSubscriberListResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageSubscriberListResponse struct {
 	// Whether there is at least one more page after the current one.
-	HasNextPage bool                               `json:"has_next_page" toon:"has_next_page"`
-	Items       []ExportedStatusPageSubscriberItem `json:"items" toon:"items"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Subscribers on the current page.
+	Items []ExportedStatusPageSubscriberItem `json:"items" toon:"items"`
 	// Total matching subscribers.
 	Total int64 `json:"total" toon:"total"`
 }
@@ -9032,6 +9539,7 @@ type TargetsListRequest struct {
 
 // TargetsListResponse is generated from the Flashduty OpenAPI schema.
 type TargetsListResponse struct {
+	// The current page of invocable targets, sorted ascending by `target_locator`.
 	Items []TargetsListResponseItemsItem `json:"items" toon:"items"`
 	// Opaque cursor for the next page. Absent / empty means this is the last page.
 	NextCursor *string `json:"next_cursor,omitempty" toon:"next_cursor,omitempty"`
@@ -9041,9 +9549,12 @@ type TargetsListResponse struct {
 
 // TeamBriefItem is generated from the Flashduty OpenAPI schema.
 type TeamBriefItem struct {
+	// Array of person IDs belonging to the team; empty array (never null) when the team has no members.
 	PersonIDs []uint64 `json:"person_ids" toon:"person_ids"`
-	TeamID    uint64   `json:"team_id" toon:"team_id"`
-	TeamName  string   `json:"team_name" toon:"team_name"`
+	// Team ID.
+	TeamID uint64 `json:"team_id" toon:"team_id"`
+	// Team name.
+	TeamName string `json:"team_name" toon:"team_name"`
 }
 
 // TeamDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -9074,6 +9585,7 @@ type TeamInfosRequest struct {
 
 // TeamInfosResponse is generated from the Flashduty OpenAPI schema.
 type TeamInfosResponse struct {
+	// Array of brief team info for the matched `team_ids`; may be null when no ID matches.
 	Items []TeamBriefItem `json:"items" toon:"items"`
 }
 
@@ -9123,6 +9635,7 @@ type TeamListRequest struct {
 // TeamListResponse is generated from the Flashduty OpenAPI schema.
 type TeamListResponse struct {
 	ListOptions
+	// Array of teams for the current page, used with `p`, `limit` and `total` for pagination; empty array on an empty page.
 	Items []TeamItem `json:"items" toon:"items"`
 	// Total number of teams matching the filter.
 	Total int64 `json:"total" toon:"total"`
@@ -9245,7 +9758,7 @@ type TemplateItem struct {
 	SlackApp string `json:"slack_app" toon:"slack_app"`
 	// SMS template source (Go `text/template` syntax).
 	SMS string `json:"sms" toon:"sms"`
-	// Template lifecycle status.
+	// Template lifecycle status. `enabled` templates can be referenced by escalation policies for notifications; `disabled` templates are no longer used for new notifications; `deleted` templates are never returned by list endpoints.
 	Status string `json:"status" toon:"status"`
 	// ID of the team this template is scoped to, or 0 for account-wide.
 	TeamID int64 `json:"team_id" toon:"team_id"`
@@ -9291,8 +9804,9 @@ type TemplateListRequest struct {
 // TemplateListResponse is generated from the Flashduty OpenAPI schema.
 type TemplateListResponse struct {
 	// True if another page exists after the returned one.
-	HasNextPage bool           `json:"has_next_page" toon:"has_next_page"`
-	Items       []TemplateItem `json:"items" toon:"items"`
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Notification templates on the current page; the first item of the first page is always the built-in preset template.
+	Items []TemplateItem `json:"items" toon:"items"`
 	// Total number of templates matching the filter, across all pages.
 	Total int64 `json:"total" toon:"total"`
 }
@@ -9417,18 +9931,25 @@ type UnackIncidentRequest struct {
 
 // UnsubscribeRuleItem is generated from the Flashduty OpenAPI schema.
 type UnsubscribeRuleItem struct {
-	AccountID   int64       `json:"account_id" toon:"account_id"`
-	ChannelID   int64       `json:"channel_id" toon:"channel_id"`
-	CreatedAt   int64       `json:"created_at" toon:"created_at"`
-	DeletedAt   int64       `json:"deleted_at" toon:"deleted_at"`
+	// ID of the account the rule belongs to.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// ID of the channel the rule belongs to.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Creation time, Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Rule description.
 	Description string      `json:"description" toon:"description"`
 	Filters     FilterGroup `json:"filters" toon:"filters"`
-	Priority    int64       `json:"priority" toon:"priority"`
-	RuleID      string      `json:"rule_id" toon:"rule_id"`
-	RuleName    string      `json:"rule_name" toon:"rule_name"`
-	Status      string      `json:"status" toon:"status"`
-	UpdatedAt   int64       `json:"updated_at" toon:"updated_at"`
-	UpdatedBy   int64       `json:"updated_by" toon:"updated_by"`
+	// Rule ID (MongoDB ObjectID).
+	RuleID string `json:"rule_id" toon:"rule_id"`
+	// Rule name.
+	RuleName string `json:"rule_name" toon:"rule_name"`
+	// Rule status: `enabled` or `disabled`; deleted rules never appear in the list.
+	Status string `json:"status" toon:"status"`
+	// Last update time, Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// ID of the user who last updated the rule.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // UpdateChannelRequest is generated from the Flashduty OpenAPI schema.
@@ -9559,8 +10080,6 @@ type UpdateInhibitRuleRequest struct {
 	Equals []string `json:"equals" toon:"equals"`
 	// When true, suppressed target alerts are dropped instead of merged.
 	IsDirectlyDiscard bool `json:"is_directly_discard,omitempty" toon:"is_directly_discard,omitempty"`
-	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Inhibit rule ID (MongoDB ObjectID).
 	RuleID string `json:"rule_id" toon:"rule_id"`
 	// Rule name, 1 to 39 characters.
@@ -9583,8 +10102,6 @@ type UpdateSilenceRuleRequest struct {
 	IsAutoDelete bool `json:"is_auto_delete,omitempty" toon:"is_auto_delete,omitempty"`
 	// When true, silenced alerts are dropped instead of suppressed into incidents.
 	IsDirectlyDiscard bool `json:"is_directly_discard,omitempty" toon:"is_directly_discard,omitempty"`
-	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Silence rule ID (MongoDB ObjectID).
 	RuleID string `json:"rule_id" toon:"rule_id"`
 	// Rule name, 1 to 39 characters.
@@ -9633,9 +10150,9 @@ type UpdateStatusPageRequest struct {
 	CustomLinks []map[string]string `json:"custom_links,omitempty" toon:"custom_links,omitempty"`
 	// Dark-mode logo image of the status page. Omit to keep the existing value.
 	DarkLogo string `json:"dark_logo,omitempty" toon:"dark_logo,omitempty"`
-	// How event dates are displayed. Omit to keep the existing value.
+	// How change dates are displayed. Leave empty to keep the current value. `calendar` uses a calendar view; `list` uses a list view.
 	DateView string `json:"date_view,omitempty" toon:"date_view,omitempty"`
-	// How uptime is displayed. Omit to keep the existing value.
+	// How uptime is displayed. Leave empty to keep the current value. `chart_and_percentage` shows both chart and percentage; `chart` shows only the chart; `none` hides uptime.
 	DisplayUptimeMode string `json:"display_uptime_mode,omitempty" toon:"display_uptime_mode,omitempty"`
 	// Favicon of the status page. Omit to keep the existing value.
 	Favicon string `json:"favicon,omitempty" toon:"favicon,omitempty"`
@@ -10061,7 +10578,9 @@ type AssignedToNotify struct {
 
 // AuditLogParamsItem is generated from the Flashduty OpenAPI schema.
 type AuditLogParamsItem struct {
-	Key   string `json:"Key" toon:"Key"`
+	// Name of a URL path parameter (the `:xxx` placeholder in the route).
+	Key string `json:"Key" toon:"Key"`
+	// The actual value of that path parameter in this request.
 	Value string `json:"Value" toon:"Value"`
 }
 
@@ -10107,7 +10626,7 @@ type CreateChannelRequestGroup struct {
 	StormThresholds []int64 `json:"storm_thresholds,omitempty" toon:"storm_thresholds,omitempty"`
 	// Grouping time window in minutes. Default max is 1440 minutes (24 h); extended accounts may allow up to 43200 minutes (30 days).
 	TimeWindow int64 `json:"time_window,omitempty" toon:"time_window,omitempty"`
-	// Window type. Defaults to `tumbling`.
+	// Window type, default `tumbling`. `tumbling` is a fixed window counted from incident creation — once it expires, new alerts open a new incident; `sliding` is a sliding window counted from the incident's most recent alert, extended each time a new alert merges in.
 	WindowType string `json:"window_type,omitempty" toon:"window_type,omitempty"`
 }
 
@@ -10171,7 +10690,13 @@ type CreateIncidentRequestAssignedTo struct {
 	Notify CreateIncidentRequestAssignedToNotify `json:"notify,omitzero" toon:"notify,omitempty"`
 	// Member IDs to assign directly (1–100). Can be combined with `escalate_rule_id`.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
-	// Assignment type, derived by the server — callers should omit it: `assign` on manual create, `reassign` on reassignment, `escalate` when driven by escalation.
+	// Assignment type, derived server-side — callers do not set it: `assign` for manual creation, `reassign` for re-assignment, `escalate` for escalation-driven assignment.
+	// | Value | Meaning |
+	// |---|---|
+	// | `assign` | Initial assignment when the incident is created manually. |
+	// | `reassign` | Re-assignment of an existing incident. |
+	// | `escalate` | Assignment triggered by escalation policy advancement. |
+	// | `reopen` | Assignment restarted from the first layer after the incident is reopened. |
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
 
@@ -10235,7 +10760,16 @@ type CreateStatusPageChangeRequestUpdatesItem struct {
 	ComponentChanges []CreateStatusPageChangeRequestUpdatesItemComponentChangesItem `json:"component_changes,omitempty" toon:"component_changes,omitempty"`
 	// Update description (Markdown).
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// Change status after this update. Omit if the overall status does not change.
+	// Change status after this update. May be omitted when the overall status does not change. The first four values apply to incident-type changes, the last three to maintenance-type changes.
+	// | Value | Meaning |
+	// |---|---|
+	// | `investigating` | Investigating (incident). |
+	// | `identified` | Root cause identified (incident). |
+	// | `monitoring` | Fix deployed, monitoring (incident). |
+	// | `resolved` | Resolved (incident). |
+	// | `scheduled` | Scheduled (maintenance). |
+	// | `ongoing` | In progress (maintenance). |
+	// | `completed` | Completed (maintenance). |
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
 	// Update ID. Server-assigned on create; supply when replaying historical updates.
 	UpdateID string `json:"update_id,omitempty" toon:"update_id,omitempty"`
@@ -10257,7 +10791,7 @@ type DiagnoseRequestInput struct {
 
 // DiagnoseRequestMethodsItem is generated from the Flashduty OpenAPI schema.
 type DiagnoseRequestMethodsItem struct {
-	// Only meaningful for compare-style methods. Defaults to `previous_window`.
+	// Only meaningful for compare-style methods. Defaults to `previous_window`. `previous_window` = the equal-length window immediately before the current window; `same_window_yesterday` = the current window shifted back 24 hours; `same_window_last_week` = the current window shifted back 7 days.
 	Baseline string `json:"baseline,omitempty" toon:"baseline,omitempty"`
 	// `log_patterns` supports `pattern_snapshot`, `pattern_compare`. `metric_trends` supports `single_window_shape`, `window_compare`.
 	Name string `json:"name,omitempty" toon:"name,omitempty"`
@@ -10321,6 +10855,7 @@ type FeedDetailIncidentAssignNotify struct {
 
 // FieldDeleteReferenceErrorData is generated from the Flashduty OpenAPI schema.
 type FieldDeleteReferenceErrorData struct {
+	// Custom forms that still reference the field, each with `kind`/`name`/`href`; all references must be removed before the field can be deleted.
 	Refs []FieldDeleteReference `json:"refs" toon:"refs"`
 }
 
@@ -10339,7 +10874,29 @@ type IncidentRawItemAssignedTo struct {
 	// Member IDs assigned directly to this incident.
 	PersonIDs []int64 `json:"person_ids" toon:"person_ids"`
 	// Assignment type.
+	// | Value | Meaning |
+	// |---|---|
+	// | `assign` | Initial assignment when the incident is created manually. |
+	// | `reassign` | Re-assignment of an existing incident. |
+	// | `escalate` | Assignment triggered by escalation policy advancement. |
+	// | `reopen` | Assignment restarted from the first layer after the incident is reopened. |
 	Type string `json:"type" toon:"type"`
+}
+
+// IncidentRawItemRespondersItem is generated from the Flashduty OpenAPI schema.
+type IncidentRawItemRespondersItem struct {
+	// Acknowledgement time, as a Unix timestamp in seconds; 0 if not acknowledged.
+	AcknowledgedAt Timestamp `json:"acknowledged_at" toon:"acknowledged_at"`
+	// Responder's identity in an external chat tool (e.g. Slack); only present when backfilled by an external system.
+	As string `json:"as" toon:"as"`
+	// Assignment time, as a Unix timestamp in seconds.
+	AssignedAt Timestamp `json:"assigned_at" toon:"assigned_at"`
+	// Responder email. Omitted when empty.
+	Email string `json:"email" toon:"email"`
+	// Person ID of the responder.
+	PersonID int64 `json:"person_id" toon:"person_id"`
+	// Responder display name. Omitted when empty.
+	PersonName string `json:"person_name" toon:"person_name"`
 }
 
 // PostMortemItemBasics is generated from the Flashduty OpenAPI schema.
@@ -10364,51 +10921,77 @@ type PostMortemItemContent struct {
 
 // RuleConfigsCheckAnydata is generated from the Flashduty OpenAPI schema.
 type RuleConfigsCheckAnydata struct {
+	// Number of consecutive evaluations that must satisfy the condition before alerting; minimum 1.
 	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
-	Enabled            bool  `json:"enabled,omitempty" toon:"enabled,omitempty"`
-	PushRecoveryEvent  bool  `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
+	// Whether any-data checking is enabled: any returned data row triggers an alert.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Whether to push a recovery event notification when the alert resolves.
+	PushRecoveryEvent bool `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
 	// Recovery condition for any-data check. If omitted or `mode` is empty, treated as `nodata`.
-	Recovery           RuleConfigsCheckAnydataRecovery `json:"recovery,omitzero" toon:"recovery,omitempty"`
-	RecoveryCheckTimes int64                           `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
-	Severity           string                          `json:"severity,omitempty" toon:"severity,omitempty"`
+	Recovery RuleConfigsCheckAnydataRecovery `json:"recovery,omitzero" toon:"recovery,omitempty"`
+	// Number of consecutive evaluations that must satisfy the recovery condition before resolving; minimum 1.
+	RecoveryCheckTimes int64 `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
+	// Severity of any-data alert events; case-sensitive.
+	Severity string `json:"severity,omitempty" toon:"severity,omitempty"`
 }
 
 // RuleConfigsCheckNodata is generated from the Flashduty OpenAPI schema.
 type RuleConfigsCheckNodata struct {
+	// Whether to trigger an alert when every query returns an empty result.
+	AlertOnEmptyResult bool `json:"alert_on_empty_result,omitempty" toon:"alert_on_empty_result,omitempty"`
+	// Severity of empty-result alerts, case-sensitive; only effective when `alert_on_empty_result` is enabled.
+	AlertOnEmptyResultSeverity string `json:"alert_on_empty_result_severity,omitempty" toon:"alert_on_empty_result_severity,omitempty"`
+	// Number of consecutive evaluations that must satisfy the condition before alerting; minimum 1.
 	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
-	Enabled            bool  `json:"enabled,omitempty" toon:"enabled,omitempty"`
-	PushRecoveryEvent  bool  `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
+	// Whether no-data checking is enabled: a previously-seen series that stops returning data triggers an alert.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Whether to push a recovery event notification when the alert resolves.
+	PushRecoveryEvent bool `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
+	// Number of consecutive evaluations that must satisfy the recovery condition before resolving; minimum 1.
 	RecoveryCheckTimes int64 `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
 	// Auto-resolve after N seconds.
-	ResolveTimeout int64  `json:"resolve_timeout,omitempty" toon:"resolve_timeout,omitempty"`
-	Severity       string `json:"severity,omitempty" toon:"severity,omitempty"`
+	ResolveTimeout int64 `json:"resolve_timeout,omitempty" toon:"resolve_timeout,omitempty"`
+	// Severity of no-data alert events; case-sensitive.
+	Severity string `json:"severity,omitempty" toon:"severity,omitempty"`
 }
 
 // RuleConfigsCheckThreshold is generated from the Flashduty OpenAPI schema.
 type RuleConfigsCheckThreshold struct {
-	AlertingCheckTimes int64                             `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
-	Critical           string                            `json:"critical,omitempty" toon:"critical,omitempty"`
-	Enabled            bool                              `json:"enabled,omitempty" toon:"enabled,omitempty"`
-	Info               string                            `json:"info,omitempty" toon:"info,omitempty"`
-	PushRecoveryEvent  bool                              `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
-	Recovery           RuleConfigsCheckThresholdRecovery `json:"recovery,omitzero" toon:"recovery,omitempty"`
-	RecoveryCheckTimes int64                             `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
-	Warning            string                            `json:"warning,omitempty" toon:"warning,omitempty"`
+	// Number of consecutive evaluations that must satisfy the condition before alerting; minimum 1.
+	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
+	// Critical threshold expression referencing query results via `$<query>` or `$<query>.<value_field>`, e.g. `$A > 90`; at least one severity must be configured.
+	Critical string `json:"critical,omitempty" toon:"critical,omitempty"`
+	// Whether threshold checking is enabled.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Info threshold expression, same syntax as `critical`.
+	Info string `json:"info,omitempty" toon:"info,omitempty"`
+	// Whether to push a recovery event notification when the alert resolves.
+	PushRecoveryEvent bool `json:"push_recovery_event,omitempty" toon:"push_recovery_event,omitempty"`
+	// Recovery evaluation configuration for threshold checks.
+	Recovery RuleConfigsCheckThresholdRecovery `json:"recovery,omitzero" toon:"recovery,omitempty"`
+	// Number of consecutive evaluations that must satisfy the recovery condition before resolving; minimum 1.
+	RecoveryCheckTimes int64 `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
+	// Warning threshold expression, same syntax as `critical`.
+	Warning string `json:"warning,omitempty" toon:"warning,omitempty"`
 }
 
 // RuleConfigsQueriesItem is generated from the Flashduty OpenAPI schema.
 type RuleConfigsQueriesItem struct {
+	// Datasource-specific query options keyed by the `<datasource>.<option>` convention (e.g. `es.type`, `tencent_cls.limit`); most datasources need none.
 	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
 	// Query expression.
-	Expr        string   `json:"expr,omitempty" toon:"expr,omitempty"`
+	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
+	// Result fields that become alert event labels — identical label sets collapse into one alert; must not overlap `value_fields`; applies to table-shaped results (SQL/ES-style datasources).
 	LabelFields []string `json:"label_fields,omitempty" toon:"label_fields,omitempty"`
 	// Query identifier (letter, e.g. `A`). The name `R` is reserved and must not be used.
-	Name        string   `json:"name,omitempty" toon:"name,omitempty"`
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Numeric result fields used in threshold evaluation (referenced as `$A.<field>` in threshold expressions); required for threshold checks unless the datasource is `prometheus`/`loki`/`victorialogs`; field names must not contain `.`.
 	ValueFields []string `json:"value_fields,omitempty" toon:"value_fields,omitempty"`
 }
 
 // RuleConfigsRelateQueriesItem is generated from the Flashduty OpenAPI schema.
 type RuleConfigsRelateQueriesItem struct {
+	// Datasource-specific options for the auxiliary query, same convention as `queries[].args`.
 	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
 	// Query expression.
 	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
@@ -10418,20 +11001,26 @@ type RuleConfigsRelateQueriesItem struct {
 
 // RUMIssueItemError is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemError struct {
+	// Normalized error message, truncated to at most 512 characters.
 	Message string `json:"message" toon:"message"`
-	Type    string `json:"type" toon:"type"`
+	// Error type, from the error event's `error_type` field as reported by the SDK.
+	Type string `json:"type" toon:"type"`
 }
 
 // RUMIssueItemFirstSeen is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemFirstSeen struct {
-	Timestamp int64  `json:"timestamp" toon:"timestamp"`
-	Version   string `json:"version" toon:"version"`
+	// Client time of the first error event, Unix timestamp in milliseconds.
+	Timestamp TimestampMilli `json:"timestamp" toon:"timestamp"`
+	// Application version at first occurrence; empty string when the event carries no version.
+	Version string `json:"version" toon:"version"`
 }
 
 // RUMIssueItemLastSeen is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemLastSeen struct {
-	Timestamp int64  `json:"timestamp" toon:"timestamp"`
-	Version   string `json:"version" toon:"version"`
+	// Client time of the most recent error event, Unix timestamp in milliseconds.
+	Timestamp TimestampMilli `json:"timestamp" toon:"timestamp"`
+	// Application version at the most recent occurrence; empty string when the event carries no version.
+	Version string `json:"version" toon:"version"`
 }
 
 // RUMIssueItemRegression is generated from the Flashduty OpenAPI schema.
@@ -10440,16 +11029,29 @@ type RUMIssueItemRegression struct {
 	RegressedAt Timestamp `json:"regressed_at" toon:"regressed_at"`
 	// Application version in which the regression was observed.
 	RegressedAtVersion string `json:"regressed_at_version" toon:"regressed_at_version"`
-	// Timestamp of the previous resolution before the regression.
-	ResolvedAt Timestamp `json:"resolved_at" toon:"resolved_at"`
+	// When the issue was resolved before this regression, as a Unix timestamp in milliseconds.
+	ResolvedAt TimestampMilli `json:"resolved_at" toon:"resolved_at"`
 }
 
 // RUMIssueItemSuspectedCause is generated from the Flashduty OpenAPI schema.
 type RUMIssueItemSuspectedCause struct {
-	PersonID int64  `json:"person_id" toon:"person_id"`
-	Reason   string `json:"reason" toon:"reason"`
-	Source   string `json:"source" toon:"source"`
-	Value    string `json:"value" toon:"value"`
+	// Person ID of the user who manually set the cause; 0 when `source` is `auto`.
+	PersonID int64 `json:"person_id" toon:"person_id"`
+	// Explanation for the cause determination, generated only by AI analysis; empty string when AI is disabled or analysis has not run.
+	Reason string `json:"reason" toon:"reason"`
+	// Origin of the cause: `auto` for system-determined, `user` for manually set.
+	Source string `json:"source" toon:"source"`
+	// Suspected cause category. One of:
+	//
+	// | Value | Meaning |
+	// |---|---|
+	// | `api.failed_request` | API request failure (e.g. HTTP 4xx/5xx responses) |
+	// | `network.error` | Network connectivity error (offline, aborted requests, etc.) |
+	// | `code.exception` | Code exception (Syntax/Reference/Range and similar runtime errors) |
+	// | `code.invalid_object_access` | Invalid object access (e.g. reading a property of `undefined`/`null`) |
+	// | `code.invalid_argument` | Invalid argument passed to a function |
+	// | `unknown` | Cause could not be determined |
+	Value string `json:"value" toon:"value"`
 }
 
 // TargetsListResponseItemsItem is generated from the Flashduty OpenAPI schema.
@@ -10470,7 +11072,9 @@ type TargetsListResponseItemsItem struct {
 
 // ToolCatalogResponseError is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponseError struct {
-	Code    string `json:"code" toon:"code"`
+	// Request-level error code: `target_unavailable` target unreachable, `timeout` resolution timed out, `forward_failed` cross-instance forwarding failed, `invalid_tool_result` agent returned an invalid result, `ambiguous_target_kind` target kind not uniquely inferable.
+	Code string `json:"code" toon:"code"`
+	// Human-readable error detail.
 	Message string `json:"message" toon:"message"`
 	// Returned for `ambiguous_target_kind`; lists the candidate kinds.
 	TargetKinds *[]string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
@@ -10478,7 +11082,9 @@ type ToolCatalogResponseError struct {
 
 // ToolCatalogResponseTarget is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponseTarget struct {
-	Kind    string `json:"kind" toon:"kind"`
+	// Resolved target kind, e.g. `host` or `mysql`; matches the `target_kind` inferred from or given in the request.
+	Kind string `json:"kind" toon:"kind"`
+	// Echo of the target locator from the request.
 	Locator string `json:"locator" toon:"locator"`
 }
 
@@ -10504,8 +11110,11 @@ type ToolInvokeRequestToolsItem struct {
 
 // ToolInvokeResponseError is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseError struct {
-	Code        string    `json:"code" toon:"code"`
-	Message     string    `json:"message" toon:"message"`
+	// Request-level error code: `target_unavailable` target unreachable, `forward_failed` cross-instance forwarding failed, `ambiguous_target_kind` target kind not uniquely inferable.
+	Code string `json:"code" toon:"code"`
+	// Human-readable error detail.
+	Message string `json:"message" toon:"message"`
+	// Returned only when `code` is `ambiguous_target_kind`, listing the candidate target kinds matched by the locator; omitted otherwise.
 	TargetKinds *[]string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
 }
 
@@ -10529,7 +11138,9 @@ type ToolInvokeResponseResultsItem struct {
 
 // ToolInvokeResponseTarget is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseTarget struct {
-	Kind    string `json:"kind" toon:"kind"`
+	// Resolved target kind, e.g. `host` or `mysql`; matches the `target_kind` inferred from or given in the request.
+	Kind string `json:"kind" toon:"kind"`
+	// Echo of the target locator from the request.
 	Locator string `json:"locator" toon:"locator"`
 }
 
@@ -10633,6 +11244,7 @@ type CreateStatusPageChangeRequestUpdatesItemComponentChangesItem struct {
 
 // RuleConfigsCheckAnydataRecovery is generated from the Flashduty OpenAPI schema.
 type RuleConfigsCheckAnydataRecovery struct {
+	// Datasource-specific options for the recovery query, same convention as `queries[].args`; required for Elasticsearch datasources when `mode` is `ql`.
 	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
 	// Recovery expression. Required when `mode` is `ql`.
 	Condition string `json:"condition,omitempty" toon:"condition,omitempty"`
@@ -10642,14 +11254,17 @@ type RuleConfigsCheckAnydataRecovery struct {
 
 // RuleConfigsCheckThresholdRecovery is generated from the Flashduty OpenAPI schema.
 type RuleConfigsCheckThresholdRecovery struct {
+	// Recovery condition expression; required when `mode` is `threshold` or `ql`, and must be empty for `invert`.
 	Condition string `json:"condition,omitempty" toon:"condition,omitempty"`
-	Mode      string `json:"mode,omitempty" toon:"mode,omitempty"`
+	// Recovery mode: `invert` = resolve when the alert expression no longer holds (`condition` stays empty); `threshold` = resolve when the `condition` threshold expression holds; `ql` = resolve when the `condition` query expression evaluates true.
+	Mode string `json:"mode,omitempty" toon:"mode,omitempty"`
 }
 
 // ToolInvokeResponseResultsItemError is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseResultsItemError struct {
 	// Common WebAPI codes: `timeout`, `target_unavailable`, `invalid_tool_result`, `internal`, `invalid_args`, `unsupported_syntax`, `path_not_found`, and `catalog_changed`. Agent-specific tool errors may also be returned unchanged.
-	Code    string `json:"code" toon:"code"`
+	Code string `json:"code" toon:"code"`
+	// Human-readable detail for this tool's failure; agent-side messages may be forwarded verbatim.
 	Message string `json:"message" toon:"message"`
 }
 

@@ -11061,61 +11061,58 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "total": 2,
-                    "has_next_page": false,
+                    "total": 2363,
+                    "has_next_page": true,
+                    "search_after_ctx": "6a86b5d6f72de50ae1ce2ffb",
                     "items": [
                       {
-                        "incident_id": "67ca560c381a4fedb664f5f8",
-                        "title": "CPU spike on prod-web-01",
-                        "description": "CPU usage exceeded 90% threshold",
-                        "team_id": 4295771902131,
-                        "team_name": "SRE Team",
-                        "channel_id": 4321322010131,
-                        "channel_name": "Production Alerts",
+                        "incident_id": "6a86b5d6f72de50ae1ce2ffb",
+                        "title": "prod-web-01 CPU 使用率超过 90%",
+                        "description": "CPU 使用率连续 5 分钟超过阈值",
+                        "team_id": 2477033058131,
+                        "team_name": "SRE 团队",
+                        "channel_id": 3047621227131,
+                        "channel_name": "生产环境告警",
                         "progress": "Closed",
-                        "severity": "Info",
-                        "created_at": 1741313548,
+                        "severity": "Critical",
+                        "created_at": 1787213270,
+                        "alert_cnt": 3,
+                        "active_alert_cnt": 0,
+                        "alert_event_cnt": 5,
                         "closed_by": "manually",
-                        "seconds_to_ack": 1052085,
-                        "seconds_to_close": 1483880,
-                        "engaged_seconds": 1052085,
+                        "creator_id": 2477273692131,
+                        "creator_name": "张三",
+                        "closer_id": 2477273692131,
+                        "closer_name": "张三",
+                        "seconds_to_ack": 14,
+                        "seconds_to_close": 1830,
+                        "engaged_seconds": 1816,
                         "hours": "work",
                         "responders": [
                           {
-                            "person_id": 3790925372131,
-                            "assigned_at": 1741313548,
-                            "acknowledged_at": 1742365633,
-                            "person_name": "alice",
-                            "email": "alice@example.com"
+                            "person_id": 2477273692131,
+                            "assigned_at": 1787213270,
+                            "acknowledged_at": 1787213284,
+                            "person_name": "张三",
+                            "email": "zhangsan@example.com"
                           }
                         ],
                         "assigned_to": {
-                          "person_ids": [
-                            3790925372131
-                          ],
-                          "escalate_rule_id": "000000000000000000000000",
+                          "escalate_rule_id": "66138789904a9027583dbc4e",
                           "layer_idx": 0,
-                          "type": "reassign"
+                          "type": "assign",
+                          "assigned_at": 1787213270,
+                          "id": "b8tyUoRvCv4wsPndFRpmNL",
+                          "escalate_rule_name": "值班策略"
                         },
-                        "labels": {},
-                        "fields": {},
-                        "notifications": 4,
-                        "interruptions": 2,
-                        "assignments": 2,
-                        "reassignments": 1,
+                        "notifications": 2,
+                        "interruptions": 1,
+                        "assignments": 1,
+                        "reassignments": 0,
                         "acknowledgements": 1,
                         "escalations": 0,
                         "timeout_escalations": 0,
-                        "manual_escalations": 0,
-                        "creator_id": 3790925372131,
-                        "creator_name": "alice",
-                        "owner_id": 3790925372132,
-                        "owner_name": "bob",
-                        "closer_id": 3790925372133,
-                        "closer_name": "carol",
-                        "snoozed_before": 1712608400,
-                        "ever_muted": false,
-                        "frequency": "rare"
+                        "manual_escalations": 0
                       }
                     ]
                   }
@@ -31174,7 +31171,8 @@
         "properties": {
           "request_id": {
             "type": "string",
-            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+            "description": "本次请求的唯一追踪 ID（trace ID），反馈问题时请提供该值以便检索日志。"
           },
           "error": {
             "$ref": "#/components/schemas/DutyError"
@@ -31262,7 +31260,7 @@
                   "escalate",
                   "reopen"
                 ],
-                "description": "指派类型，由服务端自动推导，调用方无需传值：手动创建为 `assign`，再次指派为 `reassign`，升级触发为 `escalate`。"
+                "description": "指派类型，由服务端自动推导，调用方无需传值：手动创建为 `assign`，再次指派为 `reassign`，升级触发为 `escalate`。\n| 值 | 含义 |\n|---|---|\n| `assign` | 手动创建故障时的首次指派。 |\n| `reassign` | 对已有故障的再次指派。 |\n| `escalate` | 分派策略升级触发的指派。 |\n| `reopen` | 故障重新打开后从第一环节重新开始的分派。 |"
               },
               "emails": {
                 "type": "array",
@@ -31508,7 +31506,7 @@
               "popup",
               "tab"
             ],
-            "description": "链接打开方式。"
+            "description": "链接打开方式。`popup` 在故障详情页内以弹窗打开；`tab` 在新浏览器标签页打开。"
           }
         }
       },
@@ -32027,7 +32025,7 @@
               "Processing",
               "Closed"
             ],
-            "description": "故障进展状态。"
+            "description": "故障进展状态。`Triggered` 已触发待认领；`Processing` 已认领处理中（取消认领会回到 `Triggered`）；`Closed` 已关闭。"
           },
           "title": {
             "type": "string",
@@ -32719,7 +32717,7 @@
               "autorefresh",
               "escalation"
             ],
-            "description": "触发恢复操作的来源。"
+            "description": "触发恢复操作的来源。\n| 值 | 含义 |\n|---|---|\n| `voice` | 语音电话按键操作。 |\n| `console` | 控制台（Web UI）操作。 |\n| `card` | IM 通知卡片按钮（钉钉/飞书/Slack/Teams）。 |\n| `wcard` | 企业微信通知卡片按钮。 |\n| `event` | 事件驱动：关联告警全部恢复 Ok 自动关闭，或外部 ITSM 系统同步的关闭。 |\n| `autorslv` | 自动恢复：超过协作空间配置的自动恢复时长无新告警，由系统关闭。 |\n| `autorefresh` | 卡片自动刷新（保留值，恢复动态中不会出现）。 |\n| `escalation` | 升级流程（保留值，恢复动态中不会出现）。 |"
           }
         },
         "title": "i_rslv"
@@ -32909,7 +32907,7 @@
               "fire",
               "refire"
             ],
-            "description": "首次触发或再次触发。"
+            "description": "首次触发或再次触发。`fire`：故障在该分派层级的首次通知；`refire`：故障一直未被处理时，按该层级的通知间隔对同一层级的再次催发，催发次数受层级配置的最大次数限制。"
           },
           "escalate_rule_name": {
             "type": "string",
@@ -34016,7 +34014,7 @@
               "drafting",
               "published"
             ],
-            "description": "复盘状态，缺省时服务端默认按 `published` 过滤。"
+            "description": "复盘状态，缺省时服务端默认按 `published` 过滤。`drafting` 仅返回草稿中的复盘；`published` 仅返回已发布的复盘。"
           },
           "team_ids": {
             "type": "array",
@@ -34115,7 +34113,7 @@
               "drafting",
               "published"
             ],
-            "description": "复盘状态。"
+            "description": "复盘状态。`drafting` 草稿中，可继续编辑；`published` 已发布。"
           },
           "post_mortem_id": {
             "type": "string",
@@ -34312,7 +34310,8 @@
                 },
                 "description": "参与处理的成员。"
               }
-            }
+            },
+            "description": "由关联故障自动汇总的基础信息：最高严重程度、最早开始/最晚关闭时间、累计持续时长与参与人。"
           },
           "content": {
             "type": "object",
@@ -34324,7 +34323,8 @@
                 "type": "string",
                 "description": "正文内容（BlockNote JSON）。"
               }
-            }
+            },
+            "description": "复盘正文，对象内仅含一个 `content` 字段，值为 BlockNote JSON 字符串。"
           },
           "follow_ups": {
             "type": "string",
@@ -34602,7 +34602,7 @@
                   "tumbling",
                   "sliding"
                 ],
-                "description": "窗口类型,默认 `tumbling`。"
+                "description": "窗口类型,默认 `tumbling`。`tumbling` 为固定窗口，自故障创建时间起算，窗口到期后新告警会开启新故障；`sliding` 为滑动窗口，自故障最近一次告警时间起算，每有新告警并入即向后顺延。"
               },
               "storm_threshold": {
                 "type": "integer",
@@ -34964,10 +34964,6 @@
             "format": "int64",
             "description": "所属协作空间 ID，可通过 `POST /channel/list` 获取。"
           },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级,数值越小越优先。"
-          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -35076,10 +35072,6 @@
             "type": "integer",
             "format": "int64",
             "description": "所属协作空间 ID，可通过 `POST /channel/list` 获取。"
-          },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级,数值越小越优先。"
           },
           "rule_name": {
             "type": "string",
@@ -35493,7 +35485,7 @@
               "tumbling",
               "sliding"
             ],
-            "description": "窗口类型，默认 `tumbling`。"
+            "description": "窗口类型，默认 `tumbling`。`tumbling` 为固定窗口，自故障创建时间起算，窗口到期后新告警会开启新故障；`sliding` 为滑动窗口，自故障最近一次告警时间起算，每有新告警并入即向后顺延。"
           },
           "storm_threshold": {
             "type": "integer",
@@ -35628,7 +35620,7 @@
               "disabled",
               "deleted"
             ],
-            "description": "协作空间状态。"
+            "description": "协作空间状态。`enabled` 正常接收与处理事件；`disabled` 停用，新事件被直接丢弃；`deleted` 已删除，仅按 ID 查询详情时可能返回，列表接口不返回。"
           },
           "deleted_at": {
             "type": "integer",
@@ -35656,7 +35648,7 @@
               "trigger",
               "update"
             ],
-            "description": "自动恢复计时重置方式。"
+            "description": "自动恢复计时重置方式。`trigger`（默认）计时只在故障触发时启动一次，之后并入的新告警不影响计时；`update` 每当有新告警并入故障时从最新告警时间重新计时。"
           },
           "is_private": {
             "type": "boolean",
@@ -35857,21 +35849,21 @@
         "properties": {
           "account_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "规则所属账户 ID。"
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级，数值越小越优先。"
+            "format": "int64",
+            "description": "规则所属协作空间 ID。"
           },
           "rule_name": {
-            "type": "string"
+            "type": "string",
+            "description": "规则名称。"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "规则描述。"
           },
           "from_incident_id": {
             "type": "string",
@@ -35900,27 +35892,28 @@
             "enum": [
               "enabled",
               "disabled"
-            ]
+            ],
+            "description": "规则状态：`enabled` 启用，`disabled` 停用；已删除的规则不会出现在列表中。"
           },
           "rule_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "规则 ID（MongoDB ObjectID）。"
           },
           "updated_by": {
             "type": "integer",
-            "format": "int64"
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "最近一次更新该规则的用户 ID。"
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "创建时间，Unix 时间戳（秒）。"
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "最近更新时间，Unix 时间戳（秒）。"
           },
           "is_effective": {
             "type": "boolean",
@@ -35953,20 +35946,21 @@
         "properties": {
           "account_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "规则所属账户 ID。"
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "priority": {
-            "type": "integer"
+            "format": "int64",
+            "description": "规则所属协作空间 ID。"
           },
           "rule_name": {
-            "type": "string"
+            "type": "string",
+            "description": "规则名称。"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "规则描述。"
           },
           "source_filters": {
             "$ref": "#/components/schemas/FilterGroup"
@@ -35982,34 +35976,36 @@
             "description": "用于配对源告警与目标告警的 label 键列表。"
           },
           "is_directly_discard": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "为 true 时被抑制的目标告警直接丢弃；为 false 时告警仍会创建但被静音，不触发故障与通知。"
           },
           "status": {
             "type": "string",
             "enum": [
               "enabled",
               "disabled"
-            ]
+            ],
+            "description": "规则状态：`enabled` 启用，`disabled` 停用；已删除的规则不会出现在列表中。"
           },
           "rule_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "规则 ID（MongoDB ObjectID）。"
           },
           "updated_by": {
             "type": "integer",
-            "format": "int64"
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "最近一次更新该规则的用户 ID。"
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "创建时间，Unix 时间戳（秒）。"
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "最近更新时间，Unix 时间戳（秒）。"
           }
         }
       },
@@ -36032,20 +36028,21 @@
         "properties": {
           "account_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "规则所属账户 ID。"
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "priority": {
-            "type": "integer"
+            "format": "int64",
+            "description": "规则所属协作空间 ID。"
           },
           "rule_name": {
-            "type": "string"
+            "type": "string",
+            "description": "规则名称。"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "规则描述。"
           },
           "filters": {
             "$ref": "#/components/schemas/FilterGroup"
@@ -36055,27 +36052,28 @@
             "enum": [
               "enabled",
               "disabled"
-            ]
+            ],
+            "description": "规则状态：`enabled` 启用，`disabled` 停用；已删除的规则不会出现在列表中。"
           },
           "rule_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "规则 ID（MongoDB ObjectID）。"
           },
           "updated_by": {
             "type": "integer",
-            "format": "int64"
-          },
-          "deleted_at": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "最近一次更新该规则的用户 ID。"
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "创建时间，Unix 时间戳（秒）。"
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "最近更新时间，Unix 时间戳（秒）。"
           }
         }
       },
@@ -36338,10 +36336,6 @@
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "静默策略 ID（MongoDB ObjectID）。"
           },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级，数值越小越优先。"
-          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -36416,10 +36410,6 @@
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "抑制策略 ID（MongoDB ObjectID）。"
-          },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级，数值越小越优先。"
           },
           "rule_name": {
             "type": "string",
@@ -36573,7 +36563,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ChannelItem"
-            }
+            },
+            "description": "当前页的协作空间列表。"
           },
           "total": {
             "type": "integer",
@@ -36596,7 +36587,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ChannelShort"
-            }
+            },
+            "description": "请求的 `channel_ids` 中实际存在的协作空间简要信息；未找到的 ID 会被忽略。"
           }
         }
       },
@@ -36610,7 +36602,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SilenceRuleItem"
-            }
+            },
+            "description": "该协作空间下的全部静默规则（不含已删除），按创建时间升序。"
           }
         }
       },
@@ -36624,7 +36617,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/InhibitRuleItem"
-            }
+            },
+            "description": "该协作空间下的全部抑制规则（不含已删除），按创建时间升序。"
           }
         }
       },
@@ -36638,7 +36632,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UnsubscribeRuleItem"
-            }
+            },
+            "description": "该协作空间下的全部排除规则（不含已删除），按创建时间升序。"
           }
         }
       },
@@ -36652,7 +36647,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EscalateRuleItem"
-            }
+            },
+            "description": "该协作空间下的全部升级规则（不含已删除），按优先级升序。"
           }
         }
       },
@@ -36837,7 +36833,7 @@
               "enabled",
               "deleted"
             ],
-            "description": "规则状态。"
+            "description": "规则状态。`enabled` 生效中；`deleted` 已删除，仅在历史版本中可见。"
           },
           "version": {
             "type": "integer",
@@ -37261,7 +37257,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertItem"
-            }
+            },
+            "description": "当前页的告警列表。"
           }
         }
       },
@@ -37396,10 +37393,14 @@
       },
       "AlertFeedType": {
         "type": "string",
-        "description": "告警动态记录类型。每个值标识一个告警生命周期事件；`detail` 的具体结构由该字段决定。\n\n| 类型 | 含义 |\n|---|---|\n| `a_new` | 告警触发。 |\n| `a_comm` | 在告警上添加了评论。 |\n| `a_close` | 告警关闭。 |",
+        "description": "告警动态记录类型。每个值标识一个告警生命周期事件；`detail` 的具体结构由该字段决定。\n\n| 类型 | 含义 |\n|---|---|\n| `a_new` | 告警触发。 |\n| `a_update` | 告警被新事件更新（如严重程度、状态变化）。 |\n| `a_merge` | 告警被合并。 |\n| `a_comm` | 在告警上添加了评论。 |\n| `a_m_silence` | 告警被静默规则收敛。 |\n| `a_m_inhibit` | 告警被抑制规则收敛。 |\n| `a_close` | 告警关闭（仅历史数据，当前版本不再产生）。 |",
         "enum": [
           "a_new",
+          "a_update",
+          "a_merge",
           "a_comm",
+          "a_m_silence",
+          "a_m_inhibit",
           "a_close"
         ]
       },
@@ -37503,13 +37504,15 @@
         "type": "object",
         "properties": {
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否还有下一页。"
           },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FeedItem"
-            }
+            },
+            "description": "当前页的告警动态记录列表。"
           }
         }
       },
@@ -37572,7 +37575,7 @@
               "alert_drop",
               "alert_inhibit"
             ],
-            "description": "规则类型。"
+            "description": "规则类型。规则按数组顺序依次执行，`if` 条件命中后按 `kind` 处理事件。\n| 值 | 含义 |\n|---|---|\n| `title_reset` | 按 `settings.title` 模板重写事件标题。 |\n| `description_reset` | 按 `settings.description` 模板重写事件描述。 |\n| `severity_reset` | 将事件严重程度与状态重置为 `settings.severity`（`Critical`/`Warning`/`Info`）。 |\n| `alert_drop` | 直接丢弃匹配的事件，不生成告警。 |\n| `alert_inhibit` | 当存在匹配 `settings.source_filters` 且按 `settings.equals` 关联的活跃源告警时，丢弃该事件（抑制）。 |"
           },
           "if": {
             "$ref": "#/components/schemas/OrFilterGroup",
@@ -37666,7 +37669,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertPipelineItem"
-            }
+            },
+            "description": "所请求集成各自的告警处理流水线配置，每个已配置的集成一项。"
           }
         }
       },
@@ -37765,19 +37769,23 @@
         "properties": {
           "total": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "符合条件的事件总数；计数上限为 1000，超过时返回 1000。"
           },
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否还有下一页（按 limit+1 探测）。"
           },
           "search_after_ctx": {
-            "type": "string"
+            "type": "string",
+            "description": "下一页游标，为本页最后一条事件的 ObjectID，传入下次请求的 `search_after_ctx`；无更多数据或结果为空时不返回。"
           },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlertEventItem"
-            }
+            },
+            "description": "当前页的原始告警事件列表。"
           }
         }
       },
@@ -37936,7 +37944,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/WebhookHistoryItem"
-            }
+            },
+            "description": "当前页的 Webhook 推送记录。"
           },
           "total": {
             "type": "integer",
@@ -38424,7 +38433,7 @@
           "handoff_time": {
             "type": "integer",
             "format": "int64",
-            "description": "值班交接时间（秒）。"
+            "description": "值班交接时间，Unix 时间戳（秒）。"
           },
           "enable_time": {
             "type": "integer",
@@ -38509,7 +38518,7 @@
           },
           "rotation_unit": {
             "type": "string",
-            "description": "轮转单位。",
+            "description": "轮转单位。值班人按该单位依次轮换。\n| 值 | 含义 |\n|---|---|\n| `hour` | 按小时轮转。 |\n| `day` | 按天轮转。 |\n| `week` | 按周轮转。 |\n| `month` | 按月轮转。 |",
             "enum": [
               "hour",
               "day",
@@ -39274,7 +39283,7 @@
           },
           "kind": {
             "type": "string",
-            "description": "日历类型。",
+            "description": "日历类型。`region.official.holiday` 为地区法定假日公共日历（数据来自中心假日服务），`religion.holiday` 为宗教假日公共日历（预留值，当前无数据），`personal` 为账户自建的个人/团队日历。",
             "enum": [
               "region.official.holiday",
               "religion.holiday",
@@ -39319,7 +39328,7 @@
           },
           "status": {
             "type": "string",
-            "description": "日历状态。",
+            "description": "日历状态。`enabled` 正常可用；`deleted` 已删除，列表接口不返回。",
             "enum": [
               "enabled",
               "deleted"
@@ -39333,7 +39342,7 @@
         "properties": {
           "kind": {
             "type": "string",
-            "description": "日历类型过滤条件，为空时默认 personal。",
+            "description": "日历类型过滤条件，为空时默认 personal。`region.official.holiday` 查询地区法定假日公共日历（按调用方 locale 过滤）；`personal` 查询账户自建日历。",
             "enum": [
               "region.official.holiday",
               "personal"
@@ -39691,7 +39700,7 @@
           },
           "status": {
             "type": "string",
-            "description": "模板生命周期状态。",
+            "description": "模板生命周期状态。`enabled` 启用中，可被分派策略引用发送通知；`disabled` 停用，不再用于新通知；`deleted` 已删除，列表接口不返回。",
             "enum": [
               "enabled",
               "disabled",
@@ -39822,7 +39831,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TemplateItem"
-            }
+            },
+            "description": "当前页的通知模板列表；第一页的第一条固定为内置预置模板。"
           }
         }
       },
@@ -41060,7 +41070,7 @@
             "enum": [
               "created_at"
             ],
-            "description": "底层故障集合的排序字段。"
+            "description": "底层故障集合的排序字段。当前仅支持 `created_at`（按故障创建时间）。"
           },
           "asc": {
             "type": "boolean",
@@ -41162,7 +41172,7 @@
                   "week",
                   "month"
                 ],
-                "description": "将指标按时间粒度聚合。设置后时间范围须不少于 24 小时；`day` 粒度时范围不得超过 31 天。"
+                "description": "将指标按时间粒度聚合。设置后时间范围须不少于 24 小时；`day` 粒度时范围不得超过 31 天。`day` 按自然日、`week` 按自然周、`month` 按自然月切分聚合桶，边界按 `time_zone` 对齐。"
               }
             }
           }
@@ -41218,7 +41228,7 @@
                   "check",
                   "resource"
                 ],
-                "description": "聚合维度。"
+                "description": "聚合维度。`check` 按告警事件的 `labels.check` 标签（监控检查项）取值聚合；`resource` 按 `labels.resource` 标签（监控资源标识）取值聚合。"
               },
               "k": {
                 "type": "integer",
@@ -41230,7 +41240,7 @@
                   "total_alert_cnt",
                   "total_alert_event_cnt"
                 ],
-                "description": "排序字段。"
+                "description": "排序字段。`total_alert_cnt` 按告警数量排序；`total_alert_event_cnt` 按原始告警事件数量排序。"
               },
               "asc": {
                 "type": "boolean",
@@ -41251,7 +41261,7 @@
               "sleep",
               "off"
             ],
-            "description": "启用 `split_hours` 时的时段桶。"
+            "description": "启用 `split_hours` 时的时段桶。`work` 为周一至周五 08:00–19:00，`sleep` 为每日 23:00–08:00，`off` 为其余时间，均按账户时区判定（`sleep` 优先于 `work` 判定）。"
           },
           "ts": {
             "type": "integer",
@@ -41260,28 +41270,30 @@
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "协作空间 ID，仅在按协作空间聚合（`/insight/channel`）时返回。"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "团队 ID，仅在按团队聚合（`/insight/team`）时返回。"
           },
           "responder_id": {
             "type": "integer",
-            "format": "int64"
-          },
-          "account_id": {
-            "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "处理人员（个人）ID，仅在按处理人员聚合（`/insight/responder`）时返回。"
           },
           "team_name": {
-            "type": "string"
+            "type": "string",
+            "description": "团队名称，按团队聚合时返回；名称查不到（如团队已删除）时省略。"
           },
           "channel_name": {
-            "type": "string"
+            "type": "string",
+            "description": "协作空间名称，按协作空间聚合时返回；名称查不到时省略。"
           },
           "responder_name": {
-            "type": "string"
+            "type": "string",
+            "description": "处理人员姓名，按处理人员聚合时返回；姓名查不到时省略。"
           }
         }
       },
@@ -41296,87 +41308,108 @@
             "properties": {
               "total_incident_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "故障总数。"
               },
               "total_incidents_acknowledged": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "有过认领的故障数。"
               },
               "total_incidents_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "已关闭的故障数。"
               },
               "total_incidents_auto_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "自动关闭的故障数（告警全部恢复触发）。"
               },
               "total_incidents_manually_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "人工关闭的故障数。"
               },
               "total_incidents_timeout_closed": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "超时自动关闭的故障数。"
               },
               "total_incidents_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "发生过升级的故障数。"
               },
               "total_incidents_manually_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "发生过手动升级的故障数。"
               },
               "total_incidents_timeout_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "发生过超时升级的故障数。"
               },
               "total_incidents_reassigned": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "发生过改派的故障数。"
               },
               "total_interruptions": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "打扰总次数：通过 App 推送、短信、电话语音发送的通知次数，同一处理人员 60 秒内的连续通知合并计为一次。"
               },
               "total_notifications": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "通知发送总次数。"
               },
               "total_engaged_seconds": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "处理耗时总和（秒）：各故障所有已认领处理人员的「关闭时间 − 本人认领时间」之和。"
               },
               "total_seconds_to_ack": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "首次认领耗时总和（秒）。"
               },
               "total_seconds_to_close": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "关闭耗时总和（秒）。"
               },
               "mean_seconds_to_ack": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "平均首次认领耗时（秒）。"
               },
               "mean_seconds_to_close": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "平均关闭耗时（秒）。"
               },
               "noise_reduction_pct": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "降噪比（%）：`100 − 故障数 ÷ 告警事件数 × 100`；无告警事件对比数据时为 0。"
               },
               "acknowledgement_pct": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "认领率（%）：认领过的故障数 ÷ 故障总数 × 100，保留两位小数；故障总数为 0 时为 100。"
               },
               "total_alert_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "告警总数。"
               },
               "total_alert_event_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "告警事件总数。"
               }
             }
           }
@@ -41393,51 +41426,63 @@
             "properties": {
               "total_incident_cnt": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该处理人员参与的故障数。"
               },
               "total_incidents_acknowledged": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员认领过的故障数。"
               },
               "total_incidents_reassigned": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员被改派的故障数。"
               },
               "total_incidents_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员的故障中发生过升级的故障数。"
               },
               "total_incidents_timeout_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员的故障中超时升级的故障数。"
               },
               "total_incidents_manually_escalated": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员的故障中手动升级的故障数。"
               },
               "total_interruptions": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员的打扰次数：通过 App 推送、短信、电话语音发送的通知次数，60 秒内的连续通知合并计为一次。"
               },
               "total_notifications": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "发给该人员的通知总次数。"
               },
               "total_engaged_seconds": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员的处理耗时总和（秒）：各故障的「关闭时间 − 本人认领时间」之和。"
               },
               "total_seconds_to_ack": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "该人员的认领耗时总和（秒）：各故障的「认领时间 − 分派时间」之和。"
               },
               "mean_seconds_to_ack": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "该人员的平均认领耗时（秒）。"
               },
               "acknowledgement_pct": {
                 "type": "number",
-                "format": "double"
+                "format": "double",
+                "description": "该人员的认领率（%）：认领过的故障数 ÷ 参与的故障数 × 100，保留两位小数。"
               }
             }
           }
@@ -41450,7 +41495,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DimensionInsightItem"
-            }
+            },
+            "description": "按接口维度（账户/团队/协作空间）聚合的洞察指标行；启用 `split_hours` 或 `aggregate_unit` 时会进一步按时段或时间桶拆分。"
           }
         }
       },
@@ -41461,7 +41507,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResponderInsightItem"
-            }
+            },
+            "description": "按处理人员聚合的故障响应指标行；启用 `split_hours` 或 `aggregate_unit` 时会进一步按时段或时间桶拆分。"
           }
         }
       },
@@ -41471,27 +41518,34 @@
         "properties": {
           "incident_id": {
             "type": "string",
-            "pattern": "^[0-9a-fA-F]{24}$"
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "故障 ID，账户内唯一。"
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "故障标题。"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "故障描述；为空时不返回。"
           },
           "team_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "故障归属团队的 ID。"
           },
           "team_name": {
-            "type": "string"
+            "type": "string",
+            "description": "故障归属团队的名称。"
           },
           "channel_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "故障所属协作空间的 ID。"
           },
           "channel_name": {
-            "type": "string"
+            "type": "string",
+            "description": "故障所属协作空间的名称。"
           },
           "progress": {
             "type": "string",
@@ -41502,42 +41556,142 @@
             "enum": [
               "Critical",
               "Warning",
-              "Info",
-              "Ok"
-            ]
+              "Info"
+            ],
+            "description": "故障严重程度。"
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "故障创建时间，Unix 时间戳（秒）。"
+          },
+          "alert_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "故障聚合的告警总数。"
+          },
+          "active_alert_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "仍处于活跃（未恢复）状态的告警数量。"
+          },
+          "alert_event_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "故障关联的告警事件总数；一条告警的每次上报计为一个事件。"
           },
           "closed_by": {
             "type": "string",
             "enum": [
+              "",
               "auto",
               "timeout",
               "manually"
-            ]
+            ],
+            "description": "关闭方式：`auto` 自动关闭、`timeout` 超时关闭、`manually` 人工关闭；未关闭时为空字符串。"
+          },
+          "owner_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "故障负责人的成员 ID。"
+          },
+          "owner_name": {
+            "type": "string",
+            "description": "故障负责人的显示名称。"
+          },
+          "creator_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "故障创建人的成员 ID。"
+          },
+          "creator_name": {
+            "type": "string",
+            "description": "故障创建人的显示名称。"
+          },
+          "closer_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "关闭该故障的成员 ID。"
+          },
+          "closer_name": {
+            "type": "string",
+            "description": "关闭该故障的成员显示名称。"
           },
           "seconds_to_ack": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "从故障创建到首次认领的耗时（秒）；从未认领时为 0。"
           },
           "seconds_to_close": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "从故障创建到关闭的耗时（秒）；未关闭时为 0。"
           },
           "engaged_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "处理耗时总和（秒）：所有已认领处理人员的「关闭时间 − 本人认领时间」之和；未关闭时为 0。"
           },
           "hours": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "work",
+              "off",
+              "sleep"
+            ],
+            "description": "故障创建时刻在账户时区下所处的时段：`work` 工作日 08:00–19:00，`sleep` 每日 23:00–次日 08:00，`off` 其余时间。"
+          },
+          "snoozed_before": {
+            "type": "integer",
+            "format": "int64",
+            "description": "故障被暂缓到何时的 Unix 时间戳（秒）。"
+          },
+          "ever_muted": {
+            "type": "boolean",
+            "description": "该故障是否曾因抖动（flapping）被收敛静默。"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "frequent",
+              "rare"
+            ],
+            "description": "故障频次分类：`frequent` 高频、`rare` 低频。"
           },
           "responders": {
             "type": "array",
+            "description": "处理人员列表，记录每个人的分派与认领时间。",
             "items": {
               "type": "object",
-              "description": "处理人员条目（结构详见故障模块）。"
+              "properties": {
+                "person_id": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "处理人员的成员 ID。"
+                },
+                "assigned_at": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "被分派的时间，Unix 时间戳（秒）。"
+                },
+                "acknowledged_at": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "认领时间，Unix 时间戳（秒）；未认领时为 0。"
+                },
+                "person_name": {
+                  "type": "string",
+                  "description": "处理人员的显示名称；为空时不返回。"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "处理人员的邮箱；为空时不返回。"
+                },
+                "as": {
+                  "type": "string",
+                  "description": "处理人员在外部协作 IM（如 Slack）中的标识；仅在外部系统回填时返回。"
+                }
+              }
             }
           },
           "assigned_to": {
@@ -41573,7 +41727,7 @@
                   "escalate",
                   "reopen"
                 ],
-                "description": "分派类型。"
+                "description": "分派类型。\n| 值 | 含义 |\n|---|---|\n| `assign` | 手动创建故障时的首次指派。 |\n| `reassign` | 对已有故障的再次指派。 |\n| `escalate` | 分派策略升级触发的指派。 |\n| `reopen` | 故障重新打开后从第一环节重新开始的分派。 |"
               },
               "assigned_at": {
                 "type": "integer",
@@ -41590,85 +41744,53 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "故障标签，键值对形式；无标签时不返回。"
           },
           "fields": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "故障自定义字段；无自定义字段时不返回。"
           },
           "notifications": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "通知发送总次数。"
           },
           "interruptions": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "打扰次数：通过 App 推送、短信、电话语音渠道发送的通知次数；同一处理人员 60 秒内的连续通知合并计为一次。"
           },
           "assignments": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "分派次数。"
           },
           "reassignments": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "改派（重新分派）次数。"
           },
           "acknowledgements": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "认领次数。"
           },
           "escalations": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "升级总次数，等于 `timeout_escalations` 与 `manual_escalations` 之和。"
           },
           "timeout_escalations": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "超时未处理触发的升级次数。"
           },
           "manual_escalations": {
             "type": "integer",
-            "format": "int64"
-          },
-          "creator_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "creator_name": {
-            "type": "string"
-          },
-          "owner_id": {
-            "type": "integer",
             "format": "int64",
-            "description": "故障负责人的成员 ID。"
-          },
-          "owner_name": {
-            "type": "string",
-            "description": "故障负责人的显示名称。"
-          },
-          "closer_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "关闭该故障的成员 ID。"
-          },
-          "closer_name": {
-            "type": "string",
-            "description": "关闭该故障的成员显示名称。"
-          },
-          "snoozed_before": {
-            "type": "integer",
-            "format": "int64",
-            "description": "故障被暂缓到何时的 Unix 时间戳（秒）。"
-          },
-          "ever_muted": {
-            "type": "boolean",
-            "description": "该故障是否曾被收敛。"
-          },
-          "frequency": {
-            "type": "string",
-            "enum": [
-              "frequent",
-              "rare"
-            ],
-            "description": "故障频次分类。"
+            "description": "人工手动触发的升级次数。"
           }
         }
       },
@@ -41681,7 +41803,8 @@
             "description": "匹配的故障总数。"
           },
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否还有下一页。"
           },
           "search_after_ctx": {
             "type": "string",
@@ -41691,7 +41814,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/IncidentRawItem"
-            }
+            },
+            "description": "故障明细列表。"
           }
         }
       },
@@ -41708,11 +41832,13 @@
           },
           "total_alert_cnt": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "该 label 取值桶内的告警总数。"
           },
           "total_alert_event_cnt": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "该 label 取值桶内的原始告警事件总数。"
           }
         }
       },
@@ -41723,7 +41849,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/InsightAlertByLabelItem"
-            }
+            },
+            "description": "按指定 label 取值聚合的 Top-K 统计行。"
           }
         }
       },
@@ -41752,7 +41879,7 @@
               "incident",
               "maintenance"
             ],
-            "description": "事件类型。"
+            "description": "事件类型。`incident` 为非计划的故障事件；`maintenance` 为计划内的维护事件。类型决定可用的状态取值。"
           },
           "title": {
             "type": "string",
@@ -41879,7 +42006,7 @@
               "full_outage",
               "under_maintenance"
             ],
-            "description": "事件导致的组件当前状态。"
+            "description": "事件导致的组件当前状态。严重程度递增：`operational` < `degraded` = `under_maintenance` < `partial_outage` < `full_outage`；incident 类型事件可用前四种，maintenance 类型仅可用 `operational` 与 `under_maintenance`。\n| 值 | 含义 |\n|---|---|\n| `operational` | 正常。 |\n| `degraded` | 性能下降。 |\n| `partial_outage` | 部分故障。 |\n| `full_outage` | 完全故障。 |\n| `under_maintenance` | 维护中。 |"
           }
         }
       },
@@ -41911,7 +42038,7 @@
               "ongoing",
               "completed"
             ],
-            "description": "本次更新后的事件状态。当更新不改变整体状态时省略。"
+            "description": "本次更新后的事件状态。当更新不改变整体状态时省略。前四个值仅适用于 incident 类型，后三个仅适用于 maintenance 类型。\n| 值 | 含义 |\n|---|---|\n| `investigating` | 排查中（incident）。 |\n| `identified` | 已定位原因（incident）。 |\n| `monitoring` | 已修复，观察中（incident）。 |\n| `resolved` | 已解决（incident）。 |\n| `scheduled` | 已计划（maintenance）。 |\n| `ongoing` | 进行中（maintenance）。 |\n| `completed` | 已完成（maintenance）。 |"
           },
           "description": {
             "type": "string",
@@ -41966,7 +42093,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/StatusPageChangeItem"
-            }
+            },
+            "description": "符合过滤条件的状态页事件（故障/维护）列表。"
           }
         }
       },
@@ -42146,7 +42274,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ExportedStatusPageSubscriberItem"
-            }
+            },
+            "description": "当前页的订阅者列表。"
           }
         }
       },
@@ -42170,7 +42299,7 @@
               "email",
               "im"
             ],
-            "description": "订阅通知方式。"
+            "description": "订阅通知方式。`email` 为邮件订阅（公开状态页）；`im` 为 IM 即时消息订阅（内部状态页）。取值由状态页类型决定。"
           },
           "components": {
             "type": "array",
@@ -42427,7 +42556,7 @@
               "history",
               "subscribers"
             ],
-            "description": "当前迁移阶段。"
+            "description": "当前迁移阶段。`structure` 迁移页面结构（分区与组件）；`history` 迁移历史故障、维护记录与事件模板；`subscribers` 迁移邮件订阅者。"
           },
           "status": {
             "type": "string",
@@ -42438,7 +42567,7 @@
               "failed",
               "cancelled"
             ],
-            "description": "任务当前状态。"
+            "description": "任务当前状态。\n| 值 | 含义 |\n|---|---|\n| `pending` | 已创建，等待执行。 |\n| `running` | 执行中。 |\n| `completed` | 已全部完成。 |\n| `failed` | 执行失败，`error` 字段含失败原因。 |\n| `cancelled` | 已被取消。 |"
           },
           "progress": {
             "$ref": "#/components/schemas/StatusPageMigrationProgress",
@@ -42484,22 +42613,28 @@
             "description": "已完成的步骤数。"
           },
           "components_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "已从源状态页导入的组件数量。"
           },
           "sections_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "已从源状态页导入的分区（对应 Atlassian component group）数量。"
           },
           "incidents_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "已导入的历史故障数量。"
           },
           "maintenances_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "已导入的计划维护数量。"
           },
           "subscribers_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "已成功导入的邮件订阅者数量。"
           },
           "templates_imported": {
-            "type": "integer"
+            "type": "integer",
+            "description": "已成功导入的事件模板数量；导入失败的模板会被跳过并记入 `warnings`。"
           },
           "subscribers_skipped": {
             "type": "integer",
@@ -42624,7 +42759,7 @@
                     "ongoing",
                     "completed"
                   ],
-                  "description": "更新后的事件状态。若整体状态未变化可省略。"
+                  "description": "更新后的事件状态。若整体状态未变化可省略。前四个值仅适用于 incident 类型，后三个仅适用于 maintenance 类型。\n| 值 | 含义 |\n|---|---|\n| `investigating` | 排查中（incident）。 |\n| `identified` | 已定位原因（incident）。 |\n| `monitoring` | 已修复，观察中（incident）。 |\n| `resolved` | 已解决（incident）。 |\n| `scheduled` | 已计划（maintenance）。 |\n| `ongoing` | 进行中（maintenance）。 |\n| `completed` | 已完成（maintenance）。 |"
                 },
                 "description": {
                   "type": "string",
@@ -42711,7 +42846,7 @@
               "ongoing",
               "completed"
             ],
-            "description": "更新后的事件状态,需与事件类型匹配。当状态切换为 `resolved` 或 `completed` 时,所有关联组件必须恢复为 `operational`。"
+            "description": "更新后的事件状态,需与事件类型匹配。当状态切换为 `resolved` 或 `completed` 时,所有关联组件必须恢复为 `operational`。\n| 值 | 含义 |\n|---|---|\n| `investigating` | 排查中（incident）。 |\n| `identified` | 已定位原因（incident）。 |\n| `monitoring` | 已修复，观察中（incident）。 |\n| `scheduled` | 已计划（maintenance）。 |\n| `ongoing` | 进行中（maintenance）。 |"
           },
           "description": {
             "type": "string",
@@ -42833,25 +42968,31 @@
           },
           "creator_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "创建人用户 ID。"
           },
           "creator_name": {
-            "type": "string"
+            "type": "string",
+            "description": "创建人用户名。"
           },
           "updater_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "最近修改人用户 ID。"
           },
           "updater_name": {
-            "type": "string"
+            "type": "string",
+            "description": "最近修改人用户名。"
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "创建时间，Unix 时间戳（秒）。"
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "最近修改时间，Unix 时间戳（秒）。"
           },
           "triggered": {
             "type": "boolean",
@@ -42887,22 +43028,26 @@
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "description": "作为告警事件标签的结果字段列表，相同标签组合归为同一告警；不可与 `value_fields` 重复，适用于表型结果（SQL/ES 等数据源）。"
                 },
                 "value_fields": {
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "description": "参与阈值评估的数值结果字段列表（以 `$A.<field>` 形式被阈值表达式引用）；对阈值检查且数据源非 `prometheus`/`loki`/`victorialogs` 时必填，字段名不允许含 `.`。"
                 },
                 "args": {
                   "type": "object",
                   "additionalProperties": {
                     "type": "string"
-                  }
+                  },
+                  "description": "数据源相关的查询附加参数，键采用 `<数据源>.<参数>` 约定（如 `es.type`、`tencent_cls.limit`）；大多数数据源无需配置。"
                 }
               }
-            }
+            },
+            "description": "查询列表，至少一条；每条需唯一的 `name`（`R`、`__all__` 为保留名）与非空且不重复的 `expr`。"
           },
           "relate_queries": {
             "type": "array",
@@ -42922,7 +43067,8 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "string"
-                  }
+                  },
+                  "description": "辅助查询的数据源相关附加参数，约定同 `queries[].args`。"
                 }
               }
             }
@@ -42932,25 +43078,32 @@
             "description": "阈值检查配置。",
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "是否启用阈值检查。"
               },
               "alerting_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "连续满足告警条件多少次后触发告警，最小为 1。"
               },
               "recovery_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "连续满足恢复条件多少次后判定恢复，最小为 1。"
               },
               "push_recovery_event": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "告警恢复时是否推送恢复事件通知。"
               },
               "critical": {
-                "type": "string"
+                "type": "string",
+                "description": "Critical 级别阈值表达式，用 `$<查询名>` 或 `$<查询名>.<value_field>` 引用查询结果，如 `$A > 90`；三个级别至少配置一个。"
               },
               "warning": {
-                "type": "string"
+                "type": "string",
+                "description": "Warning 级别阈值表达式，语法同 `critical`。"
               },
               "info": {
-                "type": "string"
+                "type": "string",
+                "description": "Info 级别阈值表达式，语法同 `critical`。"
               },
               "recovery": {
                 "type": "object",
@@ -42961,12 +43114,15 @@
                       "invert",
                       "threshold",
                       "ql"
-                    ]
+                    ],
+                    "description": "恢复判定方式：`invert` = 告警表达式不再成立即恢复（此时 `condition` 为空）；`threshold` = `condition` 阈值表达式成立时恢复；`ql` = `condition` 查询表达式为真时恢复。"
                   },
                   "condition": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "恢复条件表达式；`mode` 为 `threshold` 或 `ql` 时必填，`invert` 时必须为空。"
                   }
-                }
+                },
+                "description": "阈值检查的恢复判定配置。"
               }
             }
           },
@@ -42975,16 +43131,20 @@
             "description": "有数据检查配置。查询返回任意数据行时触发告警。",
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "是否启用有数据检查：查询返回任意数据行即触发告警。"
               },
               "alerting_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "连续满足告警条件多少次后触发告警，最小为 1。"
               },
               "recovery_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "连续满足恢复条件多少次后判定恢复，最小为 1。"
               },
               "push_recovery_event": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "告警恢复时是否推送恢复事件通知。"
               },
               "severity": {
                 "type": "string",
@@ -42992,7 +43152,8 @@
                   "Critical",
                   "Warning",
                   "Info"
-                ]
+                ],
+                "description": "有数据告警的事件级别，大小写敏感。"
               },
               "recovery": {
                 "type": "object",
@@ -43014,7 +43175,8 @@
                     "type": "object",
                     "additionalProperties": {
                       "type": "string"
-                    }
+                    },
+                    "description": "恢复查询的数据源相关附加参数，约定同 `queries[].args`；Elasticsearch 数据源且 `mode` 为 `ql` 时需要配置。"
                   }
                 }
               }
@@ -43025,16 +43187,20 @@
             "description": "无数据检查配置。",
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "是否启用无数据检查：历史上有数据的序列查不到数据时触发告警。"
               },
               "alerting_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "连续满足告警条件多少次后触发告警，最小为 1。"
               },
               "recovery_check_times": {
-                "type": "integer"
+                "type": "integer",
+                "description": "连续满足恢复条件多少次后判定恢复，最小为 1。"
               },
               "push_recovery_event": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "告警恢复时是否推送恢复事件通知。"
               },
               "severity": {
                 "type": "string",
@@ -43042,11 +43208,25 @@
                   "Critical",
                   "Warning",
                   "Info"
-                ]
+                ],
+                "description": "无数据告警的事件级别，大小写敏感。"
               },
               "resolve_timeout": {
                 "type": "integer",
                 "description": "自动恢复等待时间（秒）。"
+              },
+              "alert_on_empty_result": {
+                "type": "boolean",
+                "description": "所有查询都返回空结果时是否触发告警。"
+              },
+              "alert_on_empty_result_severity": {
+                "type": "string",
+                "enum": [
+                  "Critical",
+                  "Warning",
+                  "Info"
+                ],
+                "description": "空结果告警的事件级别，大小写敏感；仅在 `alert_on_empty_result` 开启时生效。"
               }
             }
           }
@@ -43179,7 +43359,7 @@
               "markdown"
             ],
             "default": "text",
-            "description": "描述内容的格式。省略或为空时默认使用 `text`。"
+            "description": "描述内容的格式。省略或为空时默认使用 `text`。`text` = 纯文本；`markdown` = Markdown 格式，告警详情中按 Markdown 渲染。"
           },
           "description": {
             "type": "string",
@@ -43491,10 +43671,12 @@
         "properties": {
           "folder_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "文件夹（分组节点）ID。"
           },
           "folder_name": {
-            "type": "string"
+            "type": "string",
+            "description": "文件夹名称；部分接口不返回该字段（`omitempty`）。"
           },
           "rule_total": {
             "type": "integer",
@@ -43534,7 +43716,8 @@
           },
           "account_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "所属账户 ID。"
           },
           "alert_rule_id": {
             "type": "integer",
@@ -43551,14 +43734,17 @@
           },
           "creator_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "触发本次变更的用户 ID（取变更时规则的 `updater_id`）。"
           },
           "creator_name": {
-            "type": "string"
+            "type": "string",
+            "description": "触发本次变更的用户名（取变更时规则的 `updater_name`）。"
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "审计记录生成时间，Unix 时间戳（秒）；取变更时规则的 `updated_at`。"
           }
         }
       },
@@ -43582,7 +43768,8 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "数据源类型记录 ID。"
           },
           "name": {
             "type": "string",
@@ -43622,11 +43809,13 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "快照记录 ID。"
           },
           "account_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "所属账户 ID。"
           },
           "num": {
             "type": "integer",
@@ -43700,41 +43889,49 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "规则名称，导入账户内最长 128 字符。"
           },
           "labels": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "自定义标签键值对，会附加到该规则产生的告警事件上。"
           },
           "ds_type": {
-            "type": "string"
+            "type": "string",
+            "description": "数据源类型标识，如 `prometheus`；须为导入环境中已存在的数据源类型（`ident`）。"
           },
           "ds_list": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "数据源名称列表，支持通配符；与 `ds_ids` 合并后共同决定规则监控哪些数据源，数据源改名后需手工维护。"
           },
           "ds_ids": {
             "type": "array",
             "items": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "description": "数据源 ID 列表，与 `ds_list` 合并生效；按 ID 引用，不受数据源改名影响。"
           },
           "enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "规则是否启用；导入为禁用的规则不参与评估。"
           },
           "debug_log_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否输出该规则评估过程的调试日志，排障时开启。"
           },
           "rule_configs": {
             "$ref": "#/components/schemas/RuleConfigs"
           },
           "cron_pattern": {
-            "type": "string"
+            "type": "string",
+            "description": "评估调度，支持 6 字段（含秒）cron 表达式或 `@every <duration>`（时长须为整秒且不小于 1s）；不允许 `CRON_TZ=`/`TZ=` 前缀，时区写在 `timezone`。"
           },
           "timezone": {
             "type": "string",
@@ -43742,37 +43939,44 @@
             "default": "Asia/Shanghai"
           },
           "delay_seconds": {
-            "type": "integer"
+            "type": "integer",
+            "description": "查询时间偏移（秒）：每次评估按「调度时刻 − delay_seconds」取数，规避数据采集/入库延迟；`0` 表示不偏移。"
           },
           "enabled_times": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EnabledTime"
-            }
+            },
+            "description": "生效时间窗口列表；每项含 `days`（0–6，0 表示周日）、`stime`/`etime`（`HH:MM`），窗口按规则 `timezone` 解释，空列表表示不生效。"
           },
           "annotations": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "附加到告警事件的自定义注解键值对；键不允许以 `$` 开头（`$` 前缀保留给查询字段引用）。"
           },
           "description_type": {
             "type": "string",
             "enum": [
               "text",
               "markdown"
-            ]
+            ],
+            "description": "`description` 的格式，`text` 或 `markdown`；省略时按 `text` 处理。"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "规则说明，格式由 `description_type` 指定，会随告警事件展示。"
           },
           "repeat_interval": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "告警重复通知间隔（秒）；小于 1 时按默认值 3600 处理。"
           },
           "repeat_total": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "同一告警的最大重复通知次数；小于 1 时按默认值 3 处理。"
           }
         }
       },
@@ -43878,25 +44082,32 @@
             "description": "自定义查询参数，格式为 `key=value`。"
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的 CA 证书内容，用于校验服务端证书。"
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端证书内容，用于双向 TLS；须与 `tls_key` 成对配置。"
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端私钥内容；须与 `tls_cert` 成对配置。"
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否跳过服务端证书校验（不安全，仅用于自签名场景）。"
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "TLS 握手使用的 SNI / 证书校验主机名；留空时取连接地址中的主机名。"
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最低 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制，且不得高于 `tls_max_version`。"
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最高 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制。"
           }
         }
       },
@@ -43905,46 +44116,58 @@
         "description": "Loki 数据源配置，TLS 字段继承自 TLSClientConfig。",
         "properties": {
           "basic_auth_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否启用 HTTP Basic Auth；为 `false` 时 `basic_auth_username`/`basic_auth_password` 不生效。"
           },
           "basic_auth_username": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth 用户名，`basic_auth_enabled` 为 `true` 时生效。"
           },
           "basic_auth_password": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth 密码，`basic_auth_enabled` 为 `true` 时生效。"
           },
           "headers": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "附加到每个请求的自定义 HTTP 头列表，元素格式为 `Key: Value`；可用于租户头（如 `X-Scope-OrgID`）。"
           },
           "params": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "附加到每个查询请求 URL 的自定义参数列表，元素格式为 `key=value`。"
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的 CA 证书内容，用于校验服务端证书。"
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端证书内容，用于双向 TLS；须与 `tls_key` 成对配置。"
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端私钥内容；须与 `tls_cert` 成对配置。"
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否跳过服务端证书校验（不安全，仅用于自签名场景）。"
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "TLS 握手使用的 SNI / 证书校验主机名；留空时取连接地址中的主机名。"
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最低 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制，且不得高于 `tls_max_version`。"
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最高 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制。"
           }
         }
       },
@@ -43953,10 +44176,12 @@
         "description": "MySQL 数据源配置，TLS 字段继承自 TLSClientConfig。",
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "MySQL 认证用户名。"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "MySQL 认证密码。"
           },
           "open_conns": {
             "type": "integer",
@@ -43983,28 +44208,35 @@
               "require",
               "verify-full"
             ],
-            "description": "MySQL 连接的 TLS 模式。留空则保持旧的逐字段 TLS 行为。"
+            "description": "MySQL 连接的 TLS 模式。留空则保持旧的逐字段 TLS 行为。`disable` = 不使用 TLS（保存时清空全部 `tls_*` 字段）；`require` = 使用 TLS 但不校验服务端证书；`verify-full` = 使用 TLS 并校验服务端证书（CA 链与主机名）。MySQL 不提供 `verify-ca`——要校验 CA 就必须同时校验主机名。"
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的 CA 证书内容，用于校验服务端证书；仅在 `tls_mode` 为 `verify-full`（或旧版空 `tls_mode`）时允许配置。"
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端证书内容，用于双向 TLS；须与 `tls_key` 成对配置。"
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端私钥内容；须与 `tls_cert` 成对配置。"
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否跳过服务端证书校验；设置 `tls_mode` 时由 `tls_mode` 派生（`require` 视为 `true`，`verify-full` 视为 `false`），仅旧版空 `tls_mode` 配置下手工生效。"
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "TLS 握手使用的 SNI / 证书校验主机名；留空时取连接地址中的主机名。"
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最低 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制，且不得高于 `tls_max_version`。"
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最高 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制。"
           }
         }
       },
@@ -44013,10 +44245,12 @@
         "description": "Oracle 数据源配置。",
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "Oracle 认证用户名。"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "Oracle 认证密码。"
           },
           "options": {
             "type": "object",
@@ -44026,18 +44260,22 @@
             "description": "额外连接参数（键值对）。"
           },
           "open_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "连接池最大打开连接数；`0` 或省略时使用默认值 32。"
           },
           "idle_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "连接池最大空闲连接数；`0` 或省略时使用默认值 4。"
           },
           "lifetime_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "连接最大存活时间（秒）；`0` 或省略时使用默认值 600（10 分钟）。"
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "单次查询超时时间（毫秒）；`0` 或省略时使用默认值 10000（10 秒）。"
           }
         }
       },
@@ -44046,24 +44284,30 @@
         "description": "PostgreSQL 数据源配置。",
         "properties": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "PostgreSQL 认证用户名。"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "PostgreSQL 认证密码。"
           },
           "open_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "连接池最大打开连接数；`0` 或省略时使用默认值 32。"
           },
           "idle_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "连接池最大空闲连接数；`0` 或省略时使用默认值 4。"
           },
           "lifetime_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "连接最大存活时间（秒）；`0` 或省略时使用默认值 600（10 分钟）。"
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "单次查询超时时间（毫秒）；`0` 或省略时使用默认值 10000（10 秒）。"
           },
           "ssl_mode": {
             "type": "string",
@@ -44073,16 +44317,19 @@
               "verify-ca",
               "verify-full"
             ],
-            "description": "PostgreSQL 连接的 SSL 模式。留空则保持由 `tls_ca` 推断的旧行为。"
+            "description": "PostgreSQL 连接的 SSL 模式。留空则保持由 `tls_ca` 推断的旧行为。`disable` = 不使用 TLS（保存时清空全部 `tls_*` 字段）；`require` = 使用 TLS 但不校验服务端证书（不允许配置 `tls_ca`）；`verify-ca` = 校验服务端证书 CA 链但不校验主机名；`verify-full` = 校验 CA 链与主机名。"
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的 CA 证书内容，用于校验服务端证书；`ssl_mode` 为 `verify-ca`/`verify-full` 时使用，为 `require` 时不允许配置。"
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端证书内容，用于双向 TLS；须与 `tls_key` 成对配置。"
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端私钥内容；须与 `tls_cert` 成对配置。"
           }
         }
       },
@@ -44095,24 +44342,30 @@
             "description": "认证用默认数据库。"
           },
           "username": {
-            "type": "string"
+            "type": "string",
+            "description": "ClickHouse 认证用户名。"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "ClickHouse 认证密码。"
           },
           "open_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "连接池最大打开连接数；`0` 或省略时使用默认值 32。"
           },
           "idle_conns": {
-            "type": "integer"
+            "type": "integer",
+            "description": "连接池最大空闲连接数；`0` 或省略时使用默认值 4。"
           },
           "lifetime_seconds": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "连接最大存活时间（秒）；`0` 或省略时使用默认值 600（10 分钟）。"
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "单次查询超时时间（毫秒）；`0` 或省略时使用默认值 10000（10 秒）。"
           },
           "max_execution_seconds": {
             "type": "integer",
@@ -44125,28 +44378,36 @@
             "description": "拨号超时（毫秒）。"
           },
           "tls_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否启用 TLS；为 `false` 时保存前会清空全部 `tls_*` 字段。"
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的 CA 证书内容，用于校验服务端证书。"
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端证书内容，用于双向 TLS；须与 `tls_key` 成对配置。"
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端私钥内容；须与 `tls_cert` 成对配置。"
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否跳过服务端证书校验（不安全，仅用于自签名场景）。"
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "TLS 握手使用的 SNI / 证书校验主机名；留空时取连接地址中的主机名。"
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最低 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制，且不得高于 `tls_max_version`。"
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最高 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制。"
           }
         }
       },
@@ -44164,7 +44425,8 @@
           },
           "timeout_mills": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "单次查询超时时间（毫秒）；`0` 或省略时使用默认值 10000（10 秒）。"
           },
           "cloud_id": {
             "type": "string",
@@ -44179,23 +44441,27 @@
             "description": "`self-managed` 部署的用户名。"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "description": "自建集群（`self-managed`）的认证密码；配置了 `service_token` 时该字段不生效。"
           },
           "service_token": {
             "type": "string",
             "description": "服务令牌，若设置则覆盖用户名/密码认证。"
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的 CA 证书内容，用于校验 Elasticsearch 服务端证书。"
           },
           "certificate_fingerprint": {
-            "type": "string"
+            "type": "string",
+            "description": "Elasticsearch CA 证书的 SHA-256 指纹，用于校验服务端证书链（ES 8 默认安全配置的推荐方式）。"
           },
           "headers": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "附加到每个请求的自定义 HTTP 头列表，元素格式为 `Key: Value`。"
           }
         }
       },
@@ -44225,46 +44491,58 @@
         "description": "VictoriaLogs 数据源配置，TLS 字段继承自 TLSClientConfig。",
         "properties": {
           "basic_auth_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否启用 HTTP Basic Auth；为 `false` 时 `basic_auth_username`/`basic_auth_password` 不生效。"
           },
           "basic_auth_username": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth 用户名，`basic_auth_enabled` 为 `true` 时生效。"
           },
           "basic_auth_password": {
-            "type": "string"
+            "type": "string",
+            "description": "Basic Auth 密码，`basic_auth_enabled` 为 `true` 时生效。"
           },
           "headers": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "附加到每个请求的自定义 HTTP 头列表，元素格式为 `Key: Value`；可用于租户头（如 `AccountID`/`ProjectID`）。"
           },
           "params": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "附加到每个查询请求 URL 的自定义参数列表，元素格式为 `key=value`。"
           },
           "tls_ca": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的 CA 证书内容，用于校验服务端证书。"
           },
           "tls_cert": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端证书内容，用于双向 TLS；须与 `tls_key` 成对配置。"
           },
           "tls_key": {
-            "type": "string"
+            "type": "string",
+            "description": "PEM 格式的客户端私钥内容；须与 `tls_cert` 成对配置。"
           },
           "tls_skip_verify": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否跳过服务端证书校验（不安全，仅用于自签名场景）。"
           },
           "tls_server_name": {
-            "type": "string"
+            "type": "string",
+            "description": "TLS 握手使用的 SNI / 证书校验主机名；留空时取连接地址中的主机名。"
           },
           "tls_min_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最低 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制，且不得高于 `tls_max_version`。"
           },
           "tls_max_version": {
-            "type": "string"
+            "type": "string",
+            "description": "最高 TLS 版本，可选 `1.0`、`1.1`、`1.2`、`1.3`；留空表示不限制。"
           }
         }
       },
@@ -44753,7 +45031,7 @@
               "popup",
               "tab"
             ],
-            "description": "链路链接的打开方式。"
+            "description": "链路链接的打开方式。取值：`popup`（在弹窗中打开链路详情）、`tab`（在新标签页中打开）。"
           },
           "endpoint": {
             "type": "string",
@@ -44788,9 +45066,12 @@
               "flutter",
               "kotlin-multiplatform",
               "roku",
-              "unity"
+              "unity",
+              "miniprogram",
+              "harmony",
+              "electron"
             ],
-            "description": "应用类型。"
+            "description": "应用类型。平台标识，取值为 `browser`（浏览器 Web 应用）、`ios`（iOS 应用）、`android`（Android 应用）、`react-native`（React Native 应用）、`flutter`（Flutter 应用）、`kotlin-multiplatform`（Kotlin Multiplatform 应用）、`roku`（Roku 频道应用）、`unity`（Unity 应用）。注意：创建接口还接受 `miniprogram`、`harmony`、`electron`，这些类型的应用同样会出现在响应中（见 Enum gaps）。"
           },
           "client_token": {
             "type": "string",
@@ -44829,7 +45110,7 @@
               "disabled",
               "deleted"
             ],
-            "description": "应用状态。"
+            "description": "应用状态。取值：`enabled`（启用中，正常接收数据）、`disabled`（已停用）、`deleted`（已删除的软删除标记；所有查询都会过滤该状态，响应中实际不会出现）。"
           },
           "created_by": {
             "type": "integer",
@@ -44858,16 +45139,19 @@
         "description": "RUM 应用分页列表。",
         "properties": {
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否还有下一页；当前页之后仍存在匹配记录时为 `true`。"
           },
           "total": {
-            "type": "integer"
+            "type": "integer",
+            "description": "符合筛选条件的应用总数。"
           },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumApplicationItem"
-            }
+            },
+            "description": "当前页的 RUM 应用列表。"
           }
         }
       },
@@ -44908,7 +45192,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumApplicationItem"
-            }
+            },
+            "description": "与请求的 `application_ids`（最多 200 个，自动去重）匹配的应用信息列表。"
           }
         }
       },
@@ -44940,7 +45225,7 @@
               "harmony",
               "electron"
             ],
-            "description": "应用类型。"
+            "description": "应用类型。平台标识，取值为 `browser`（浏览器 Web 应用）、`ios`（iOS 应用）、`android`（Android 应用）、`react-native`（React Native 应用）、`flutter`（Flutter 应用）、`kotlin-multiplatform`（Kotlin Multiplatform 应用）、`roku`（Roku 频道应用）、`unity`（Unity 应用）、`miniprogram`（微信小程序）、`harmony`（鸿蒙 HarmonyOS 应用）、`electron`（Electron 桌面应用）。"
           },
           "team_id": {
             "type": "integer",
@@ -45021,7 +45306,7 @@
               "harmony",
               "electron"
             ],
-            "description": "应用类型；不传则保持不变。"
+            "description": "应用类型；不传则保持不变。平台标识，取值为 `browser`（浏览器 Web 应用）、`ios`（iOS 应用）、`android`（Android 应用）、`react-native`（React Native 应用）、`flutter`（Flutter 应用）、`kotlin-multiplatform`（Kotlin Multiplatform 应用）、`roku`（Roku 频道应用）、`unity`（Unity 应用）、`miniprogram`（微信小程序）、`harmony`（鸿蒙 HarmonyOS 应用）、`electron`（Electron 桌面应用）。"
           },
           "team_id": {
             "type": "integer",
@@ -45069,20 +45354,24 @@
         "properties": {
           "team_id": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Issue 所属团队的 ID，创建 Issue 时取自所属应用的 `team_id`。"
           },
           "issue_id": {
             "type": "string",
             "description": "唯一 Issue ID。"
           },
           "application_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Issue 所属 RUM 应用的 ID。"
           },
           "application_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Issue 所属应用的名称（查询时按 `application_id` 关联填充，反映应用的当前名称）。"
           },
           "service": {
-            "type": "string"
+            "type": "string",
+            "description": "产生该 Issue 的服务名，来自错误事件的 `service` 字段。"
           },
           "status": {
             "type": "string",
@@ -45091,7 +45380,8 @@
               "reviewed",
               "ignored",
               "resolved"
-            ]
+            ],
+            "description": "Issue 的处理状态：`for_review`（待处理）、`reviewed`（已查看）、`ignored`（已忽略）、`resolved`（已解决）；已软删除（`deleted`）的 Issue 不会出现在响应中。"
           },
           "error_count": {
             "type": "integer",
@@ -45109,58 +45399,72 @@
           },
           "age": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "从首次出现到最近一次出现的时长，单位秒。注意：`model/issue/issue.go:40` 的字段注释写的是 millisecond，但实际写入与消费（告警严重性判定）均按秒处理，注释已过时。"
           },
           "resolved_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "标记为已解决的时间，Unix 时间戳（毫秒）；未解决时为 0。"
           },
           "resolved_by": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "将 Issue 标记为已解决的用户 Person ID；未解决时为 0。"
           },
           "created_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Issue 创建时间（即首个错误事件的客户端时间），Unix 时间戳（毫秒）。"
           },
           "updated_at": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Issue 最近一次更新的时间，Unix 时间戳（毫秒）。"
           },
           "first_seen": {
             "type": "object",
             "properties": {
               "timestamp": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "首个错误事件的客户端时间，Unix 时间戳（毫秒）。"
               },
               "version": {
-                "type": "string"
+                "type": "string",
+                "description": "首次出现时的应用版本；事件未携带版本信息时为空字符串。"
               }
-            }
+            },
+            "description": "Issue 首次出现的信息（时间与对应应用版本）。"
           },
           "last_seen": {
             "type": "object",
             "properties": {
               "timestamp": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "最近一次错误事件的客户端时间，Unix 时间戳（毫秒）。"
               },
               "version": {
-                "type": "string"
+                "type": "string",
+                "description": "最近一次出现时的应用版本；事件未携带版本信息时为空字符串。"
               }
-            }
+            },
+            "description": "Issue 最近一次出现的信息（时间与对应应用版本）。"
           },
           "error": {
             "type": "object",
             "properties": {
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "归一化后的错误信息，最长保留 512 个字符（超出部分截断）。"
               },
               "type": {
-                "type": "string"
+                "type": "string",
+                "description": "错误类型，来自错误事件的 `error_type` 字段（由 SDK 上报）。"
               }
-            }
+            },
+            "description": "该 Issue 的代表性错误信息，来自创建 Issue 的错误事件。"
           },
           "suspected_cause": {
             "type": "object",
@@ -45170,7 +45474,8 @@
                 "enum": [
                   "auto",
                   "user"
-                ]
+                ],
+                "description": "根因来源：`auto` 表示系统自动判定，`user` 表示用户手动指定。"
               },
               "value": {
                 "type": "string",
@@ -45181,16 +45486,20 @@
                   "code.invalid_object_access",
                   "code.invalid_argument",
                   "unknown"
-                ]
+                ],
+                "description": "疑似根因分类。取值：\n\n| 值 | 含义 |\n|---|---|\n| `api.failed_request` | API/接口请求失败（如 HTTP 4xx/5xx 响应） |\n| `network.error` | 网络连接错误（断网、请求中断等） |\n| `code.exception` | 代码异常（Syntax/Reference/Range 等运行时异常） |\n| `code.invalid_object_access` | 非法对象访问（如对 `undefined`/`null` 读取属性） |\n| `code.invalid_argument` | 非法参数（向函数传入了无效参数） |\n| `unknown` | 无法判定的未知原因 |"
               },
               "reason": {
-                "type": "string"
+                "type": "string",
+                "description": "根因判定的理由说明，仅 AI 自动分析时生成；未启用 AI 或尚未分析时为空字符串。"
               },
               "person_id": {
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "description": "手动指定根因的用户 Person ID；`source` 为 `auto` 时为 0。"
               }
-            }
+            },
+            "description": "疑似根因分析结果，由系统自动判定（规则或 AI）或用户手动指定。"
           },
           "regression": {
             "type": "object",
@@ -45208,7 +45517,7 @@
               "resolved_at": {
                 "type": "integer",
                 "format": "int64",
-                "description": "回溯前的上次解决时间。"
+                "description": "本次回溯前的上次解决时间，Unix 毫秒时间戳。"
               }
             }
           },
@@ -45216,7 +45525,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "该 Issue 出现过错误的应用版本列表（去重）；事件未携带版本信息时可能包含空字符串。"
           },
           "severity": {
             "type": "string",
@@ -45332,13 +45642,16 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumIssueItem"
-            }
+            },
+            "description": "当前页的 Issue 列表。"
           },
           "has_next_page": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否还有下一页；当前页之后仍存在匹配记录时为 `true`。"
           },
           "total": {
-            "type": "integer"
+            "type": "integer",
+            "description": "符合筛选条件的 Issue 总数。"
           }
         }
       },
@@ -45373,7 +45686,7 @@
               "ignored",
               "resolved"
             ],
-            "description": "新状态。设置为 `resolved` 时会记录解决时间与操作人；从 `resolved` 改回其他状态会清除解决信息。"
+            "description": "新状态。设置为 `resolved` 时会记录解决时间与操作人；从 `resolved` 改回其他状态会清除解决信息。取值：`for_review`（待处理）、`reviewed`（已查看）、`ignored`（已忽略）、`resolved`（已解决）。"
           },
           "suspected_cause": {
             "type": "string",
@@ -45385,7 +45698,7 @@
               "code.invalid_argument",
               "unknown"
             ],
-            "description": "新的疑似原因；设置后原因来源会标记为 `user`（用户指定），覆盖自动判定结果。"
+            "description": "新的疑似原因；设置后原因来源会标记为 `user`（用户指定），覆盖自动判定结果。取值：\n\n| 值 | 含义 |\n|---|---|\n| `api.failed_request` | API/接口请求失败 |\n| `network.error` | 网络连接错误 |\n| `code.exception` | 代码异常 |\n| `code.invalid_object_access` | 非法对象访问 |\n| `code.invalid_argument` | 非法参数 |\n| `unknown` | 未知原因 |"
           }
         }
       },
@@ -45409,7 +45722,7 @@
           },
           "type": {
             "type": "string",
-            "description": "平台类型。省略时默认为 `browser`。",
+            "description": "平台类型。省略时默认为 `browser`。取值：`browser`（浏览器 JS Sourcemap）、`android`（Android 符号文件，ProGuard/R8 mapping 或 NDK native 符号，可用 `kind` 区分）、`ios`（iOS dSYM 符号文件）。",
             "enum": [
               "browser",
               "android",
@@ -45544,7 +45857,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SourcemapItem"
-            }
+            },
+            "description": "当前页的 Sourcemap（含 iOS dSYM、小程序 Sourcemap 等符号文件）记录列表。"
           }
         }
       },
@@ -45894,7 +46208,7 @@
               "zh-CN",
               "en-US"
             ],
-            "description": "语言"
+            "description": "语言。可选值：`zh-CN`（简体中文）、`en-US`（英文）；非法值返回 400。"
           },
           "time_zone": {
             "type": "string",
@@ -46129,7 +46443,7 @@
               "zh-CN",
               "en-US"
             ],
-            "description": "新的语言偏好。"
+            "description": "新的语言偏好。可选值：`zh-CN`（简体中文）、`en-US`（英文）；非法值返回 400。"
           },
           "time_zone": {
             "type": "string",
@@ -46371,17 +46685,20 @@
         "properties": {
           "team_id": {
             "type": "integer",
-            "format": "uint64"
+            "format": "uint64",
+            "description": "团队 ID。"
           },
           "team_name": {
-            "type": "string"
+            "type": "string",
+            "description": "团队名称。"
           },
           "person_ids": {
             "type": "array",
             "items": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "description": "团队成员的人员 ID 数组；团队无成员时为空数组（不为 null）。"
           }
         }
       },
@@ -46396,7 +46713,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TeamBriefItem"
-            }
+            },
+            "description": "按请求 `team_ids` 命中的团队简要信息数组；未命中任何 ID 时可能为 null。"
           }
         }
       },
@@ -46467,7 +46785,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TeamItem"
-            }
+            },
+            "description": "当前页的团队数组，与 `p`、`limit`、`total` 配合分页；空页时为空数组。"
           }
         }
       },
@@ -46693,7 +47012,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RoleItem"
-            }
+            },
+            "description": "角色数组；默认包含账户自建角色和内置全局角色（`no_global=true` 时不含全局角色），无结果时为空数组。"
           }
         }
       },
@@ -46795,7 +47115,7 @@
               "read",
               "manage"
             ],
-            "description": "查看权限或管理权限。"
+            "description": "查看权限或管理权限。`read`：只读查看类权限（查看、查询）；`manage`：管理变更类权限（创建、修改、删除、设置等写操作）。"
           },
           "description": {
             "type": "string",
@@ -46834,7 +47154,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PermissionItem"
-            }
+            },
+            "description": "权限点数组，含系统级权限与当前账户的自定义菜单权限（不含其他账户的权限）。"
           }
         }
       },
@@ -46879,7 +47200,7 @@
               "menu",
               "url"
             ],
-            "description": "因子类型。"
+            "description": "因子类型。`api`：后端 API 因子，`factor_name` 为接口名（如 `skill:write:upload`），由网关强制校验；`button`：前端操作因子，用于角色配置页渲染操作开关；`visit`：页面访问因子（自定义菜单页面即此类型）；`menu`：菜单可见性因子（历史类型，当前无种子数据）；`url`：页面路由地址因子（历史类型，当前无种子数据）。"
           }
         }
       },
@@ -47039,10 +47360,12 @@
               "type": "object",
               "properties": {
                 "Key": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL 路径参数名（路由中 `:xxx` 占位符的名称）。"
                 },
                 "Value": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "该路径参数在本次请求中的实际取值。"
                 }
               }
             },
@@ -47121,7 +47444,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AuditOperationTypeItem"
-            }
+            },
+            "description": "所有可审计操作类型的数组（仅含标记为需审计的 API），始终为数组，可能为空。"
           }
         }
       },
@@ -47163,7 +47487,7 @@
               "single_select",
               "text"
             ],
-            "description": "字段类型。"
+            "description": "字段类型。\n| 值 | 含义 |\n|---|---|\n| `checkbox` | 勾选框，取值为 bool，不支持 options。 |\n| `multi_select` | 多选，取值为 string 数组，每项须在 options 中。 |\n| `single_select` | 单选，取值为 string，须在 options 中。 |\n| `text` | 自由文本，取值为 string。 |"
           },
           "value_type": {
             "type": "string",
@@ -47172,7 +47496,7 @@
               "bool",
               "float"
             ],
-            "description": "取值类型。`checkbox` 固定为 `bool`；`single_select`/`multi_select`/`text` 固定为 `string`。"
+            "description": "取值类型。`checkbox` 固定为 `bool`；`single_select`/`multi_select`/`text` 固定为 `string`。`float` 为保留值，当前不会出现。"
           },
           "options": {
             "type": [
@@ -47347,7 +47671,7 @@
               "bool",
               "float"
             ],
-            "description": "取值类型。`checkbox` 须为 `bool`；其他类型须为 `string`。创建后不可更改。"
+            "description": "取值类型。`checkbox` 须为 `bool`；其他类型须为 `string`。创建后不可更改。`float` 为保留值，当前所有 `field_type` 均不接受。"
           },
           "options": {
             "type": "array",
@@ -47479,7 +47803,7 @@
             "enum": [
               "query_result.v1"
             ],
-            "description": "公开结果契约版本，与 monit-edge 内部查询协议版本相互独立。"
+            "description": "公开结果契约版本，与 monit-edge 内部查询协议版本相互独立。固定为 `query_result.v1`，`result` 字段的结构由该契约定义。"
           },
           "result": {
             "$ref": "#/components/schemas/QueryResult"
@@ -47519,7 +47843,8 @@
             "type": "string",
             "enum": [
               "frames"
-            ]
+            ],
+            "description": "结果类型判别字段，固定为 `frames`，表示 `frames` 载荷为类型化表格/时序 Frame。"
           },
           "frames": {
             "type": "array",
@@ -47543,13 +47868,15 @@
             "enum": [
               "table",
               "time_series"
-            ]
+            ],
+            "description": "Frame 类型：`table` 为通用表格，`time_series` 为时序（恰含一个 time 字段和一个 float 字段）。"
           },
           "fields": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/QueryField"
-            }
+            },
+            "description": "Frame 的列集合；同一 Frame 内所有字段的 `values` 长度一致，第 i 行由各字段 `values[i]` 组成。"
           }
         }
       },
@@ -47563,7 +47890,8 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "列名；时序 Frame 的 float 字段上以 `labels` 区分不同序列，`name` 通常为指标名。"
           },
           "type": {
             "type": "string",
@@ -47571,7 +47899,8 @@
               "string",
               "float",
               "time"
-            ]
+            ],
+            "description": "列值类型，决定 `values` 元素的编码：`string` 为字符串或 null，`float` 为数值/`NaN`/`±Inf` 字符串或 null，`time` 为 RFC 3339 Nano 字符串或 null。"
           },
           "labels": {
             "type": "object",
@@ -47594,7 +47923,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "description": "该列的全部值，按行序排列；长度与 Frame 内其他字段一致。"
           }
         }
       },
@@ -47609,7 +47939,8 @@
             "type": "string",
             "enum": [
               "records"
-            ]
+            ],
+            "description": "结果类型判别字段，固定为 `records`，表示 `records` 载荷为 schema 灵活的记录数组。"
           },
           "records": {
             "type": "array",
@@ -47639,7 +47970,8 @@
             "type": "string",
             "enum": [
               "samples"
-            ]
+            ],
+            "description": "结果类型判别字段，固定为 `samples`，表示 `samples` 载荷为带标签的瞬时样本数组。"
           },
           "samples": {
             "type": "array",
@@ -47661,7 +47993,8 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "样本的完整标签集合；可为空对象但字段始终存在。"
           },
           "value": {
             "description": "有限数值，或非有限浮点数的 JSON 安全表示。",
@@ -47809,7 +48142,7 @@
                     "same_window_yesterday",
                     "same_window_last_week"
                   ],
-                  "description": "仅对 compare 类方法有意义。默认 `previous_window`。"
+                  "description": "仅对 compare 类方法有意义。默认 `previous_window`。`previous_window` = 紧接当前窗口之前的等长窗口；`same_window_yesterday` = 当前窗口整体前移 24 小时；`same_window_last_week` = 当前窗口整体前移 7 天。"
                 }
               }
             }
@@ -47910,10 +48243,12 @@
             "description": "解析出的目标。未传 `target_kind` 且无法根据 locator 唯一推断时，不输出该字段。",
             "properties": {
               "kind": {
-                "type": "string"
+                "type": "string",
+                "description": "解析出的目标类型（target kind），如 `host`、`mysql`；与请求推断或指定的 `target_kind` 一致。"
               },
               "locator": {
-                "type": "string"
+                "type": "string",
+                "description": "回显请求中的目标标识符（locator）。"
               }
             },
             "x-flashduty-preserve-absence": true
@@ -47955,10 +48290,12 @@
                   "forward_failed",
                   "invalid_tool_result",
                   "ambiguous_target_kind"
-                ]
+                ],
+                "description": "请求级错误码：`target_unavailable` 目标不可达，`timeout` 解析超时，`forward_failed` 跨实例转发失败，`invalid_tool_result` Agent 返回结果非法，`ambiguous_target_kind` 无法唯一推断目标类型。"
               },
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "人类可读的错误详情。"
               },
               "target_kinds": {
                 "type": "array",
@@ -48026,10 +48363,12 @@
             "description": "解析出的目标。未传 `target_kind` 且无法根据 locator 唯一推断时，不输出该字段。",
             "properties": {
               "kind": {
-                "type": "string"
+                "type": "string",
+                "description": "解析出的目标类型（target kind），如 `host`、`mysql`；与请求推断或指定的 `target_kind` 一致。"
               },
               "locator": {
-                "type": "string"
+                "type": "string",
+                "description": "回显请求中的目标标识符（locator）。"
               }
             },
             "x-flashduty-preserve-absence": true
@@ -48083,7 +48422,8 @@
                       "description": "常见 WebAPI 错误码：`timeout`、`target_unavailable`、`invalid_tool_result`、`internal`、`invalid_args`、`unsupported_syntax`、`path_not_found` 和 `catalog_changed`。Agent 特有的工具错误也可能原样返回。"
                     },
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "该 Tool 失败的人类可读错误详情；Agent 侧错误信息可能原样透传。"
                     }
                   },
                   "x-flashduty-preserve-absence": true
@@ -48101,17 +48441,20 @@
                   "target_unavailable",
                   "forward_failed",
                   "ambiguous_target_kind"
-                ]
+                ],
+                "description": "请求级错误码：`target_unavailable` 目标不可达，`forward_failed` 跨实例转发失败，`ambiguous_target_kind` 无法唯一推断目标类型。"
               },
               "message": {
-                "type": "string"
+                "type": "string",
+                "description": "人类可读的错误详情。"
               },
               "target_kinds": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 },
-                "x-flashduty-preserve-absence": true
+                "x-flashduty-preserve-absence": true,
+                "description": "仅当 `code` 为 `ambiguous_target_kind` 时返回，列出该 locator 命中的候选 target kind；其他情况省略。"
               }
             },
             "x-flashduty-preserve-absence": true
@@ -48176,7 +48519,8 @@
                   "description": "最近一次路由投影写入时间,Unix 秒。视为\"最近一次被观测到\",而非实时在线指标。"
                 }
               }
-            }
+            },
+            "description": "当前页的可调用目标（target）列表，按 `target_locator` 升序排列。"
           },
           "total": {
             "type": "integer",
@@ -48332,7 +48676,7 @@
           },
           "change_status": {
             "type": "string",
-            "description": "变更事件的生命周期状态。",
+            "description": "变更事件的生命周期状态。由变更事件源按执行进度上报。\n| 值 | 含义 |\n|---|---|\n| `Planned` | 已计划，尚未开始。 |\n| `Ready` | 已就绪，待执行。 |\n| `Processing` | 正在执行。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |",
             "enum": [
               "Planned",
               "Ready",
@@ -48837,7 +49181,7 @@
           },
           "type": {
             "type": "string",
-            "description": "状态页可见性类型。",
+            "description": "状态页可见性类型。`public` 为公开状态页，任何人可访问，订阅方式为邮件；`internal` 为内部状态页，仅账户成员可访问，订阅方式为 IM。",
             "enum": [
               "public",
               "internal"
@@ -48873,7 +49217,7 @@
           },
           "date_view": {
             "type": "string",
-            "description": "时间线的展示方式。",
+            "description": "时间线的展示方式。`calendar` 以日历视图展示事件日期；`list` 以列表视图展示。",
             "enum": [
               "calendar",
               "list"
@@ -48881,7 +49225,7 @@
           },
           "display_uptime_mode": {
             "type": "string",
-            "description": "可用率的展示方式。",
+            "description": "可用率的展示方式。`chart_and_percentage` 同时展示可用率图表与百分比数值；`chart` 仅展示图表；`none` 不展示可用率。",
             "enum": [
               "chart_and_percentage",
               "chart",
@@ -49958,7 +50302,7 @@
         "properties": {
           "scope": {
             "type": "string",
-            "description": "要查询的 RUM 数据 scope。",
+            "description": "要查询的 RUM 数据 scope。取值：\n\n| 值 | 含义 |\n|---|---|\n| `session` | 用户会话 |\n| `view` | 页面/视图 |\n| `action` | 用户操作 |\n| `error` | 错误事件 |\n| `resource` | 资源加载 |\n| `long_task` | 长任务 |\n| `vital` | 性能指标（Web Vitals 等） |\n| `issue` | 异常聚合 Issue |\n| `sourcemap` | Sourcemap 符号文件 |",
             "enum": [
               "session",
               "view",
@@ -50017,7 +50361,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FacetCountItem"
-            }
+            },
+            "description": "分面值及其出现次数的列表，按计数降序排列，最多返回 `limit`（默认上限 100）条。"
           }
         }
       },
@@ -50065,7 +50410,7 @@
           },
           "value_type": {
             "type": "string",
-            "description": "字段值的数据类型。",
+            "description": "字段值的数据类型。取值：\n\n| 值 | 含义 |\n|---|---|\n| `string` | 字符串 |\n| `number` | 数值 |\n| `boolean` | 布尔值 |\n| `array<string>` | 字符串数组 |\n| `array<number>` | 数值数组 |\n| `array<boolean>` | 布尔数组 |",
             "enum": [
               "string",
               "number",
@@ -50077,7 +50422,7 @@
           },
           "show_type": {
             "type": "string",
-            "description": "在分析 UI 中的展示类型。",
+            "description": "在分析 UI 中的展示类型。取值：`list`（枚举值列表展示，仅该类型支持分面计数 facet count）、`range`（按数值/时间区间范围筛选展示）。",
             "enum": [
               "list",
               "range"
@@ -50164,7 +50509,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumFieldItem"
-            }
+            },
+            "description": "符合 `scopes` / `is_facet` 筛选条件的 RUM 字段定义列表，字段名称与描述按请求语言环境本地化。"
           }
         }
       },
@@ -50285,9 +50631,11 @@
               "android",
               "ios",
               "miniprogram",
-              "harmony"
+              "harmony",
+              "flutter",
+              "electron"
             ],
-            "description": "来源平台。省略时默认按 `browser` 处理。"
+            "description": "来源平台。省略时默认按 `browser` 处理。取值：`browser`（浏览器 JS 堆栈，Sourcemap 还原）、`android`（Android 堆栈，mapping/NDK 符号化）、`ios`（iOS 崩溃堆栈，dSYM 符号化）、`miniprogram`（微信小程序堆栈，Sourcemap 还原）、`harmony`（鸿蒙堆栈，Sourcemap/native 符号化）、`flutter`（Flutter 堆栈，符号还原）、`electron`（Electron 堆栈，Sourcemap 还原）。"
           },
           "service": {
             "type": "string",
@@ -50347,7 +50695,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SourcemapEnrichedFrame"
-            }
+            },
+            "description": "经过符号化（Sourcemap / dSYM / NDK 符号表等）还原后的错误栈帧列表。"
           }
         }
       },
@@ -50559,7 +50908,7 @@
           },
           "date_view": {
             "type": "string",
-            "description": "事件日期展示方式。留空表示保持原值。",
+            "description": "事件日期展示方式。留空表示保持原值。`calendar` 为日历视图；`list` 为列表视图。",
             "enum": [
               "calendar",
               "list"
@@ -50567,7 +50916,7 @@
           },
           "display_uptime_mode": {
             "type": "string",
-            "description": "可用率展示方式。留空表示保持原值。",
+            "description": "可用率展示方式。留空表示保持原值。`chart_and_percentage` 同时展示图表与百分比；`chart` 仅展示图表；`none` 不展示。",
             "enum": [
               "chart_and_percentage",
               "chart",
@@ -50806,7 +51155,7 @@
           },
           "auth_mode": {
             "type": "string",
-            "description": "认证模式。",
+            "description": "认证模式。可选值：`shared`（共享凭据：配置资源时保存一份静态凭据，账户内所有调用方共用；缺省及空字符串等同于此值）、`per_user_secret`（按人密钥：每位使用者按 `secret_schema` 各自保存密钥，运行时按人注入）、`per_user_oauth`（按人 OAuth：每位使用者各自完成 OAuth 授权，首次调用时按需完成发现与注册）。",
             "enum": [
               "shared",
               "per_user_secret",
@@ -51090,7 +51439,7 @@
           },
           "environment_kind": {
             "type": "string",
-            "description": "运行环境类型。省略或空字符串表示自动选择。",
+            "description": "运行环境类型。省略或空字符串表示自动选择。可选值：`cloud`（平台托管的云端沙箱）、`byoc`（账户内自托管的 BYOC 运行器，需配合 `environment_id`）；自动选择时优先使用在线的 BYOC 运行器，否则使用云端沙箱。",
             "enum": [
               "",
               "cloud",
@@ -51186,7 +51535,7 @@
               "person",
               "team"
             ],
-            "description": "运行会话作用域。"
+            "description": "运行会话作用域。可选值：`person`（个人规则，team_id=0，以创建者个人身份运行；创建者离开账户后规则会被停用）、`team`（团队规则，team_id>0，归属团队并在团队成员间共享，不随创建者离开而失效）。该值由规则的 team_id 派生。"
           },
           "cron_expr": {
             "type": "string",
@@ -51202,7 +51551,7 @@
           },
           "environment_kind": {
             "type": "string",
-            "description": "运行环境类型。省略或空字符串表示自动选择。",
+            "description": "运行环境类型。省略或空字符串表示自动选择。可选值：`cloud`（平台托管的云端沙箱）、`byoc`（账户内自托管的 BYOC 运行器）；空字符串表示自动选择（优先在线的 BYOC 运行器，否则云端沙箱）。",
             "enum": [
               "",
               "cloud",
@@ -51373,7 +51722,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AutomationRuleItem"
-            }
+            },
+            "description": "当前页的自动化规则数组，与 `total` 配合分页。"
           }
         },
         "required": [
@@ -51534,7 +51884,7 @@
               "http_post",
               "oncall_incident"
             ],
-            "description": "触发来源。"
+            "description": "触发来源。可选值：\n| 值 | 含义 |\n| --- | --- |\n| `schedule` | 定时触发器按调度计划触发 |\n| `debug` | 调试运行（保留值；当前版本的规则运行不产生该来源） |\n| `manual` | 用户手动触发一次运行 |\n| `http_post` | 通过规则的 HTTP POST webhook 触发 |\n| `oncall_incident` | 由值班故障（on-call incident）事件触发 |"
           },
           "occurrence_key": {
             "type": "string",
@@ -51552,7 +51902,7 @@
               "skipped",
               "abandoned"
             ],
-            "description": "运行状态。"
+            "description": "运行状态。可选值（前三个为进行中，其余为终态）：\n| 值 | 含义 |\n| --- | --- |\n| `queued` | 已入队，等待工作器执行 |\n| `running` | 正在执行 |\n| `retrying` | 本次尝试失败，已安排重试 |\n| `succeeded` | 成功完成 |\n| `partial` | 部分成功（当前仅记忆整理类运行会产生；规则运行不会落到该状态） |\n| `failed` | 失败终态，不再重试 |\n| `skipped` | 未执行（如超过宽限期、触发器或规则失效），以运行记录形式留存原因 |\n| `abandoned` | 进行中超过陈旧阈值被后台清扫判为未完成（如工作器异常退出） |"
           },
           "attempts": {
             "type": "integer",
@@ -51684,7 +52034,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AutomationRunItem"
-            }
+            },
+            "description": "指定规则（`rule_id`）的运行记录数组，按请求中的状态/触发类型/时间范围过滤并分页。"
           }
         },
         "required": [
@@ -51758,7 +52109,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AutomationTemplateItem"
-            }
+            },
+            "description": "内置自动化模板数组，展示文案按请求 `locale`（缺省取请求头语种）本地化。"
           }
         },
         "required": [
@@ -51894,7 +52246,7 @@
           },
           "status": {
             "type": "string",
-            "description": "事件状态。",
+            "description": "事件状态。可选值：`normal`（正常事件，会进入提供给模型的上下文）、`compressed`（已被上下文压缩（compaction）折叠进摘要边界事件，不再加载给模型，仅作历史留存）。",
             "enum": [
               "normal",
               "compressed"
@@ -52004,7 +52356,7 @@
           },
           "environment_kind": {
             "type": "string",
-            "description": "绑定到指定 BYOC 运行器（需同时提供 environment_id）。省略或留空表示自动选择；MCP 服务器不支持 cloud。",
+            "description": "绑定到指定 BYOC 运行器（需同时提供 environment_id）。省略或留空表示自动选择；MCP 服务器不支持 cloud。唯一可选值：`byoc`（账户内自托管的 BYOC 运行器；MCP 服务器进程运行在客户自己的基础设施上）。",
             "enum": [
               "byoc"
             ]
@@ -52106,7 +52458,7 @@
           },
           "transport": {
             "type": "string",
-            "description": "传输协议。",
+            "description": "传输协议。可选值：`stdio`（标准输入输出，本地子进程方式）、`sse`（独立 SSE，旧版 MCP 传输协议）、`streamable-http`（较新的 HTTP 流式传输协议）。",
             "enum": [
               "stdio",
               "sse",
@@ -52187,7 +52539,7 @@
           },
           "auth_mode": {
             "type": "string",
-            "description": "认证模式。",
+            "description": "认证模式。可选值：`shared`（共享凭据：配置资源时保存一份静态凭据，账户内所有调用方共用；缺省及空字符串等同于此值）、`per_user_secret`（按人密钥：每位使用者按 `secret_schema` 各自保存密钥，运行时按人注入）、`per_user_oauth`（按人 OAuth：每位使用者各自完成 OAuth 授权，首次调用时按需完成发现与注册）。",
             "enum": [
               "shared",
               "per_user_secret",
@@ -52511,7 +52863,7 @@
               "person",
               "team"
             ],
-            "description": "本次运行解析出的作用域，与规则的 run_scope 一致。"
+            "description": "本次运行解析出的作用域，与规则的 run_scope 一致。可选值：`person`（个人规则，以创建者身份运行）、`team`（团队规则，归属团队运行）。"
           },
           "owner_id": {
             "type": "integer",
@@ -52667,7 +53019,7 @@
           },
           "entry_kind": {
             "type": "string",
-            "description": "创建该会话的入口来源。",
+            "description": "创建该会话的入口来源。可选值：\n| 值 | 含义 |\n| --- | --- |\n| `web` | Web 控制台界面创建 |\n| `im` | IM 客户端（IM 机器人/IM 端 H5）创建 |\n| `api` | 通过公开 API 创建 |\n| `automation` | 由自动化规则触发创建（无人值守运行） |\n| `subagent` | 父会话经 agent_dispatch 派生的子会话（审计标签；运行时按 web 工具面执行） |",
             "enum": [
               "web",
               "im",
@@ -52711,12 +53063,13 @@
           },
           "access_source": {
             "type": "string",
-            "description": "调用者获得该会话访问权限的方式；未解析到访问来源时省略。",
+            "description": "调用者获得该会话访问权限的方式；未解析到访问来源时省略。可选值：\n| 值 | 含义 |\n| --- | --- |\n| `owner` | 调用者是会话创建者（完全权限） |\n| `team_member` | 调用者是会话绑定团队的成员（完全权限） |\n| `manager` | 管理者授权（保留值；当前版本不产生该来源） |\n| `share_link` | 通过有效分享链接获得（仅查看/复刻，不能继续或管理） |\n| `participant` | 同账户非成员通过可参与的团队会话获得（仅查看/继续/复刻） |",
             "enum": [
               "owner",
               "team_member",
               "manager",
-              "share_link"
+              "share_link",
+              "participant"
             ]
           },
           "share_enabled": {
@@ -52740,7 +53093,7 @@
           },
           "status": {
             "type": "string",
-            "description": "生命周期状态。",
+            "description": "生命周期状态。可选值：`enabled`（正常可用）、`deleted`（已删除，软删除，不可再访问）。",
             "enum": [
               "enabled",
               "deleted"
@@ -52869,7 +53222,7 @@
         "properties": {
           "app_name": {
             "type": "string",
-            "description": "要查询其会话的智能体应用。",
+            "description": "要查询其会话的智能体应用。可选值：\n| 值 | 含义 |\n| --- | --- |\n| `ask-ai` | Ask AI 问答助手 |\n| `support` | 客服支持智能体 |\n| `support-website` | 官网站点客服智能体（经 A2A 暴露，不内置于控制台） |\n| `support-flashcat` | Flashcat 站点客服智能体（经 A2A 暴露） |\n| `ai-sre` | AI SRE 主应用 |\n| `template-assistant` | 通知模板助手（模板编辑/校验场景） |\n| `swe` | 内部基准评测应用（不对外开放） |",
             "enum": [
               "ask-ai",
               "support",
@@ -53376,7 +53729,7 @@
               "roku",
               "unity"
             ],
-            "description": "记录该会话的 SDK 平台。"
+            "description": "记录该会话的 SDK 平台。平台标识，取值为 `browser`、`android`、`ios`、`miniprogram`、`react-native`、`flutter`、`kotlin-multiplatform`、`roku`、`unity`。"
           },
           "start": {
             "type": "integer",
@@ -53406,7 +53759,7 @@
               "roku",
               "unity"
             ],
-            "description": "记录该视图的 SDK 平台。"
+            "description": "记录该视图的 SDK 平台。平台标识，取值为 `browser`、`android`、`ios`、`miniprogram`、`react-native`、`flutter`、`kotlin-multiplatform`、`roku`、`unity`。"
           },
           "view_id": {
             "type": "string",
@@ -53629,7 +53982,7 @@
               "responders",
               "aggregate_alert_count"
             ],
-            "description": "故障卡片字段名。"
+            "description": "故障卡片字段名。\n\n| 值 | 含义 |\n|---|---|\n| `channel` | 触发该故障的告警来源通道名称；仅当通道名非空时返回。 |\n| `snoozed_before` | 故障暂缓（Snooze）截止时间，格式为 `YYYY-MM-DD HH:MM:SS`；仅当故障处于暂缓状态时返回。 |\n| `severity` | 故障等级标签；仅当等级非空时返回。 |\n| `responders` | 当前处理人姓名列表，以空格分隔；仅当存在处理人时返回。 |\n| `aggregate_alert_count` | 聚合到该故障的告警数量；仅当数量大于 1 时返回。 |"
           },
           "value": {
             "type": "string",
@@ -53672,7 +54025,8 @@
         "properties": {
           "request_id": {
             "type": "string",
-            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+            "example": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+            "description": "本次请求的追踪 ID，与 `Flashcat-Request-Id` 响应头一致。"
           },
           "error": {
             "$ref": "#/components/schemas/DutyError"
@@ -53687,9 +54041,11 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/FieldDeleteReference"
-                }
+                },
+                "description": "仍引用该字段的自定义表单列表，每项含 `kind`/`name`/`href`；需先解除全部引用才能删除该字段。"
               }
-            }
+            },
+            "description": "附加错误数据；本错误下固定包含 `refs` 字段。"
           }
         }
       },
@@ -53748,14 +54104,14 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "description": "边缘诊断结果的 schema 版本。",
+            "description": "边缘诊断结果的 schema 版本。固定为 `2`，标识响应结构版本，结构发生不兼容变更时递增。",
             "enum": [
               "2"
             ]
           },
           "operation": {
             "type": "string",
-            "description": "执行的诊断类别。",
+            "description": "执行的诊断类别。固定为 `log_patterns`，表示日志模式诊断（适用于 `loki` / `victorialogs` 数据源）。",
             "enum": [
               "log_patterns"
             ]
@@ -53804,7 +54160,7 @@
         "properties": {
           "method": {
             "type": "string",
-            "description": "执行的诊断方法。",
+            "description": "执行的诊断方法。`pattern_snapshot` = 仅对当前窗口做日志模式聚合快照，不涉及基线；`pattern_compare` = 当前窗口与基线窗口（见 `baseline`）之间的模式对比。",
             "enum": [
               "pattern_snapshot",
               "pattern_compare"
@@ -53812,7 +54168,7 @@
           },
           "baseline": {
             "type": "string",
-            "description": "比较方法使用的基线窗口类型。",
+            "description": "比较方法使用的基线窗口类型。`previous_window` = 紧接当前窗口之前的等长窗口；`same_window_yesterday` = 当前窗口整体前移 24 小时；`same_window_last_week` = 当前窗口整体前移 7 天。仅 `pattern_compare` 结果携带该字段。",
             "enum": [
               "previous_window",
               "same_window_yesterday",
@@ -53872,14 +54228,14 @@
         "properties": {
           "schema_version": {
             "type": "string",
-            "description": "边缘诊断结果的 schema 版本。",
+            "description": "边缘诊断结果的 schema 版本。固定为 `2`，标识响应结构版本，结构发生不兼容变更时递增。",
             "enum": [
               "2"
             ]
           },
           "operation": {
             "type": "string",
-            "description": "执行的诊断类别。",
+            "description": "执行的诊断类别。固定为 `metric_trends`，表示指标趋势诊断（适用于 `prometheus` 兼容数据源）。",
             "enum": [
               "metric_trends"
             ]
@@ -53924,7 +54280,7 @@
         "properties": {
           "method": {
             "type": "string",
-            "description": "执行的诊断方法。",
+            "description": "执行的诊断方法。`single_window_shape` = 仅分析当前窗口内指标的形态（趋势与形状），不涉及基线；`window_compare` = 当前窗口与基线窗口（见 `baseline`）之间的逐序列对比。",
             "enum": [
               "single_window_shape",
               "window_compare"
@@ -53932,7 +54288,7 @@
           },
           "baseline": {
             "type": "string",
-            "description": "比较方法使用的基线窗口类型。",
+            "description": "比较方法使用的基线窗口类型。`previous_window` = 紧接当前窗口之前的等长窗口；`same_window_yesterday` = 当前窗口整体前移 24 小时；`same_window_last_week` = 当前窗口整体前移 7 天。仅 `window_compare` 结果携带该字段。",
             "enum": [
               "previous_window",
               "same_window_yesterday",
@@ -54055,7 +54411,7 @@
           },
           "comparison_status": {
             "type": "string",
-            "description": "当前与基线窗口之间的观测可比性。",
+            "description": "当前与基线窗口之间的观测可比性。\n\n| 值 | 含义 |\n|---|---|\n| `comparable` | 当前窗口与基线窗口都观测到该模式，可正常对比。 |\n| `observed_only_current` | 仅当前窗口观测到该模式（新出现的模式）。 |\n| `observed_only_baseline` | 仅基线窗口观测到该模式（当前窗口已消失）。 |\n| `comparison_limited_by_incomplete_evidence` | 两侧都观测到，但证据不完整（如日志量超过聚合上限或采样被截断），对比结论受限。 |",
             "enum": [
               "comparable",
               "observed_only_current",
@@ -54269,7 +54625,7 @@
           },
           "comparison_status": {
             "type": "string",
-            "description": "当前与基线序列的可比性。",
+            "description": "当前与基线序列的可比性。\n\n| 值 | 含义 |\n|---|---|\n| `comparable` | 两个窗口都有足够的有限样本点，可正常对比。 |\n| `new_series` | 该序列仅存在于当前窗口（新序列）。 |\n| `disappeared_series` | 该序列仅存在于基线窗口（当前窗口已消失）。 |\n| `insufficient_current_points` | 当前窗口的有限样本点少于 3 个，无法对比。 |\n| `insufficient_baseline_points` | 基线窗口的有限样本点少于 3 个，无法对比。 |",
             "enum": [
               "comparable",
               "new_series",
@@ -55220,7 +55576,7 @@
               "action",
               "follow_up"
             ],
-            "description": "跟进事项类型。"
+            "description": "跟进事项类型。`action`：挂在故障上的处置行动事项，可直接转换为 `follow_up`；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项，创建时要求故障已关联到该复盘。"
           },
           "title": {
             "type": "string",
@@ -55259,7 +55615,7 @@
               "action",
               "follow_up"
             ],
-            "description": "跟进事项类型。"
+            "description": "跟进事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。"
           },
           "title": {
             "type": "string",
@@ -55310,7 +55666,7 @@
               "action",
               "follow_up"
             ],
-            "description": "跟进事项类型。"
+            "description": "跟进事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。"
           },
           "title": {
             "type": "string",
@@ -55357,7 +55713,7 @@
               "action",
               "follow_up"
             ],
-            "description": "跟进事项类型。"
+            "description": "跟进事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。"
           },
           "title": {
             "type": "string",
@@ -55396,7 +55752,7 @@
               "action",
               "follow_up"
             ],
-            "description": "转化前的事项类型。"
+            "description": "转化前的事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。当前转换方向仅支持 `action` → `follow_up`，因此该事件中 `from_type` 恒为 `action`。"
           },
           "to_type": {
             "type": "string",
@@ -55404,7 +55760,7 @@
               "action",
               "follow_up"
             ],
-            "description": "转化后的事项类型。"
+            "description": "转化后的事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。当前转换方向仅支持 `action` → `follow_up`，因此该事件中 `to_type` 恒为 `follow_up`，且转换成功后会立即尝试绑定故障对应的复盘。"
           },
           "post_mortem_id": {
             "type": "string",
@@ -55431,7 +55787,7 @@
               "action",
               "follow_up"
             ],
-            "description": "跟进事项类型。"
+            "description": "跟进事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。"
           },
           "title": {
             "type": "string",
@@ -55458,7 +55814,7 @@
               "action",
               "follow_up"
             ],
-            "description": "跟进事项类型。"
+            "description": "跟进事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。"
           },
           "title": {
             "type": "string",
@@ -55570,7 +55926,7 @@
               "stale",
               "unknown"
             ],
-            "description": "新鲜度分类。"
+            "description": "新鲜度分类。`fresh` = 最近一次快照在 2× 上报间隔内收到；`stale` = 超过 2× 上报间隔未收到新快照；`unknown` = 无快照数据，无法判定。"
           },
           "newest_received_at_ms": {
             "type": "integer",
@@ -55639,7 +55995,7 @@
               "partial",
               "unavailable"
             ],
-            "description": "已加载主机的网络清单增强覆盖聚合状态。"
+            "description": "已加载主机的网络清单增强覆盖聚合状态（取所有主机中最差的一档）。\n\n| 值 | 含义 |\n|---|---|\n| `complete` | 所有主机请求的网络命名空间全部扫描成功且无错误。 |\n| `partial` | 至少一台主机部分命名空间未扫描成功，或扫描存在错误。 |\n| `unavailable` | 至少一台主机的命名空间全部未扫描成功。 |\n| `unknown` | 未加载任何主机，或某主机上报了无法识别的状态。 |"
           },
           "kubernetes_enrichment_status": {
             "type": "string",
@@ -55649,7 +56005,7 @@
               "partial",
               "unavailable"
             ],
-            "description": "已加载主机的 Kubernetes 增强覆盖聚合状态。"
+            "description": "已加载主机的 Kubernetes 增强覆盖聚合状态（取所有主机中最差的一档）。\n\n| 值 | 含义 |\n|---|---|\n| `complete` | 所有主机的实体均有完整的 Pod 绑定元数据。 |\n| `partial` | 至少一台主机存在绑定但部分 Pod 元数据缺失，或有绑定被丢弃。 |\n| `unavailable` | 至少一台主机没有任何 Pod 绑定。 |\n| `unknown` | 未加载任何主机，或某主机上报了无法识别的状态。 |"
           },
           "listener_address_family_status": {
             "type": "string",
@@ -55659,7 +56015,7 @@
               "partial",
               "unavailable"
             ],
-            "description": "已加载主机的监听地址族（IPv4/IPv6）解析覆盖聚合状态。"
+            "description": "已加载主机的监听地址族（IPv4/IPv6）解析覆盖聚合状态（取所有主机中最差的一档）。\n\n| 值 | 含义 |\n|---|---|\n| `complete` | 所有主机的 IPv6 通配监听器，其 IPv6-only 属性均已确认。 |\n| `partial` | 至少一台主机只有部分 IPv6 通配监听器的 IPv6-only 属性已确认。 |\n| `unavailable` | 至少一台主机的 IPv6 通配监听器 IPv6-only 属性全部未知。 |\n| `unknown` | 未加载任何主机，或某主机上报了无法识别的状态。 |"
           },
           "ipv6_wildcard_listener_count": {
             "type": "integer",
@@ -56066,7 +56422,7 @@
               "summary",
               "full"
             ],
-            "description": "本次应用的 `unresolved_mode`。"
+            "description": "本次应用的 `unresolved_mode`。`full` = 未解析的目的端完整列入 `unresolved_endpoints`，且对应的边保留在 `edges` 中（默认）；`summary` = 未解析的边不进入 `edges`，`unresolved_endpoints` 仅保留最多 20 条样例，配合 `by_reason` 计数概览。"
           },
           "total": {
             "type": "integer",
@@ -56218,7 +56574,7 @@
               "ambiguous",
               "unresolved"
             ],
-            "description": "该关系目的端的解析结果。"
+            "description": "该关系目的端的解析结果。`resolved` = 唯一解析到某台主机的某个监听实体，关系可信；`ambiguous` = 存在多个候选（或监听地址族未知），关系仅是待核实的线索；`unresolved` = 未找到任何候选，目的端身份未知。"
           },
           "target_host_id": {
             "type": "string",
@@ -56238,7 +56594,7 @@
               "tcp",
               "udp"
             ],
-            "description": "目的端的传输协议。"
+            "description": "目的端的传输协议。`tcp` = TCP 连接；`udp` = UDP 会话。当前采集端仅上报 `tcp`，`udp` 为预留值。"
           },
           "destination_ip": {
             "type": "string",
@@ -56306,7 +56662,7 @@
               "unsupported",
               "no_data"
             ],
-            "description": "锚点主机的服务拓扑采集状态。"
+            "description": "锚点主机的服务拓扑采集状态。\n\n| 值 | 含义 |\n|---|---|\n| `active` | 采集正常：有新鲜快照且无降级。 |\n| `degraded` | 采集在进行但质量受损：健康上报晚于快照、快照被截断/降级，或采集报错。 |\n| `stale` | 有快照但已过期（超过 2× 上报间隔未更新）。 |\n| `initializing` | Agent 已上报采集能力，但首个快照尚未就绪。 |\n| `disabled` | 该主机的拓扑采集被禁用。 |\n| `unsupported` | Agent 或内核不支持该采集。 |\n| `no_data` | 未收到任何快照或健康数据。 |"
           },
           "authoritative": {
             "type": "boolean",
@@ -56520,7 +56876,7 @@
               "unsupported",
               "no_data"
             ],
-            "description": "总体的服务拓扑采集状态。"
+            "description": "总体的服务拓扑采集状态。\n\n| 值 | 含义 |\n|---|---|\n| `active` | 采集正常：有新鲜快照且无降级。 |\n| `degraded` | 采集在进行但质量受损：健康上报晚于快照、快照被截断/降级，或采集报错。 |\n| `stale` | 有快照但已过期（超过 2× 上报间隔未更新）。 |\n| `initializing` | Agent 已上报采集能力，但首个快照尚未就绪。 |\n| `disabled` | 该主机的拓扑采集被禁用。 |\n| `unsupported` | Agent 或内核不支持该采集。 |\n| `no_data` | 未收到任何快照或健康数据。 |"
           },
           "authoritative": {
             "type": "boolean",
@@ -56753,7 +57109,7 @@
               "unsupported",
               "no_data"
             ],
-            "description": "总体的服务拓扑采集状态。"
+            "description": "总体的服务拓扑采集状态。\n\n| 值 | 含义 |\n|---|---|\n| `active` | 采集正常：有新鲜快照且无降级。 |\n| `degraded` | 采集在进行但质量受损：健康上报晚于快照、快照被截断/降级，或采集报错。 |\n| `stale` | 有快照但已过期（超过 2× 上报间隔未更新）。 |\n| `initializing` | Agent 已上报采集能力，但首个快照尚未就绪。 |\n| `disabled` | 该主机的拓扑采集被禁用。 |\n| `unsupported` | Agent 或内核不支持该采集。 |\n| `no_data` | 未收到任何快照或健康数据。 |"
           },
           "capability_status": {
             "type": "string",
@@ -56787,7 +57143,7 @@
               "stale",
               "unknown"
             ],
-            "description": "该主机拓扑数据的新鲜度分类。"
+            "description": "该主机拓扑数据的新鲜度分类。`fresh` = 最近一次快照在 2× 上报间隔内收到；`stale` = 超过 2× 上报间隔未收到新快照；`unknown` = 从未收到拓扑快照，无法判定新鲜度。"
           },
           "max_age_ms": {
             "type": "integer",
@@ -57516,7 +57872,7 @@
               "error.browser_name",
               "error.is_crash"
             ],
-            "description": "过滤属性键。预设严重性规则仅支持以下 Error 级别属性。"
+            "description": "过滤属性键。预设严重性规则仅支持以下 Error 级别属性。\n\n| 值 | 含义 |\n|---|---|\n| `error.usr_id` | 用户 ID |\n| `error.usr_email` | 用户邮箱 |\n| `error.view_url` | 错误发生页面的完整 URL |\n| `error.view_url_path` | 错误发生页面的 URL 路径 |\n| `error.error_type` | 错误类型 |\n| `error.error_message` | 错误信息 |\n| `error.env` | 环境（如 production/staging） |\n| `error.service` | 服务名 |\n| `error.device_type` | 设备类型 |\n| `error.os_name` | 操作系统名称 |\n| `error.browser_name` | 浏览器名称 |\n| `error.is_crash` | 是否为崩溃错误（布尔） |"
           },
           "oper": {
             "type": "string",
@@ -58004,7 +58360,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RumPresetSeverityRuleHistoryItem"
-            }
+            },
+            "description": "当前页的预设严重性规则历史快照列表。"
           }
         }
       },
@@ -58099,7 +58456,7 @@
               "free",
               "professional"
             ],
-            "description": "该资源的套餐版本。"
+            "description": "该资源的套餐版本。取值：`free`（免费版）、`professional`（专业版）。"
           },
           "offering_id": {
             "type": "integer",
@@ -58340,7 +58697,7 @@
         "properties": {
           "code": {
             "type": "string",
-            "description": "提示码。",
+            "description": "提示码。可选值：`unresolved_reference`（写入的文件内容中 @ref 引用了包内不存在的文件，`ref` 给出该引用）、`still_referenced_by`（被删除的文件仍被包内其他文件 @ref 引用，`refs` 列出引用方）。",
             "enum": [
               "unresolved_reference",
               "still_referenced_by"
@@ -58381,7 +58738,7 @@
           },
           "scope": {
             "type": "string",
-            "description": "限定范围；`all`（默认）会覆盖 `include_account`。",
+            "description": "限定范围；`all`（默认）会覆盖 `include_account`。可选值：`all`（账户范围 + 可见团队范围）、`account`（仅账户级知识包）、`team`（仅团队级知识包，可配合 `team_ids` 过滤）。",
             "enum": [
               "all",
               "account",
@@ -58416,7 +58773,7 @@
         "properties": {
           "scope": {
             "type": "string",
-            "description": "知识包范围。",
+            "description": "知识包范围。可选值：`account`（账户级知识包，scope_id 固定为调用方账户 ID，仅账户管理员可创建；首次创建会播种默认 DUTY.md）、`team`（团队级知识包，必须提供 `scope_id` 团队 ID，调用者需属于该团队）。",
             "enum": [
               "account",
               "team"
@@ -58562,7 +58919,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeFileItem"
-            }
+            },
+            "description": "该知识包内的文件数组；无文件时为空数组。"
           }
         },
         "required": [
@@ -58578,7 +58936,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgePackItem"
-            }
+            },
+            "description": "过滤后当前可见的知识包数组（当前页），与 `total` 配合分页。"
           },
           "total": {
             "type": "integer",
@@ -58599,7 +58958,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeFileItem"
-            }
+            },
+            "description": "指定知识包内的文件数组；无文件时为空数组。"
           },
           "total": {
             "type": "integer",
@@ -58640,7 +59000,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeWarning"
-            }
+            },
+            "description": "写入成功后的非阻塞警告数组；`code=unresolved_reference` 表示文件内容中的 @ref 引用了包内不存在的文件。无警告时该字段缺省（omitempty）。"
           }
         },
         "required": [
@@ -58676,7 +59037,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/KnowledgeWarning"
-            }
+            },
+            "description": "删除后的非阻塞警告数组；`code=still_referenced_by` 表示被（强制）删除的文件仍被包内其他文件 @ref 引用（`refs` 列出引用方）。无警告时该字段缺省（omitempty）。"
           }
         }
       }
