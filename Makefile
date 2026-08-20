@@ -3,7 +3,7 @@
 
 # Tooling
 BUILD_DIR := bin
-GOLANGCI_LINT_VERSION := v2.11.4
+GOLANGCI_LINT_VERSION := v2.13.0
 GOLANGCI_LINT := $(BUILD_DIR)/golangci-lint
 GCI_VERSION := v0.13.5
 GCI := $(BUILD_DIR)/gci
