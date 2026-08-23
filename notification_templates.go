@@ -74,7 +74,7 @@ func (s *NotificationTemplatesService) WriteDelete(ctx context.Context, req *Tem
 
 // Update a template.
 //
-// Replace the content of every channel on an existing template.
+// Update an existing template. Only the fields present in the request are written: a channel you omit keeps its current content, and an explicit empty string clears it.
 //
 // API: POST /template/update (template-write-update).
 func (s *NotificationTemplatesService) WriteUpdate(ctx context.Context, req *TemplateUpdateRequest) (*Response, error) {
