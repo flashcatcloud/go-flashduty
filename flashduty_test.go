@@ -507,6 +507,15 @@ func TestNullableRequestFieldsSendExplicitZero(t *testing.T) {
 			at:   []string{"feishu_app_card_v2_table_enabled"},
 			want: false,
 		},
+		{
+			// Clearing a channel is an explicit empty string. It must survive
+			// the encoder: dropping it would silently mean "leave as is".
+			name: "template update clears a channel",
+			path: "/template/update",
+			body: &TemplateUpdateRequest{TemplateID: "t-1", TemplateName: "t", DingtalkApp: String("")},
+			at:   []string{"dingtalk_app"},
+			want: "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -560,11 +569,19 @@ func TestNullableRequestFieldsOmitUnsetValues(t *testing.T) {
 			present: []string{`"scopes"`},
 		},
 		{
-			name:    "template update leaves the feishu card table alone",
-			path:    "/template/update",
-			body:    &TemplateUpdateRequest{TemplateID: "t-1", TemplateName: "t"},
-			absent:  []string{`"feishu_app_card_v2_table_enabled"`},
-			present: []string{`"template_id":"t-1"`},
+			// An update that touches one channel must not carry the others:
+			// on the wire, a channel that is present is a channel that gets
+			// written.
+			name: "template update carries only the channel it changes",
+			path: "/template/update",
+			body: &TemplateUpdateRequest{TemplateID: "t-1", TemplateName: "t", Feishu: String("{{ .title }}")},
+			absent: []string{
+				`"feishu_app_card_v2_table_enabled"`, `"description"`, `"team_id"`,
+				`"email"`, `"sms"`, `"voice"`, `"dingtalk"`, `"wecom"`, `"feishu_app"`,
+				`"dingtalk_app"`, `"wecom_app"`, `"slack_app"`, `"teams_app"`,
+				`"telegram"`, `"slack"`, `"zoom"`,
+			},
+			present: []string{`"template_id":"t-1"`, `"feishu":"{{ .title }}"`},
 		},
 	}
 

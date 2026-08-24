@@ -9171,12 +9171,12 @@
       "post": {
         "operationId": "template-write-update",
         "summary": "Update a template",
-        "description": "Replace the content of every channel on an existing template.",
+        "description": "Update an existing template. Only the fields present in the request are written: a channel you omit keeps its current content, and an explicit empty string clears it.",
         "tags": [
           "On-call/Notification templates"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Templates Manage** (`on-call`) |\n\n## Usage\n\n- Every channel field in the request overwrites the stored value — send an empty string to clear a channel.\n- The caller needs data-permission on the template's team; otherwise the response is `AccessDenied`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Templates Manage** (`on-call`) |\n\n## Usage\n\n- Only the fields present in the request are written. A channel you omit keeps its current content; send it as an empty string to clear it.\n- The caller needs data-permission on the template's team; otherwise the response is `AccessDenied`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
           "href": "/en/api-reference/on-call/notification-templates/template-write-update",
           "metadata": {
             "sidebarTitle": "Update a template"
@@ -39972,10 +39972,12 @@
             "example": "6605a1b2c3d4e5f6a7b8c9d0"
           },
           "team_id": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
-            "description": "Team scope. 0 for account-wide.",
-            "default": 0
+            "description": "Team scope. 0 for account-wide. Omit to keep the template's current team."
           },
           "template_name": {
             "type": "string",
@@ -39984,37 +39986,61 @@
             "description": "Template name. 1–39 characters."
           },
           "description": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 500,
-            "description": "Free-form description. Up to 500 characters."
+            "description": "Free-form description. Up to 500 characters. Omit to keep the current content; send an empty string to clear it."
           },
           "email": {
-            "type": "string",
-            "description": "Email body template source (Go `html/template` syntax)."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Email body template source (Go `html/template` syntax). Omit to keep the current content; send an empty string to clear it."
           },
           "sms": {
-            "type": "string",
-            "description": "SMS template source (Go `text/template` syntax)."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "SMS template source (Go `text/template` syntax). Omit to keep the current content; send an empty string to clear it."
           },
           "voice": {
-            "type": "string",
-            "description": "Voice call script template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Voice call script template source. Omit to keep the current content; send an empty string to clear it."
           },
           "dingtalk": {
-            "type": "string",
-            "description": "DingTalk robot message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "DingTalk robot message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "wecom": {
-            "type": "string",
-            "description": "WeCom robot message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "WeCom robot message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "feishu": {
-            "type": "string",
-            "description": "Feishu robot message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Feishu robot message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "feishu_app": {
-            "type": "string",
-            "description": "Feishu app message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Feishu app message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "feishu_app_card_v2_table_enabled": {
             "type": [
@@ -40024,32 +40050,53 @@
             "description": "When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting."
           },
           "dingtalk_app": {
-            "type": "string",
-            "description": "DingTalk app message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "DingTalk app message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "wecom_app": {
-            "type": "string",
-            "description": "WeCom app message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "WeCom app message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "slack_app": {
-            "type": "string",
-            "description": "Slack app message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Slack app message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "teams_app": {
-            "type": "string",
-            "description": "Microsoft Teams app message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Microsoft Teams app message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "telegram": {
-            "type": "string",
-            "description": "Telegram bot message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Telegram bot message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "slack": {
-            "type": "string",
-            "description": "Slack robot message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Slack robot message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "zoom": {
-            "type": "string",
-            "description": "Zoom bot message template source."
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Zoom bot message template source. Omit to keep the current content; send an empty string to clear it."
           },
           "incident_card_hidden_fields": {
             "$ref": "#/components/schemas/IncidentCardHiddenFields",

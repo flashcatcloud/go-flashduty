@@ -9813,46 +9813,46 @@ type TemplateListResponse struct {
 
 // TemplateUpdateRequest is generated from the Flashduty OpenAPI schema.
 type TemplateUpdateRequest struct {
-	// Free-form description. Up to 500 characters.
-	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// DingTalk robot message template source.
-	Dingtalk string `json:"dingtalk,omitempty" toon:"dingtalk,omitempty"`
-	// DingTalk app message template source.
-	DingtalkApp string `json:"dingtalk_app,omitempty" toon:"dingtalk_app,omitempty"`
-	// Email body template source (Go `html/template` syntax).
-	Email string `json:"email,omitempty" toon:"email,omitempty"`
-	// Feishu robot message template source.
-	Feishu string `json:"feishu,omitempty" toon:"feishu,omitempty"`
-	// Feishu app message template source.
-	FeishuApp string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
+	// Free-form description. Up to 500 characters. Omit to keep the current content; send an empty string to clear it.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// DingTalk robot message template source. Omit to keep the current content; send an empty string to clear it.
+	Dingtalk *string `json:"dingtalk,omitempty" toon:"dingtalk,omitempty"`
+	// DingTalk app message template source. Omit to keep the current content; send an empty string to clear it.
+	DingtalkApp *string `json:"dingtalk_app,omitempty" toon:"dingtalk_app,omitempty"`
+	// Email body template source (Go `html/template` syntax). Omit to keep the current content; send an empty string to clear it.
+	Email *string `json:"email,omitempty" toon:"email,omitempty"`
+	// Feishu robot message template source. Omit to keep the current content; send an empty string to clear it.
+	Feishu *string `json:"feishu,omitempty" toon:"feishu,omitempty"`
+	// Feishu app message template source. Omit to keep the current content; send an empty string to clear it.
+	FeishuApp *string `json:"feishu_app,omitempty" toon:"feishu_app,omitempty"`
 	// When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting.
 	FeishuAppCardV2TableEnabled *bool `json:"feishu_app_card_v2_table_enabled,omitempty" toon:"feishu_app_card_v2_table_enabled,omitempty"`
 	// Incident card fields hidden per IM app type.
 	IncidentCardHiddenFields IncidentCardHiddenFields `json:"incident_card_hidden_fields,omitempty" toon:"incident_card_hidden_fields,omitempty"`
-	// Slack robot message template source.
-	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
-	// Slack app message template source.
-	SlackApp string `json:"slack_app,omitempty" toon:"slack_app,omitempty"`
-	// SMS template source (Go `text/template` syntax).
-	SMS string `json:"sms,omitempty" toon:"sms,omitempty"`
-	// Team scope. 0 for account-wide.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-	// Microsoft Teams app message template source.
-	TeamsApp string `json:"teams_app,omitempty" toon:"teams_app,omitempty"`
-	// Telegram bot message template source.
-	Telegram string `json:"telegram,omitempty" toon:"telegram,omitempty"`
+	// Slack robot message template source. Omit to keep the current content; send an empty string to clear it.
+	Slack *string `json:"slack,omitempty" toon:"slack,omitempty"`
+	// Slack app message template source. Omit to keep the current content; send an empty string to clear it.
+	SlackApp *string `json:"slack_app,omitempty" toon:"slack_app,omitempty"`
+	// SMS template source (Go `text/template` syntax). Omit to keep the current content; send an empty string to clear it.
+	SMS *string `json:"sms,omitempty" toon:"sms,omitempty"`
+	// Team scope. 0 for account-wide. Omit to keep the template's current team.
+	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	// Microsoft Teams app message template source. Omit to keep the current content; send an empty string to clear it.
+	TeamsApp *string `json:"teams_app,omitempty" toon:"teams_app,omitempty"`
+	// Telegram bot message template source. Omit to keep the current content; send an empty string to clear it.
+	Telegram *string `json:"telegram,omitempty" toon:"telegram,omitempty"`
 	// Target template ID; obtain it from `POST /template/list`.
 	TemplateID string `json:"template_id" toon:"template_id"`
 	// Template name. 1–39 characters.
 	TemplateName string `json:"template_name" toon:"template_name"`
-	// Voice call script template source.
-	Voice string `json:"voice,omitempty" toon:"voice,omitempty"`
-	// WeCom robot message template source.
-	Wecom string `json:"wecom,omitempty" toon:"wecom,omitempty"`
-	// WeCom app message template source.
-	WecomApp string `json:"wecom_app,omitempty" toon:"wecom_app,omitempty"`
-	// Zoom bot message template source.
-	Zoom string `json:"zoom,omitempty" toon:"zoom,omitempty"`
+	// Voice call script template source. Omit to keep the current content; send an empty string to clear it.
+	Voice *string `json:"voice,omitempty" toon:"voice,omitempty"`
+	// WeCom robot message template source. Omit to keep the current content; send an empty string to clear it.
+	Wecom *string `json:"wecom,omitempty" toon:"wecom,omitempty"`
+	// WeCom app message template source. Omit to keep the current content; send an empty string to clear it.
+	WecomApp *string `json:"wecom_app,omitempty" toon:"wecom_app,omitempty"`
+	// Zoom bot message template source. Omit to keep the current content; send an empty string to clear it.
+	Zoom *string `json:"zoom,omitempty" toon:"zoom,omitempty"`
 }
 
 // TimeFilter is generated from the Flashduty OpenAPI schema.
