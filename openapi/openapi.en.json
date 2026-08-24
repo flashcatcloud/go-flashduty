@@ -9176,7 +9176,7 @@
           "On-call/Notification templates"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Templates Manage** (`on-call`) |\n\n## Usage\n\n- Every channel field in the request overwrites the stored value — send an empty string to clear a channel.\n- The caller needs data-permission on the template's team; otherwise the response is `AccessDenied`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Templates Manage** (`on-call`) |\n\n## Usage\n\n- Only the fields present in the request are written. A channel you omit keeps its current content; send it as an empty string to clear it.\n- The caller needs data-permission on the template's team; otherwise the response is `AccessDenied`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
           "href": "/en/api-reference/on-call/notification-templates/template-write-update",
           "metadata": {
             "sidebarTitle": "Update a template"
