@@ -3465,7 +3465,6 @@
                       {
                         "account_id": 2451002751131,
                         "channel_id": 5967964835131,
-                        "priority": 0,
                         "rule_name": "Silence Info alerts",
                         "description": "",
                         "from_incident_id": "000000000000000000000000",
@@ -3960,7 +3959,6 @@
                       {
                         "account_id": 2451002751131,
                         "channel_id": 5967964835131,
-                        "priority": 0,
                         "rule_name": "Suppress downstream alerts",
                         "description": "",
                         "source_filters": [
@@ -4462,7 +4460,6 @@
                       {
                         "account_id": 2451002751131,
                         "channel_id": 5967964835131,
-                        "priority": 0,
                         "rule_name": "Drop test alerts",
                         "description": "",
                         "filters": [
@@ -6366,6 +6363,21 @@
                     "integration_id": 10001,
                     "rules": [
                       {
+                        "kind": "title_reset",
+                        "if": [
+                          {
+                            "key": "labels.env",
+                            "oper": "IN",
+                            "vals": [
+                              "prod"
+                            ]
+                          }
+                        ],
+                        "settings": {
+                          "title": "[TPL]{{.Labels.service}} / {{.Labels.check}}"
+                        }
+                      },
+                      {
                         "kind": "severity_reset",
                         "if": null,
                         "settings": {
@@ -6452,7 +6464,34 @@
                     "items": [
                       {
                         "integration_id": 10001,
-                        "rules": [],
+                        "rules": [
+                          {
+                            "kind": "alert_inhibit",
+                            "if": [
+                              {
+                                "key": "labels.cluster",
+                                "oper": "IN",
+                                "vals": [
+                                  "prod-cn"
+                                ]
+                              }
+                            ],
+                            "settings": {
+                              "equals": [
+                                "service"
+                              ],
+                              "source_filters": [
+                                {
+                                  "key": "alert_severity",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "Critical"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ],
                         "status": "enabled",
                         "creator_id": 80011,
                         "updated_by": 80011,
@@ -6561,6 +6600,21 @@
               "example": {
                 "integration_id": 10001,
                 "rules": [
+                  {
+                    "kind": "title_reset",
+                    "if": [
+                      {
+                        "key": "labels.env",
+                        "oper": "IN",
+                        "vals": [
+                          "prod"
+                        ]
+                      }
+                    ],
+                    "settings": {
+                      "title": "[TPL]{{.Labels.service}} / {{.Labels.check}}"
+                    }
+                  },
                   {
                     "kind": "severity_reset",
                     "if": null,
@@ -30086,6 +30140,7 @@
                       "file_count": 17,
                       "total_bytes": 41010,
                       "version": 134,
+                      "duty_version": 130,
                       "created_by": 2476444212131,
                       "created_at_ms": 1778768680053,
                       "updated_at_ms": 1786456567177,
@@ -30196,6 +30251,7 @@
                         "file_count": 17,
                         "total_bytes": 41010,
                         "version": 134,
+                        "duty_version": 130,
                         "created_by": 2476444212131,
                         "created_at_ms": 1778768680053,
                         "updated_at_ms": 1786456567177,
@@ -30210,6 +30266,7 @@
                         "file_count": 4,
                         "total_bytes": 11159,
                         "version": 15,
+                        "duty_version": 15,
                         "created_by": 2476444212131,
                         "created_at_ms": 1782201586089,
                         "updated_at_ms": 1785462092702,
@@ -30303,6 +30360,7 @@
                     "file_count": 17,
                     "total_bytes": 41010,
                     "version": 138,
+                    "duty_version": 130,
                     "created_by": 2476444212131,
                     "created_at_ms": 1778768680053,
                     "updated_at_ms": 1786458765182,
@@ -30395,6 +30453,7 @@
                     "file_count": 4,
                     "total_bytes": 11159,
                     "version": 15,
+                    "duty_version": 15,
                     "created_by": 2476444212131,
                     "created_at_ms": 1782201586089,
                     "updated_at_ms": 1785462092702,
@@ -35200,10 +35259,6 @@
             "format": "int64",
             "description": "所属协作空间 ID，可通过 `POST /channel/list` 获取。"
           },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级,数值越小越优先。"
-          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -35832,7 +35887,6 @@
         "required": [
           "account_id",
           "channel_id",
-          "priority",
           "rule_name",
           "description",
           "time_filters",
@@ -35930,7 +35984,6 @@
         "required": [
           "account_id",
           "channel_id",
-          "priority",
           "rule_name",
           "description",
           "source_filters",
@@ -36015,7 +36068,6 @@
         "required": [
           "account_id",
           "channel_id",
-          "priority",
           "rule_name",
           "description",
           "filters",
@@ -36461,10 +36513,6 @@
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "排除规则 ID（MongoDB ObjectID）。"
-          },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级，数值越小越优先。"
           },
           "rule_name": {
             "type": "string",
@@ -37578,8 +37626,11 @@
             "description": "规则类型。规则按数组顺序依次执行，`if` 条件命中后按 `kind` 处理事件。\n| 值 | 含义 |\n|---|---|\n| `title_reset` | 按 `settings.title` 模板重写事件标题。 |\n| `description_reset` | 按 `settings.description` 模板重写事件描述。 |\n| `severity_reset` | 将事件严重程度与状态重置为 `settings.severity`（`Critical`/`Warning`/`Info`）。 |\n| `alert_drop` | 直接丢弃匹配的事件，不生成告警。 |\n| `alert_inhibit` | 当存在匹配 `settings.source_filters` 且按 `settings.equals` 关联的活跃源告警时，丢弃该事件（抑制）。 |"
           },
           "if": {
-            "$ref": "#/components/schemas/OrFilterGroup",
-            "description": "可选的过滤条件，省略时对所有告警生效。"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterCondition"
+            },
+            "description": "可选 AND 过滤条件列表，全部条件匹配时规则才生效；省略时对所有告警生效。"
           },
           "settings": {
             "type": "object",
@@ -37854,8 +37905,11 @@
             "description": "需要在来源告警与当前告警之间值相等的标签键列表。"
           },
           "source_filters": {
-            "$ref": "#/components/schemas/OrFilterGroup",
-            "description": "用于匹配待抑制来源告警的过滤条件。"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterCondition"
+            },
+            "description": "用于匹配待抑制来源告警的 AND 过滤条件列表，需全部条件匹配。"
           }
         }
       },
@@ -58653,6 +58707,10 @@
             "type": "integer",
             "description": "知识包版本号，文件每次变更时递增。"
           },
+          "duty_version": {
+            "type": "integer",
+            "description": "最后一次撰写或确认 DUTY.md 时的知识库版本。当 `version` 大于该值时，说明 DUTY.md 已不能反映知识库的全部文件。"
+          },
           "created_by": {
             "type": "integer",
             "description": "创建者成员 ID。",
@@ -58681,6 +58739,7 @@
           "file_count",
           "total_bytes",
           "version",
+          "duty_version",
           "created_by",
           "created_at_ms",
           "updated_at_ms",

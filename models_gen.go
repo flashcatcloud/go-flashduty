@@ -763,8 +763,8 @@ type AlertMergeRequest struct {
 
 // AlertPipeline is generated from the Flashduty OpenAPI schema.
 type AlertPipeline struct {
-	// Optional OR-of-AND filter. When omitted, the rule applies to all alerts.
-	If OrFilterGroup `json:"if,omitempty" toon:"if,omitempty"`
+	// Optional AND-filter list — the rule applies only when every condition matches. Omit to apply the rule to all alerts.
+	If []FilterCondition `json:"if,omitempty" toon:"if,omitempty"`
 	// Rule type. Rules run in array order; when the `if` condition matches, the event is processed according to `kind`.
 	// | Value | Meaning |
 	// |---|---|
@@ -1071,8 +1071,8 @@ type ApAlertDrop struct{}
 type ApAlertInhibit struct {
 	// Label keys whose values must be equal between the source and current alert for inhibition to apply.
 	Equals []string `json:"equals" toon:"equals"`
-	// Filter that identifies the source alerts to inhibit.
-	SourceFilters OrFilterGroup `json:"source_filters" toon:"source_filters"`
+	// AND-filter list identifying the source alerts to inhibit — every condition must match.
+	SourceFilters []FilterCondition `json:"source_filters" toon:"source_filters"`
 }
 
 // ApDescriptionReset is generated from the Flashduty OpenAPI schema.
@@ -1910,8 +1910,6 @@ type CreateDropRuleRequest struct {
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
 	// Or-of-and filter tree. Each outer element is an AND group; within each group, all conditions must match.
 	Filters [][]CreateDropRuleRequestFiltersItemItem `json:"filters,omitempty" toon:"filters,omitempty"`
-	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Rule name, 1 to 39 characters.
 	RuleName string `json:"rule_name" toon:"rule_name"`
 }
@@ -4382,6 +4380,8 @@ type KnowledgePackItem struct {
 	CreatedAtMs TimestampMilli `json:"created_at_ms" toon:"created_at_ms"`
 	// Person ID of the member who created the pack.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Pack version at which DUTY.md was last authored or re-affirmed. When `version` is greater, DUTY.md no longer reflects every file in the pack.
+	DutyVersion int64 `json:"duty_version" toon:"duty_version"`
 	// Number of files in the pack.
 	FileCount int64 `json:"file_count" toon:"file_count"`
 	// Knowledge pack ID (`kpk_` prefix).
@@ -9996,8 +9996,6 @@ type UpdateDropRuleRequest struct {
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
 	// Matching alerts are dropped and generate no notification.
 	Filters FilterGroup `json:"filters,omitempty" toon:"filters,omitempty"`
-	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Drop rule ID (MongoDB ObjectID).
 	RuleID string `json:"rule_id" toon:"rule_id"`
 	// Rule name, 1 to 39 characters.
