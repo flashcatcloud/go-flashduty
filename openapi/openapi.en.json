@@ -3465,7 +3465,6 @@
                       {
                         "account_id": 2451002751131,
                         "channel_id": 5967964835131,
-                        "priority": 0,
                         "rule_name": "Silence Info alerts",
                         "description": "",
                         "from_incident_id": "000000000000000000000000",
@@ -3960,7 +3959,6 @@
                       {
                         "account_id": 2451002751131,
                         "channel_id": 5967964835131,
-                        "priority": 0,
                         "rule_name": "Suppress downstream alerts",
                         "description": "",
                         "source_filters": [
@@ -4462,7 +4460,6 @@
                       {
                         "account_id": 2451002751131,
                         "channel_id": 5967964835131,
-                        "priority": 0,
                         "rule_name": "Drop test alerts",
                         "description": "",
                         "filters": [
@@ -6366,6 +6363,21 @@
                     "integration_id": 10001,
                     "rules": [
                       {
+                        "kind": "title_reset",
+                        "if": [
+                          {
+                            "key": "labels.env",
+                            "oper": "IN",
+                            "vals": [
+                              "prod"
+                            ]
+                          }
+                        ],
+                        "settings": {
+                          "title": "[TPL]{{.Labels.service}} / {{.Labels.check}}"
+                        }
+                      },
+                      {
                         "kind": "severity_reset",
                         "if": null,
                         "settings": {
@@ -6452,7 +6464,34 @@
                     "items": [
                       {
                         "integration_id": 10001,
-                        "rules": [],
+                        "rules": [
+                          {
+                            "kind": "alert_inhibit",
+                            "if": [
+                              {
+                                "key": "labels.cluster",
+                                "oper": "IN",
+                                "vals": [
+                                  "prod-cn"
+                                ]
+                              }
+                            ],
+                            "settings": {
+                              "equals": [
+                                "service"
+                              ],
+                              "source_filters": [
+                                {
+                                  "key": "alert_severity",
+                                  "oper": "IN",
+                                  "vals": [
+                                    "Critical"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ],
                         "status": "enabled",
                         "creator_id": 80011,
                         "updated_by": 80011,
@@ -6561,6 +6600,21 @@
               "example": {
                 "integration_id": 10001,
                 "rules": [
+                  {
+                    "kind": "title_reset",
+                    "if": [
+                      {
+                        "key": "labels.env",
+                        "oper": "IN",
+                        "vals": [
+                          "prod"
+                        ]
+                      }
+                    ],
+                    "settings": {
+                      "title": "[TPL]{{.Labels.service}} / {{.Labels.check}}"
+                    }
+                  },
                   {
                     "kind": "severity_reset",
                     "if": null,
@@ -30094,6 +30148,7 @@
                       "file_count": 17,
                       "total_bytes": 41010,
                       "version": 134,
+                      "duty_version": 130,
                       "created_by": 2476444212131,
                       "created_at_ms": 1778768680053,
                       "updated_at_ms": 1786456567177,
@@ -30204,6 +30259,7 @@
                         "file_count": 17,
                         "total_bytes": 41010,
                         "version": 134,
+                        "duty_version": 130,
                         "created_by": 2476444212131,
                         "created_at_ms": 1778768680053,
                         "updated_at_ms": 1786456567177,
@@ -30218,6 +30274,7 @@
                         "file_count": 4,
                         "total_bytes": 11159,
                         "version": 15,
+                        "duty_version": 15,
                         "created_by": 2476444212131,
                         "created_at_ms": 1782201586089,
                         "updated_at_ms": 1785462092702,
@@ -30311,6 +30368,7 @@
                     "file_count": 17,
                     "total_bytes": 41010,
                     "version": 138,
+                    "duty_version": 130,
                     "created_by": 2476444212131,
                     "created_at_ms": 1778768680053,
                     "updated_at_ms": 1786458765182,
@@ -30403,6 +30461,7 @@
                     "file_count": 4,
                     "total_bytes": 11159,
                     "version": 15,
+                    "duty_version": 15,
                     "created_by": 2476444212131,
                     "created_at_ms": 1782201586089,
                     "updated_at_ms": 1785462092702,
@@ -35209,10 +35268,6 @@
             "format": "int64",
             "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
-          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -35841,7 +35896,6 @@
         "required": [
           "account_id",
           "channel_id",
-          "priority",
           "rule_name",
           "description",
           "time_filters",
@@ -35939,7 +35993,6 @@
         "required": [
           "account_id",
           "channel_id",
-          "priority",
           "rule_name",
           "description",
           "source_filters",
@@ -36024,7 +36077,6 @@
         "required": [
           "account_id",
           "channel_id",
-          "priority",
           "rule_name",
           "description",
           "filters",
@@ -36470,10 +36522,6 @@
             "type": "string",
             "pattern": "^[0-9a-fA-F]{24}$",
             "description": "Drop rule ID (MongoDB ObjectID)."
-          },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
           },
           "rule_name": {
             "type": "string",
@@ -37587,8 +37635,11 @@
             "description": "Rule type. Rules run in array order; when the `if` condition matches, the event is processed according to `kind`.\n| Value | Meaning |\n|---|---|\n| `title_reset` | Rewrites the event title from the `settings.title` template. |\n| `description_reset` | Rewrites the event description from the `settings.description` template. |\n| `severity_reset` | Resets the event severity and status to `settings.severity` (`Critical`/`Warning`/`Info`). |\n| `alert_drop` | Discards the matching event outright; no alert is created. |\n| `alert_inhibit` | Discards the event (inhibition) when an active source alert matching `settings.source_filters` and correlated via `settings.equals` exists. |"
           },
           "if": {
-            "$ref": "#/components/schemas/OrFilterGroup",
-            "description": "Optional OR-of-AND filter. When omitted, the rule applies to all alerts."
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterCondition"
+            },
+            "description": "Optional AND-filter list — the rule applies only when every condition matches. Omit to apply the rule to all alerts."
           },
           "settings": {
             "type": "object",
@@ -37863,8 +37914,11 @@
             "description": "Label keys whose values must be equal between the source and current alert for inhibition to apply."
           },
           "source_filters": {
-            "$ref": "#/components/schemas/OrFilterGroup",
-            "description": "Filter that identifies the source alerts to inhibit."
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterCondition"
+            },
+            "description": "AND-filter list identifying the source alerts to inhibit — every condition must match."
           }
         }
       },
@@ -58662,6 +58716,10 @@
             "type": "integer",
             "description": "Pack version, incremented on every file change."
           },
+          "duty_version": {
+            "type": "integer",
+            "description": "Pack version at which DUTY.md was last authored or re-affirmed. When `version` is greater, DUTY.md no longer reflects every file in the pack."
+          },
           "created_by": {
             "type": "integer",
             "description": "Person ID of the member who created the pack.",
@@ -58690,6 +58748,7 @@
           "file_count",
           "total_bytes",
           "version",
+          "duty_version",
           "created_by",
           "created_at_ms",
           "updated_at_ms",
