@@ -1910,8 +1910,6 @@ type CreateDropRuleRequest struct {
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
 	// Or-of-and filter tree. Each outer element is an AND group; within each group, all conditions must match.
 	Filters [][]CreateDropRuleRequestFiltersItemItem `json:"filters,omitempty" toon:"filters,omitempty"`
-	// Evaluation priority. Lower runs first.
-	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Rule name, 1 to 39 characters.
 	RuleName string `json:"rule_name" toon:"rule_name"`
 }
@@ -2013,6 +2011,8 @@ type CreateInhibitRuleRequest struct {
 	Equals []string `json:"equals" toon:"equals"`
 	// When true, suppressed target alerts are dropped instead of merged.
 	IsDirectlyDiscard bool `json:"is_directly_discard,omitempty" toon:"is_directly_discard,omitempty"`
+	// Evaluation priority. Lower runs first.
+	Priority int64 `json:"priority,omitempty" toon:"priority,omitempty"`
 	// Rule name, 1 to 39 characters.
 	RuleName string `json:"rule_name" toon:"rule_name"`
 	// Or-of-and filter tree. Each outer element is an AND group; within each group, all conditions must match.
@@ -8084,6 +8084,26 @@ type ServiceMapAnchor struct {
 	HostID string `json:"host_id" toon:"host_id"`
 }
 
+// ServiceMapCanonicalPodPlacement is generated from the Flashduty OpenAPI schema.
+type ServiceMapCanonicalPodPlacement struct {
+	// Stable cluster identity derived from the Kubernetes cluster rather than an Agent alias.
+	CanonicalClusterID string `json:"canonical_cluster_id" toon:"canonical_cluster_id"`
+	// Revision of the canonical K8s current context used for this resolution.
+	ContextRevision string `json:"context_revision" toon:"context_revision"`
+	// True when the Pod uses the host network namespace.
+	HostNetwork bool `json:"host_network" toon:"host_network"`
+	// Canonical Pod identity and metadata.
+	PodRef ServiceMapPodReference `json:"pod_ref" toon:"pod_ref"`
+	// Bounded Services selecting the Pod.
+	Services []ServiceMapKubernetesServiceReference `json:"services" toon:"services"`
+	// Number of matching Services omitted by response bounds.
+	ServicesOmitted int64 `json:"services_omitted" toon:"services_omitted"`
+	// Unix timestamp in milliseconds when Safari observed the source context.
+	SourceObservedAtMs TimestampMilli `json:"source_observed_at_ms" toon:"source_observed_at_ms"`
+	// Canonical owning workload, when resolved.
+	Workload *ServiceMapKubernetesWorkloadReference `json:"workload" toon:"workload"`
+}
+
 // ServiceMapCapability is generated from the Flashduty OpenAPI schema.
 type ServiceMapCapability struct {
 	// Capture mode, e.g. `ebpf` or `polling`.
@@ -8330,6 +8350,52 @@ type ServiceMapHostCoverage struct {
 	Truncated bool `json:"truncated" toon:"truncated"`
 }
 
+// ServiceMapKubernetesPlacement is generated from the Flashduty OpenAPI schema.
+type ServiceMapKubernetesPlacement struct {
+	// Number of visible canonical candidates considered.
+	CandidateCount int64 `json:"candidate_count" toon:"candidate_count"`
+	// Canonical context, present only when exactly one visible candidate was resolved.
+	Canonical *ServiceMapCanonicalPodPlacement `json:"canonical" toon:"canonical"`
+	// Agent confidence classification for the host-local binding.
+	Confidence string `json:"confidence" toon:"confidence"`
+	// Timestamp the binding was first observed.
+	FirstSeen string `json:"first_seen" toon:"first_seen"`
+	// Agent-observed process or container instance ID associated with the Pod.
+	InstanceID string `json:"instance_id" toon:"instance_id"`
+	// Timestamp the binding was last observed.
+	LastSeen string `json:"last_seen" toon:"last_seen"`
+	// Best-effort Pod identity observed on the host.
+	PodRef ServiceMapPodReference `json:"pod_ref" toon:"pod_ref"`
+	// Bounded machine-readable reasons explaining a non-canonical or partial result.
+	ReasonCodes []string `json:"reason_codes" toon:"reason_codes"`
+	// Machine-readable resolver result, such as `canonical`, `ambiguous`, `missing`, `not_covered`, `permission_denied`, or `unavailable`.
+	ResolutionStatus string `json:"resolution_status" toon:"resolution_status"`
+	// Agent evidence source, such as cgroup or container runtime metadata.
+	Source string `json:"source" toon:"source"`
+	// Product-level placement state. `canonical` means exactly one visible canonical context was resolved; `ambiguous` means multiple visible candidates remain; `provisional` preserves host-local evidence when canonical enrichment is unavailable or not visible.
+	Status string `json:"status" toon:"status"`
+}
+
+// ServiceMapKubernetesServiceReference is generated from the Flashduty OpenAPI schema.
+type ServiceMapKubernetesServiceReference struct {
+	// Service name.
+	Name string `json:"name" toon:"name"`
+	// Service namespace.
+	Namespace string `json:"namespace" toon:"namespace"`
+	// Service UID, when available.
+	Uid string `json:"uid" toon:"uid"`
+}
+
+// ServiceMapKubernetesWorkloadReference is generated from the Flashduty OpenAPI schema.
+type ServiceMapKubernetesWorkloadReference struct {
+	// Workload kind, such as Deployment, StatefulSet, or DaemonSet.
+	Kind string `json:"kind" toon:"kind"`
+	// Workload name.
+	Name string `json:"name" toon:"name"`
+	// Workload UID.
+	Uid string `json:"uid" toon:"uid"`
+}
+
 // ServiceMapNode is generated from the Flashduty OpenAPI schema.
 type ServiceMapNode struct {
 	// Container name, when the node runs in a container.
@@ -8352,8 +8418,10 @@ type ServiceMapNode struct {
 	ImageVersion string `json:"image_version" toon:"image_version"`
 	// Number of instances folded into this node, when the node represents a workload replica set.
 	InstanceCount int64 `json:"instance_count" toon:"instance_count"`
-	// Node kind, e.g. `process`, `container`.
+	// Runtime carrier type. Current agents emit `bare_process` or `container`; consumers should tolerate unknown future values.
 	Kind string `json:"kind" toon:"kind"`
+	// Bounded entity-to-Pod placement evidence. Canonical context is included only when visible to the caller and the product projection is available.
+	KubernetesPlacements []ServiceMapKubernetesPlacement `json:"kubernetes_placements" toon:"kubernetes_placements"`
 	// Timestamp the node was last observed.
 	LastSeen string `json:"last_seen" toon:"last_seen"`
 	// Kubernetes namespace, when known.
@@ -8364,6 +8432,20 @@ type ServiceMapNode struct {
 	SystemdUnit string `json:"systemd_unit" toon:"systemd_unit"`
 	// Kubernetes workload name, when known.
 	WorkloadName string `json:"workload_name" toon:"workload_name"`
+}
+
+// ServiceMapPodReference is generated from the Flashduty OpenAPI schema.
+type ServiceMapPodReference struct {
+	// Container name associated with the entity, when known.
+	ContainerName string `json:"container_name" toon:"container_name"`
+	// Pod name, when known.
+	Name string `json:"name" toon:"name"`
+	// Pod namespace, when known.
+	Namespace string `json:"namespace" toon:"namespace"`
+	// Kubernetes node name hosting the Pod, when known.
+	NodeName string `json:"node_name" toon:"node_name"`
+	// Kubernetes Pod UID.
+	Uid string `json:"uid" toon:"uid"`
 }
 
 // ServiceMapResolutionCandidate is generated from the Flashduty OpenAPI schema.
@@ -8522,6 +8604,38 @@ type ServiceMapSummaryNeighbor struct {
 	TargetHostID string `json:"target_host_id" toon:"target_host_id"`
 }
 
+// ServiceMapSummaryPodPlacement is generated from the Flashduty OpenAPI schema.
+type ServiceMapSummaryPodPlacement struct {
+	// Number of visible canonical candidates.
+	CandidateCount int64 `json:"candidate_count" toon:"candidate_count"`
+	// Caller-visible canonical context, when uniquely resolved.
+	Canonical *ServiceMapCanonicalPodPlacement `json:"canonical" toon:"canonical"`
+	// Agent confidence classification.
+	Confidence string `json:"confidence" toon:"confidence"`
+	// Human-readable entity name.
+	DisplayName string `json:"display_name" toon:"display_name"`
+	// Entity associated with the Pod.
+	EntityID string `json:"entity_id" toon:"entity_id"`
+	// Host containing the entity.
+	HostID string `json:"host_id" toon:"host_id"`
+	// Best-effort Pod namespace.
+	Namespace string `json:"namespace" toon:"namespace"`
+	// Best-effort Kubernetes node name.
+	NodeName string `json:"node_name" toon:"node_name"`
+	// Best-effort Pod name.
+	PodName string `json:"pod_name" toon:"pod_name"`
+	// Kubernetes Pod UID.
+	PodUid string `json:"pod_uid" toon:"pod_uid"`
+	// Bounded resolver reason codes.
+	ReasonCodes []string `json:"reason_codes" toon:"reason_codes"`
+	// Machine-readable canonical resolver result.
+	ResolutionStatus string `json:"resolution_status" toon:"resolution_status"`
+	// Agent binding evidence source.
+	Source string `json:"source" toon:"source"`
+	// Product-level placement state: `canonical` is uniquely resolved, `ambiguous` has multiple visible candidates, and `provisional` contains only host-local evidence.
+	Status string `json:"status" toon:"status"`
+}
+
 // ServiceMapSummaryRequest is generated from the Flashduty OpenAPI schema.
 type ServiceMapSummaryRequest struct {
 	// Host (and optional entity) to summarize.
@@ -8546,6 +8660,10 @@ type ServiceMapSummaryResponse struct {
 	Freshness ServiceMapFreshness `json:"freshness" toon:"freshness"`
 	// `current` if the summary reflects the live graph; `last_known_good` if the latest ingestion is unhealthy and this reflects the last authoritative graph instead.
 	GraphRole string `json:"graph_role" toon:"graph_role"`
+	// Up to 32 entity-to-Pod placements selected for AI context, with caller-visible canonical K8s context when available.
+	KubernetesPlacements []ServiceMapSummaryPodPlacement `json:"kubernetes_placements" toon:"kubernetes_placements"`
+	// Number of additional placements omitted by topology or summary bounds.
+	KubernetesPlacementsOmitted int64 `json:"kubernetes_placements_omitted" toon:"kubernetes_placements_omitted"`
 	// False when `graph_role=last_known_good`, i.e. the most recent collection attempt was not authoritative.
 	LatestCollectionAuthoritative bool `json:"latest_collection_authoritative" toon:"latest_collection_authoritative"`
 	// Unix timestamp in milliseconds of the most recent non-authoritative health signal, when more recent than the current graph.
@@ -8594,6 +8712,10 @@ type ServiceMapTopologyCoverage struct {
 	Ipv6OnlyUnknownListenerCount int64 `json:"ipv6_only_unknown_listener_count" toon:"ipv6_only_unknown_listener_count"`
 	// Number of IPv6 wildcard (unspecified-address) listeners observed.
 	Ipv6WildcardListenerCount int64 `json:"ipv6_wildcard_listener_count" toon:"ipv6_wildcard_listener_count"`
+	// Number of returned placements with multiple visible canonical candidates.
+	KubernetesAmbiguousCount int64 `json:"kubernetes_ambiguous_count" toon:"kubernetes_ambiguous_count"`
+	// Number of returned placements resolved to one visible canonical Pod context.
+	KubernetesCanonicalCount int64 `json:"kubernetes_canonical_count" toon:"kubernetes_canonical_count"`
 	// Aggregate Kubernetes enrichment coverage across loaded hosts (worst per-host status wins).
 	//
 	// | Value | Meaning |
@@ -8603,6 +8725,14 @@ type ServiceMapTopologyCoverage struct {
 	// | `unavailable` | At least one host has no pod bindings at all. |
 	// | `unknown` | No host loaded, or a host reported an unrecognized status. |
 	KubernetesEnrichmentStatus string `json:"kubernetes_enrichment_status" toon:"kubernetes_enrichment_status"`
+	// Number of entity-to-Pod placements omitted because a per-node or topology-wide bound was reached.
+	KubernetesPlacementsOmitted int64 `json:"kubernetes_placements_omitted" toon:"kubernetes_placements_omitted"`
+	// Number of bounded entity-to-Pod placements returned across all topology nodes.
+	KubernetesPlacementsReturned int64 `json:"kubernetes_placements_returned" toon:"kubernetes_placements_returned"`
+	// Availability of the visibility-filtered canonical Kubernetes projection. `not_applicable` means no placement needs resolution; `complete` means every returned placement resolved canonically; `partial` means only some placements resolved canonically or bounded details were omitted; `unavailable` means no placement could be resolved canonically. Omitted while the product projection is disabled.
+	KubernetesProjectionStatus string `json:"kubernetes_projection_status" toon:"kubernetes_projection_status"`
+	// Number of returned placements that remain based only on host-local Agent evidence.
+	KubernetesProvisionalCount int64 `json:"kubernetes_provisional_count" toon:"kubernetes_provisional_count"`
 	// Aggregate listener address-family (IPv4/IPv6) resolution coverage across loaded hosts (worst per-host status wins).
 	//
 	// | Value | Meaning |

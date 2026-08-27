@@ -34964,6 +34964,10 @@
             "format": "int64",
             "description": "所属协作空间 ID，可通过 `POST /channel/list` 获取。"
           },
+          "priority": {
+            "type": "integer",
+            "description": "匹配优先级,数值越小越优先。"
+          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -35199,10 +35203,6 @@
             "type": "integer",
             "format": "int64",
             "description": "所属协作空间 ID，可通过 `POST /channel/list` 获取。"
-          },
-          "priority": {
-            "type": "integer",
-            "description": "匹配优先级,数值越小越优先。"
           },
           "rule_name": {
             "type": "string",
@@ -56002,7 +56002,9 @@
           "truncated_hosts",
           "network_inventory_status",
           "kubernetes_enrichment_status",
-          "listener_address_family_status"
+          "listener_address_family_status",
+          "kubernetes_placements_returned",
+          "kubernetes_placements_omitted"
         ],
         "properties": {
           "direction": {
@@ -56053,6 +56055,41 @@
               "unavailable"
             ],
             "description": "已加载主机的 Kubernetes 增强覆盖聚合状态（取所有主机中最差的一档）。\n\n| 值 | 含义 |\n|---|---|\n| `complete` | 所有主机的实体均有完整的 Pod 绑定元数据。 |\n| `partial` | 至少一台主机存在绑定但部分 Pod 元数据缺失，或有绑定被丢弃。 |\n| `unavailable` | 至少一台主机没有任何 Pod 绑定。 |\n| `unknown` | 未加载任何主机，或某主机上报了无法识别的状态。 |"
+          },
+          "kubernetes_placements_returned": {
+            "type": "integer",
+            "format": "int64",
+            "description": "所有拓扑节点中实际返回的、有界的实体到 Pod 关联数量。"
+          },
+          "kubernetes_placements_omitted": {
+            "type": "integer",
+            "format": "int64",
+            "description": "由于达到单节点或整张拓扑上限而省略的实体到 Pod 关联数量。"
+          },
+          "kubernetes_projection_status": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "complete",
+              "partial",
+              "unavailable"
+            ],
+            "description": "经过可见性过滤的 canonical Kubernetes 投影状态。`not_applicable` 表示没有需要解析的关联；`complete` 表示所有返回关联均完成 canonical 解析；`partial` 表示仅部分完成 canonical 解析或有界详情被省略；`unavailable` 表示没有关联能够完成 canonical 解析。产品投影未启用时省略。"
+          },
+          "kubernetes_canonical_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "唯一解析到调用方可见 canonical Pod 上下文的关联数量。"
+          },
+          "kubernetes_ambiguous_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "存在多个调用方可见 canonical 候选的关联数量。"
+          },
+          "kubernetes_provisional_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "仍然仅基于主机侧 Agent 证据的关联数量。"
           },
           "listener_address_family_status": {
             "type": "string",
@@ -56256,7 +56293,7 @@
           },
           "kind": {
             "type": "string",
-            "description": "节点类型，例如 `process`、`container`。"
+            "description": "运行载体类型。当前 Agent 输出 `bare_process` 或 `container`；消费方应兼容未来未知值。"
           },
           "display_name": {
             "type": "string",
@@ -56309,6 +56346,206 @@
             "type": "string",
             "format": "date-time",
             "description": "最近一次观测到该节点的时间。"
+          },
+          "kubernetes_placements": {
+            "type": "array",
+            "description": "有界的实体到 Pod 关联证据。只有 canonical 上下文对调用方可见且产品投影可用时才会返回该上下文。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapKubernetesPlacement"
+            }
+          }
+        }
+      },
+      "ServiceMapPodReference": {
+        "type": "object",
+        "description": "稳定的 Pod 身份，以及 Agent 或 canonical 投影获得的 best-effort 元数据。",
+        "required": [
+          "uid"
+        ],
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "Kubernetes Pod UID。"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Pod 命名空间（如果已知）。"
+          },
+          "name": {
+            "type": "string",
+            "description": "Pod 名称（如果已知）。"
+          },
+          "node_name": {
+            "type": "string",
+            "description": "承载 Pod 的 Kubernetes 节点名称（如果已知）。"
+          },
+          "container_name": {
+            "type": "string",
+            "description": "与实体关联的容器名称（如果已知）。"
+          }
+        }
+      },
+      "ServiceMapKubernetesWorkloadReference": {
+        "type": "object",
+        "description": "拥有该 Pod 的 canonical Kubernetes 工作负载。",
+        "required": [
+          "kind",
+          "uid",
+          "name"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "工作负载类型，例如 Deployment、StatefulSet 或 DaemonSet。"
+          },
+          "uid": {
+            "type": "string",
+            "description": "工作负载 UID。"
+          },
+          "name": {
+            "type": "string",
+            "description": "工作负载名称。"
+          }
+        }
+      },
+      "ServiceMapKubernetesServiceReference": {
+        "type": "object",
+        "description": "选择了 canonical Pod 的 Kubernetes Service。",
+        "required": [
+          "namespace",
+          "name"
+        ],
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "description": "Service 命名空间。"
+          },
+          "name": {
+            "type": "string",
+            "description": "Service 名称。"
+          },
+          "uid": {
+            "type": "string",
+            "description": "Service UID（如果可用）。"
+          }
+        }
+      },
+      "ServiceMapCanonicalPodPlacement": {
+        "type": "object",
+        "description": "从 Safari current context cache 解析并经过可见性过滤的 canonical Kubernetes 上下文。",
+        "required": [
+          "canonical_cluster_id",
+          "context_revision",
+          "source_observed_at_ms",
+          "pod_ref"
+        ],
+        "properties": {
+          "canonical_cluster_id": {
+            "type": "string",
+            "description": "从 Kubernetes 集群自身派生的稳定集群身份，而非 Agent 别名。"
+          },
+          "context_revision": {
+            "type": "string",
+            "description": "本次解析使用的 canonical K8s current context 修订版本。"
+          },
+          "source_observed_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Safari 观测到源上下文的 Unix 毫秒时间戳。"
+          },
+          "pod_ref": {
+            "$ref": "#/components/schemas/ServiceMapPodReference",
+            "description": "Canonical Pod 身份和元数据。"
+          },
+          "host_network": {
+            "type": "boolean",
+            "description": "Pod 使用主机网络命名空间时为 true。"
+          },
+          "workload": {
+            "$ref": "#/components/schemas/ServiceMapKubernetesWorkloadReference",
+            "nullable": true,
+            "description": "解析得到的 canonical 所属工作负载。"
+          },
+          "services": {
+            "type": "array",
+            "description": "选择该 Pod 的有界 Service 列表。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapKubernetesServiceReference"
+            }
+          },
+          "services_omitted": {
+            "type": "integer",
+            "format": "int64",
+            "description": "由于响应边界而省略的匹配 Service 数量。"
+          }
+        }
+      },
+      "ServiceMapKubernetesPlacement": {
+        "type": "object",
+        "description": "实体到 Pod 的证据，以及可选的、调用方可见的 canonical K8s 解析结果。",
+        "required": [
+          "status",
+          "instance_id",
+          "pod_ref",
+          "source",
+          "confidence"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "canonical",
+              "ambiguous",
+              "provisional"
+            ],
+            "description": "产品级关联状态。`canonical` 表示唯一解析到一个可见 canonical 上下文；`ambiguous` 表示仍有多个可见候选；当 canonical 增强不可用或不可见时，`provisional` 会保留主机侧证据。"
+          },
+          "resolution_status": {
+            "type": "string",
+            "description": "机器可读的解析结果，例如 `canonical`、`ambiguous`、`missing`、`not_covered`、`permission_denied` 或 `unavailable`。"
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "解释非 canonical 或部分结果的有界机器可读原因。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidate_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "参与解析的可见 canonical 候选数量。"
+          },
+          "instance_id": {
+            "type": "string",
+            "description": "Agent 观测到的、与 Pod 关联的进程或容器实例 ID。"
+          },
+          "pod_ref": {
+            "$ref": "#/components/schemas/ServiceMapPodReference",
+            "description": "主机上 best-effort 观测到的 Pod 身份。"
+          },
+          "canonical": {
+            "$ref": "#/components/schemas/ServiceMapCanonicalPodPlacement",
+            "nullable": true,
+            "description": "仅在唯一解析到一个可见候选时出现的 canonical 上下文。"
+          },
+          "source": {
+            "type": "string",
+            "description": "Agent 证据来源，例如 cgroup 或容器运行时元数据。"
+          },
+          "confidence": {
+            "type": "string",
+            "description": "Agent 对主机侧绑定的置信度分类。"
+          },
+          "first_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "首次观测到该绑定的时间。"
+          },
+          "last_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "最后一次观测到该绑定的时间。"
           }
         }
       },
@@ -56683,6 +56920,7 @@
           "truncated",
           "resolution_counts",
           "neighbors",
+          "kubernetes_placements_omitted",
           "context_ref_detail"
         ],
         "properties": {
@@ -56772,9 +57010,99 @@
               "$ref": "#/components/schemas/ServiceMapSummaryNeighbor"
             }
           },
+          "kubernetes_placements": {
+            "type": "array",
+            "description": "为 AI 上下文选择的最多 32 条实体到 Pod 关联；可用时包含调用方可见的 canonical K8s 上下文。",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapSummaryPodPlacement"
+            }
+          },
+          "kubernetes_placements_omitted": {
+            "type": "integer",
+            "format": "int64",
+            "description": "由于拓扑或摘要边界而省略的其他关联数量。"
+          },
           "context_ref_detail": {
             "type": "string",
             "description": "为大模型提示词预先渲染好的自然语言证据摘要文本，是对上述结构化字段的便捷呈现，结构化字段本身才是权威来源。"
+          }
+        }
+      },
+      "ServiceMapSummaryPodPlacement": {
+        "type": "object",
+        "description": "投影到 AI 就绪 ServiceMap 摘要中的有界实体到 Pod 关联。",
+        "required": [
+          "host_id",
+          "entity_id",
+          "status",
+          "pod_uid"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "实体所在的主机。"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "与 Pod 关联的实体。"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "便于阅读的实体名称。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "canonical",
+              "ambiguous",
+              "provisional"
+            ],
+            "description": "产品级关联状态：`canonical` 表示唯一解析成功，`ambiguous` 表示存在多个可见候选，`provisional` 表示仅包含主机侧证据。"
+          },
+          "resolution_status": {
+            "type": "string",
+            "description": "机器可读的 canonical 解析结果。"
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "有界的解析原因代码。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidate_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "可见 canonical 候选数量。"
+          },
+          "pod_uid": {
+            "type": "string",
+            "description": "Kubernetes Pod UID。"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Best-effort Pod 命名空间。"
+          },
+          "pod_name": {
+            "type": "string",
+            "description": "Best-effort Pod 名称。"
+          },
+          "node_name": {
+            "type": "string",
+            "description": "Best-effort Kubernetes 节点名称。"
+          },
+          "canonical": {
+            "$ref": "#/components/schemas/ServiceMapCanonicalPodPlacement",
+            "nullable": true,
+            "description": "唯一解析成功时返回的调用方可见 canonical 上下文。"
+          },
+          "source": {
+            "type": "string",
+            "description": "Agent 绑定证据来源。"
+          },
+          "confidence": {
+            "type": "string",
+            "description": "Agent 置信度分类。"
           }
         }
       },

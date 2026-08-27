@@ -34973,6 +34973,10 @@
             "format": "int64",
             "description": "Owning channel ID; obtain it from `POST /channel/list`."
           },
+          "priority": {
+            "type": "integer",
+            "description": "Evaluation priority. Lower runs first."
+          },
           "rule_name": {
             "type": "string",
             "minLength": 1,
@@ -35208,10 +35212,6 @@
             "type": "integer",
             "format": "int64",
             "description": "Owning channel ID; obtain it from `POST /channel/list`."
-          },
-          "priority": {
-            "type": "integer",
-            "description": "Evaluation priority. Lower runs first."
           },
           "rule_name": {
             "type": "string",
@@ -56011,7 +56011,9 @@
           "truncated_hosts",
           "network_inventory_status",
           "kubernetes_enrichment_status",
-          "listener_address_family_status"
+          "listener_address_family_status",
+          "kubernetes_placements_returned",
+          "kubernetes_placements_omitted"
         ],
         "properties": {
           "direction": {
@@ -56062,6 +56064,41 @@
               "unavailable"
             ],
             "description": "Aggregate Kubernetes enrichment coverage across loaded hosts (worst per-host status wins).\n\n| Value | Meaning |\n|---|---|\n| `complete` | Every host has full pod-binding metadata for its entities. |\n| `partial` | At least one host has bindings but some pod metadata is missing or bindings were dropped. |\n| `unavailable` | At least one host has no pod bindings at all. |\n| `unknown` | No host loaded, or a host reported an unrecognized status. |"
+          },
+          "kubernetes_placements_returned": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of bounded entity-to-Pod placements returned across all topology nodes."
+          },
+          "kubernetes_placements_omitted": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of entity-to-Pod placements omitted because a per-node or topology-wide bound was reached."
+          },
+          "kubernetes_projection_status": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "complete",
+              "partial",
+              "unavailable"
+            ],
+            "description": "Availability of the visibility-filtered canonical Kubernetes projection. `not_applicable` means no placement needs resolution; `complete` means every returned placement resolved canonically; `partial` means only some placements resolved canonically or bounded details were omitted; `unavailable` means no placement could be resolved canonically. Omitted while the product projection is disabled."
+          },
+          "kubernetes_canonical_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of returned placements resolved to one visible canonical Pod context."
+          },
+          "kubernetes_ambiguous_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of returned placements with multiple visible canonical candidates."
+          },
+          "kubernetes_provisional_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of returned placements that remain based only on host-local Agent evidence."
           },
           "listener_address_family_status": {
             "type": "string",
@@ -56265,7 +56302,7 @@
           },
           "kind": {
             "type": "string",
-            "description": "Node kind, e.g. `process`, `container`."
+            "description": "Runtime carrier type. Current agents emit `bare_process` or `container`; consumers should tolerate unknown future values."
           },
           "display_name": {
             "type": "string",
@@ -56318,6 +56355,206 @@
             "type": "string",
             "format": "date-time",
             "description": "Timestamp the node was last observed."
+          },
+          "kubernetes_placements": {
+            "type": "array",
+            "description": "Bounded entity-to-Pod placement evidence. Canonical context is included only when visible to the caller and the product projection is available.",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapKubernetesPlacement"
+            }
+          }
+        }
+      },
+      "ServiceMapPodReference": {
+        "type": "object",
+        "description": "A stable Pod identity plus best-effort metadata observed by the Agent or canonical projection.",
+        "required": [
+          "uid"
+        ],
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "Kubernetes Pod UID."
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Pod namespace, when known."
+          },
+          "name": {
+            "type": "string",
+            "description": "Pod name, when known."
+          },
+          "node_name": {
+            "type": "string",
+            "description": "Kubernetes node name hosting the Pod, when known."
+          },
+          "container_name": {
+            "type": "string",
+            "description": "Container name associated with the entity, when known."
+          }
+        }
+      },
+      "ServiceMapKubernetesWorkloadReference": {
+        "type": "object",
+        "description": "Canonical Kubernetes workload owning a Pod.",
+        "required": [
+          "kind",
+          "uid",
+          "name"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "Workload kind, such as Deployment, StatefulSet, or DaemonSet."
+          },
+          "uid": {
+            "type": "string",
+            "description": "Workload UID."
+          },
+          "name": {
+            "type": "string",
+            "description": "Workload name."
+          }
+        }
+      },
+      "ServiceMapKubernetesServiceReference": {
+        "type": "object",
+        "description": "A Kubernetes Service selecting the canonical Pod.",
+        "required": [
+          "namespace",
+          "name"
+        ],
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "description": "Service namespace."
+          },
+          "name": {
+            "type": "string",
+            "description": "Service name."
+          },
+          "uid": {
+            "type": "string",
+            "description": "Service UID, when available."
+          }
+        }
+      },
+      "ServiceMapCanonicalPodPlacement": {
+        "type": "object",
+        "description": "Visibility-filtered canonical Kubernetes context resolved from Safari's current context cache.",
+        "required": [
+          "canonical_cluster_id",
+          "context_revision",
+          "source_observed_at_ms",
+          "pod_ref"
+        ],
+        "properties": {
+          "canonical_cluster_id": {
+            "type": "string",
+            "description": "Stable cluster identity derived from the Kubernetes cluster rather than an Agent alias."
+          },
+          "context_revision": {
+            "type": "string",
+            "description": "Revision of the canonical K8s current context used for this resolution."
+          },
+          "source_observed_at_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds when Safari observed the source context."
+          },
+          "pod_ref": {
+            "$ref": "#/components/schemas/ServiceMapPodReference",
+            "description": "Canonical Pod identity and metadata."
+          },
+          "host_network": {
+            "type": "boolean",
+            "description": "True when the Pod uses the host network namespace."
+          },
+          "workload": {
+            "$ref": "#/components/schemas/ServiceMapKubernetesWorkloadReference",
+            "nullable": true,
+            "description": "Canonical owning workload, when resolved."
+          },
+          "services": {
+            "type": "array",
+            "description": "Bounded Services selecting the Pod.",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapKubernetesServiceReference"
+            }
+          },
+          "services_omitted": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of matching Services omitted by response bounds."
+          }
+        }
+      },
+      "ServiceMapKubernetesPlacement": {
+        "type": "object",
+        "description": "Entity-to-Pod evidence with an optional caller-visible canonical K8s resolution.",
+        "required": [
+          "status",
+          "instance_id",
+          "pod_ref",
+          "source",
+          "confidence"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "canonical",
+              "ambiguous",
+              "provisional"
+            ],
+            "description": "Product-level placement state. `canonical` means exactly one visible canonical context was resolved; `ambiguous` means multiple visible candidates remain; `provisional` preserves host-local evidence when canonical enrichment is unavailable or not visible."
+          },
+          "resolution_status": {
+            "type": "string",
+            "description": "Machine-readable resolver result, such as `canonical`, `ambiguous`, `missing`, `not_covered`, `permission_denied`, or `unavailable`."
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "Bounded machine-readable reasons explaining a non-canonical or partial result.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidate_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of visible canonical candidates considered."
+          },
+          "instance_id": {
+            "type": "string",
+            "description": "Agent-observed process or container instance ID associated with the Pod."
+          },
+          "pod_ref": {
+            "$ref": "#/components/schemas/ServiceMapPodReference",
+            "description": "Best-effort Pod identity observed on the host."
+          },
+          "canonical": {
+            "$ref": "#/components/schemas/ServiceMapCanonicalPodPlacement",
+            "nullable": true,
+            "description": "Canonical context, present only when exactly one visible candidate was resolved."
+          },
+          "source": {
+            "type": "string",
+            "description": "Agent evidence source, such as cgroup or container runtime metadata."
+          },
+          "confidence": {
+            "type": "string",
+            "description": "Agent confidence classification for the host-local binding."
+          },
+          "first_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp the binding was first observed."
+          },
+          "last_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp the binding was last observed."
           }
         }
       },
@@ -56692,6 +56929,7 @@
           "truncated",
           "resolution_counts",
           "neighbors",
+          "kubernetes_placements_omitted",
           "context_ref_detail"
         ],
         "properties": {
@@ -56781,9 +57019,99 @@
               "$ref": "#/components/schemas/ServiceMapSummaryNeighbor"
             }
           },
+          "kubernetes_placements": {
+            "type": "array",
+            "description": "Up to 32 entity-to-Pod placements selected for AI context, with caller-visible canonical K8s context when available.",
+            "items": {
+              "$ref": "#/components/schemas/ServiceMapSummaryPodPlacement"
+            }
+          },
+          "kubernetes_placements_omitted": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of additional placements omitted by topology or summary bounds."
+          },
           "context_ref_detail": {
             "type": "string",
             "description": "Pre-rendered natural-language evidence string summarizing this response, designed for LLM prompts. The structured fields above are the source of truth; this is a convenience rendering of them."
+          }
+        }
+      },
+      "ServiceMapSummaryPodPlacement": {
+        "type": "object",
+        "description": "A bounded entity-to-Pod placement projected into the AI-ready ServiceMap summary.",
+        "required": [
+          "host_id",
+          "entity_id",
+          "status",
+          "pod_uid"
+        ],
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "Host containing the entity."
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "Entity associated with the Pod."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Human-readable entity name."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "canonical",
+              "ambiguous",
+              "provisional"
+            ],
+            "description": "Product-level placement state: `canonical` is uniquely resolved, `ambiguous` has multiple visible candidates, and `provisional` contains only host-local evidence."
+          },
+          "resolution_status": {
+            "type": "string",
+            "description": "Machine-readable canonical resolver result."
+          },
+          "reason_codes": {
+            "type": "array",
+            "description": "Bounded resolver reason codes.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidate_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of visible canonical candidates."
+          },
+          "pod_uid": {
+            "type": "string",
+            "description": "Kubernetes Pod UID."
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Best-effort Pod namespace."
+          },
+          "pod_name": {
+            "type": "string",
+            "description": "Best-effort Pod name."
+          },
+          "node_name": {
+            "type": "string",
+            "description": "Best-effort Kubernetes node name."
+          },
+          "canonical": {
+            "$ref": "#/components/schemas/ServiceMapCanonicalPodPlacement",
+            "nullable": true,
+            "description": "Caller-visible canonical context, when uniquely resolved."
+          },
+          "source": {
+            "type": "string",
+            "description": "Agent binding evidence source."
+          },
+          "confidence": {
+            "type": "string",
+            "description": "Agent confidence classification."
           }
         }
       },
