@@ -129,9 +129,6 @@ type OrFilterGroup [][]FilterCondition
 // PermissionFactorListResponse is a list response payload.
 type PermissionFactorListResponse []PermissionFactorItem
 
-// QueryRowsResponse is a list response payload.
-type QueryRowsResponse []QueryRow
-
 // RuleAuditListResponse is a list response payload.
 type RuleAuditListResponse []AlertRuleAudit
 
@@ -6064,23 +6061,6 @@ type PreviewIncidentCardFixedField struct {
 	Value string `json:"value" toon:"value"`
 }
 
-// PreviewSyncRequest is generated from the Flashduty OpenAPI schema.
-type PreviewSyncRequest struct {
-	// Additional datasource-type-specific query arguments (string keys and values), e.g. `sls.project` and `sls.logstore` for SLS, `es.type` for Elasticsearch, `loki.type` and `loki.limit` for Loki.
-	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
-	// Shift the query window backward by this many seconds to compensate for data ingestion latency.
-	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
-	// Datasource display name as configured in the account.
-	DsName string `json:"ds_name" toon:"ds_name"`
-	// Datasource type, e.g. `prometheus`, `loki`, `elasticsearch`.
-	DsType string `json:"ds_type" toon:"ds_type"`
-	// Query expression. Format depends on `ds_type` (PromQL for Prometheus, LogQL for Loki, etc.).
-	Expr string `json:"expr" toon:"expr"`
-}
-
-// PreviewSyncResponse is generated from the Flashduty OpenAPI schema.
-type PreviewSyncResponse struct{}
-
 // PreviewTemplateRequest is generated from the Flashduty OpenAPI schema.
 type PreviewTemplateRequest struct {
 	// Template content to render.
@@ -6174,30 +6154,6 @@ type QueryResult struct {
 	Records *[]any `json:"records,omitempty" toon:"records,omitempty"`
 	// Instant samples with their complete label sets.
 	Samples *[]QuerySample `json:"samples,omitempty" toon:"samples,omitempty"`
-}
-
-// QueryRow is generated from the Flashduty OpenAPI schema.
-type QueryRow struct {
-	// String-valued fields (labels, log fields, SQL columns).
-	Fields map[string]string `json:"fields" toon:"fields"`
-	// Numeric fields. For metric queries the canonical key is `__value__`. May be `null` for detail-oriented sources.
-	Values map[string]float64 `json:"values" toon:"values"`
-}
-
-// QueryRowsRequest is generated from the Flashduty OpenAPI schema.
-type QueryRowsRequest struct {
-	// Optional consistency check. Must equal the authenticated account when supplied; mismatched values are rejected. Business execution always uses the authenticated account.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings, and keys are always namespaced by source (e.g. `sls.project`, `loki.type`). Validation depends on `ds_type`: SLS requires `sls.project` + `sls.logstore`. Elasticsearch accepts `es.type` of `sql`, or omitted — any other value is rejected. Loki and VictoriaLogs accept `<source>.type` of `stats`, `raw`, or omitted; `raw` additionally requires a time range, either `<source>.start` + `<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit` (unit one of `s`, `m`, `h`, `d`). Prometheus and the remaining SQL sources ignore `args` entirely.
-	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
-	// Look-back offset in seconds applied to point-in-time queries (Prometheus, Loki stats, VictoriaLogs stats). Ignored for raw / detail queries.
-	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
-	// Data source name; must match a configured data source under the tenant.
-	DsName string `json:"ds_name" toon:"ds_name"`
-	// Data source type; must match a configured data source under the tenant. Examples: `prometheus`, `loki`, `victorialogs`, `sls`, `elasticsearch`, `mysql`, `postgres`, `oracle`, `clickhouse`.
-	DsType string `json:"ds_type" toon:"ds_type"`
-	// Query expression. Syntax depends on `ds_type` and is interpreted by the corresponding monit-edge client (PromQL for Prometheus, LogQL for Loki, SQL for SQL sources, etc.).
-	Expr string `json:"expr" toon:"expr"`
 }
 
 // QuerySample is generated from the Flashduty OpenAPI schema.
@@ -6624,12 +6580,6 @@ type RuleFieldsUpdateRequest struct {
 	RepeatTotal int64 `json:"repeat_total,omitempty" toon:"repeat_total,omitempty"`
 	// Timezone in which the rule executes. IANA timezone name; defaults to `Asia/Shanghai`.
 	Timezone string `json:"timezone,omitempty" toon:"timezone,omitempty"`
-}
-
-// RuleFolderIDRequest is generated from the Flashduty OpenAPI schema.
-type RuleFolderIDRequest struct {
-	// Folder ID to summarize. Obtainable via `POST /monit/folder/list`. Trigger statistics are returned grouped by direct child folder.
-	FolderID uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
 }
 
 // RuleIDRequest is generated from the Flashduty OpenAPI schema.

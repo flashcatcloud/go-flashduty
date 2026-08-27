@@ -221,20 +221,6 @@ func (s *AlertRulesService) WriteMove(ctx context.Context, req *RuleMoveRequest)
 	return out, resp, nil
 }
 
-// Get rule trigger status under folder.
-//
-// Return the rule trigger summary for all rules under a folder node and its descendants.
-//
-// API: POST /monit/rule/status (monit-rule-write-status).
-func (s *AlertRulesService) WriteStatus(ctx context.Context, req *RuleFolderIDRequest) (*RuleStatusResponse, *Response, error) {
-	out := new(RuleStatusResponse)
-	resp, err := s.client.do(ctx, "/monit/rule/status", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // Update alert rule.
 //
 // Replace the full configuration of an existing alert rule. All fields are overwritten.

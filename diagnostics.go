@@ -35,20 +35,6 @@ func (s *DiagnosticsService) QueryDiagnose(ctx context.Context, req *DiagnoseReq
 	return out, resp, nil
 }
 
-// Query data source rows.
-//
-// Deprecated. Run a synchronous ad-hoc query and return the historical flattened rows shape. Existing consumers should migrate to `/monit/query/data`, which preserves frames, records, and samples without forcing every result into legacy rows.
-//
-// API: POST /monit/query/rows (monit-read-query-rows).
-func (s *DiagnosticsService) QueryRows(ctx context.Context, req *QueryRowsRequest) (*QueryRowsResponse, *Response, error) {
-	out := new(QueryRowsResponse)
-	resp, err := s.client.do(ctx, "/monit/query/rows", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // List monitored targets.
 //
 // List the targets observed under the current tenant by the monit-agent route projection. Supports `target_locator` prefix search and cursor pagination. Use this to drive `target_locator` selection for `/monit/tools/catalog` and `/monit/tools/invoke`.

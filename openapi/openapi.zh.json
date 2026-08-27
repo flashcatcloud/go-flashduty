@@ -122,10 +122,6 @@
       "description": "AI SRE 智能体会话历史 —— 查询、查看与导出会话记录。"
     },
     {
-      "name": "Monitors/通用工具",
-      "description": "监控服务开通及数据预览工具。"
-    },
-    {
       "name": "AI SRE/自动化"
     },
     {
@@ -14130,83 +14126,6 @@
         }
       }
     },
-    "/monit/rule/status": {
-      "post": {
-        "operationId": "monit-rule-write-status",
-        "summary": "查看文件夹下规则触发状态",
-        "description": "返回指定文件夹节点及其子孙节点下所有规则的触发情况汇总。",
-        "tags": [
-          "Monitors/告警规则"
-        ],
-        "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **告警规则管理**（`monit`） |\n\n## 使用说明\n\n- 将 `folder_id` 设为 `0` 可获取所有文件夹的汇总。\n- 若文件夹包含规则数量过多，为保护系统会跳过计算。",
-          "href": "/zh/api-reference/monitors/alert-rules/monit-rule-write-status",
-          "metadata": {
-            "sidebarTitle": "查看文件夹下规则触发状态"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/RuleStatusResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": [
-                    {
-                      "folder_id": 100,
-                      "folder_name": "生产环境",
-                      "rule_total": 10,
-                      "triggered_rule_count": 2
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RuleFolderIDRequest"
-              },
-              "example": {
-                "folder_id": 100
-              }
-            }
-          }
-        }
-      }
-    },
     "/monit/rule/audits": {
       "post": {
         "operationId": "monit-rule-read-audits",
@@ -19888,7 +19807,7 @@
           "Monitors/诊断分析"
         ],
         "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | 每账户 **100 次/分钟**、**5 次/秒** |\n| 权限 | 任意有效的 `app_key`（只读，不受特定权限分类限制） |\n| Edge 版本要求 | 受支持的部署要求 **monit-edge v0.65.0 或更高版本** |\n\n## 使用说明\n\n- 此公开接口以 **monit-edge v0.65.0** 为最低受支持版本。迁移期间，WebAPI 仍保留旧版 Edge 适配器：query.v2 结果仍可能保留 frames、records 或 samples，而 legacy rows 只能提供其已保留的信息。这些适配器不会改变最低支持版本；旧协议缺少 query.v3 的取消和错误生命周期语义，legacy rows 已丢失的数据也无法恢复。\n- 公开响应格式固定为 `query_result.v1`，与 Edge 内部查询协议版本无关。必须根据 `result.kind`（`frames`、`records` 或 `samples`）分发结果，不要根据 `ds_type` 或 Edge 版本猜测结果形态。\n- `frames` 结果可以包含多个表格或时序 Frame。字段值按列组织，同一 Frame 中所有字段的值数量一致。\n- `records` 结果可以包含嵌套 JSON 和 null record。超出 JavaScript 安全整数范围的整数字面量会以十进制字符串返回。\n- `samples` 结果包含标签集合和瞬时值。值可以是数字，也可以是字符串 `NaN`、`+Inf` 或 `-Inf`。\n- 最终成功响应上限为 8 MiB，查询结果上限为 1,000 行。超限时请缩短时间范围、减少字段或在数据源侧聚合。\n- 查询失败使用非 2xx HTTP 状态码和标准错误 envelope。不要透明回退到已弃用的 `/monit/query/rows` 接口。\n- WebAPI 跨实例转发和 Edge 执行合计可能耗时 35 秒。客户端超时建议至少设为 40 秒，并在调用方放弃查询时向下传播取消信号。",
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | 每账户 **100 次/分钟**、**5 次/秒** |\n| 权限 | 任意有效的 `app_key`（只读，不受特定权限分类限制） |\n| Edge 版本要求 | 受支持的部署要求 **monit-edge v0.65.0 或更高版本** |\n\n## 使用说明\n\n- 此公开接口以 **monit-edge v0.65.0** 为最低受支持版本。迁移期间，WebAPI 仍保留旧版 Edge 适配器：query.v2 结果仍可能保留 frames、records 或 samples，而 legacy rows 只能提供其已保留的信息。这些适配器不会改变最低支持版本；旧协议缺少 query.v3 的取消和错误生命周期语义，legacy rows 已丢失的数据也无法恢复。\n- 公开响应格式固定为 `query_result.v1`，与 Edge 内部查询协议版本无关。必须根据 `result.kind`（`frames`、`records` 或 `samples`）分发结果，不要根据 `ds_type` 或 Edge 版本猜测结果形态。\n- `frames` 结果可以包含多个表格或时序 Frame。字段值按列组织，同一 Frame 中所有字段的值数量一致。\n- `records` 结果可以包含嵌套 JSON 和 null record。超出 JavaScript 安全整数范围的整数字面量会以十进制字符串返回。\n- `samples` 结果包含标签集合和瞬时值。值可以是数字，也可以是字符串 `NaN`、`+Inf` 或 `-Inf`。\n- 最终成功响应上限为 8 MiB，查询结果上限为 1,000 行。超限时请缩短时间范围、减少字段或在数据源侧聚合。\n- 查询失败使用非 2xx HTTP 状态码和标准错误 envelope。旧版 `/monit/query/rows` 接口已下线；数据源查询请使用此接口。\n- WebAPI 跨实例转发和 Edge 执行合计可能耗时 35 秒。客户端超时建议至少设为 40 秒，并在调用方放弃查询时向下传播取消信号。",
           "href": "/zh/api-reference/monitors/diagnostics/monit-read-query-data",
           "metadata": {
             "sidebarTitle": "查询结构化数据"
@@ -20002,92 +19921,6 @@
         }
       }
     },
-    "/monit/query/rows": {
-      "post": {
-        "operationId": "monit-read-query-rows",
-        "summary": "查询数据源原始行",
-        "description": "已弃用。执行同步即席查询并返回历史扁平 rows 结构。现有调用方应迁移到 `/monit/query/data`；新接口会保留 frames、records 和 samples 的自然语义，不再把所有结果强制压成 legacy rows。",
-        "deprecated": true,
-        "tags": [
-          "Monitors/诊断分析"
-        ],
-        "x-mint": {
-          "content": "## 已弃用\n\n所有新集成请使用 [`POST /monit/query/data`](/zh/api-reference/monitors/diagnostics/monit-read-query-data)。本接口仅在现有前端和 AI SRE 调用方迁移期间保留。\n\n## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | 每账户 **100 次/分钟**、**5 次/秒** |\n| 权限 | 任意有效的 `app_key`（只读，不受特定权限分类限制） |\n\n## 使用说明\n\n- 请求通过 WebSocket 转发至 `monit-edge`；`ds_type` + `ds_name` 指定的数据源必须已存在于调用账户下。\n- 请求体中的 `account_id` 可选。若传入，必须与认证账户一致；不一致将被拒绝。\n- 参数校验失败使用标准错误 envelope。当 `monit-edge` 拒绝查询时，其 `{\"error\": {\"code\": ..., \"message\": ...}}` 响应体会被保留，HTTP 状态码与 Edge 错误码一致；错误码无效或缺失时返回 HTTP 500。请同时检查状态码和错误响应体。\n- monit-edge 强制行数上限；结果过多时返回 `error.message = \"too many rows\"`。请缩小时间范围或在数据源侧聚合。\n- `args` 是透传的多态 `string→string` 映射，语义取决于 `ds_type`（SLS 需要 `sls.project` + `sls.logstore`；Loki/VictoriaLogs 原始模式需要通过 `*.start`/`*.end` 或 `*.timespan.value`/`*.timespan.unit` 指定时间范围；Prometheus 和 SQL 数据源忽略该字段）。各数据源完整参数列表见 monit-webapi query-api 文档。",
-          "href": "/zh/api-reference/monitors/diagnostics/monit-read-query-rows",
-          "metadata": {
-            "sidebarTitle": "查询数据源原始行"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/QueryRowsRequest"
-              },
-              "example": {
-                "account_id": 10001,
-                "ds_type": "prometheus",
-                "ds_name": "prod-prom",
-                "expr": "up",
-                "delay_seconds": 30
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/QueryRowsResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": [
-                    {
-                      "fields": {
-                        "__name__": "up",
-                        "instance": "10.0.0.1:9100",
-                        "job": "node"
-                      },
-                      "values": {
-                        "__value__": 1
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
     "/monit/query/diagnose": {
       "post": {
         "operationId": "monit-read-query-diagnose",
@@ -20097,7 +19930,7 @@
           "Monitors/诊断分析"
         ],
         "x-mint": {
-          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **600 次/分钟**;**10 次/秒** 每账户 |\n| 权限 | 任意有效的 `app_key`(只读;不受特定权限分类约束) |\n\n## 使用说明\n\n- 这是诊断 / RCA 接口,而非原始数据查询接口——如需查看明细行,请配合 `/monit/query/rows` 使用。\n- 仅支持三种 `ds_type` 与 `operation` 组合：`loki` / `victorialogs` → `log_patterns`，`prometheus` → `metric_trends`。即使显式传入 `operation`，其他数据源也会被拒绝。\n- `methods` 选择要执行的分析方法;省略时,`log_patterns` 默认为 `pattern_snapshot + pattern_compare(previous_window)`,`metric_trends` 默认为 `single_window_shape + window_compare(previous_window)`。\n- `time_range` 单位为 Unix 秒;缺失或无效时默认最近 15 分钟;窗口宽度超过 6 小时将被拒绝。\n- 请求通过 WebSocket 转发至 `monit-edge`。长耗时:边缘侧执行可能耗时约 30 秒,叠加 webapi 开销。客户端超时应至少设置为 **35 秒**。\n- `options.*` 由边缘侧设置上限(`max_logs_scanned` ≤ 50 000,`max_patterns` ≤ 50,`examples_per_pattern` ≤ 3,`step_seconds` ∈ [15, 300],`max_series` ≤ 200,`topk` ≤ 50,`timeout_seconds` ≤ 30)。\n- 与 `/monit/query/rows` 一样存在两层错误:边缘侧执行错误以 HTTP 200 返回,响应体中带 `error` 对象——务必同时检查两层。\n- 日志样例在返回前会经过基础脱敏处理,响应中会带 `warnings: [\"examples redacted\"]`。不可作为原始日志使用。",
+          "content": "## 调用限制\n\n| 项 | 值 |\n| ------ | ----- |\n| 速率限制 | **600 次/分钟**;**10 次/秒** 每账户 |\n| 权限 | 任意有效的 `app_key`(只读;不受特定权限分类约束) |\n\n## 使用说明\n\n- 这是诊断 / RCA 接口,而非原始数据查询接口——如需查看明细行,请配合 `/monit/query/data` 使用。\n- 仅支持三种 `ds_type` 与 `operation` 组合：`loki` / `victorialogs` → `log_patterns`，`prometheus` → `metric_trends`。即使显式传入 `operation`，其他数据源也会被拒绝。\n- `methods` 选择要执行的分析方法;省略时,`log_patterns` 默认为 `pattern_snapshot + pattern_compare(previous_window)`,`metric_trends` 默认为 `single_window_shape + window_compare(previous_window)`。\n- `time_range` 单位为 Unix 秒;缺失或无效时默认最近 15 分钟;窗口宽度超过 6 小时将被拒绝。\n- 请求通过 WebSocket 转发至 `monit-edge`。长耗时:边缘侧执行可能耗时约 30 秒,叠加 webapi 开销。客户端超时应至少设置为 **35 秒**。\n- `options.*` 由边缘侧设置上限(`max_logs_scanned` ≤ 50 000,`max_patterns` ≤ 50,`examples_per_pattern` ≤ 3,`step_seconds` ∈ [15, 300],`max_series` ≤ 200,`topk` ≤ 50,`timeout_seconds` ≤ 30)。\n- 此接口存在两层错误:边缘侧执行错误以 HTTP 200 返回,响应体中带 `error` 对象——务必同时检查两层。\n- 日志样例在返回前会经过基础脱敏处理,响应中会带 `warnings: [\"examples redacted\"]`。不可作为原始日志使用。",
           "href": "/zh/api-reference/monitors/diagnostics/monit-read-query-diagnose",
           "metadata": {
             "sidebarTitle": "数据源诊断"
@@ -22175,85 +22008,6 @@
             "description": "Template ID."
           }
         ]
-      }
-    },
-    "/monit/preview/sync": {
-      "post": {
-        "operationId": "monit-preview-sync",
-        "summary": "同步预览数据源查询",
-        "description": "同步执行数据源查询并返回原始结果，用于在保存前预览告警规则表达式的效果。",
-        "tags": [
-          "Monitors/通用工具"
-        ],
-        "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **60 次/分钟**；**10 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- `ds_type` 须与数据源类型匹配，如 `prometheus`、`loki`。\n- `ds_name` 为账户中配置的数据源显示名称。\n- `delay_seconds` 将查询窗口向前偏移指定秒数，用于补偿数据摄入延迟。\n- 响应体为数据源返回的原始 JSON，其结构随数据源类型而异。",
-          "href": "/zh/api-reference/monitors/monitor-utilities/monit-preview-sync",
-          "metadata": {
-            "sidebarTitle": "同步预览数据源查询"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/PreviewSyncResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "status": "success",
-                    "data": {
-                      "resultType": "vector",
-                      "result": []
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PreviewSyncRequest"
-              },
-              "example": {
-                "ds_type": "prometheus",
-                "ds_name": "生产 Prometheus",
-                "expr": "rate(http_requests_total[5m])",
-                "delay_seconds": 0
-              }
-            }
-          }
-        }
       }
     },
     "/status-page/info": {
@@ -43591,16 +43345,6 @@
         "description": "成功时返回空对象。",
         "additionalProperties": false
       },
-      "RuleFolderIDRequest": {
-        "type": "object",
-        "properties": {
-          "folder_id": {
-            "type": "integer",
-            "format": "uint64",
-            "description": "要统计的文件夹 ID，可通过 `POST /monit/folder/list` 获取。服务端按直属子文件夹分组返回规则触发统计。"
-          }
-        }
-      },
       "RuleFieldsUpdateRequest": {
         "type": "object",
         "required": [
@@ -47884,12 +47628,44 @@
         }
       },
       "QueryDataRequest": {
-        "description": "稳定结构化查询接口的请求。字段与已弃用的 rows 接口一致。",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/QueryRowsRequest"
+        "type": "object",
+        "required": [
+          "ds_type",
+          "ds_name",
+          "expr"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "可选的一致性校验。若提供,必须等于已认证账户;不一致将被拒绝。业务执行始终使用已认证账户。"
+          },
+          "ds_type": {
+            "type": "string",
+            "description": "数据源类型;必须匹配租户下已配置的数据源。示例:`prometheus`、`loki`、`victorialogs`、`sls`、`elasticsearch`、`mysql`、`postgres`、`oracle`、`clickhouse`。"
+          },
+          "ds_name": {
+            "type": "string",
+            "description": "数据源名称;必须匹配租户下已配置的数据源。"
+          },
+          "expr": {
+            "type": "string",
+            "description": "查询表达式。语法取决于 `ds_type`,由对应的 monit-edge 客户端解释(Prometheus 用 PromQL,Loki 用 LogQL,SQL 类数据源用 SQL,等等)。"
+          },
+          "delay_seconds": {
+            "type": "integer",
+            "description": "应用于点查询(Prometheus、Loki stats、VictoriaLogs stats)的回看偏移,单位秒。明细 / raw 查询忽略该字段。",
+            "default": 0
+          },
+          "args": {
+            "type": "object",
+            "description": "透传给 monit-edge 的多态键值扩展参数。所有值必须是字符串，键一律按数据源加前缀（如 `sls.project`、`loki.type`）。校验规则取决于 `ds_type`：SLS 必须提供 `sls.project` 与 `sls.logstore`；Elasticsearch 的 `es.type` 只接受 `sql` 或不传，其他值一律拒绝；Loki 与 VictoriaLogs 的 `<source>.type` 接受 `stats`、`raw` 或不传，其中 `raw` 还必须给出时间范围——`<source>.start` + `<source>.end`，或 `<source>.timespan.value` + `<source>.timespan.unit`（单位取 `s`/`m`/`h`/`d`）。Prometheus 及其余 SQL 类数据源完全忽略 `args`。",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
-        ]
+        },
+        "description": "稳定结构化查询接口的请求参数。"
       },
       "QueryDataResponse": {
         "type": "object",
@@ -48112,72 +47888,6 @@
                 ]
               }
             ]
-          }
-        }
-      },
-      "QueryRowsRequest": {
-        "type": "object",
-        "required": [
-          "ds_type",
-          "ds_name",
-          "expr"
-        ],
-        "properties": {
-          "account_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "可选的一致性校验。若提供,必须等于已认证账户;不一致将被拒绝。业务执行始终使用已认证账户。"
-          },
-          "ds_type": {
-            "type": "string",
-            "description": "数据源类型;必须匹配租户下已配置的数据源。示例:`prometheus`、`loki`、`victorialogs`、`sls`、`elasticsearch`、`mysql`、`postgres`、`oracle`、`clickhouse`。"
-          },
-          "ds_name": {
-            "type": "string",
-            "description": "数据源名称;必须匹配租户下已配置的数据源。"
-          },
-          "expr": {
-            "type": "string",
-            "description": "查询表达式。语法取决于 `ds_type`,由对应的 monit-edge 客户端解释(Prometheus 用 PromQL,Loki 用 LogQL,SQL 类数据源用 SQL,等等)。"
-          },
-          "delay_seconds": {
-            "type": "integer",
-            "description": "应用于点查询(Prometheus、Loki stats、VictoriaLogs stats)的回看偏移,单位秒。明细 / raw 查询忽略该字段。",
-            "default": 0
-          },
-          "args": {
-            "type": "object",
-            "description": "透传给 monit-edge 的多态键值扩展参数。所有值必须是字符串，键一律按数据源加前缀（如 `sls.project`、`loki.type`）。校验规则取决于 `ds_type`：SLS 必须提供 `sls.project` 与 `sls.logstore`；Elasticsearch 的 `es.type` 只接受 `sql` 或不传，其他值一律拒绝；Loki 与 VictoriaLogs 的 `<source>.type` 接受 `stats`、`raw` 或不传，其中 `raw` 还必须给出时间范围——`<source>.start` + `<source>.end`，或 `<source>.timespan.value` + `<source>.timespan.unit`（单位取 `s`/`m`/`h`/`d`）。Prometheus 及其余 SQL 类数据源完全忽略 `args`。",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "QueryRowsResponse": {
-        "type": "array",
-        "description": "结果行。不同数据源对 `fields` 与 `values` 的填充方式不同——指标类数据源(Prometheus、*-stats)将数字放入 `values`;明细类数据源(SQL、SLS、原始日志)将数据放入 `fields`,`values` 可能为 `null`。",
-        "items": {
-          "$ref": "#/components/schemas/QueryRow"
-        }
-      },
-      "QueryRow": {
-        "type": "object",
-        "properties": {
-          "fields": {
-            "type": "object",
-            "description": "字符串值字段(标签、日志字段、SQL 列)。",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "values": {
-            "type": "object",
-            "nullable": true,
-            "description": "数值字段。对于指标查询,规范键名为 `__value__`。对于明细类数据源可能为 `null`。",
-            "additionalProperties": {
-              "type": "number"
-            }
           }
         }
       },
@@ -49571,44 +49281,6 @@
             "description": "模板最近更新时间的 Unix 秒级时间戳。"
           }
         }
-      },
-      "PreviewSyncRequest": {
-        "type": "object",
-        "required": [
-          "ds_type",
-          "ds_name",
-          "expr"
-        ],
-        "description": "同步数据源查询预览的参数。",
-        "properties": {
-          "ds_type": {
-            "type": "string",
-            "description": "数据源类型，如 `prometheus`、`loki`、`elasticsearch`。"
-          },
-          "ds_name": {
-            "type": "string",
-            "description": "账户中配置的数据源显示名称。"
-          },
-          "expr": {
-            "type": "string",
-            "description": "查询表达式，格式因 `ds_type` 而异（Prometheus 为 PromQL，Loki 为 LogQL 等）。"
-          },
-          "delay_seconds": {
-            "type": "integer",
-            "description": "将查询窗口向前偏移的秒数，用于补偿数据摄入延迟。"
-          },
-          "args": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "特定数据源类型的附加查询参数（键值均为字符串），如 SLS 的 `sls.project`、`sls.logstore`，Elasticsearch 的 `es.type`，Loki 的 `loki.type`、`loki.limit`。"
-          }
-        }
-      },
-      "PreviewSyncResponse": {
-        "type": "object",
-        "description": "数据源返回的原始 JSON，结构随数据源类型而异。"
       },
       "ResetPostMortemBasicsRequest": {
         "type": "object",

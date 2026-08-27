@@ -122,10 +122,6 @@
       "description": "AI SRE agent session history — list, inspect, and export transcripts."
     },
     {
-      "name": "Monitors/Monitor utilities",
-      "description": "Monitors service activation and data preview utilities."
-    },
-    {
       "name": "AI SRE/Automations"
     },
     {
@@ -14138,83 +14134,6 @@
         }
       }
     },
-    "/monit/rule/status": {
-      "post": {
-        "operationId": "monit-rule-write-status",
-        "summary": "Get rule trigger status under folder",
-        "description": "Return the rule trigger summary for all rules under a folder node and its descendants.",
-        "tags": [
-          "Monitors/Alert rules"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Alerting Rules Manage** (`monit`) |\n\n## Usage\n\n- Set `folder_id` to `0` to get summary across all folders.\n- If the folder contains too many rules, computation is skipped for self-protection.",
-          "href": "/en/api-reference/monitors/alert-rules/monit-rule-write-status",
-          "metadata": {
-            "sidebarTitle": "Get rule trigger status under folder"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/RuleStatusResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": [
-                    {
-                      "folder_id": 100,
-                      "folder_name": "Production",
-                      "rule_total": 10,
-                      "triggered_rule_count": 2
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RuleFolderIDRequest"
-              },
-              "example": {
-                "folder_id": 100
-              }
-            }
-          }
-        }
-      }
-    },
     "/monit/rule/audits": {
       "post": {
         "operationId": "monit-rule-read-audits",
@@ -19896,7 +19815,7 @@
           "Monitors/Diagnostics"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **100 requests/minute**; **5 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n| Edge requirement | Supported deployments require **monit-edge v0.65.0 or later** |\n\n## Usage\n\n- Treat **monit-edge v0.65.0** as the minimum supported Edge version for this public API. WebAPI retains migration adapters for older Edge versions: query.v2 results may still preserve frames, records, or samples, while legacy rows can expose only the information they retained. These adapters do not change the support floor; older protocols lack query.v3 cancellation and error-lifecycle semantics, and data already lost by legacy rows cannot be recovered.\n- The public response format is always `query_result.v1` and is independent of the internal Edge query protocol. Dispatch on `result.kind` (`frames`, `records`, or `samples`); do not infer the result shape from `ds_type` or the Edge version.\n- A `frames` result may contain multiple table or time-series frames. Field values are columnar and all fields in one frame have the same length.\n- A `records` result may contain nested JSON and null records. Integer literals outside JavaScript's safe integer range are returned as decimal strings.\n- A `samples` result contains label sets and instant values. A value may be a number or one of the strings `NaN`, `+Inf`, and `-Inf`.\n- The final success response is limited to 8 MiB and query results are limited to 1,000 rows. Narrow the time range, reduce fields, or aggregate at the source when a request exceeds a limit.\n- Query failures use non-2xx HTTP status codes and the standard error envelope. Do not transparently fall back to the deprecated `/monit/query/rows` endpoint.\n- Query execution may take up to 35 seconds across WebAPI forwarding and Edge execution. Configure client timeouts to at least 40 seconds and propagate cancellation when the caller abandons a query.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **100 requests/minute**; **5 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n| Edge requirement | Supported deployments require **monit-edge v0.65.0 or later** |\n\n## Usage\n\n- Treat **monit-edge v0.65.0** as the minimum supported Edge version for this public API. WebAPI retains migration adapters for older Edge versions: query.v2 results may still preserve frames, records, or samples, while legacy rows can expose only the information they retained. These adapters do not change the support floor; older protocols lack query.v3 cancellation and error-lifecycle semantics, and data already lost by legacy rows cannot be recovered.\n- The public response format is always `query_result.v1` and is independent of the internal Edge query protocol. Dispatch on `result.kind` (`frames`, `records`, or `samples`); do not infer the result shape from `ds_type` or the Edge version.\n- A `frames` result may contain multiple table or time-series frames. Field values are columnar and all fields in one frame have the same length.\n- A `records` result may contain nested JSON and null records. Integer literals outside JavaScript's safe integer range are returned as decimal strings.\n- A `samples` result contains label sets and instant values. A value may be a number or one of the strings `NaN`, `+Inf`, and `-Inf`.\n- The final success response is limited to 8 MiB and query results are limited to 1,000 rows. Narrow the time range, reduce fields, or aggregate at the source when a request exceeds a limit.\n- Query failures use non-2xx HTTP status codes and the standard error envelope. The legacy `/monit/query/rows` endpoint has been removed; use this endpoint for datasource queries.\n- Query execution may take up to 35 seconds across WebAPI forwarding and Edge execution. Configure client timeouts to at least 40 seconds and propagate cancellation when the caller abandons a query.",
           "href": "/en/api-reference/monitors/diagnostics/monit-read-query-data",
           "metadata": {
             "sidebarTitle": "Query structured data"
@@ -20010,92 +19929,6 @@
         }
       }
     },
-    "/monit/query/rows": {
-      "post": {
-        "operationId": "monit-read-query-rows",
-        "summary": "Query data source rows",
-        "description": "Deprecated. Run a synchronous ad-hoc query and return the historical flattened rows shape. Existing consumers should migrate to `/monit/query/data`, which preserves frames, records, and samples without forcing every result into legacy rows.",
-        "deprecated": true,
-        "tags": [
-          "Monitors/Diagnostics"
-        ],
-        "x-mint": {
-          "content": "## Deprecated\n\nUse [`POST /monit/query/data`](/en/api-reference/monitors/diagnostics/monit-read-query-data) for all new integrations. This endpoint remains available only during the migration of existing UI and AI SRE consumers.\n\n## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **100 requests/minute**; **5 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- The request is forwarded to `monit-edge` over WebSocket; the data source named by `ds_type` + `ds_name` must already exist under the calling account.\n- `account_id` in the body is optional. When supplied it must equal the authenticated account; mismatched values are rejected.\n- Validation failures use the standard error envelope. When `monit-edge` rejects a query, its `{\"error\": {\"code\": ..., \"message\": ...}}` body is preserved and the HTTP status matches the edge error code; an invalid or absent code becomes HTTP 500. Check both the status and the error body.\n- monit-edge enforces a row cap; large result sets come back as `error.message = \"too many rows\"`. Narrow the time range or aggregate at the source.\n- `args` is a polymorphic `string→string` map that is forwarded verbatim. Semantics depend on `ds_type` (SLS requires `sls.project` + `sls.logstore`; Loki / VictoriaLogs raw mode requires a time range via `*.start`/`*.end` or `*.timespan.value`/`*.timespan.unit`; Prometheus and SQL sources ignore it). See the monit-webapi query-api docs for the per-source key list.",
-          "href": "/en/api-reference/monitors/diagnostics/monit-read-query-rows",
-          "metadata": {
-            "sidebarTitle": "Query data source rows"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/QueryRowsRequest"
-              },
-              "example": {
-                "account_id": 10001,
-                "ds_type": "prometheus",
-                "ds_name": "prod-prom",
-                "expr": "up",
-                "delay_seconds": 30
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/QueryRowsResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": [
-                    {
-                      "fields": {
-                        "__name__": "up",
-                        "instance": "10.0.0.1:9100",
-                        "job": "node"
-                      },
-                      "values": {
-                        "__value__": 1
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
     "/monit/query/diagnose": {
       "post": {
         "operationId": "monit-read-query-diagnose",
@@ -20105,7 +19938,7 @@
           "Monitors/Diagnostics"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- This is a diagnostic / RCA endpoint, not a raw data query — pair it with `/monit/query/rows` when you need detailed rows.\n- Only three `ds_type` and `operation` pairs are supported: `loki` / `victorialogs` → `log_patterns`, and `prometheus` → `metric_trends`. Every other datasource is rejected, even when `operation` is explicit.\n- `methods` selects the analyses to run; when omitted, `log_patterns` defaults to `pattern_snapshot + pattern_compare(previous_window)` and `metric_trends` defaults to `single_window_shape + window_compare(previous_window)`.\n- `time_range` is in Unix seconds; missing or invalid values default to the last 15 minutes; a window wider than 6 hours is rejected.\n- The request is forwarded over WebSocket to `monit-edge`. Long-running: the request may take up to ~30 s on the edge side plus webapi overhead. Set client timeouts to **at least 35 s**.\n- `options.*` are upper-bounded by edge (`max_logs_scanned` ≤ 50 000, `max_patterns` ≤ 50, `examples_per_pattern` ≤ 3, `step_seconds` ∈ [15, 300], `max_series` ≤ 200, `topk` ≤ 50, `timeout_seconds` ≤ 30).\n- Two error layers as with `/monit/query/rows`: edge-level execution errors come back as HTTP 200 with an `error` object in the body — check both layers.\n- Log examples are basic-redacted before being returned; expect `warnings: [\"examples redacted\"]`. Do not treat them as raw logs.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **600 requests/minute**; **10 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n\n## Usage\n\n- This is a diagnostic / RCA endpoint, not a raw data query — pair it with `/monit/query/data` when you need detailed rows.\n- Only three `ds_type` and `operation` pairs are supported: `loki` / `victorialogs` → `log_patterns`, and `prometheus` → `metric_trends`. Every other datasource is rejected, even when `operation` is explicit.\n- `methods` selects the analyses to run; when omitted, `log_patterns` defaults to `pattern_snapshot + pattern_compare(previous_window)` and `metric_trends` defaults to `single_window_shape + window_compare(previous_window)`.\n- `time_range` is in Unix seconds; missing or invalid values default to the last 15 minutes; a window wider than 6 hours is rejected.\n- The request is forwarded over WebSocket to `monit-edge`. Long-running: the request may take up to ~30 s on the edge side plus webapi overhead. Set client timeouts to **at least 35 s**.\n- `options.*` are upper-bounded by edge (`max_logs_scanned` ≤ 50 000, `max_patterns` ≤ 50, `examples_per_pattern` ≤ 3, `step_seconds` ∈ [15, 300], `max_series` ≤ 200, `topk` ≤ 50, `timeout_seconds` ≤ 30).\n- Two error layers exist: edge-level execution errors come back as HTTP 200 with an `error` object in the body — check both layers.\n- Log examples are basic-redacted before being returned; expect `warnings: [\"examples redacted\"]`. Do not treat them as raw logs.",
           "href": "/en/api-reference/monitors/diagnostics/monit-read-query-diagnose",
           "metadata": {
             "sidebarTitle": "Diagnose data source"
@@ -22183,85 +22016,6 @@
             "description": "Template ID."
           }
         ]
-      }
-    },
-    "/monit/preview/sync": {
-      "post": {
-        "operationId": "monit-preview-sync",
-        "summary": "Preview datasource query",
-        "description": "Execute a synchronous datasource query and return the raw result. Used to preview alert rule expressions before saving.",
-        "tags": [
-          "Monitors/Monitor utilities"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **60 requests/minute**; **10 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `ds_type` must match the datasource type (e.g. `prometheus`, `loki`).\n- `ds_name` is the display name of the datasource as configured in the account.\n- `delay_seconds` shifts the query window backward by the specified number of seconds, useful for accommodating data ingestion latency.\n- The response body is the raw JSON returned by the datasource — its schema varies by datasource type.",
-          "href": "/en/api-reference/monitors/monitor-utilities/monit-preview-sync",
-          "metadata": {
-            "sidebarTitle": "Preview datasource query"
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/PreviewSyncResponse"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": {
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
-                  "data": {
-                    "status": "success",
-                    "data": {
-                      "resultType": "vector",
-                      "result": []
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PreviewSyncRequest"
-              },
-              "example": {
-                "ds_type": "prometheus",
-                "ds_name": "Prometheus Prod",
-                "expr": "rate(http_requests_total[5m])",
-                "delay_seconds": 0
-              }
-            }
-          }
-        }
       }
     },
     "/status-page/info": {
@@ -43600,16 +43354,6 @@
         "description": "Empty response on success.",
         "additionalProperties": false
       },
-      "RuleFolderIDRequest": {
-        "type": "object",
-        "properties": {
-          "folder_id": {
-            "type": "integer",
-            "format": "uint64",
-            "description": "Folder ID to summarize. Obtainable via `POST /monit/folder/list`. Trigger statistics are returned grouped by direct child folder."
-          }
-        }
-      },
       "RuleFieldsUpdateRequest": {
         "type": "object",
         "required": [
@@ -47893,12 +47637,44 @@
         }
       },
       "QueryDataRequest": {
-        "description": "Request for the stable structured query endpoint. It uses the same query fields as the deprecated rows endpoint.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/QueryRowsRequest"
+        "type": "object",
+        "required": [
+          "ds_type",
+          "ds_name",
+          "expr"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Optional consistency check. Must equal the authenticated account when supplied; mismatched values are rejected. Business execution always uses the authenticated account."
+          },
+          "ds_type": {
+            "type": "string",
+            "description": "Data source type; must match a configured data source under the tenant. Examples: `prometheus`, `loki`, `victorialogs`, `sls`, `elasticsearch`, `mysql`, `postgres`, `oracle`, `clickhouse`."
+          },
+          "ds_name": {
+            "type": "string",
+            "description": "Data source name; must match a configured data source under the tenant."
+          },
+          "expr": {
+            "type": "string",
+            "description": "Query expression. Syntax depends on `ds_type` and is interpreted by the corresponding monit-edge client (PromQL for Prometheus, LogQL for Loki, SQL for SQL sources, etc.)."
+          },
+          "delay_seconds": {
+            "type": "integer",
+            "description": "Look-back offset in seconds applied to point-in-time queries (Prometheus, Loki stats, VictoriaLogs stats). Ignored for raw / detail queries.",
+            "default": 0
+          },
+          "args": {
+            "type": "object",
+            "description": "Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings, and keys are always namespaced by source (e.g. `sls.project`, `loki.type`). Validation depends on `ds_type`: SLS requires `sls.project` + `sls.logstore`. Elasticsearch accepts `es.type` of `sql`, or omitted — any other value is rejected. Loki and VictoriaLogs accept `<source>.type` of `stats`, `raw`, or omitted; `raw` additionally requires a time range, either `<source>.start` + `<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit` (unit one of `s`, `m`, `h`, `d`). Prometheus and the remaining SQL sources ignore `args` entirely.",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
-        ]
+        },
+        "description": "Request for the stable structured query endpoint."
       },
       "QueryDataResponse": {
         "type": "object",
@@ -48121,72 +47897,6 @@
                 ]
               }
             ]
-          }
-        }
-      },
-      "QueryRowsRequest": {
-        "type": "object",
-        "required": [
-          "ds_type",
-          "ds_name",
-          "expr"
-        ],
-        "properties": {
-          "account_id": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Optional consistency check. Must equal the authenticated account when supplied; mismatched values are rejected. Business execution always uses the authenticated account."
-          },
-          "ds_type": {
-            "type": "string",
-            "description": "Data source type; must match a configured data source under the tenant. Examples: `prometheus`, `loki`, `victorialogs`, `sls`, `elasticsearch`, `mysql`, `postgres`, `oracle`, `clickhouse`."
-          },
-          "ds_name": {
-            "type": "string",
-            "description": "Data source name; must match a configured data source under the tenant."
-          },
-          "expr": {
-            "type": "string",
-            "description": "Query expression. Syntax depends on `ds_type` and is interpreted by the corresponding monit-edge client (PromQL for Prometheus, LogQL for Loki, SQL for SQL sources, etc.)."
-          },
-          "delay_seconds": {
-            "type": "integer",
-            "description": "Look-back offset in seconds applied to point-in-time queries (Prometheus, Loki stats, VictoriaLogs stats). Ignored for raw / detail queries.",
-            "default": 0
-          },
-          "args": {
-            "type": "object",
-            "description": "Polymorphic key/value extension parameters forwarded verbatim to monit-edge. All values must be strings, and keys are always namespaced by source (e.g. `sls.project`, `loki.type`). Validation depends on `ds_type`: SLS requires `sls.project` + `sls.logstore`. Elasticsearch accepts `es.type` of `sql`, or omitted — any other value is rejected. Loki and VictoriaLogs accept `<source>.type` of `stats`, `raw`, or omitted; `raw` additionally requires a time range, either `<source>.start` + `<source>.end` or `<source>.timespan.value` + `<source>.timespan.unit` (unit one of `s`, `m`, `h`, `d`). Prometheus and the remaining SQL sources ignore `args` entirely.",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "QueryRowsResponse": {
-        "type": "array",
-        "description": "Result rows. Different data sources populate `fields` vs `values` differently — metric sources (Prometheus, *-stats) put numbers into `values`; detail sources (SQL, SLS, raw logs) put data into `fields` and may return `values: null`.",
-        "items": {
-          "$ref": "#/components/schemas/QueryRow"
-        }
-      },
-      "QueryRow": {
-        "type": "object",
-        "properties": {
-          "fields": {
-            "type": "object",
-            "description": "String-valued fields (labels, log fields, SQL columns).",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "values": {
-            "type": "object",
-            "nullable": true,
-            "description": "Numeric fields. For metric queries the canonical key is `__value__`. May be `null` for detail-oriented sources.",
-            "additionalProperties": {
-              "type": "number"
-            }
           }
         }
       },
@@ -49580,44 +49290,6 @@
             "description": "Unix timestamp in seconds when the template was last updated."
           }
         }
-      },
-      "PreviewSyncRequest": {
-        "type": "object",
-        "required": [
-          "ds_type",
-          "ds_name",
-          "expr"
-        ],
-        "description": "Parameters for a synchronous datasource query preview.",
-        "properties": {
-          "ds_type": {
-            "type": "string",
-            "description": "Datasource type, e.g. `prometheus`, `loki`, `elasticsearch`."
-          },
-          "ds_name": {
-            "type": "string",
-            "description": "Datasource display name as configured in the account."
-          },
-          "expr": {
-            "type": "string",
-            "description": "Query expression. Format depends on `ds_type` (PromQL for Prometheus, LogQL for Loki, etc.)."
-          },
-          "delay_seconds": {
-            "type": "integer",
-            "description": "Shift the query window backward by this many seconds to compensate for data ingestion latency."
-          },
-          "args": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Additional datasource-type-specific query arguments (string keys and values), e.g. `sls.project` and `sls.logstore` for SLS, `es.type` for Elasticsearch, `loki.type` and `loki.limit` for Loki."
-          }
-        }
-      },
-      "PreviewSyncResponse": {
-        "type": "object",
-        "description": "Raw JSON response from the datasource. Schema varies by datasource type."
       },
       "ResetPostMortemBasicsRequest": {
         "type": "object",
