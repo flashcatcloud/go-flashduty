@@ -90,17 +90,3 @@ func (s *SkillsService) WriteUpdate(ctx context.Context, req *SkillUpdateRequest
 	}
 	return out, resp, nil
 }
-
-// Upload skill.
-//
-// Upload a skill archive (.skill/.zip/.tar.gz/.tgz) to create or replace a skill.
-//
-// API: POST /safari/skill/upload (skill-write-upload).
-func (s *SkillsService) WriteUpload(ctx context.Context) (*SkillItem, *Response, error) {
-	out := new(SkillItem)
-	resp, err := s.client.do(ctx, "/safari/skill/upload", nil, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}

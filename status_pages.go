@@ -261,6 +261,17 @@ func (s *StatusPagesService) SectionUpsert(ctx context.Context, req *UpsertStatu
 	return out, resp, nil
 }
 
+// Export subscribers.
+//
+// Export subscribers list for a status page as a CSV attachment. The response is a `text/csv` file with columns: Method, Recipient, Components, Subscribe All, Locale.
+//
+// The success body is a file, not a JSON envelope: it is returned on Response.Raw.
+//
+// API: POST /status-page/subscriber/export (statusPageSubscriberExport).
+func (s *StatusPagesService) SubscriberExport(ctx context.Context, req *ExportStatusPageSubscribersRequest) (*Response, error) {
+	return s.client.do(ctx, "/status-page/subscriber/export", req, nil)
+}
+
 // Import subscribers.
 //
 // Bulk import subscribers for a status page. The account must be allowlisted for subscriber import; otherwise the call is rejected with an access-denied error.

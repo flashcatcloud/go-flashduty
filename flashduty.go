@@ -189,6 +189,15 @@ func (c *Client) doMethodWithAppKey(ctx context.Context, method, path string, bo
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: request to %s failed: %v", sanitizeURL(req.URL), sanitizeError(err))
 	}
+	return c.processResponse(httpResp, out)
+}
+
+// processResponse drains and interprets an HTTP response: it unwraps the
+// {request_id, error, data} envelope, decodes data into out (when non-nil),
+// and surfaces non-JSON success bodies on Response.Raw. Hand-written methods
+// that build their own request (e.g. multipart upload) reuse it so envelope
+// handling lives in exactly one place.
+func (c *Client) processResponse(httpResp *http.Response, out any) (*Response, error) {
 	defer func() { _ = httpResp.Body.Close() }()
 
 	resp := &Response{Response: httpResp, RequestID: httpResp.Header.Get("Flashcat-Request-Id")}

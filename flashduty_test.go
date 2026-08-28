@@ -610,3 +610,131 @@ func TestNullableRequestFieldsOmitUnsetValues(t *testing.T) {
 		})
 	}
 }
+
+// TestMappingDataWriteUploadSendsMultipart pins the hand-written upload path:
+// schema_id/do_not_truncate_first ride the query string, the CSV rides a
+// multipart "file" part, and the JSON envelope response is unwrapped.
+func TestMappingDataWriteUploadSendsMultipart(t *testing.T) {
+	const csv = "source,result\na,b\n"
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("method = %s, want POST", r.Method)
+		}
+		q := r.URL.Query()
+		if got := q.Get("app_key"); got != "KEY" {
+			t.Errorf("app_key = %q, want KEY", got)
+		}
+		if got := q.Get("schema_id"); got != "665f1a2b3c4d5e6f7a8b9c01" {
+			t.Errorf("schema_id = %q", got)
+		}
+		if got := q.Get("do_not_truncate_first"); got != "TRUE" {
+			t.Errorf("do_not_truncate_first = %q, want TRUE", got)
+		}
+		if ct := r.Header.Get("Content-Type"); !strings.HasPrefix(ct, "multipart/form-data; boundary=") {
+			t.Errorf("Content-Type = %q, want multipart/form-data", ct)
+			return
+		}
+		mr, err := r.MultipartReader()
+		if err != nil {
+			t.Errorf("MultipartReader: %v", err)
+			return
+		}
+		part, err := mr.NextPart()
+		if err != nil {
+			t.Errorf("NextPart: %v", err)
+			return
+		}
+		if part.FormName() != "file" || part.FileName() != "data.csv" {
+			t.Errorf("part = %q/%q, want file/data.csv", part.FormName(), part.FileName())
+		}
+		data, _ := io.ReadAll(part)
+		if string(data) != csv {
+			t.Errorf("file content = %q, want the CSV body", data)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"request_id":"RID-UP","data":{}}`)
+	})
+
+	resp, err := c.AlertEnrichment.MappingDataWriteUpload(context.Background(), &MappingDataUploadRequest{
+		SchemaID:           "665f1a2b3c4d5e6f7a8b9c01",
+		DoNotTruncateFirst: true,
+		File:               strings.NewReader(csv),
+		Filename:           "data.csv",
+	})
+	if err != nil {
+		t.Fatalf("upload: %v", err)
+	}
+	if resp.RequestID != "RID-UP" {
+		t.Fatalf("RequestID = %q, want RID-UP", resp.RequestID)
+	}
+}
+
+func TestMappingDataWriteUploadRequiresFile(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		t.Error("server must not be hit when the request is invalid")
+	})
+	if _, err := c.AlertEnrichment.MappingDataWriteUpload(context.Background(), nil); err == nil {
+		t.Fatal("expected error for nil request")
+	}
+	if _, err := c.AlertEnrichment.MappingDataWriteUpload(context.Background(), &MappingDataUploadRequest{SchemaID: "x"}); err == nil {
+		t.Fatal("expected error for nil File")
+	}
+}
+
+// TestSkillsWriteUploadSendsMultipartForm pins the hand-written skill upload:
+// team_id/replace/skill_id ride as form fields beside the "file" part, and the
+// typed SkillItem response is decoded from the envelope.
+func TestSkillsWriteUploadSendsMultipartForm(t *testing.T) {
+	const archive = "fake-zip-bytes"
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if got := q.Get("app_key"); got != "KEY" {
+			t.Errorf("app_key = %q, want KEY", got)
+		}
+		mr, err := r.MultipartReader()
+		if err != nil {
+			t.Errorf("MultipartReader: %v", err)
+			return
+		}
+		form := map[string]string{}
+		var fileName, fileBody string
+		for {
+			part, err := mr.NextPart()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				t.Errorf("NextPart: %v", err)
+				return
+			}
+			data, _ := io.ReadAll(part)
+			if part.FormName() == "file" {
+				fileName, fileBody = part.FileName(), string(data)
+			} else {
+				form[part.FormName()] = string(data)
+			}
+		}
+		if fileName != "my-skill.zip" || fileBody != archive {
+			t.Errorf("file part = %q/%q", fileName, fileBody)
+		}
+		if form["team_id"] != "42" || form["replace"] != "true" || form["skill_id"] != "skill-1" {
+			t.Errorf("form fields = %v", form)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"request_id":"RID-SK","data":{"skill_id":"skill-1","skill_name":"demo"}}`)
+	})
+
+	item, resp, err := c.Skills.WriteUpload(context.Background(), &SkillUploadRequest{
+		File:     strings.NewReader(archive),
+		Filename: "my-skill.zip",
+		TeamID:   42,
+		Replace:  true,
+		SkillID:  "skill-1",
+	})
+	if err != nil {
+		t.Fatalf("skill upload: %v", err)
+	}
+	if resp.RequestID != "RID-SK" || item.SkillName != "demo" {
+		t.Fatalf("got %+v / %+v", item, resp)
+	}
+}

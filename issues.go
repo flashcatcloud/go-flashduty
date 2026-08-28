@@ -7,6 +7,17 @@ import "context"
 // IssuesService handles the "RUM/Issues" API resource.
 type IssuesService service
 
+// Export issues as CSV.
+//
+// Export the filtered RUM error tracking issues as a CSV file. The response is a `text/csv` stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope; non-console callers can read the `X-Export-Total` and `X-Export-Truncated` response headers.
+//
+// The success body is a file, not a JSON envelope: it is returned on Response.Raw.
+//
+// API: POST /rum/issue/export (rum-issue-read-export).
+func (s *IssuesService) ReadExport(ctx context.Context, req *RUMIssueExportRequest) (*Response, error) {
+	return s.client.do(ctx, "/rum/issue/export", req, nil)
+}
+
 // Get issue detail.
 //
 // Retrieve full details of a single issue by `issue_id`.

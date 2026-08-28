@@ -98,6 +98,7 @@ func run() error {
 			"ErrorResponse":               true,
 			"DutyError":                   true,
 			"AutomationRuleUpdateRequest": true, // hand-written to preserve partial-update pointer semantics.
+			"SkillUploadRequest":          true, // multipart form schema; the hand-written WriteUpload carries the file as an io.Reader.
 		},
 		queued:   map[string]bool{},
 		synth:    map[string]any{},
@@ -175,8 +176,9 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 				continue
 			}
 			// The generated client is an app_key client and does not template path
-			// parameters. Endpoints with operation-level non-AppKey auth or path
-			// params need hand-written methods.
+			// parameters. Endpoints with operation-level non-AppKey auth, path
+			// params, or a non-JSON request body (e.g. multipart/form-data file
+			// upload, which do() cannot encode) need hand-written methods.
 			if needsHandWrittenOperation(o) {
 				continue
 			}
@@ -227,11 +229,14 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 	return services
 }
 
-// isStreamingOp reports whether an operation's 200 response is a non-JSON
-// streaming body (its 200 content has no "application/json" key). Such endpoints
-// — e.g. session/export returning application/x-ndjson — cannot be modeled by the
-// typed do/doGet path (which buffers the body and decodes one JSON envelope) and
-// are excluded from generation in favor of a hand-written streaming method.
+// isStreamingOp reports whether an operation's 200 response is a line-delimited
+// stream (application/x-ndjson). The typed do/doGet path buffers the whole body
+// and decodes one JSON envelope, which is wrong for an unbounded stream, so such
+// endpoints are excluded from generation in favor of a hand-written streaming
+// method (see sessions_export.go). Bounded binary downloads (text/csv,
+// application/octet-stream) are NOT streams: do() already surfaces their body on
+// Response.Raw, and they generate as ordinary raw methods returning (*Response,
+// error).
 func isStreamingOp(o map[string]any) bool {
 	resp := asMap(asMap(o["responses"])["200"])
 	content := asMap(resp["content"])
@@ -239,12 +244,23 @@ func isStreamingOp(o map[string]any) bool {
 		return false // no body at all is not a streaming response
 	}
 	_, hasJSON := content["application/json"]
-	return !hasJSON
+	if hasJSON {
+		return false
+	}
+	_, hasNDJSON := content["application/x-ndjson"]
+	return hasNDJSON
 }
 
 func needsHandWrittenOperation(o map[string]any) bool {
 	for _, raw := range asSlice(o["parameters"]) {
 		if str(asMap(raw), "in") == "path" {
+			return true
+		}
+	}
+	// A non-JSON request body (e.g. multipart/form-data file upload) cannot
+	// be encoded by the generated do() path, which JSON-marshals the body.
+	if content := asMap(asMap(o["requestBody"])["content"]); len(content) > 0 {
+		if _, ok := content["application/json"]; !ok {
 			return true
 		}
 	}
@@ -316,9 +332,29 @@ func (g *Gen) opDoc(o map[string]any, method, path string) []string {
 		lines = append(lines, "")
 		lines = append(lines, wrapText(d)...)
 	}
+	// Binary downloads carry no JSON envelope, so dataType leaves them
+	// untyped; tell the caller where the bytes land.
+	if isBinaryDownloadOp(o) {
+		lines = append(lines, "")
+		lines = append(lines, "The success body is a file, not a JSON envelope: it is returned on Response.Raw.")
+	}
 	lines = append(lines, "")
 	lines = append(lines, fmt.Sprintf("API: %s %s (%s).", method, path, str(o, "operationId")))
 	return lines
+}
+
+// isBinaryDownloadOp reports whether an operation's 200 response is a bounded
+// non-JSON file body (e.g. text/csv, application/octet-stream), as opposed to
+// an ndjson stream (see isStreamingOp) or an ordinary JSON envelope.
+func isBinaryDownloadOp(o map[string]any) bool {
+	content := asMap(asMap(asMap(o["responses"])["200"])["content"])
+	if len(content) == 0 {
+		return false
+	}
+	if _, hasJSON := content["application/json"]; hasJSON {
+		return false
+	}
+	return !isStreamingOp(o)
 }
 
 // computeRequestReachable returns the Go names of every schema reachable from an

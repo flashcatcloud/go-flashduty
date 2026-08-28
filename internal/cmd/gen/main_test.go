@@ -321,3 +321,79 @@ func TestMergeAllOfMarksOptionalOneOfProperties(t *testing.T) {
 		t.Fatalf("required oneOf intersection = %#v, want [method]", got)
 	}
 }
+
+// TestEmitStructPreserveAbsenceRequestObjectPointerWraps pins the request-side
+// x-flashduty-preserve-absence contract: an optional object the server branches
+// on by presence must generate as a pointer, so an explicitly-sent all-zero
+// object (e.g. disabling alerting) still serializes.
+func TestEmitStructPreserveAbsenceRequestObjectPointerWraps(t *testing.T) {
+	g := newTestGen(map[string]any{
+		"Alerting": map[string]any{
+			"type":       "object",
+			"properties": map[string]any{"enabled": map[string]any{"type": "boolean"}},
+		},
+	})
+	g.reqGoNames["UpdateRequest"] = true
+
+	schema := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"alerting": map[string]any{
+				"$ref":                         "#/components/schemas/Alerting",
+				"x-flashduty-preserve-absence": true,
+			},
+		},
+	}
+
+	src := g.emitStruct("UpdateRequest", schema)
+	if !strings.Contains(src, "Alerting *Alerting `json:\"alerting,omitempty\" toon:\"alerting,omitempty\"`") {
+		t.Fatalf("preserve-absence request object must generate as a pointer; got:\n%s", src)
+	}
+}
+
+// TestOpClassificationPredicates pins the three-way split of non-standard
+// operations: ndjson streams and non-JSON request bodies are hand-written,
+// while bounded binary downloads generate ordinary raw methods.
+func TestOpClassificationPredicates(t *testing.T) {
+	opWithResp := func(contentType string) map[string]any {
+		return map[string]any{
+			"responses": map[string]any{
+				"200": map[string]any{
+					"content": map[string]any{contentType: map[string]any{}},
+				},
+			},
+		}
+	}
+
+	jsonOp := opWithResp("application/json")
+	if isStreamingOp(jsonOp) || isBinaryDownloadOp(jsonOp) {
+		t.Error("JSON op must be neither streaming nor binary download")
+	}
+	ndjsonOp := opWithResp("application/x-ndjson")
+	if !isStreamingOp(ndjsonOp) || isBinaryDownloadOp(ndjsonOp) {
+		t.Error("ndjson op must be streaming, not binary download")
+	}
+	for _, ct := range []string{"application/octet-stream", "text/csv"} {
+		op := opWithResp(ct)
+		if isStreamingOp(op) || !isBinaryDownloadOp(op) {
+			t.Errorf("%s op must be a binary download, not streaming", ct)
+		}
+	}
+
+	multipartOp := map[string]any{
+		"requestBody": map[string]any{
+			"content": map[string]any{"multipart/form-data": map[string]any{}},
+		},
+	}
+	if !needsHandWrittenOperation(multipartOp) {
+		t.Error("multipart request body must route to a hand-written method")
+	}
+	jsonReqOp := map[string]any{
+		"requestBody": map[string]any{
+			"content": map[string]any{"application/json": map[string]any{}},
+		},
+	}
+	if needsHandWrittenOperation(jsonReqOp) {
+		t.Error("JSON request body must stay on the generated path")
+	}
+}

@@ -9459,18 +9459,6 @@ type SkillUpdateRequest struct {
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
-// SkillUploadRequest is generated from the Flashduty OpenAPI schema.
-type SkillUploadRequest struct {
-	// Skill archive (.skill / .zip / .tar.gz / .tgz). Max 100MB; oversized files are rejected before the body is read.
-	File string `json:"file" toon:"file"`
-	// When true, overwrite an existing skill instead of failing on a name collision — matched by `skill_id` if provided, otherwise by skill name.
-	Replace bool `json:"replace,omitempty" toon:"replace,omitempty"`
-	// Existing skill ID to target when replacing a specific skill (requires `replace=true`).
-	SkillID string `json:"skill_id,omitempty" toon:"skill_id,omitempty"`
-	// Team scope for the created/upserted skill: 0 = account-wide. Ignored when replacing a specific skill via `skill_id`.
-	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
-}
-
 // SnoozeIncidentRequest is generated from the Flashduty OpenAPI schema.
 type SnoozeIncidentRequest struct {
 	// Incident IDs to snooze. At most 100 per call.

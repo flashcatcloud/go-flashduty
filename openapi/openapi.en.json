@@ -20068,17 +20068,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "data"
-                  ],
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/DiagnoseResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DiagnoseResponse"
+                        }
+                      }
                     }
-                  }
+                  ]
                 },
                 "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
                     "schema_version": "2",
                     "operation": "log_patterns",
