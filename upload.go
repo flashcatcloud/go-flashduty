@@ -93,5 +93,6 @@ func (c *Client) uploadFile(ctx context.Context, path string, query url.Values, 
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: request to %s failed: %v", sanitizeURL(req.URL), sanitizeError(err))
 	}
+	defer func() { _ = httpResp.Body.Close() }()
 	return c.processResponse(httpResp, out)
 }
