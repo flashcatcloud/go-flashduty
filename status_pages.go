@@ -74,7 +74,7 @@ func (s *StatusPagesService) ChangeInfo(ctx context.Context, req *StatusPagesCha
 
 // List status page events.
 //
-// List status page events with only publicly visible affected components.
+// List status page events for console management. Unlike the public display endpoints, the response includes hidden components.
 //
 // API: GET /status-page/change/list (statusPageChangeList).
 func (s *StatusPagesService) ChangeList(ctx context.Context, req *StatusPagesChangeListRequest) (*StatusPageChangeListResponse, *Response, error) {
@@ -178,8 +178,8 @@ func (s *StatusPagesService) Delete(ctx context.Context, req *DeleteStatusPageRe
 // Retrieve detailed configuration for a specific status page.
 //
 // API: GET /status-page/info (statusPageInfo).
-func (s *StatusPagesService) Info(ctx context.Context, req *StatusPagesInfoRequest) (*StatusPageItem, *Response, error) {
-	out := new(StatusPageItem)
+func (s *StatusPagesService) Info(ctx context.Context, req *StatusPagesInfoRequest) (*StatusPageInfoResponse, *Response, error) {
+	out := new(StatusPageInfoResponse)
 	resp, err := s.client.doGet(ctx, "/status-page/info", req, out)
 	if err != nil {
 		return nil, resp, err
@@ -261,23 +261,9 @@ func (s *StatusPagesService) SectionUpsert(ctx context.Context, req *UpsertStatu
 	return out, resp, nil
 }
 
-// Export subscribers.
-//
-// Export subscribers list for a status page as a CSV attachment. The response is a `text/csv` file with columns: Method, Recipient, Components, Subscribe All, Locale.
-//
-// API: POST /status-page/subscriber/export (statusPageSubscriberExport).
-func (s *StatusPagesService) SubscriberExport(ctx context.Context, req *ExportStatusPageSubscribersRequest) (*StatusPageSubscriberExportResponse, *Response, error) {
-	out := new(StatusPageSubscriberExportResponse)
-	resp, err := s.client.do(ctx, "/status-page/subscriber/export", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // Import subscribers.
 //
-// Bulk import subscribers for a status page.
+// Bulk import subscribers for a status page. The account must be allowlisted for subscriber import; otherwise the call is rejected with an access-denied error.
 //
 // API: POST /status-page/subscriber/import (statusPageSubscriberImport).
 func (s *StatusPagesService) SubscriberImport(ctx context.Context, req *ImportStatusPageSubscribersRequest) (*Response, error) {
@@ -312,8 +298,13 @@ func (s *StatusPagesService) TemplateDelete(ctx context.Context, req *DeleteStat
 // List all event templates for a status page.
 //
 // API: GET /status-page/template/list (statusPageTemplateList).
-func (s *StatusPagesService) TemplateList(ctx context.Context, req *StatusPagesTemplateListRequest) (*Response, error) {
-	return s.client.doGet(ctx, "/status-page/template/list", req, nil)
+func (s *StatusPagesService) TemplateList(ctx context.Context, req *StatusPagesTemplateListRequest) (*ListStatusPageTemplatesResponse, *Response, error) {
+	out := new(ListStatusPageTemplatesResponse)
+	resp, err := s.client.doGet(ctx, "/status-page/template/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
 }
 
 // Upsert status page template.

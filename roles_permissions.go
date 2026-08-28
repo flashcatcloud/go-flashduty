@@ -51,7 +51,7 @@ func (s *RolesPermissionsService) ReadListPermission(ctx context.Context, req *R
 
 // List permission factors.
 //
-// Return all permission factors (API, button, menu, URL, visit) optionally filtered by type.
+// Return all permission factors (API, button, menu, URL, visit) granted to the calling member, optionally filtered by type. Requires a member-scoped credential — calls authenticated as the account principal (e.g. an account-level app key) are rejected with a 400, because the account principal implicitly holds every permission.
 //
 // API: POST /role/permission/factor/list (role-read-list-permission-factor).
 func (s *RolesPermissionsService) ReadListPermissionFactor(ctx context.Context, req *PermissionFactorListRequest) (*PermissionFactorListResponse, *Response, error) {
@@ -65,10 +65,10 @@ func (s *RolesPermissionsService) ReadListPermissionFactor(ctx context.Context, 
 
 // Delete a role.
 //
-// Permanently delete a custom role and revoke it from all members.
+// Delete a custom role. While members still hold the role, the call fails with `ReferenceExist` unless `is_force` is true.
 //
 // API: POST /role/delete (role-write-delete).
-func (s *RolesPermissionsService) WriteDelete(ctx context.Context, req *RoleIDRequest) (*Response, error) {
+func (s *RolesPermissionsService) WriteDelete(ctx context.Context, req *RoleDeleteRequest) (*Response, error) {
 	return s.client.do(ctx, "/role/delete", req, nil)
 }
 

@@ -18,7 +18,7 @@ func (s *MembersService) MemberDelete(ctx context.Context, req *MemberDeleteRequ
 
 // Grant role to member.
 //
-// Add a role assignment to a member.
+// Add role assignments to a member. Role IDs that do not exist are silently ignored; if none resolve, the call is a no-op success.
 //
 // API: POST /member/role/grant (memberGrantRole).
 func (s *MembersService) MemberGrantRole(ctx context.Context, req *MemberRoleGrantRequest) (*Response, error) {
@@ -27,7 +27,7 @@ func (s *MembersService) MemberGrantRole(ctx context.Context, req *MemberRoleGra
 
 // Get current member info.
 //
-// Return the current session member's full profile.
+// Return the profile of the member the credential belongs to. Requires a member-scoped credential — calls authenticated as the account principal (e.g. an account-level app key) are rejected with a 400.
 //
 // API: POST /member/info (memberInfo).
 func (s *MembersService) MemberInfo(ctx context.Context) (*MemberInfoResponse, *Response, error) {
@@ -78,7 +78,7 @@ func (s *MembersService) MemberResetInfo(ctx context.Context, req *MemberResetIn
 
 // Revoke role from member.
 //
-// Remove a role assignment from a member.
+// Remove role assignments from a member. Role IDs that do not exist are silently ignored; if none resolve, the call is a no-op success.
 //
 // API: POST /member/role/revoke (memberRevokeRole).
 func (s *MembersService) MemberRevokeRole(ctx context.Context, req *MemberRoleRevokeRequest) (*Response, error) {
@@ -87,7 +87,7 @@ func (s *MembersService) MemberRevokeRole(ctx context.Context, req *MemberRoleRe
 
 // Update member roles.
 //
-// Replace all role assignments for a member at once.
+// Replace all role assignments for a member at once. Role IDs that do not exist are silently dropped; an empty `role_ids` resets the member to the built-in Viewer role (ID 8).
 //
 // API: POST /member/role/update (memberUpdateRole).
 func (s *MembersService) MemberUpdateRole(ctx context.Context, req *MemberRoleUpdateRequest) (*Response, error) {

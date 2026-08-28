@@ -23,7 +23,7 @@ func (s *ChannelsService) ChannelCreate(ctx context.Context, req *CreateChannelR
 
 // Delete channel.
 //
-// Delete a channel and all associated configuration.
+// Delete a channel. Only a `disabled` channel can be deleted; all of its escalation, silence, drop and inhibit rules are deleted with it. The call fails when an integration route still references the channel.
 //
 // API: POST /channel/delete (channelDelete).
 func (s *ChannelsService) ChannelDelete(ctx context.Context, req *ChannelIDRequest) (*Response, error) {
@@ -32,7 +32,7 @@ func (s *ChannelsService) ChannelDelete(ctx context.Context, req *ChannelIDReque
 
 // Disable channel.
 //
-// Disable a channel to stop incident routing without deleting it.
+// Disable a channel to stop incident routing without deleting it; a disabled channel discards incoming events. Only an `enabled` channel can be disabled.
 //
 // API: POST /channel/disable (channelDisable).
 func (s *ChannelsService) ChannelDisable(ctx context.Context, req *ChannelIDRequest) (*Response, error) {
@@ -41,7 +41,7 @@ func (s *ChannelsService) ChannelDisable(ctx context.Context, req *ChannelIDRequ
 
 // Enable channel.
 //
-// Enable a disabled channel to resume incident routing.
+// Enable a channel to resume incident routing. Only a `disabled` channel can be enabled.
 //
 // API: POST /channel/enable (channelEnable).
 func (s *ChannelsService) ChannelEnable(ctx context.Context, req *ChannelIDRequest) (*Response, error) {
@@ -64,7 +64,7 @@ func (s *ChannelsService) ChannelEscalateRuleCreate(ctx context.Context, req *Cr
 
 // Delete escalation rule.
 //
-// Delete an escalation rule.
+// Delete an escalation rule. Only a `disabled` rule can be deleted.
 //
 // API: POST /channel/escalate/rule/delete (channelEscalateRuleDelete).
 func (s *ChannelsService) ChannelEscalateRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -73,7 +73,7 @@ func (s *ChannelsService) ChannelEscalateRuleDelete(ctx context.Context, req *Ch
 
 // Disable escalation rule.
 //
-// Disable an escalation rule without deleting it.
+// Disable an escalation rule without deleting it. Only an `enabled` rule can be disabled.
 //
 // API: POST /channel/escalate/rule/disable (channelEscalateRuleDisable).
 func (s *ChannelsService) ChannelEscalateRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -82,7 +82,7 @@ func (s *ChannelsService) ChannelEscalateRuleDisable(ctx context.Context, req *C
 
 // Enable escalation rule.
 //
-// Enable a disabled escalation rule.
+// Enable a disabled escalation rule. Only a `disabled` rule can be enabled.
 //
 // API: POST /channel/escalate/rule/enable (channelEscalateRuleEnable).
 func (s *ChannelsService) ChannelEscalateRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -170,7 +170,7 @@ func (s *ChannelsService) ChannelInhibitRuleCreate(ctx context.Context, req *Cre
 
 // Delete inhibit rule.
 //
-// Delete an inhibit rule.
+// Delete an inhibit rule. Only a `disabled` rule can be deleted.
 //
 // API: POST /channel/inhibit/rule/delete (channelInhibitRuleDelete).
 func (s *ChannelsService) ChannelInhibitRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -179,7 +179,7 @@ func (s *ChannelsService) ChannelInhibitRuleDelete(ctx context.Context, req *Cha
 
 // Disable inhibit rule.
 //
-// Disable an inhibit rule without deleting it.
+// Disable an inhibit rule without deleting it. Only an `enabled` rule can be disabled.
 //
 // API: POST /channel/inhibit/rule/disable (channelInhibitRuleDisable).
 func (s *ChannelsService) ChannelInhibitRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -188,7 +188,7 @@ func (s *ChannelsService) ChannelInhibitRuleDisable(ctx context.Context, req *Ch
 
 // Enable inhibit rule.
 //
-// Enable a disabled inhibit rule.
+// Enable a disabled inhibit rule. Only a `disabled` rule can be enabled.
 //
 // API: POST /channel/inhibit/rule/enable (channelInhibitRuleEnable).
 func (s *ChannelsService) ChannelInhibitRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -248,7 +248,7 @@ func (s *ChannelsService) ChannelSilenceRuleCreate(ctx context.Context, req *Cre
 
 // Delete silence rule.
 //
-// Delete a silence rule.
+// Delete a silence rule. Only a `disabled` rule can be deleted.
 //
 // API: POST /channel/silence/rule/delete (channelSilenceRuleDelete).
 func (s *ChannelsService) ChannelSilenceRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -257,7 +257,7 @@ func (s *ChannelsService) ChannelSilenceRuleDelete(ctx context.Context, req *Cha
 
 // Disable silence rule.
 //
-// Disable a silence rule without deleting it.
+// Disable a silence rule without deleting it. Only an `enabled` rule can be disabled.
 //
 // API: POST /channel/silence/rule/disable (channelSilenceRuleDisable).
 func (s *ChannelsService) ChannelSilenceRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -266,7 +266,7 @@ func (s *ChannelsService) ChannelSilenceRuleDisable(ctx context.Context, req *Ch
 
 // Enable silence rule.
 //
-// Enable a disabled silence rule.
+// Enable a disabled silence rule. Only a `disabled` rule can be enabled.
 //
 // API: POST /channel/silence/rule/enable (channelSilenceRuleEnable).
 func (s *ChannelsService) ChannelSilenceRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -312,7 +312,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleCreate(ctx context.Context, req 
 
 // Delete drop rule.
 //
-// Delete a drop rule.
+// Delete a drop rule. Only a `disabled` rule can be deleted.
 //
 // API: POST /channel/unsubscribe/rule/delete (channelUnsubscribeRuleDelete).
 func (s *ChannelsService) ChannelUnsubscribeRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -321,7 +321,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleDelete(ctx context.Context, req 
 
 // Disable drop rule.
 //
-// Disable a drop rule without deleting it.
+// Disable a drop rule without deleting it. Only an `enabled` rule can be disabled.
 //
 // API: POST /channel/unsubscribe/rule/disable (channelUnsubscribeRuleDisable).
 func (s *ChannelsService) ChannelUnsubscribeRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -330,7 +330,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleDisable(ctx context.Context, req
 
 // Enable drop rule.
 //
-// Enable a disabled drop rule.
+// Enable a disabled drop rule. Only a `disabled` rule can be enabled.
 //
 // API: POST /channel/unsubscribe/rule/enable (channelUnsubscribeRuleEnable).
 func (s *ChannelsService) ChannelUnsubscribeRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {

@@ -63,24 +63,6 @@ func (s *AnalyticsService) ByTeam(ctx context.Context, req *InsightQueryRequest)
 	return out, resp, nil
 }
 
-// Export channel insight.
-//
-// Export channel insight metrics as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
-//
-// API: POST /insight/channel/export (insightChannelExport).
-func (s *AnalyticsService) ChannelExport(ctx context.Context, req *InsightQueryRequest) (*Response, error) {
-	return s.client.do(ctx, "/insight/channel/export", req, nil)
-}
-
-// Export insight incidents.
-//
-// Export the filtered incident analytics list as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
-//
-// API: POST /insight/incident/export (insightIncidentExport).
-func (s *AnalyticsService) IncidentExport(ctx context.Context, req *InsightIncidentExportRequest) (*Response, error) {
-	return s.client.do(ctx, "/insight/incident/export", req, nil)
-}
-
 // List insight incidents.
 //
 // Return a paged list of incidents with per-incident handling metrics used by the analytics dashboard.
@@ -93,24 +75,6 @@ func (s *AnalyticsService) IncidentList(ctx context.Context, req *InsightInciden
 		return nil, resp, err
 	}
 	return out, resp, nil
-}
-
-// Export responder insight.
-//
-// Export responder insight metrics as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
-//
-// API: POST /insight/responder/export (insightResponderExport).
-func (s *AnalyticsService) ResponderExport(ctx context.Context, req *InsightQueryRequest) (*Response, error) {
-	return s.client.do(ctx, "/insight/responder/export", req, nil)
-}
-
-// Export team insight.
-//
-// Export team insight metrics as a CSV file. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope.
-//
-// API: POST /insight/team/export (insightTeamExport).
-func (s *AnalyticsService) TeamExport(ctx context.Context, req *InsightQueryRequest) (*Response, error) {
-	return s.client.do(ctx, "/insight/team/export", req, nil)
 }
 
 // Get top-K alerts grouped by check or resource.

@@ -479,10 +479,12 @@ func TestNullableRequestFieldsSendExplicitZero(t *testing.T) {
 		},
 		{
 			// A minimal alerting override is entirely zero-valued apart from
-			// Enabled; the pointer keeps the omitzero container on the wire.
+			// Enabled; the container pointer keeps an all-zero object on the
+			// wire so the server replaces the stored config instead of
+			// leaving it unchanged.
 			name: "rum application update disables alerting",
 			path: "/rum/application/update",
-			body: &RUMApplicationUpdateRequest{ApplicationID: "app-1", Alerting: RUMApplicationAlerting{Enabled: Bool(false)}},
+			body: &RUMApplicationUpdateRequest{ApplicationID: "app-1", Alerting: &RUMApplicationAlerting{Enabled: false}},
 			at:   []string{"alerting", "enabled"},
 			want: false,
 		},
@@ -557,7 +559,7 @@ func TestNullableRequestFieldsOmitUnsetValues(t *testing.T) {
 		{
 			name:    "rum application update leaves privacy toggles alone",
 			path:    "/rum/application/update",
-			body:    &RUMApplicationUpdateRequest{ApplicationID: "app-1", ApplicationName: "renamed"},
+			body:    &RUMApplicationUpdateRequest{ApplicationID: "app-1", ApplicationName: String("renamed")},
 			absent:  []string{`"is_private"`, `"no_geo"`, `"no_ip"`, `"alerting"`},
 			present: []string{`"application_name":"renamed"`},
 		},

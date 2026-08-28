@@ -164,20 +164,6 @@ func (s *AlertEnrichmentService) MappingAPIWriteUpdate(ctx context.Context, req 
 	return s.client.do(ctx, "/enrichment/mapping/api/update", req, nil)
 }
 
-// Download mapping data as CSV.
-//
-// Export all data rows of a mapping schema as a CSV file download.
-//
-// API: POST /enrichment/mapping/data/download (mapping-data-read-download).
-func (s *AlertEnrichmentService) MappingDataReadDownload(ctx context.Context, req *MappingSchemaIDRequest) (*CSVFileResponse, *Response, error) {
-	out := new(CSVFileResponse)
-	resp, err := s.client.do(ctx, "/enrichment/mapping/data/download", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // List mapping data.
 //
 // Return paginated mapping data rows for a schema, with optional exact-match filtering on source label values.
@@ -215,8 +201,8 @@ func (s *AlertEnrichmentService) MappingDataWriteTruncate(ctx context.Context, r
 // Upload a CSV file to bulk-load mapping data. By default the existing data is truncated before loading the new rows.
 //
 // API: POST /enrichment/mapping/data/upload (mapping-data-write-upload).
-func (s *AlertEnrichmentService) MappingDataWriteUpload(ctx context.Context, req *MappingDataUploadRequest) (*Response, error) {
-	return s.client.do(ctx, "/enrichment/mapping/data/upload", req, nil)
+func (s *AlertEnrichmentService) MappingDataWriteUpload(ctx context.Context) (*Response, error) {
+	return s.client.do(ctx, "/enrichment/mapping/data/upload", nil, nil)
 }
 
 // Upsert mapping data rows.

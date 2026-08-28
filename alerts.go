@@ -79,7 +79,7 @@ func (s *AlertsService) ReadList(ctx context.Context, req *AlertListRequest) (*A
 
 // List alerts by IDs.
 //
-// Return the details of multiple alerts by their IDs in a single request.
+// Return the details of multiple alerts by their IDs in a single request. Note: this endpoint does not paginate — `total` and `has_next_page` are always `0`/`false` and `search_after_ctx` is never set.
 //
 // API: POST /alert/list-by-ids (alert-read-list-by-ids).
 func (s *AlertsService) ReadListByIDs(ctx context.Context, req *AlertListByIDsRequest) (*AlertListResponse, *Response, error) {

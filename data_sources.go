@@ -79,7 +79,7 @@ func (s *DataSourcesService) WriteCreate(ctx context.Context, req *DataSourceUps
 
 // Delete datasource.
 //
-// Delete a data source by ID. Alert rules referencing this datasource must be updated or deleted first.
+// Delete a data source by ID. Alert rules referencing this datasource are not blocked: the datasource is removed from their monitoring scope and their open alerts on it are closed automatically.
 //
 // API: POST /monit/datasource/delete (monit-datasource-write-delete).
 func (s *DataSourcesService) WriteDelete(ctx context.Context, req *IDRequest) (*Response, error) {

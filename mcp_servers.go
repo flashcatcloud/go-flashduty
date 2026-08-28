@@ -9,7 +9,7 @@ type McpServersService service
 
 // Get MCP server detail.
 //
-// Get one MCP server and run a live probe of its tool list.
+// Get one MCP server as a pure database read — no live probe is performed.
 //
 // API: POST /safari/mcp/server/get (mcp-read-server-get).
 func (s *McpServersService) ReadServerGet(ctx context.Context, req *McpServerGetRequest) (*McpServerItem, *Response, error) {

@@ -505,8 +505,13 @@ func (s *IncidentsService) WorkItemCreate(ctx context.Context, req *CreateWorkIt
 // Soft-delete a work item.
 //
 // API: POST /incident/work-item/delete (incidentWorkItemDelete).
-func (s *IncidentsService) WorkItemDelete(ctx context.Context, req *DeleteWorkItemRequest) (*Response, error) {
-	return s.client.do(ctx, "/incident/work-item/delete", req, nil)
+func (s *IncidentsService) WorkItemDelete(ctx context.Context, req *DeleteWorkItemRequest) (*WorkItemMutationResult, *Response, error) {
+	out := new(WorkItemMutationResult)
+	resp, err := s.client.do(ctx, "/incident/work-item/delete", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
 }
 
 // List work items.

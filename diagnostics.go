@@ -26,27 +26,8 @@ func (s *DiagnosticsService) QueryData(ctx context.Context, req *QueryDataReques
 // Run a synchronous diagnostic query (`log_patterns` for Loki/VictoriaLogs, `metric_trends` for Prometheus). Used by Flashduty AI SRE for log-pattern clustering and time-series trend analysis. Long-running — up to 35 s.
 //
 // API: POST /monit/query/diagnose (monit-read-query-diagnose).
-func (s *DiagnosticsService) QueryDiagnose(ctx context.Context, req *DiagnoseRequest) (*DiagnoseResponse, *Response, error) {
-	out := new(DiagnoseResponse)
-	resp, err := s.client.do(ctx, "/monit/query/diagnose", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Query data source rows.
-//
-// Deprecated. Run a synchronous ad-hoc query and return the historical flattened rows shape. Existing consumers should migrate to `/monit/query/data`, which preserves frames, records, and samples without forcing every result into legacy rows.
-//
-// API: POST /monit/query/rows (monit-read-query-rows).
-func (s *DiagnosticsService) QueryRows(ctx context.Context, req *QueryRowsRequest) (*QueryRowsResponse, *Response, error) {
-	out := new(QueryRowsResponse)
-	resp, err := s.client.do(ctx, "/monit/query/rows", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
+func (s *DiagnosticsService) QueryDiagnose(ctx context.Context, req *DiagnoseRequest) (*Response, error) {
+	return s.client.do(ctx, "/monit/query/diagnose", req, nil)
 }
 
 // List monitored targets.
