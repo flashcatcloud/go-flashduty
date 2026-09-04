@@ -170,6 +170,10 @@
     },
     {
       "name": "AI SRE/Knowledge"
+    },
+    {
+      "name": "AI SRE/Artifacts",
+      "description": "AI SRE artifact gallery — publish, browse, and publicly share agent-produced files."
     }
   ],
   "paths": {
@@ -12224,6 +12228,92 @@
         ]
       }
     },
+    "/status-page/draft/create": {
+      "post": {
+        "operationId": "statusPageDraftCreate",
+        "summary": "Create status page draft",
+        "description": "Store a status page event draft so a human can review and publish it from the console.",
+        "tags": [
+          "On-call/Status pages"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- The `draft` payload is stored verbatim (up to 64 KB); the console publish form reads it back to prefill the event.\n- A draft lives for 30 days and is consumed exactly once when the event is published.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/on-call/status-pages/status-page-draft-create",
+          "metadata": {
+            "sidebarTitle": "Create status page draft"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/StatusPageDraftCreateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "draft_id": "draft_3xK9mQ2vN7pR4wT8yH1sJ5",
+                    "created_at": 1788000000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStatusPageDraftRequest"
+              },
+              "example": {
+                "draft": {
+                  "v": 1,
+                  "page_id": 5750613685214,
+                  "type": "incident",
+                  "name": "Web Console Degraded Performance",
+                  "message": "We are investigating degraded performance affecting the web console.",
+                  "affected_components": [
+                    {
+                      "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                      "status": "degraded"
+                    }
+                  ]
+                },
+                "source": "ai_sre:sess_01KC3H2A9ZQ8W7E6R5T4Y3U2I1"
+              }
+            }
+          }
+        }
+      }
+    },
     "/status-page/change/create": {
       "post": {
         "operationId": "statusPageChangeCreate",
@@ -21087,7 +21177,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -30725,6 +30815,961 @@
                 "rel_path": "tmp/openapi-delete-example.md"
               }
             }
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/list": {
+      "post": {
+        "operationId": "artifact-read-list",
+        "summary": "List artifacts",
+        "description": "List published artifacts visible to the caller, with pagination and title search.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `scope` selects `all` (default — the caller's own personal artifacts plus every team the caller belongs to), `personal` (only the caller's own), or `team` (only team-owned artifacts of the caller's teams).\n- `team_ids` narrows further to specific teams, intersected with the caller's visibility — teams the caller does not belong to return nothing.\n- Default sort is `updated_at` descending; set `orderby` to `created_at` to change the field and `asc: true` to flip direction.\n- For an `app_key` call, visibility is evaluated against the key owner's identity — the list shows that member's personal artifacts and their teams' artifacts.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-read-list",
+          "metadata": {
+            "sidebarTitle": "List artifacts"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactListRequest"
+              },
+              "example": {
+                "scope": "all",
+                "page": 1,
+                "limit": 20
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                        "title": "SK 海力士 2026 Q2 财报深度分析",
+                        "team_id": 2477033058131,
+                        "team_name": "研发团队",
+                        "person_id": 2476444212131,
+                        "creator_name": "yushuangyu",
+                        "is_mine": true,
+                        "can_edit": true,
+                        "session_id": "sess_VCbVPZrq9YoyBu8sNCmqUy",
+                        "session_title": "分析海力士财报并发布报告",
+                        "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                        "name": "sk-hynix-q2-2026-report.html",
+                        "size": 18996,
+                        "content_type": "text/html",
+                        "created_at": 1785293373899,
+                        "updated_at": 1785747910219,
+                        "share_enabled": true,
+                        "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                        "shared_by": 3790925372131,
+                        "shared_at": 1785747928665,
+                        "share_file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+                      },
+                      {
+                        "artifact_id": "art_CWQzDU2PXSRJvKDhQbuMKu",
+                        "title": "rum_recommendation",
+                        "team_id": 2477033058131,
+                        "team_name": "研发团队",
+                        "person_id": 3790925372131,
+                        "creator_name": "牛伟利",
+                        "is_mine": false,
+                        "can_edit": true,
+                        "session_id": "sess_QXUC9C2PYWP5EE7vETR3UD",
+                        "session_title": "生成 RUM 文档多格式",
+                        "file_id": "pf_Jnc4E5YBcWLGzunB4ntP9s",
+                        "name": "rum_recommendation.pdf",
+                        "size": 137107,
+                        "content_type": "application/pdf",
+                        "created_at": 1785229432881,
+                        "updated_at": 1785741344822
+                      }
+                    ],
+                    "total": 17
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/get": {
+      "post": {
+        "operationId": "artifact-read-get",
+        "summary": "Get artifact detail",
+        "description": "Get a single published artifact by ID.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Visibility is account-wide: any valid `app_key` can read any artifact in the account. `is_mine` and `can_edit` are computed relative to the key owner.\n- When `share_enabled` is true and `file_id` differs from `share_file_id`, the public snapshot is stale — refresh it with `/safari/artifact/gallery/share/sync`.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-read-get",
+          "metadata": {
+            "sidebarTitle": "Get artifact detail"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PublishedArtifactItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "title": "SK 海力士 2026 Q2 财报深度分析",
+                    "team_id": 2477033058131,
+                    "team_name": "研发团队",
+                    "person_id": 2476444212131,
+                    "creator_name": "yushuangyu",
+                    "is_mine": true,
+                    "can_edit": true,
+                    "session_id": "sess_VCbVPZrq9YoyBu8sNCmqUy",
+                    "session_title": "分析海力士财报并发布报告",
+                    "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                    "name": "sk-hynix-q2-2026-report.html",
+                    "size": 18996,
+                    "content_type": "text/html",
+                    "created_at": 1785293373899,
+                    "updated_at": 1785747910219,
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 3790925372131,
+                    "shared_at": 1785747928665,
+                    "share_file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/file-state": {
+      "post": {
+        "operationId": "artifact-read-get-file-state",
+        "summary": "Get file publish state",
+        "description": "Check which presented files already have a live published artifact.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- At most 50 `file_ids` per call; duplicates and empty strings are ignored.\n- Files with no live published artifact are simply absent from `items` — match results by the echoed `file_id`.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-read-get-file-state",
+          "metadata": {
+            "sidebarTitle": "Get file publish state"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactFileStateRequest"
+              },
+              "example": {
+                "file_ids": [
+                  "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                  "pf_9kLm2nQpRsTuVwXyZaBcDe"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactFileStateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                        "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                        "title": "SK 海力士 2026 Q2 财报深度分析",
+                        "gallery_path": "/ai-sre/artifacts/art_VnfrWic8UbB9q3EfYR4Gmg"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/sign": {
+      "post": {
+        "operationId": "artifact-read-sign",
+        "summary": "Create signed file URLs",
+        "description": "Create short-lived signed URLs to download or preview a presented file.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Both URLs expire after `expires_in` seconds (300). Sign again to get fresh URLs.\n- Returned URLs are relative — prepend `https://api.flashcat.cloud` before use, then follow them with `GET /safari/artifact/stream`.\n- The signed token is bound to the calling account and the app_key owner's identity, so a leaked URL does not work for another account or member.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-read-sign",
+          "metadata": {
+            "sidebarTitle": "Create signed file URLs"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactSignRequest"
+              },
+              "example": {
+                "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SignedURLs"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "download_url": "/safari/artifact/stream?mode=download&t=cGZfU2RoRUE1ZmJaSkduSHp3ck5KTU1TQnxzZXNzX1ZDYlZQWnJxOVlveUJ1OHNOQ21xVXl8MjQ1MTAwMjc1MTEzMXwyNDc2NDQ0MjEyMTMxfDB8MHwxNzg4NTI5NjI2NTU0.hPQHab0MBNbnrHYwc6VwDJbGonIamfWUr0yeSmLHYAs",
+                    "preview_url": "/safari/artifact/stream?mode=preview&t=cGZfU2RoRUE1ZmJaSkduSHp3ck5KTU1TQnxzZXNzX1ZDYlZQWnJxOVlveUJ1OHNOQ21xVXl8MjQ1MTAwMjc1MTEzMXwyNDc2NDQ0MjEyMTMxfDB8MHwxNzg4NTI5NjI2NTU0.hPQHab0MBNbnrHYwc6VwDJbGonIamfWUr0yeSmLHYAs",
+                    "expires_in": 300,
+                    "name": "sk-hynix-q2-2026-report.html",
+                    "size": 18996,
+                    "content_type": "text/html"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/stream": {
+      "get": {
+        "operationId": "artifact-read-stream",
+        "summary": "Download or preview a file",
+        "description": "Download or preview a file's bytes using a signed token.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **100 requests/minute**; **10 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Success has two forms: a `302` redirect to a short-lived presigned object-storage URL (files stored in S3-compatible storage), or a `200` binary stream (files hosted on a self-hosted runner). Follow redirects.\n- Responses carry `Cache-Control: private, no-store` — they are never cached by the gateway.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-read-stream",
+          "metadata": {
+            "sidebarTitle": "Download or preview a file"
+          }
+        },
+        "parameters": [
+          {
+            "name": "t",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Signed token issued by `POST /safari/artifact/sign`. Bound to the calling account and person; valid for 5 minutes."
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "download",
+                "preview"
+              ],
+              "default": "download"
+            },
+            "description": "`download` (default) serves the file as an attachment; `preview` serves it inline for browser display. Any other value falls back to `download`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File bytes, proxied, when the file is hosted on a self-hosted runner. Content-Disposition follows `mode`.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to a short-lived presigned object-storage URL when the file lives in S3-compatible storage. Follow the `Location` header; no body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/publish-from-file": {
+      "post": {
+        "operationId": "artifact-write-publish",
+        "summary": "Publish file as artifact",
+        "description": "Publish a session-produced file to the artifact gallery.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Allowed file types: HTML/Markdown, images, PDF, text/data/code files, and zip/tar archives, matched by extension. Files over 16 MiB are rejected.\n- Publishing is an upsert keyed by the source session and workspace path — republishing the same file replaces the artifact's bytes under a fresh `file_id`, which makes an existing public snapshot stale until synced.\n- The artifact inherits personal/team scope from the source session; move it afterwards with `/safari/artifact/gallery/update` if needed.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-write-publish",
+          "metadata": {
+            "sidebarTitle": "Publish file as artifact"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactPublishFromFileRequest"
+              },
+              "example": {
+                "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                "title": "SK 海力士 2026 Q2 财报深度分析"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactPublishResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "title": "SK 海力士 2026 Q2 财报深度分析",
+                    "gallery_path": "/ai-sre/artifacts/art_VnfrWic8UbB9q3EfYR4Gmg"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/update": {
+      "post": {
+        "operationId": "artifact-write-update",
+        "summary": "Update artifact",
+        "description": "Rename an artifact or transfer it between personal and team scope.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Only the provided fields change — omit `title` or `team_id` to leave them unchanged.\n- `team_id: 0` moves the artifact to personal scope (only the creator can manage it); a positive `team_id` requires the caller (for `app_key` calls, the key owner) to be a member of that team.\n- Returns the full artifact after the update.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-write-update",
+          "metadata": {
+            "sidebarTitle": "Update artifact"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactUpdateRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                "title": "SK 海力士 2026 Q2 财报深度分析（终稿）"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PublishedArtifactItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "title": "SK 海力士 2026 Q2 财报深度分析（终稿）",
+                    "team_id": 2477033058131,
+                    "team_name": "研发团队",
+                    "person_id": 2476444212131,
+                    "creator_name": "yushuangyu",
+                    "is_mine": true,
+                    "can_edit": true,
+                    "session_id": "sess_VCbVPZrq9YoyBu8sNCmqUy",
+                    "session_title": "分析海力士财报并发布报告",
+                    "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                    "name": "sk-hynix-q2-2026-report.html",
+                    "size": 18996,
+                    "content_type": "text/html",
+                    "created_at": 1785293373899,
+                    "updated_at": 1785829000000,
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 3790925372131,
+                    "shared_at": 1785747928665,
+                    "share_file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/delete": {
+      "post": {
+        "operationId": "artifact-write-delete",
+        "summary": "Remove artifact from gallery",
+        "description": "Detach an artifact from the gallery; the source file stays with its session.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- This is a detach, not a byte delete: the underlying presented file stays with the source session and can be published again.\n- If public sharing was enabled, the public objects are destroyed in the same operation and the link stops resolving.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-write-delete",
+          "metadata": {
+            "sidebarTitle": "Remove artifact from gallery"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_CWQzDU2PXSRJvKDhQbuMKu"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "null",
+                          "description": "Always null on success."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/share/enable": {
+      "post": {
+        "operationId": "artifact-write-share-enable",
+        "summary": "Enable public sharing",
+        "description": "Turn on anonymous public sharing for an artifact and return its public link.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- The public link is anonymous — anyone with it can view the content, and the link may be forwarded. Content is copied to public CDN objects; the gallery API is not involved when the link is viewed.\n- Idempotent: enabling an already-shared artifact returns the existing link unchanged, and re-enabling after a revoke brings the same link back — the link is keyed by artifact ID.\n- Artifacts over 16 MiB cannot be shared; the call fails with `InvalidParameter`.\n- Sharing is a snapshot: later republishes do not update the public content until you call `/safari/artifact/gallery/share/sync`.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-write-share-enable",
+          "metadata": {
+            "sidebarTitle": "Enable public sharing"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactShareState"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 2476444212131,
+                    "shared_at": 1785747928665
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/share/sync": {
+      "post": {
+        "operationId": "artifact-write-share-sync",
+        "summary": "Update shared snapshot",
+        "description": "Refresh the public snapshot of a shared artifact with its latest content.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Fails with `InvalidParameter` when sharing is not enabled — enable it first.\n- The link never changes; only the snapshot bytes and `shared_at` are refreshed.\n- Use `share_file_id != file_id` on the artifact detail to detect a stale snapshot before syncing.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-write-share-sync",
+          "metadata": {
+            "sidebarTitle": "Update shared snapshot"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactShareState"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 2476444212131,
+                    "shared_at": 1785829900000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/share/revoke": {
+      "post": {
+        "operationId": "artifact-write-share-revoke",
+        "summary": "Revoke public sharing",
+        "description": "Turn off public sharing; the link stops resolving immediately.",
+        "tags": [
+          "AI SRE/Artifacts"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- The public CDN objects are deleted, so the link stops resolving; this is a no-op when the artifact is not shared.\n- Re-enabling later returns the same `public_url` — the link is keyed by artifact ID, so revoke is not a way to rotate the link.\n- Every call is recorded in the account audit log.\n",
+          "href": "/en/api-reference/ai-sre/artifacts/artifact-write-share-revoke",
+          "metadata": {
+            "sidebarTitle": "Revoke public sharing"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "null",
+                          "description": "Always null on success."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
@@ -42665,6 +43710,25 @@
           }
         }
       },
+      "StatusPageDraftCreateResponse": {
+        "type": "object",
+        "description": "Result of storing a status page draft.",
+        "required": [
+          "draft_id",
+          "created_at"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "description": "Draft ID matching `draft_[A-Za-z0-9]{22}`; the console review link carries it."
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Creation time in Unix epoch seconds."
+          }
+        }
+      },
       "ImportStatusPageSubscribersRequest": {
         "type": "object",
         "description": "Parameters for bulk-importing subscribers. Each subscriber must have a non-empty `recipient` (≤255 chars) and subscribe to at least one component, change, or set `all: true`.",
@@ -43192,6 +44256,24 @@
               }
             },
             "description": "Component status transitions applied by this update. Component IDs must be unique."
+          }
+        }
+      },
+      "CreateStatusPageDraftRequest": {
+        "type": "object",
+        "description": "Parameters for storing a status page draft. The `draft` payload is stored verbatim; only the validated fields listed below are interpreted.",
+        "required": [
+          "draft"
+        ],
+        "properties": {
+          "draft": {
+            "type": "object",
+            "description": "Draft payload, stored verbatim, up to 64 KB serialized. Validated fields: `page_id`, `type` (`incident` or `maintenance`), `name`, `message`; optional `change_id` (append an update to an existing event when > 0), `status`, `affected_components`, and `start_time`/`end_time` (Unix epoch seconds, new maintenance only)."
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Opaque marker of the drafting origin, e.g. `ai_sre:sess_xxx`. Up to 64 characters."
           }
         }
       },
@@ -60497,6 +61579,424 @@
             "description": "When false (default), deletion fails with a `ReferenceExist` error listing the members that still hold the role in `data.refs`. When true, the role is first revoked from all holders and then deleted."
           }
         }
+      },
+      "ArtifactIdRequest": {
+        "type": "object",
+        "description": "Identify one gallery artifact.",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "Artifact ID (`art_` prefix). Also the key of the public-share link."
+          }
+        },
+        "required": [
+          "artifact_id"
+        ]
+      },
+      "ArtifactListRequest": {
+        "type": "object",
+        "description": "Filter and paginate the artifact gallery.",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "personal",
+              "team"
+            ],
+            "default": "all",
+            "description": "Visibility scope. `all` (default) lists the caller's own personal artifacts plus artifacts of every team the caller belongs to; `personal` lists only the caller's own; `team` lists only team-owned artifacts of the caller's teams."
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Restrict to artifacts owned by these team IDs, intersected with the caller's visibility — teams the caller does not belong to silently return nothing."
+          },
+          "query": {
+            "type": "string",
+            "description": "Case-insensitive substring match on the artifact title."
+          },
+          "page": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "Page number, 1-based."
+          },
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "description": "Page size. Defaults to 20; capped at 100."
+          },
+          "orderby": {
+            "type": "string",
+            "enum": [
+              "created_at",
+              "updated_at"
+            ],
+            "description": "Sort field: `created_at` or `updated_at`. Empty means `updated_at` descending."
+          },
+          "asc": {
+            "type": "boolean",
+            "description": "Sort ascending when true, descending when false. Applies only when `orderby` is set."
+          }
+        }
+      },
+      "ArtifactListResponse": {
+        "type": "object",
+        "description": "A page of gallery artifacts.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishedArtifactItem"
+            },
+            "description": "Artifacts on this page."
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of artifacts matching the filter across all pages."
+          }
+        }
+      },
+      "PublishedArtifactItem": {
+        "type": "object",
+        "description": "One published artifact in the gallery. Time fields are Unix timestamps in milliseconds.",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "Artifact ID (`art_` prefix). Also the key of the public-share link."
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title in the gallery."
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Owning team ID. `0` means a personal artifact (creator-only management); a positive value means team-owned."
+          },
+          "team_name": {
+            "type": "string",
+            "description": "Owning team's display name. Omitted for personal artifacts."
+          },
+          "person_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Person (member) ID of the creator."
+          },
+          "creator_name": {
+            "type": "string",
+            "description": "Creator's display name."
+          },
+          "is_mine": {
+            "type": "boolean",
+            "description": "Whether the caller is the creator."
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "Whether the caller may manage this artifact (rename, transfer, delete, share): the creator, any member of the owning team, or a manager of the source session."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Source session ID (`sess_` prefix) that produced the file."
+          },
+          "session_title": {
+            "type": "string",
+            "description": "Source session's title. Omitted when the session has been deleted."
+          },
+          "file_id": {
+            "type": "string",
+            "description": "Presented-file ID (`pf_` prefix) currently holding the artifact's bytes. Changes on every republish."
+          },
+          "name": {
+            "type": "string",
+            "description": "Underlying file name including extension."
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "File size in bytes."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME type of the file."
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds when the artifact was published."
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds when the artifact was last updated (rename, transfer, or republish)."
+          },
+          "share_enabled": {
+            "type": "boolean",
+            "description": "Whether anonymous public sharing is on. Omitted when false."
+          },
+          "public_url": {
+            "type": "string",
+            "description": "Anonymous public link — a console `/share/artifact/<artifact_id>` page served entirely from CDN. Present only while shared; anyone with the link can view it, no login required."
+          },
+          "shared_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Person ID of the member who enabled sharing. Present only while shared."
+          },
+          "shared_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds of the last share enable or snapshot sync. Present only while shared."
+          },
+          "share_file_id": {
+            "type": "string",
+            "description": "Presented-file ID the public snapshot was materialized from. When `share_enabled` is true and `file_id` differs from `share_file_id`, the public snapshot is stale — call `/safari/artifact/gallery/share/sync` to refresh it."
+          }
+        },
+        "required": [
+          "artifact_id",
+          "title",
+          "team_id",
+          "person_id",
+          "creator_name",
+          "is_mine",
+          "can_edit",
+          "session_id",
+          "file_id",
+          "name",
+          "size",
+          "content_type",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ArtifactUpdateRequest": {
+        "type": "object",
+        "description": "Partial update of a gallery artifact. Only provided fields change.",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "Artifact ID (`art_` prefix). Also the key of the public-share link."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New title. Trimmed; must be non-empty when provided. Omit to leave unchanged."
+          },
+          "team_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Transfer target scope. `0` moves the artifact to personal scope (only the creator can manage it); a positive value moves it to a team the caller must belong to. Omit to leave unchanged."
+          }
+        },
+        "required": [
+          "artifact_id"
+        ]
+      },
+      "ArtifactPublishFromFileRequest": {
+        "type": "object",
+        "description": "Publish a session-produced file to the artifact gallery.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Presented-file ID (`pf_` prefix) of a file produced in a session, as shown on the file card in chat."
+          },
+          "title": {
+            "type": "string",
+            "description": "Gallery display title. Trimmed; must be non-empty."
+          }
+        },
+        "required": [
+          "file_id",
+          "title"
+        ]
+      },
+      "ArtifactPublishResponse": {
+        "type": "object",
+        "description": "Result of publishing a file to the gallery.",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "Artifact ID (`art_` prefix). Also the key of the public-share link."
+          },
+          "title": {
+            "type": "string",
+            "description": "Gallery display title."
+          },
+          "gallery_path": {
+            "type": "string",
+            "description": "Console-relative path of the artifact page: `/ai-sre/artifacts/<artifact_id>`."
+          }
+        },
+        "required": [
+          "artifact_id",
+          "title",
+          "gallery_path"
+        ]
+      },
+      "ArtifactFileStateRequest": {
+        "type": "object",
+        "description": "Probe publish state for a batch of presented files.",
+        "properties": {
+          "file_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "description": "Presented-file IDs (`pf_` prefix) to probe. At most 50 per call; duplicates and empty strings are ignored."
+          }
+        },
+        "required": [
+          "file_ids"
+        ]
+      },
+      "ArtifactFileStateItem": {
+        "type": "object",
+        "description": "Live publish state of one presented file. Returned only for files that have a live published artifact.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Echoes the requested presented-file ID."
+          },
+          "artifact_id": {
+            "type": "string",
+            "description": "Artifact ID (`art_` prefix). Also the key of the public-share link."
+          },
+          "title": {
+            "type": "string",
+            "description": "Gallery display title of the published artifact."
+          },
+          "gallery_path": {
+            "type": "string",
+            "description": "Console-relative path of the artifact page: `/ai-sre/artifacts/<artifact_id>`."
+          }
+        },
+        "required": [
+          "file_id",
+          "artifact_id",
+          "title",
+          "gallery_path"
+        ]
+      },
+      "ArtifactFileStateResponse": {
+        "type": "object",
+        "description": "Publish states keyed by file.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArtifactFileStateItem"
+            },
+            "description": "One entry per requested file that has a live published artifact; files without one are omitted."
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "ArtifactShareState": {
+        "type": "object",
+        "description": "Public-share state of an artifact.",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "Artifact ID (`art_` prefix). Also the key of the public-share link."
+          },
+          "share_enabled": {
+            "type": "boolean",
+            "description": "Always `true` in this response."
+          },
+          "public_url": {
+            "type": "string",
+            "description": "Anonymous public link served entirely from CDN. Anyone with the link can view the content, no login required."
+          },
+          "shared_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Person ID of the member who enabled sharing."
+          },
+          "shared_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in milliseconds of the last share enable or snapshot sync."
+          }
+        },
+        "required": [
+          "artifact_id",
+          "share_enabled",
+          "public_url",
+          "shared_by",
+          "shared_at"
+        ]
+      },
+      "ArtifactSignRequest": {
+        "type": "object",
+        "description": "Request signed download/preview URLs for a presented file.",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Presented-file ID (`pf_` prefix) to sign."
+          },
+          "share_token": {
+            "type": "string",
+            "description": "Optional session share-link token. Needed only when the caller reaches the file through a shared session link rather than account membership."
+          }
+        },
+        "required": [
+          "file_id"
+        ]
+      },
+      "SignedURLs": {
+        "type": "object",
+        "description": "Short-lived signed URLs for downloading or previewing a file.",
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "description": "Relative URL (`/safari/artifact/stream?...`) that serves the file as an attachment. Prepend the API base `https://api.flashcat.cloud` before use; expires with `expires_in`."
+          },
+          "preview_url": {
+            "type": "string",
+            "description": "Same as `download_url` but served inline for browser preview."
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "Validity of both URLs in seconds (300)."
+          },
+          "name": {
+            "type": "string",
+            "description": "File name including extension."
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "File size in bytes."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME type of the file."
+          }
+        },
+        "required": [
+          "download_url",
+          "preview_url",
+          "expires_in",
+          "name",
+          "size",
+          "content_type"
+        ]
       }
     }
   }

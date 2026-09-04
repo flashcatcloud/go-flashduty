@@ -1104,6 +1104,112 @@ type ApTitleReset struct {
 	Title string `json:"title" toon:"title"`
 }
 
+// ArtifactFileStateItem is generated from the Flashduty OpenAPI schema.
+type ArtifactFileStateItem struct {
+	// Artifact ID (`art_` prefix). Also the key of the public-share link.
+	ArtifactID string `json:"artifact_id" toon:"artifact_id"`
+	// Echoes the requested presented-file ID.
+	FileID string `json:"file_id" toon:"file_id"`
+	// Console-relative path of the artifact page: `/ai-sre/artifacts/<artifact_id>`.
+	GalleryPath string `json:"gallery_path" toon:"gallery_path"`
+	// Gallery display title of the published artifact.
+	Title string `json:"title" toon:"title"`
+}
+
+// ArtifactFileStateRequest is generated from the Flashduty OpenAPI schema.
+type ArtifactFileStateRequest struct {
+	// Presented-file IDs (`pf_` prefix) to probe. At most 50 per call; duplicates and empty strings are ignored.
+	FileIDs []string `json:"file_ids" toon:"file_ids"`
+}
+
+// ArtifactFileStateResponse is generated from the Flashduty OpenAPI schema.
+type ArtifactFileStateResponse struct {
+	// One entry per requested file that has a live published artifact; files without one are omitted.
+	Items []ArtifactFileStateItem `json:"items" toon:"items"`
+}
+
+// ArtifactIDRequest is generated from the Flashduty OpenAPI schema.
+type ArtifactIDRequest struct {
+	// Artifact ID (`art_` prefix). Also the key of the public-share link.
+	ArtifactID string `json:"artifact_id" toon:"artifact_id"`
+}
+
+// ArtifactListRequest is generated from the Flashduty OpenAPI schema.
+type ArtifactListRequest struct {
+	// Sort ascending when true, descending when false. Applies only when `orderby` is set.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Page size. Defaults to 20; capped at 100.
+	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
+	// Sort field: `created_at` or `updated_at`. Empty means `updated_at` descending.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+	// Page number, 1-based.
+	Page int64 `json:"page,omitempty" toon:"page,omitempty"`
+	// Case-insensitive substring match on the artifact title.
+	Query string `json:"query,omitempty" toon:"query,omitempty"`
+	// Visibility scope. `all` (default) lists the caller's own personal artifacts plus artifacts of every team the caller belongs to; `personal` lists only the caller's own; `team` lists only team-owned artifacts of the caller's teams.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// Restrict to artifacts owned by these team IDs, intersected with the caller's visibility — teams the caller does not belong to silently return nothing.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
+}
+
+// ArtifactListResponse is generated from the Flashduty OpenAPI schema.
+type ArtifactListResponse struct {
+	// Artifacts on this page.
+	Items []PublishedArtifactItem `json:"items" toon:"items"`
+	// Total number of artifacts matching the filter across all pages.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// ArtifactPublishFromFileRequest is generated from the Flashduty OpenAPI schema.
+type ArtifactPublishFromFileRequest struct {
+	// Presented-file ID (`pf_` prefix) of a file produced in a session, as shown on the file card in chat.
+	FileID string `json:"file_id" toon:"file_id"`
+	// Gallery display title. Trimmed; must be non-empty.
+	Title string `json:"title" toon:"title"`
+}
+
+// ArtifactPublishResponse is generated from the Flashduty OpenAPI schema.
+type ArtifactPublishResponse struct {
+	// Artifact ID (`art_` prefix). Also the key of the public-share link.
+	ArtifactID string `json:"artifact_id" toon:"artifact_id"`
+	// Console-relative path of the artifact page: `/ai-sre/artifacts/<artifact_id>`.
+	GalleryPath string `json:"gallery_path" toon:"gallery_path"`
+	// Gallery display title.
+	Title string `json:"title" toon:"title"`
+}
+
+// ArtifactShareState is generated from the Flashduty OpenAPI schema.
+type ArtifactShareState struct {
+	// Artifact ID (`art_` prefix). Also the key of the public-share link.
+	ArtifactID string `json:"artifact_id" toon:"artifact_id"`
+	// Anonymous public link served entirely from CDN. Anyone with the link can view the content, no login required.
+	PublicURL string `json:"public_url" toon:"public_url"`
+	// Always `true` in this response.
+	ShareEnabled bool `json:"share_enabled" toon:"share_enabled"`
+	// Unix timestamp in milliseconds of the last share enable or snapshot sync.
+	SharedAt TimestampMilli `json:"shared_at" toon:"shared_at"`
+	// Person ID of the member who enabled sharing.
+	SharedBy int64 `json:"shared_by" toon:"shared_by"`
+}
+
+// ArtifactSignRequest is generated from the Flashduty OpenAPI schema.
+type ArtifactSignRequest struct {
+	// Presented-file ID (`pf_` prefix) to sign.
+	FileID string `json:"file_id" toon:"file_id"`
+	// Optional session share-link token. Needed only when the caller reaches the file through a shared session link rather than account membership.
+	ShareToken string `json:"share_token,omitempty" toon:"share_token,omitempty"`
+}
+
+// ArtifactUpdateRequest is generated from the Flashduty OpenAPI schema.
+type ArtifactUpdateRequest struct {
+	// Artifact ID (`art_` prefix). Also the key of the public-share link.
+	ArtifactID string `json:"artifact_id" toon:"artifact_id"`
+	// Transfer target scope. `0` moves the artifact to personal scope (only the creator can manage it); a positive value moves it to a team the caller must belong to. Omit to leave unchanged.
+	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	// New title. Trimmed; must be non-empty when provided. Omit to leave unchanged.
+	Title *string `json:"title,omitempty" toon:"title,omitempty"`
+}
+
 // AssignIncidentRequest is generated from the Flashduty OpenAPI schema.
 type AssignIncidentRequest struct {
 	// Assign target; at least one of `person_ids` and `escalate_rule_id` must be set.
@@ -2136,6 +2242,14 @@ type CreateStatusPageChangeTimelineRequest struct {
 	// | `ongoing` | In progress (maintenance). |
 	// | `completed` | Completed (maintenance). |
 	Status string `json:"status" toon:"status"`
+}
+
+// CreateStatusPageDraftRequest is generated from the Flashduty OpenAPI schema.
+type CreateStatusPageDraftRequest struct {
+	// Draft payload, stored verbatim, up to 64 KB serialized. Validated fields: `page_id`, `type` (`incident` or `maintenance`), `name`, `message`; optional `change_id` (append an update to an existing event when > 0), `status`, `affected_components`, and `start_time`/`end_time` (Unix epoch seconds, new maintenance only).
+	Draft map[string]any `json:"draft" toon:"draft"`
+	// Opaque marker of the drafting origin, e.g. `ai_sre:sess_xxx`. Up to 64 characters.
+	Source string `json:"source,omitempty" toon:"source,omitempty"`
 }
 
 // CreateStatusPageRequest is generated from the Flashduty OpenAPI schema.
@@ -6248,6 +6362,52 @@ type PreviewTemplateResponse struct {
 	Success bool `json:"success" toon:"success"`
 }
 
+// PublishedArtifactItem is generated from the Flashduty OpenAPI schema.
+type PublishedArtifactItem struct {
+	// Artifact ID (`art_` prefix). Also the key of the public-share link.
+	ArtifactID string `json:"artifact_id" toon:"artifact_id"`
+	// Whether the caller may manage this artifact (rename, transfer, delete, share): the creator, any member of the owning team, or a manager of the source session.
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
+	// MIME type of the file.
+	ContentType string `json:"content_type" toon:"content_type"`
+	// Unix timestamp in milliseconds when the artifact was published.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Creator's display name.
+	CreatorName string `json:"creator_name" toon:"creator_name"`
+	// Presented-file ID (`pf_` prefix) currently holding the artifact's bytes. Changes on every republish.
+	FileID string `json:"file_id" toon:"file_id"`
+	// Whether the caller is the creator.
+	IsMine bool `json:"is_mine" toon:"is_mine"`
+	// Underlying file name including extension.
+	Name string `json:"name" toon:"name"`
+	// Person (member) ID of the creator.
+	PersonID int64 `json:"person_id" toon:"person_id"`
+	// Anonymous public link — a console `/share/artifact/<artifact_id>` page served entirely from CDN. Present only while shared; anyone with the link can view it, no login required.
+	PublicURL string `json:"public_url" toon:"public_url"`
+	// Source session ID (`sess_` prefix) that produced the file.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Source session's title. Omitted when the session has been deleted.
+	SessionTitle string `json:"session_title" toon:"session_title"`
+	// Whether anonymous public sharing is on. Omitted when false.
+	ShareEnabled bool `json:"share_enabled" toon:"share_enabled"`
+	// Presented-file ID the public snapshot was materialized from. When `share_enabled` is true and `file_id` differs from `share_file_id`, the public snapshot is stale — call `/safari/artifact/gallery/share/sync` to refresh it.
+	ShareFileID string `json:"share_file_id" toon:"share_file_id"`
+	// Unix timestamp in milliseconds of the last share enable or snapshot sync. Present only while shared.
+	SharedAt TimestampMilli `json:"shared_at" toon:"shared_at"`
+	// Person ID of the member who enabled sharing. Present only while shared.
+	SharedBy int64 `json:"shared_by" toon:"shared_by"`
+	// File size in bytes.
+	Size int64 `json:"size" toon:"size"`
+	// Owning team ID. `0` means a personal artifact (creator-only management); a positive value means team-owned.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Owning team's display name. Omitted for personal artifacts.
+	TeamName string `json:"team_name" toon:"team_name"`
+	// Display title in the gallery.
+	Title string `json:"title" toon:"title"`
+	// Unix timestamp in milliseconds when the artifact was last updated (rename, transfer, or republish).
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+}
+
 // QueryDataRequest is generated from the Flashduty OpenAPI schema.
 type QueryDataRequest struct {
 	// Optional consistency check. Must equal the authenticated account when supplied; mismatched values are rejected. Business execution always uses the authenticated account.
@@ -9316,6 +9476,22 @@ type SessionTokenUsage struct {
 	ReasoningTokens int64 `json:"reasoning_tokens" toon:"reasoning_tokens"`
 }
 
+// SignedUrLs is generated from the Flashduty OpenAPI schema.
+type SignedUrLs struct {
+	// MIME type of the file.
+	ContentType string `json:"content_type" toon:"content_type"`
+	// Relative URL (`/safari/artifact/stream?...`) that serves the file as an attachment. Prepend the API base `https://api.flashcat.cloud` before use; expires with `expires_in`.
+	DownloadURL string `json:"download_url" toon:"download_url"`
+	// Validity of both URLs in seconds (300).
+	ExpiresIn int64 `json:"expires_in" toon:"expires_in"`
+	// File name including extension.
+	Name string `json:"name" toon:"name"`
+	// Same as `download_url` but served inline for browser preview.
+	PreviewURL string `json:"preview_url" toon:"preview_url"`
+	// File size in bytes.
+	Size int64 `json:"size" toon:"size"`
+}
+
 // SilenceRuleItem is generated from the Flashduty OpenAPI schema.
 type SilenceRuleItem struct {
 	// ID of the account the rule belongs to.
@@ -9781,6 +9957,14 @@ type StatusPageComponentItem struct {
 	OrderID int64 `json:"order_id" toon:"order_id"`
 	// Parent section ID. Omitted when the component sits at the top level.
 	SectionID string `json:"section_id" toon:"section_id"`
+}
+
+// StatusPageDraftCreateResponse is generated from the Flashduty OpenAPI schema.
+type StatusPageDraftCreateResponse struct {
+	// Creation time in Unix epoch seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Draft ID matching `draft_[A-Za-z0-9]{22}`; the console review link carries it.
+	DraftID string `json:"draft_id" toon:"draft_id"`
 }
 
 // StatusPageInfoResponse is generated from the Flashduty OpenAPI schema.
@@ -11914,6 +12098,14 @@ type CreateEscalationRuleRequestLayersItemTargetWebhooksItem struct {
 	Settings map[string]any `json:"settings" toon:"settings"`
 	// Webhook type, one of `feishu`, `feishu_app`, `dingtalk`, `dingtalk_app`, `wecom`, `slack`, `slack_app`, `teams_app`, `telegram`, `zoom`.
 	Type string `json:"type" toon:"type"`
+}
+
+// ArtifactsReadStreamRequest holds the query parameters for Download or preview a file.
+type ArtifactsReadStreamRequest struct {
+	// Signed token issued by `POST /safari/artifact/sign`. Bound to the calling account and person; valid for 5 minutes.
+	T string `url:"t"`
+	// `download` (default) serves the file as an attachment; `preview` serves it inline for browser display. Any other value falls back to `download`.
+	Mode string `url:"mode,omitempty"`
 }
 
 // IncidentsPostMortemInfoRequest holds the query parameters for Get post-mortem.

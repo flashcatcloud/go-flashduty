@@ -149,7 +149,7 @@
       "description": "管理和查询用于 Browser、Android、iOS 错误符号化的 RUM Sourcemap 文件。"
     },
     {
-      "name": "RUM/Session replay",
+      "name": "RUM/RUM 会话回放",
       "description": "查询 RUM 会话的回放元数据与录制分段。"
     },
     {
@@ -170,6 +170,10 @@
     },
     {
       "name": "AI SRE/知识"
+    },
+    {
+      "name": "AI SRE/产物",
+      "description": "AI SRE 产物库 —— 发布、浏览并公开分享智能体生成的文件。"
     }
   ],
   "paths": {
@@ -856,7 +860,7 @@
         "summary": "获取故障时间线",
         "description": "获取指定故障的时间线动态，包括状态变更、评论和系统事件。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- 对于 `i_comm` 条目，`detail.comment_type` 在读取时根据当前账户级评论类型定义解析，因此始终反映类型的最新名称和颜色。",
@@ -1891,7 +1895,7 @@
         "summary": "评论故障",
         "description": "在故障时间线上添加文字评论。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 要提及成员，在 `comment` 中嵌入形如 `[@显示名](flashduty://ref/member/<member_id>)` 的 markdown 链接。被提及的成员会收到专门的个人通知，不受 `mute_reply` 影响。\n- 不带链接语法的纯 `@名字` 文本不会形成提及。\n- 服务端会将每个提及的显示名改写为成员的规范名称。",
@@ -11254,7 +11258,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -11428,7 +11432,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -11597,7 +11601,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -11757,7 +11761,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -12222,6 +12226,92 @@
             "description": "事件类型筛选，必填。仅返回进行中（非终态）事件：incident 含 investigating/identified/monitoring，maintenance 含 scheduled/ongoing。"
           }
         ]
+      }
+    },
+    "/status-page/draft/create": {
+      "post": {
+        "operationId": "statusPageDraftCreate",
+        "summary": "创建状态页草稿",
+        "description": "存储状态页事件草稿，供人工在控制台审核后发布。",
+        "tags": [
+          "On-call/状态页"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 任意有效 `app_key` 均可调用 |\n\n## 使用说明\n\n- `draft` 载荷将被原样存储（最大 64 KB）；控制台发布表单会读取它来预填事件内容。\n- 草稿保留 30 天，事件发布时被消费且仅可消费一次。\n- 每次调用都会记录到账户审计日志，请勿在请求字段中写入敏感信息。",
+          "href": "/zh/api-reference/on-call/status-pages/status-page-draft-create",
+          "metadata": {
+            "sidebarTitle": "创建状态页草稿"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/StatusPageDraftCreateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "draft_id": "draft_3xK9mQ2vN7pR4wT8yH1sJ5",
+                    "created_at": 1788000000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStatusPageDraftRequest"
+              },
+              "example": {
+                "draft": {
+                  "v": 1,
+                  "page_id": 5750613685214,
+                  "type": "incident",
+                  "name": "Web Console Degraded Performance",
+                  "message": "We are investigating degraded performance affecting the web console.",
+                  "affected_components": [
+                    {
+                      "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                      "status": "degraded"
+                    }
+                  ]
+                },
+                "source": "ai_sre:sess_01KC3H2A9ZQ8W7E6R5T4Y3U2I1"
+              }
+            }
+          }
+        }
       }
     },
     "/status-page/change/create": {
@@ -16411,7 +16501,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success. CSV attachment, not a JSON envelope.",
+            "description": "成功。CSV 附件，非 JSON 信封。",
             "headers": {
               "X-Export-Total": {
                 "description": "Total number of issues matching the filters, before the row cap.",
@@ -20527,7 +20617,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -20632,7 +20722,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -20717,7 +20807,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -20793,7 +20883,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -20880,7 +20970,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -20976,7 +21066,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -21087,7 +21177,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23006,7 +23096,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23094,7 +23184,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23173,7 +23263,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23252,7 +23342,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23331,7 +23421,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23431,7 +23521,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23538,7 +23628,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23618,7 +23708,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23743,7 +23833,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23822,7 +23912,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -23931,7 +24021,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24046,7 +24136,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24145,7 +24235,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24266,7 +24356,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24373,7 +24463,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24461,7 +24551,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24560,7 +24650,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24639,7 +24729,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24718,7 +24808,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24797,7 +24887,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24889,7 +24979,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -24988,7 +25078,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25084,7 +25174,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25227,7 +25317,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25376,7 +25466,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25501,7 +25591,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25580,7 +25670,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25659,7 +25749,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25738,7 +25828,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25838,7 +25928,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -25943,7 +26033,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -26045,7 +26135,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -26131,7 +26221,7 @@
         "summary": "查看会话回放元数据",
         "description": "返回可回放会话记录的应用、设备、会话时间范围及全部视图信息。",
         "tags": [
-          "RUM/Session replay"
+          "RUM/RUM 会话回放"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 若会话不存在，或该会话没有录制回放数据（`session_has_replay` 为 false），返回 `InvalidParameter`。\n- 若该会话时间窗口内未查询到任何视图，返回 `InvalidParameter`。\n- 当 `session_id` 在不同时间窗口内被复用时，可传入 `ts` 加以区分。",
@@ -26231,7 +26321,7 @@
         "summary": "查询会话回放分段",
         "description": "分页获取会话录制的回放分段，可返回预签名下载地址或原始数据流。",
         "tags": [
-          "RUM/Session replay"
+          "RUM/RUM 会话回放"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 当 `url_mode` 为 `false`（默认）时，响应以 `application/x-ndjson` 流式返回——每行是一条解压后的回放分段 JSON 记录——且**不会**包裹在标准信封中；下一页的分页游标改由响应头 `X-Search-After-Ctx` 返回，而非响应体字段。\n- 当 `url_mode` 为 `true` 时，响应为标准 JSON 信封，内含分段的预签名下载地址（1 小时内有效），而非原始字节流。\n- 传入 `ts` 可从该时间点之前最近的一个全量快照分段开始定位，而非从会话起始处分页。\n- `limit` 取值范围 1-99；传入 100 及以上将被拒绝。",
@@ -26411,7 +26501,7 @@
         "summary": "查询评论类型列表",
         "description": "获取账户下全部评论类型，按展示位置排序。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- 一次调用返回完整列表，不分页。\n- 每个账户最多可创建 10 个评论类型。",
@@ -26504,7 +26594,7 @@
         "summary": "创建评论类型",
         "description": "创建可附加到故障评论的评论类型。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 新类型追加到展示顺序的末尾。\n- 名称在账户内必须唯一（不区分大小写，忽略首尾空白）。\n- 每个账户最多可创建 10 个评论类型。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
@@ -26588,7 +26678,7 @@
         "summary": "更新评论类型",
         "description": "更新已有账户评论类型的名称和/或颜色。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 部分更新 —— 仅修改提供的字段，但 `name` 和 `color` 至少提供一个。\n- 名称在账户内必须保持唯一（不区分大小写，忽略首尾空白）。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
@@ -26659,7 +26749,7 @@
         "summary": "删除评论类型",
         "description": "删除评论类型。已使用该类型的评论保留文本内容，但不再显示类型标签。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 硬删除 —— 评论类型被永久移除，无法恢复。\n- 已引用该类型的评论会失去类型标签，其他内容不受影响。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
@@ -26729,7 +26819,7 @@
         "summary": "调整评论类型顺序",
         "description": "传入账户全部评论类型 ID 的期望顺序，设置评论类型的展示顺序。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **评论类型管理**（`on-call`） |\n\n## 使用说明\n\n- 全量排序 —— `comment_type_ids` 必须包含账户的全部评论类型，每个恰好出现一次，按期望顺序排列。\n- 展示位置从 1 开始重新分配：数组中的第一个 ID 即为位置 1。\n- 该权限默认仅管理员拥有，自定义角色需显式授予。",
@@ -26802,7 +26892,7 @@
         "summary": "查询跟进事项列表",
         "description": "查询故障跟进事项（行动项与复盘后续行动），使用游标分页。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- `incident_id`、`post_mortem_id`、`assignee_id` 至少提供一个。\n- 按 `updated_at_seconds` 倒序的游标分页 —— 将上一次响应的 `next_cursor` 作为 `cursor` 传入，直到 `has_more` 为 false。\n- 按 `incident_id` 查询时，同时包含锚定在该故障复盘上的后续行动。\n- 仅按 `assignee_id` 查询时，须为本人或账户管理员。",
@@ -26914,7 +27004,7 @@
         "summary": "创建跟进事项",
         "description": "在活动故障上创建行动项，或在其故障复盘上创建后续行动。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- `action` 锚定活动故障，且不得设置 `post_mortem_id`；`follow_up` 必须设置为关联到 `incident_id` 的故障复盘 ID。\n- 负责人须为已能查看锚定故障或复盘的活跃成员 —— 指派不会授予访问权限。\n- 新添加的负责人会收到通知。\n- 以相同的（`creator`、`idempotency_key`）重试时，返回原事项并标记 `idempotent_replay: true`，不会创建重复事项。\n- 已审计 —— 变更会记录到审计日志。",
@@ -27013,7 +27103,7 @@
         "summary": "更新跟进事项",
         "description": "部分更新跟进事项的标题、描述、状态或优先级。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 部分更新：未提供的字段保持不变；显式传 `null` 则清空该字段。\n- 乐观锁 —— `version` 必须与事项当前版本一致；不一致返回冲突错误。\n- 负责人、`item_type` 以及故障/复盘锚点不能在此修改 —— 请使用专用接口。\n- 已审计 —— 变更会记录到审计日志。",
@@ -27106,7 +27196,7 @@
         "summary": "删除跟进事项",
         "description": "软删除跟进事项。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 软删除 —— 事项不再出现在列表中，但数据仍保留。\n- 乐观锁 —— `version` 必须与事项当前版本一致；不一致返回冲突错误。\n- 已审计 —— 变更会记录到审计日志。",
@@ -27177,7 +27267,7 @@
         "summary": "完成跟进事项",
         "description": "通过设置客户端自定义的目标状态，将跟进事项标记为完成。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 仅当前负责人可以完成跟进事项。\n- `target_status` 为客户端自定义字符串 —— 没有固定状态机。\n- 相同 `idempotency_key` 搭配相同 `target_status` 会幂等重放；相同键搭配不同 `target_status` 将返回错误。\n- 已审计 —— 变更会记录到审计日志。",
@@ -27270,7 +27360,7 @@
         "summary": "转化跟进事项为复盘后续行动",
         "description": "将故障行动项原地转化为故障复盘后续行动。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 将 `action` 事项原地转化为复盘 `follow_up` —— `work_item_id` 不变。\n- 转化已是 `follow_up` 的事项时返回 `idempotent_replay: true`。\n- 如果故障已存在复盘，转化后的事项会自动绑定到该复盘。\n- 已审计 —— 变更会记录到审计日志。",
@@ -27363,7 +27453,7 @@
         "summary": "重置跟进事项负责人",
         "description": "整体替换跟进事项的负责人集合。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 整体替换负责人集合 —— 空数组表示清空所有负责人。\n- 仅新添加的负责人会收到通知；移除不通知。\n- 已审计 —— 变更会记录到审计日志。",
@@ -27464,7 +27554,7 @@
         "summary": "绑定跟进事项到复盘",
         "description": "将故障下已转化但未绑定的后续行动批量绑定到故障复盘。",
         "tags": [
-          "On-call/Incidents"
+          "On-call/故障管理"
         ],
         "x-mint": {
           "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 一次调用将该故障全部已转化但未绑定的后续行动绑定到指定复盘。\n- `items` 为本次新绑定的批次；不设置 `next_cursor` 和 `has_more`。\n- 通过 `idempotency_key` 幂等 —— 以相同键重试时重放原始结果。\n- 已审计 —— 变更会记录到审计日志。",
@@ -29909,7 +29999,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30019,7 +30109,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30130,7 +30220,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30222,7 +30312,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30316,7 +30406,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30396,7 +30486,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30495,7 +30585,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30582,7 +30672,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30673,7 +30763,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -30725,6 +30815,961 @@
                 "rel_path": "tmp/openapi-delete-example.md"
               }
             }
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/list": {
+      "post": {
+        "operationId": "artifact-read-list",
+        "summary": "查询产物列表",
+        "description": "分页查询调用者可见的产物列表，支持按标题搜索。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- `scope` 可选 `all`（默认 —— 调用者自己的个人产物 + 其所属全部团队的产物）、`personal`（仅自己创建的）、`team`（仅所属团队的团队产物）。\n- `team_ids` 可在可见范围内进一步限定团队 —— 调用者不属于的团队不会有任何返回。\n- 默认按 `updated_at` 倒序；设置 `orderby` 为 `created_at` 可更换排序字段，`asc: true` 改为升序。\n- 使用 `app_key` 调用时，可见范围按 key 所属成员的身份计算 —— 返回该成员的个人产物及其所在团队的产物。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-read-list",
+          "metadata": {
+            "sidebarTitle": "查询产物列表"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactListRequest"
+              },
+              "example": {
+                "scope": "all",
+                "page": 1,
+                "limit": 20
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                        "title": "SK 海力士 2026 Q2 财报深度分析",
+                        "team_id": 2477033058131,
+                        "team_name": "研发团队",
+                        "person_id": 2476444212131,
+                        "creator_name": "yushuangyu",
+                        "is_mine": true,
+                        "can_edit": true,
+                        "session_id": "sess_VCbVPZrq9YoyBu8sNCmqUy",
+                        "session_title": "分析海力士财报并发布报告",
+                        "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                        "name": "sk-hynix-q2-2026-report.html",
+                        "size": 18996,
+                        "content_type": "text/html",
+                        "created_at": 1785293373899,
+                        "updated_at": 1785747910219,
+                        "share_enabled": true,
+                        "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                        "shared_by": 3790925372131,
+                        "shared_at": 1785747928665,
+                        "share_file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+                      },
+                      {
+                        "artifact_id": "art_CWQzDU2PXSRJvKDhQbuMKu",
+                        "title": "rum_recommendation",
+                        "team_id": 2477033058131,
+                        "team_name": "研发团队",
+                        "person_id": 3790925372131,
+                        "creator_name": "牛伟利",
+                        "is_mine": false,
+                        "can_edit": true,
+                        "session_id": "sess_QXUC9C2PYWP5EE7vETR3UD",
+                        "session_title": "生成 RUM 文档多格式",
+                        "file_id": "pf_Jnc4E5YBcWLGzunB4ntP9s",
+                        "name": "rum_recommendation.pdf",
+                        "size": 137107,
+                        "content_type": "application/pdf",
+                        "created_at": 1785229432881,
+                        "updated_at": 1785741344822
+                      }
+                    ],
+                    "total": 17
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/get": {
+      "post": {
+        "operationId": "artifact-read-get",
+        "summary": "获取产物详情",
+        "description": "根据产物 ID 获取产物详情。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 可见范围为整个账号：任何有效 `app_key` 都能读取账号内任意产物。`is_mine` 和 `can_edit` 相对于 key 所属成员计算。\n- 当 `share_enabled` 为 true 且 `file_id` 与 `share_file_id` 不一致时，公开快照已过期 —— 调用 `/safari/artifact/gallery/share/sync` 刷新。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-read-get",
+          "metadata": {
+            "sidebarTitle": "获取产物详情"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PublishedArtifactItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "title": "SK 海力士 2026 Q2 财报深度分析",
+                    "team_id": 2477033058131,
+                    "team_name": "研发团队",
+                    "person_id": 2476444212131,
+                    "creator_name": "yushuangyu",
+                    "is_mine": true,
+                    "can_edit": true,
+                    "session_id": "sess_VCbVPZrq9YoyBu8sNCmqUy",
+                    "session_title": "分析海力士财报并发布报告",
+                    "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                    "name": "sk-hynix-q2-2026-report.html",
+                    "size": 18996,
+                    "content_type": "text/html",
+                    "created_at": 1785293373899,
+                    "updated_at": 1785747910219,
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 3790925372131,
+                    "shared_at": 1785747928665,
+                    "share_file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/file-state": {
+      "post": {
+        "operationId": "artifact-read-get-file-state",
+        "summary": "查询文件发布状态",
+        "description": "批量查询文件是否已发布为产物。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 单次最多传入 50 个 `file_ids`；重复和空字符串会被忽略。\n- 没有已发布产物的文件不会出现在 `items` 中 —— 按回显的 `file_id` 对应结果。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-read-get-file-state",
+          "metadata": {
+            "sidebarTitle": "查询文件发布状态"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactFileStateRequest"
+              },
+              "example": {
+                "file_ids": [
+                  "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                  "pf_9kLm2nQpRsTuVwXyZaBcDe"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactFileStateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                        "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                        "title": "SK 海力士 2026 Q2 财报深度分析",
+                        "gallery_path": "/ai-sre/artifacts/art_VnfrWic8UbB9q3EfYR4Gmg"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/sign": {
+      "post": {
+        "operationId": "artifact-read-sign",
+        "summary": "签发文件访问链接",
+        "description": "为文件签发短期有效的下载/预览链接。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 两个链接在 `expires_in` 秒（300 秒）后过期，需重新签发获取新链接。\n- 返回的是相对链接 —— 使用前拼接 `https://api.flashcat.cloud`，然后以 `GET /safari/artifact/stream` 访问。\n- 签名令牌与调用账号及 app_key 所属成员身份绑定 —— 链接泄露给其他账号或成员不可用。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-read-sign",
+          "metadata": {
+            "sidebarTitle": "签发文件访问链接"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactSignRequest"
+              },
+              "example": {
+                "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SignedURLs"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "download_url": "/safari/artifact/stream?mode=download&t=cGZfU2RoRUE1ZmJaSkduSHp3ck5KTU1TQnxzZXNzX1ZDYlZQWnJxOVlveUJ1OHNOQ21xVXl8MjQ1MTAwMjc1MTEzMXwyNDc2NDQ0MjEyMTMxfDB8MHwxNzg4NTI5NjI2NTU0.hPQHab0MBNbnrHYwc6VwDJbGonIamfWUr0yeSmLHYAs",
+                    "preview_url": "/safari/artifact/stream?mode=preview&t=cGZfU2RoRUE1ZmJaSkduSHp3ck5KTU1TQnxzZXNzX1ZDYlZQWnJxOVlveUJ1OHNOQ21xVXl8MjQ1MTAwMjc1MTEzMXwyNDc2NDQ0MjEyMTMxfDB8MHwxNzg4NTI5NjI2NTU0.hPQHab0MBNbnrHYwc6VwDJbGonIamfWUr0yeSmLHYAs",
+                    "expires_in": 300,
+                    "name": "sk-hynix-q2-2026-report.html",
+                    "size": 18996,
+                    "content_type": "text/html"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/stream": {
+      "get": {
+        "operationId": "artifact-read-stream",
+        "summary": "下载或预览文件",
+        "description": "使用签名令牌下载或预览文件内容。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **100 次/分钟**；**10 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 成功响应有两种形式：302 重定向到短期有效的对象存储预签名 URL（存储在 S3 兼容存储中的文件），或 200 二进制流（托管在自托管 runner 上的文件）。请跟随重定向。\n- 响应携带 `Cache-Control: private, no-store` —— 网关不会缓存。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-read-stream",
+          "metadata": {
+            "sidebarTitle": "下载或预览文件"
+          }
+        },
+        "parameters": [
+          {
+            "name": "t",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "由 `POST /safari/artifact/sign` 签发的令牌。与调用账号及成员绑定，有效期 5 分钟。"
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "download",
+                "preview"
+              ],
+              "default": "download"
+            },
+            "description": "`download`（默认）以附件形式返回文件；`preview` 以 inline 方式返回供浏览器预览。其他取值按 `download` 处理。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "文件内容流。当文件托管在自托管 runner 上时由服务端代理返回，Content-Disposition 随 `mode` 变化。",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "当文件存储在 S3 兼容存储中时，302 重定向到短期有效的预签名 URL。请跟随 `Location` 头，无响应体。"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/publish-from-file": {
+      "post": {
+        "operationId": "artifact-write-publish",
+        "summary": "发布文件为产物",
+        "description": "将会话中生成的文件发布到产物库。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 允许的文件类型：HTML/Markdown、图片、PDF、文本/数据/代码文件以及 zip/tar 压缩包（按扩展名判断）。超过 16 MiB 的文件会被拒绝。\n- 发布按（来源会话 + 工作区路径）做 upsert —— 重复发布同一文件会替换产物内容并使用新的 `file_id`，已有的公开快照会因此过期，需执行分享同步刷新。\n- 产物继承来源会话的个人/团队空间；如需调整，发布后调用 `/safari/artifact/gallery/update` 转移。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-write-publish",
+          "metadata": {
+            "sidebarTitle": "发布文件为产物"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactPublishFromFileRequest"
+              },
+              "example": {
+                "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                "title": "SK 海力士 2026 Q2 财报深度分析"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactPublishResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "title": "SK 海力士 2026 Q2 财报深度分析",
+                    "gallery_path": "/ai-sre/artifacts/art_VnfrWic8UbB9q3EfYR4Gmg"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/update": {
+      "post": {
+        "operationId": "artifact-write-update",
+        "summary": "更新产物",
+        "description": "更新产物标题，或在个人/团队空间之间转移产物。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 仅更新传入的字段 —— 不传 `title` 或 `team_id` 则对应字段保持不变。\n- `team_id: 0` 表示转为个人产物（仅创建者可管理）；传入大于 0 的 `team_id` 时，调用者（`app_key` 调用时为 key 所属成员）必须是该团队成员。\n- 返回更新后的完整产物。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-write-update",
+          "metadata": {
+            "sidebarTitle": "更新产物"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactUpdateRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                "title": "SK 海力士 2026 Q2 财报深度分析（终稿）"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PublishedArtifactItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "title": "SK 海力士 2026 Q2 财报深度分析（终稿）",
+                    "team_id": 2477033058131,
+                    "team_name": "研发团队",
+                    "person_id": 2476444212131,
+                    "creator_name": "yushuangyu",
+                    "is_mine": true,
+                    "can_edit": true,
+                    "session_id": "sess_VCbVPZrq9YoyBu8sNCmqUy",
+                    "session_title": "分析海力士财报并发布报告",
+                    "file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB",
+                    "name": "sk-hynix-q2-2026-report.html",
+                    "size": 18996,
+                    "content_type": "text/html",
+                    "created_at": 1785293373899,
+                    "updated_at": 1785829000000,
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 3790925372131,
+                    "shared_at": 1785747928665,
+                    "share_file_id": "pf_SdhEA5fbZJGnHzwrNJMMSB"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/delete": {
+      "post": {
+        "operationId": "artifact-write-delete",
+        "summary": "从产物库移除产物",
+        "description": "将产物从产物库移除；来源文件仍保留在会话中。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 该操作只是从产物库移除，不会删除文件本身 —— 来源文件仍保留在会话中，可再次发布。\n- 如果产物已开启公开分享，公开内容会在同一操作中被销毁，公开链接立即失效。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-write-delete",
+          "metadata": {
+            "sidebarTitle": "从产物库移除产物"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_CWQzDU2PXSRJvKDhQbuMKu"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "null",
+                          "description": "Always null on success."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/share/enable": {
+      "post": {
+        "operationId": "artifact-write-share-enable",
+        "summary": "开启公开分享",
+        "description": "开启产物的匿名公开分享并返回公开链接。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 公开链接是匿名的 —— 任何拿到链接的人都可以查看内容，链接也可能被继续转发。内容会被复制到公开 CDN 对象上，访问链接时不经过本 API。\n- 幂等：对已分享的产物重复开启会原样返回已有链接；撤销后重新开启也会得到同一个链接 —— 链接以产物 ID 为标识。\n- 超过 16 MiB 的产物无法分享，调用返回 `InvalidParameter`。\n- 分享是内容快照：之后重新发布产物不会自动更新公开内容，需调用 `/safari/artifact/gallery/share/sync` 同步。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-write-share-enable",
+          "metadata": {
+            "sidebarTitle": "开启公开分享"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactShareState"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 2476444212131,
+                    "shared_at": 1785747928665
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/share/sync": {
+      "post": {
+        "operationId": "artifact-write-share-sync",
+        "summary": "更新公开分享快照",
+        "description": "将公开分享的内容快照更新为产物最新内容。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 未开启分享时调用返回 `InvalidParameter` —— 请先开启分享。\n- 公开链接不变，仅更新快照内容和 `shared_at`。\n- 可通过产物详情中 `share_file_id != file_id` 判断快照是否过期，再决定是否同步。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-write-share-sync",
+          "metadata": {
+            "sidebarTitle": "更新公开分享快照"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ArtifactShareState"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "share_enabled": true,
+                    "public_url": "https://console.flashcat.cloud/share/artifact/art_VnfrWic8UbB9q3EfYR4Gmg",
+                    "shared_by": 2476444212131,
+                    "shared_at": 1785829900000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/safari/artifact/gallery/share/revoke": {
+      "post": {
+        "operationId": "artifact-write-share-revoke",
+        "summary": "撤销公开分享",
+        "description": "撤销产物的公开分享，公开链接立即失效。",
+        "tags": [
+          "AI SRE/产物"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个 `app_key` **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 公开 CDN 对象会被删除，链接随即失效；产物未开启分享时该操作为空操作。\n- 之后重新开启分享会返回同一个 `public_url` —— 链接以产物 ID 为标识，撤销并不能用于更换链接。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/artifacts/artifact-write-share-revoke",
+          "metadata": {
+            "sidebarTitle": "撤销公开分享"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactIdRequest"
+              },
+              "example": {
+                "artifact_id": "art_VnfrWic8UbB9q3EfYR4Gmg"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "null",
+                          "description": "Always null on success."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
@@ -42665,6 +43710,25 @@
           }
         }
       },
+      "StatusPageDraftCreateResponse": {
+        "type": "object",
+        "description": "存储状态页草稿的结果。",
+        "required": [
+          "draft_id",
+          "created_at"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "description": "草稿 ID，格式为 `draft_[A-Za-z0-9]{22}`；控制台审核链接会携带它。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间，Unix epoch 秒。"
+          }
+        }
+      },
       "ImportStatusPageSubscribersRequest": {
         "type": "object",
         "description": "批量导入订阅者所需的参数。每个订阅者的 `recipient` 非空且不超过 255 字符；并且至少订阅一个组件/事件，或将 `all` 置为 true。",
@@ -43192,6 +44256,24 @@
               }
             },
             "description": "本次更新应用的组件状态变更。组件 ID 不能重复。"
+          }
+        }
+      },
+      "CreateStatusPageDraftRequest": {
+        "type": "object",
+        "description": "存储状态页草稿的参数。`draft` 载荷将被原样存储，仅下列被校验的字段会被解析。",
+        "required": [
+          "draft"
+        ],
+        "properties": {
+          "draft": {
+            "type": "object",
+            "description": "草稿载荷，原样存储，序列化后最大 64 KB。被校验的字段：`page_id`、`type`（`incident` 或 `maintenance`）、`name`、`message`；可选 `change_id`（大于 0 时表示向已有事件追加进展）、`status`、`affected_components`，以及 `start_time`/`end_time`（Unix epoch 秒，仅新建维护窗口时使用）。"
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "草稿来源的不透明标记，例如 `ai_sre:sess_xxx`。最长 64 个字符。"
           }
         }
       },
@@ -60497,6 +61579,424 @@
             "description": "为 false（默认）时，若仍有成员持有该角色，删除失败并返回 `ReferenceExist` 错误，`data.refs` 中列出持有成员；为 true 时先从所有持有成员解除该角色，再删除角色。"
           }
         }
+      },
+      "ArtifactIdRequest": {
+        "type": "object",
+        "description": "指定一个产物库中的产物。",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "产物 ID（`art_` 前缀）。同时也是公开分享链接的标识。"
+          }
+        },
+        "required": [
+          "artifact_id"
+        ]
+      },
+      "ArtifactListRequest": {
+        "type": "object",
+        "description": "产物库列表的过滤与分页参数。",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "personal",
+              "team"
+            ],
+            "default": "all",
+            "description": "可见范围。`all`（默认）= 调用者自己的个人产物 + 其所在团队的产物；`personal` = 仅调用者自己创建的；`team` = 仅调用者所属团队的团队产物。"
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "只看指定团队的产物，与调用者可见范围取交集 —— 不属于调用者的团队不会有任何返回。"
+          },
+          "query": {
+            "type": "string",
+            "description": "按产物标题做大小写不敏感的子串匹配。"
+          },
+          "page": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "description": "页码，从 1 开始。"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "description": "每页条数。默认 20，最大 100。"
+          },
+          "orderby": {
+            "type": "string",
+            "enum": [
+              "created_at",
+              "updated_at"
+            ],
+            "description": "排序字段：`created_at` 或 `updated_at`。留空按 `updated_at` 倒序。"
+          },
+          "asc": {
+            "type": "boolean",
+            "description": "为 true 时升序，为 false 时降序。仅在设置了 `orderby` 时生效。"
+          }
+        }
+      },
+      "ArtifactListResponse": {
+        "type": "object",
+        "description": "一页产物列表。",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishedArtifactItem"
+            },
+            "description": "当前页的产物列表。"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "符合过滤条件的产物总数（跨所有页）。"
+          }
+        }
+      },
+      "PublishedArtifactItem": {
+        "type": "object",
+        "description": "产物库中的一个已发布产物。时间字段均为 Unix 毫秒时间戳。",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "产物 ID（`art_` 前缀）。同时也是公开分享链接的标识。"
+          },
+          "title": {
+            "type": "string",
+            "description": "产物在产物库中的展示标题。"
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "归属团队 ID。`0` 表示个人产物（仅创建者可管理）；大于 0 表示团队产物。"
+          },
+          "team_name": {
+            "type": "string",
+            "description": "归属团队的名称。个人产物不返回该字段。"
+          },
+          "person_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建者的成员 ID。"
+          },
+          "creator_name": {
+            "type": "string",
+            "description": "创建者的显示名称。"
+          },
+          "is_mine": {
+            "type": "boolean",
+            "description": "调用者是否为创建者。"
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "调用者是否可管理该产物（重命名、转移、删除、分享）：创建者、归属团队任一成员、或来源会话的管理者。"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "产出该文件的来源会话 ID（`sess_` 前缀）。"
+          },
+          "session_title": {
+            "type": "string",
+            "description": "来源会话的标题。会话已删除时不返回该字段。"
+          },
+          "file_id": {
+            "type": "string",
+            "description": "当前承载产物内容的文件 ID（`pf_` 前缀）。每次重新发布都会变化。"
+          },
+          "name": {
+            "type": "string",
+            "description": "底层文件名（含扩展名）。"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "文件大小，单位字节。"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "文件的 MIME 类型。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "产物发布的 Unix 毫秒时间戳。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "产物最近一次更新（重命名、转移或重新发布）的 Unix 毫秒时间戳。"
+          },
+          "share_enabled": {
+            "type": "boolean",
+            "description": "是否已开启匿名公开分享。为 false 时不返回该字段。"
+          },
+          "public_url": {
+            "type": "string",
+            "description": "匿名公开链接 —— 由 CDN 承载的控制台 `/share/artifact/<artifact_id>` 页面。仅在分享开启时返回；任何拿到链接的人无需登录即可查看。"
+          },
+          "shared_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "开启分享的成员 ID。仅在分享开启时返回。"
+          },
+          "shared_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近一次开启分享或更新快照的 Unix 毫秒时间戳。仅在分享开启时返回。"
+          },
+          "share_file_id": {
+            "type": "string",
+            "description": "公开快照所基于的文件 ID。当 `share_enabled` 为 true 且 `file_id` 与 `share_file_id` 不一致时，公开快照已过期 —— 调用 `/safari/artifact/gallery/share/sync` 刷新。"
+          }
+        },
+        "required": [
+          "artifact_id",
+          "title",
+          "team_id",
+          "person_id",
+          "creator_name",
+          "is_mine",
+          "can_edit",
+          "session_id",
+          "file_id",
+          "name",
+          "size",
+          "content_type",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ArtifactUpdateRequest": {
+        "type": "object",
+        "description": "产物的部分字段更新。仅更新传入的字段。",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "产物 ID（`art_` 前缀）。同时也是公开分享链接的标识。"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "新标题。会去除首尾空白，传入时不能为空。不传则不变。"
+          },
+          "team_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "转移目标空间。`0` 表示转为个人产物（仅创建者可管理）；大于 0 表示转移到调用者所属的团队。不传则不变。"
+          }
+        },
+        "required": [
+          "artifact_id"
+        ]
+      },
+      "ArtifactPublishFromFileRequest": {
+        "type": "object",
+        "description": "把会话中生成的文件发布到产物库。",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "会话中生成的文件 ID（`pf_` 前缀），即会话文件卡片上的文件标识。"
+          },
+          "title": {
+            "type": "string",
+            "description": "产物在产物库中的展示标题。会去除首尾空白，不能为空。"
+          }
+        },
+        "required": [
+          "file_id",
+          "title"
+        ]
+      },
+      "ArtifactPublishResponse": {
+        "type": "object",
+        "description": "发布产物的结果。",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "产物 ID（`art_` 前缀）。同时也是公开分享链接的标识。"
+          },
+          "title": {
+            "type": "string",
+            "description": "产物展示标题。"
+          },
+          "gallery_path": {
+            "type": "string",
+            "description": "产物页面的控制台相对路径：`/ai-sre/artifacts/<artifact_id>`。"
+          }
+        },
+        "required": [
+          "artifact_id",
+          "title",
+          "gallery_path"
+        ]
+      },
+      "ArtifactFileStateRequest": {
+        "type": "object",
+        "description": "批量查询文件的产物发布状态。",
+        "properties": {
+          "file_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "description": "要查询的文件 ID（`pf_` 前缀）。单次最多 50 个；重复和空字符串会被忽略。"
+          }
+        },
+        "required": [
+          "file_ids"
+        ]
+      },
+      "ArtifactFileStateItem": {
+        "type": "object",
+        "description": "单个文件的发布状态。仅当文件存在已发布的产物时才会返回。",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "回显请求中的文件 ID。"
+          },
+          "artifact_id": {
+            "type": "string",
+            "description": "产物 ID（`art_` 前缀）。同时也是公开分享链接的标识。"
+          },
+          "title": {
+            "type": "string",
+            "description": "已发布产物的展示标题。"
+          },
+          "gallery_path": {
+            "type": "string",
+            "description": "产物页面的控制台相对路径：`/ai-sre/artifacts/<artifact_id>`。"
+          }
+        },
+        "required": [
+          "file_id",
+          "artifact_id",
+          "title",
+          "gallery_path"
+        ]
+      },
+      "ArtifactFileStateResponse": {
+        "type": "object",
+        "description": "按文件返回的发布状态。",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArtifactFileStateItem"
+            },
+            "description": "每个存在已发布产物的请求文件对应一条记录；未发布的文件不会出现在列表中。"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "ArtifactShareState": {
+        "type": "object",
+        "description": "产物的公开分享状态。",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "产物 ID（`art_` 前缀）。同时也是公开分享链接的标识。"
+          },
+          "share_enabled": {
+            "type": "boolean",
+            "description": "本响应中固定为 `true`。"
+          },
+          "public_url": {
+            "type": "string",
+            "description": "完全由 CDN 承载的匿名公开链接。任何拿到链接的人无需登录即可查看内容。"
+          },
+          "shared_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "开启分享的成员 ID。"
+          },
+          "shared_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近一次开启分享或更新快照的 Unix 毫秒时间戳。"
+          }
+        },
+        "required": [
+          "artifact_id",
+          "share_enabled",
+          "public_url",
+          "shared_by",
+          "shared_at"
+        ]
+      },
+      "ArtifactSignRequest": {
+        "type": "object",
+        "description": "为文件申请签名下载/预览链接。",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "要签发的文件 ID（`pf_` 前缀）。"
+          },
+          "share_token": {
+            "type": "string",
+            "description": "可选的会话分享链接令牌。仅当调用者通过会话分享链接（而非账号成员身份）访问文件时需要。"
+          }
+        },
+        "required": [
+          "file_id"
+        ]
+      },
+      "SignedURLs": {
+        "type": "object",
+        "description": "短期有效的文件下载/预览签名链接。",
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "description": "以下载方式（attachment）返回文件的相对链接（`/safari/artifact/stream?...`）。使用前需拼接 API 域名 `https://api.flashcat.cloud`；有效期见 `expires_in`。"
+          },
+          "preview_url": {
+            "type": "string",
+            "description": "与 `download_url` 相同，但以 inline 方式返回，用于浏览器内预览。"
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "两个链接的有效期，单位秒（300）。"
+          },
+          "name": {
+            "type": "string",
+            "description": "文件名（含扩展名）。"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "文件大小，单位字节。"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "文件的 MIME 类型。"
+          }
+        },
+        "required": [
+          "download_url",
+          "preview_url",
+          "expires_in",
+          "name",
+          "size",
+          "content_type"
+        ]
       }
     }
   }

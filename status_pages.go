@@ -173,6 +173,20 @@ func (s *StatusPagesService) Delete(ctx context.Context, req *DeleteStatusPageRe
 	return s.client.do(ctx, "/status-page/delete", req, nil)
 }
 
+// Create status page draft.
+//
+// Store a status page event draft so a human can review and publish it from the console.
+//
+// API: POST /status-page/draft/create (statusPageDraftCreate).
+func (s *StatusPagesService) DraftCreate(ctx context.Context, req *CreateStatusPageDraftRequest) (*StatusPageDraftCreateResponse, *Response, error) {
+	out := new(StatusPageDraftCreateResponse)
+	resp, err := s.client.do(ctx, "/status-page/draft/create", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get status page detail.
 //
 // Retrieve detailed configuration for a specific status page.
