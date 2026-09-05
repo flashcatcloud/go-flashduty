@@ -3827,6 +3827,21 @@ type Flapping struct {
 	MuteMins int64 `json:"mute_mins,omitempty" toon:"mute_mins,omitempty"`
 }
 
+// GetRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type GetRemoteConfigRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+}
+
+// GetRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type GetRemoteConfigResponse struct {
+	Config RemoteConfig `json:"config" toon:"config"`
+	// Unix timestamp in milliseconds - when the current version was published. 0 when never configured.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Version the live configuration is stored under. 0 means the application has never been configured.
+	Version int64 `json:"version" toon:"version"`
+}
+
 // GetWarRoomDefaultObserversRequest is generated from the Flashduty OpenAPI schema.
 type GetWarRoomDefaultObserversRequest struct {
 	// Incident ID, a MongoDB ObjectID hex string.
@@ -4989,6 +5004,27 @@ type ListPostMortemsResponse struct {
 	Total int64 `json:"total" toon:"total"`
 }
 
+// ListRemoteConfigHistoryRequest is generated from the Flashduty OpenAPI schema.
+type ListRemoteConfigHistoryRequest struct {
+	ListOptions
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Ascending order. Default: false (descending).
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Sort field. Default: `updated_at`.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+}
+
+// ListRemoteConfigHistoryResponse is generated from the Flashduty OpenAPI schema.
+type ListRemoteConfigHistoryResponse struct {
+	// Whether more pages remain.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Version items, newest first by default.
+	Items []RemoteConfigHistoryItem `json:"items" toon:"items"`
+	// Total number of versions.
+	Total int64 `json:"total" toon:"total"`
+}
+
 // ListRoutesRequest is generated from the Flashduty OpenAPI schema.
 type ListRoutesRequest struct {
 	// Integration IDs to fetch routing rules for.
@@ -5725,6 +5761,8 @@ type MemberListRequest struct {
 	ListOptions
 	// Ascending order. Default: false (descending)
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Filter by member ID. Return only the member with this ID.
+	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
 	// Sort field. Default: `updated_at`
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
 	// Substring match on member name or email; if the keyword parses as a phone number, an exact phone match is also applied
@@ -5740,6 +5778,18 @@ type MemberListResponse struct {
 	Items []MemberItem `json:"items" toon:"items"`
 	// Total count
 	Total int64 `json:"total" toon:"total"`
+}
+
+// MemberOncallInterval is generated from the Flashduty OpenAPI schema.
+type MemberOncallInterval struct {
+	// Unix timestamp in seconds - when the shift ends. Absent while the shift is ongoing.
+	EndAt Timestamp `json:"end_at" toon:"end_at"`
+	// Owning schedule ID.
+	ScheduleID int64 `json:"schedule_id" toon:"schedule_id"`
+	// Owning schedule name.
+	ScheduleName string `json:"schedule_name" toon:"schedule_name"`
+	// Unix timestamp in seconds - when the shift starts.
+	StartAt Timestamp `json:"start_at" toon:"start_at"`
 }
 
 // MemberResetInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -5806,6 +5856,14 @@ type MemberRoleUpdateRequest struct {
 	MemberID uint64 `json:"member_id" toon:"member_id"`
 	// New role ID set. Replaces the member's existing roles entirely (not additive); get IDs from `POST /role/list`. Leave empty to reset to the built-in Viewer role (ID 8)
 	RoleIDs []uint64 `json:"role_ids,omitempty" toon:"role_ids,omitempty"`
+}
+
+// MemberScheduleItem is generated from the Flashduty OpenAPI schema.
+type MemberScheduleItem struct {
+	// Schedule ID.
+	ScheduleID int64 `json:"schedule_id" toon:"schedule_id"`
+	// Schedule name.
+	ScheduleName string `json:"schedule_name" toon:"schedule_name"`
 }
 
 // MergeIncidentsRequest is generated from the Flashduty OpenAPI schema.
@@ -6338,6 +6396,26 @@ type PreviewIncidentCardFixedField struct {
 	Value string `json:"value" toon:"value"`
 }
 
+// PreviewRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type PreviewRemoteConfigRequest struct {
+	// App version the simulated client reports.
+	AppVersion string `json:"app_version,omitempty" toon:"app_version,omitempty"`
+	// RUM application ID.
+	ApplicationID string       `json:"application_id" toon:"application_id"`
+	Config        RemoteConfig `json:"config,omitzero" toon:"config,omitempty"`
+	// Environment the simulated client reports.
+	Env string `json:"env,omitempty" toon:"env,omitempty"`
+	// SDK name and version the simulated client reports, e.g. `web@2.4.1`.
+	Sdk string `json:"sdk,omitempty" toon:"sdk,omitempty"`
+}
+
+// PreviewRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type PreviewRemoteConfigResponse struct {
+	// 0-based index of the rule that decided the result, or -1 when only the default applied.
+	HitRuleIndex int64              `json:"hit_rule_index" toon:"hit_rule_index"`
+	Values       RemoteConfigValues `json:"values" toon:"values"`
+}
+
 // PreviewTemplateRequest is generated from the Flashduty OpenAPI schema.
 type PreviewTemplateRequest struct {
 	// Template content to render.
@@ -6509,6 +6587,59 @@ type QuerySamplesResult struct {
 	Kind string `json:"kind" toon:"kind"`
 	// Instant samples with their complete label sets.
 	Samples []QuerySample `json:"samples" toon:"samples"`
+}
+
+// RemoteConfig is generated from the Flashduty OpenAPI schema.
+type RemoteConfig struct {
+	// How a change lands on a client that is already running: `next_session` (the default, and what an empty value means) leaves running sessions untouched and applies the change to new sessions; `immediate` ends the running session as soon as the change arrives so a new session starts under the new configuration.
+	Activation string `json:"activation,omitempty" toon:"activation,omitempty"`
+	// Application-defined pass-through values handed to the host app verbatim. At most 5 keys, each key up to 64 bytes, each value up to 4 KB of JSON nested at most 3 levels, 16 KB in total. Anyone holding the public client token can read it.
+	Custom  map[string]any     `json:"custom,omitempty" toon:"custom,omitempty"`
+	Default RemoteConfigValues `json:"default,omitzero" toon:"default,omitempty"`
+	// Kill switch. When false the engine reports no values at all and SDKs fall back to their init values.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Let clients re-check the configuration when they return to the foreground instead of waiting for the next poll.
+	RefreshOnForeground bool `json:"refresh_on_foreground,omitempty" toon:"refresh_on_foreground,omitempty"`
+	// Targeting rules, evaluated in order; at most 20 per application.
+	Rules []RemoteConfigRule `json:"rules,omitempty" toon:"rules,omitempty"`
+}
+
+// RemoteConfigHistoryItem is generated from the Flashduty OpenAPI schema.
+type RemoteConfigHistoryItem struct {
+	Config RemoteConfig `json:"config" toon:"config"`
+	// Hash of the configuration content; lets the console identify versions with identical content.
+	ContentHash string `json:"content_hash" toon:"content_hash"`
+	// Earliest version carrying the same content, when that is not this version itself.
+	EquivalentTo int64 `json:"equivalent_to" toon:"equivalent_to"`
+	// Operator's note left when the version was published. Empty when none was given.
+	Reason string `json:"reason" toon:"reason"`
+	// Unix timestamp in milliseconds - when the version was published.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// ID of the member who published the version.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Name of the member who published the version.
+	UpdatedByName string `json:"updated_by_name" toon:"updated_by_name"`
+	// Version number, unique within the application.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RemoteConfigRule is generated from the Flashduty OpenAPI schema.
+type RemoteConfigRule struct {
+	// Key/value conditions the SDK's config request must equal. Keys are limited to `env`, `app_version` and `sdk`; values are at most 256 bytes.
+	Match map[string]string  `json:"match" toon:"match"`
+	Set   RemoteConfigValues `json:"set" toon:"set"`
+}
+
+// RemoteConfigValues is generated from the Flashduty OpenAPI schema.
+type RemoteConfigValues struct {
+	// How Session Replay masks a page by default.
+	DefaultPrivacyLevel *string `json:"defaultPrivacyLevel,omitempty" toon:"defaultPrivacyLevel,omitempty"`
+	// Session Replay sampling rate (0-100).
+	SessionReplaySampleRate *int64 `json:"sessionReplaySampleRate,omitempty" toon:"sessionReplaySampleRate,omitempty"`
+	// Session sampling rate (0-100).
+	SessionSampleRate *int64 `json:"sessionSampleRate,omitempty" toon:"sessionSampleRate,omitempty"`
+	// Trace sampling rate (0-100): which sessions inject trace headers into their requests.
+	TraceSampleRate *int64 `json:"traceSampleRate,omitempty" toon:"traceSampleRate,omitempty"`
 }
 
 // RemoveIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -6694,6 +6825,22 @@ type ResponseEnvelope struct {
 	Error any `json:"error" toon:"error"`
 	// Unique ID for this request. Mirrored in the Flashcat-Request-Id header. Include it when reporting issues.
 	RequestID string `json:"request_id" toon:"request_id"`
+}
+
+// RevertRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type RevertRemoteConfigRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Operator's note. The console fills in `rolled back to vN` when left empty.
+	Reason string `json:"reason,omitempty" toon:"reason,omitempty"`
+	// History version to republish.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RevertRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type RevertRemoteConfigResponse struct {
+	// New version number created by the revert.
+	Version int64 `json:"version" toon:"version"`
 }
 
 // RoleDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -8250,6 +8397,20 @@ type SLSProjectsResponse struct {
 	Projects []SLSProject `json:"projects" toon:"projects"`
 	// Total number of projects matching `query`, independent of pagination.
 	Total int64 `json:"total" toon:"total"`
+}
+
+// ScheduleByPersonRequest is generated from the Flashduty OpenAPI schema.
+type ScheduleByPersonRequest struct {
+	// Member ID whose on-call status is returned.
+	PersonID int64 `json:"person_id" toon:"person_id"`
+}
+
+// ScheduleByPersonResponse is generated from the Flashduty OpenAPI schema.
+type ScheduleByPersonResponse struct {
+	Current MemberOncallInterval `json:"current" toon:"current"`
+	Next    MemberOncallInterval `json:"next" toon:"next"`
+	// All enabled schedules the member participates in.
+	Schedules []MemberScheduleItem `json:"schedules" toon:"schedules"`
 }
 
 // ScheduleCalculatedLayer is generated from the Flashduty OpenAPI schema.
@@ -10862,6 +11023,21 @@ type UpdateInhibitRuleRequest struct {
 	SourceFilters FilterGroup `json:"source_filters,omitempty" toon:"source_filters,omitempty"`
 	// Conditions the incoming target alert event must match to be suppressed; empty means every event is a target.
 	TargetFilters FilterGroup `json:"target_filters,omitempty" toon:"target_filters,omitempty"`
+}
+
+// UpdateRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type UpdateRemoteConfigRequest struct {
+	// RUM application ID.
+	ApplicationID string       `json:"application_id" toon:"application_id"`
+	Config        RemoteConfig `json:"config" toon:"config"`
+	// Operator's note on why this version was published. Stored verbatim.
+	Reason string `json:"reason,omitempty" toon:"reason,omitempty"`
+}
+
+// UpdateRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type UpdateRemoteConfigResponse struct {
+	// New published version number.
+	Version int64 `json:"version" toon:"version"`
 }
 
 // UpdateSilenceRuleRequest is generated from the Flashduty OpenAPI schema.
