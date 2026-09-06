@@ -107,6 +107,7 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /monit/datasource/list":                func(d json.RawMessage) error { var v DataSourceListResponse; return json.Unmarshal(d, &v) },
 	"POST /monit/datasource/sls/logstores":       func(d json.RawMessage) error { var v SLSLogstoresResponse; return json.Unmarshal(d, &v) },
 	"POST /monit/datasource/sls/projects":        func(d json.RawMessage) error { var v SLSProjectsResponse; return json.Unmarshal(d, &v) },
+	"POST /monit/datasource/tools/invoke":        func(d json.RawMessage) error { var v DatasourceToolResult; return json.Unmarshal(d, &v) },
 	"POST /monit/datasource/update":              func(d json.RawMessage) error { var v DataSourceItem; return json.Unmarshal(d, &v) },
 	"POST /monit/query/data":                     func(d json.RawMessage) error { var v QueryDataResponse; return json.Unmarshal(d, &v) },
 	"POST /monit/query/diagnose":                 func(d json.RawMessage) error { var v DiagnoseResponse; return json.Unmarshal(d, &v) },

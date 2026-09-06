@@ -10,10 +10,18 @@ import (
 // envelope's "error" field.
 type DutyError struct {
 	Code    string `json:"code"`
+	Reason  string `json:"reason,omitempty"`
 	Message string `json:"message"`
 }
 
 func (e *DutyError) Error() string { return fmt.Sprintf("%s: %s", e.Code, e.Message) }
+
+func (e *DutyError) reasonOrEmpty() string {
+	if e == nil {
+		return ""
+	}
+	return e.Reason
+}
 
 func (e *DutyError) codeOr(d string) string {
 	if e == nil {
@@ -36,6 +44,7 @@ func (e *DutyError) errMessageOr(d string) string {
 type ErrorResponse struct {
 	Response  *http.Response `json:"-"`
 	Code      string         `json:"code"`
+	Reason    string         `json:"reason,omitempty"`
 	Message   string         `json:"message"`
 	RequestID string         `json:"request_id"`
 }
@@ -45,10 +54,14 @@ func (e *ErrorResponse) Error() string {
 	if e.Response != nil {
 		status = e.Response.StatusCode
 	}
-	if e.Code != "" {
-		return fmt.Sprintf("flashduty: %s (code %s, http %d, request_id %s)", e.Message, e.Code, status, e.RequestID)
+	reason := ""
+	if e.Reason != "" {
+		reason = ", reason " + e.Reason
 	}
-	return fmt.Sprintf("flashduty: %s (http %d, request_id %s)", e.Message, status, e.RequestID)
+	if e.Code != "" {
+		return fmt.Sprintf("flashduty: %s (code %s, http %d%s, request_id %s)", e.Message, e.Code, status, reason, e.RequestID)
+	}
+	return fmt.Sprintf("flashduty: %s (http %d%s, request_id %s)", e.Message, status, reason, e.RequestID)
 }
 
 // RateLimitError is returned when the API responds 429. It embeds the standard

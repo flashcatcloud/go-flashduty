@@ -2,6 +2,8 @@
 
 package flashduty
 
+import "encoding/json"
+
 // AlertFeedType Alert activity feed entry type. Each value identifies one alert lifecycle event; the matching `detail` payload shape is determined by this field.
 type AlertFeedType string
 
@@ -2389,6 +2391,34 @@ type DsElasticSearchConfig struct {
 	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
+// DsKafkaConfig is generated from the Flashduty OpenAPI schema.
+type DsKafkaConfig struct {
+	// Authentication password; supports ${env:NAME}. Omit on update to preserve; explicitly send an empty string to clear. Literal passwords are omitted from responses.
+	Password *string `json:"password,omitempty" toon:"password,omitempty"`
+	// SASL mechanism: none (default, no credentials), plain, scram-sha-256, scram-sha-512 (require username and password).
+	SaslMechanism string `json:"sasl_mechanism,omitempty" toon:"sasl_mechanism,omitempty"`
+	// Connection timeout in milliseconds; defaults to 5000 when omitted.
+	TimeoutMs int64 `json:"timeout_ms,omitempty" toon:"timeout_ms,omitempty"`
+	// PEM CA certificates or an ${env:NAME} reference.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// PEM client certificate or ${env:NAME}; configure both tls_cert and tls_key.
+	TlsCert string `json:"tls_cert,omitempty" toon:"tls_cert,omitempty"`
+	// Whether TLS is enabled; defaults to false.
+	TlsEnabled bool `json:"tls_enabled,omitempty" toon:"tls_enabled,omitempty"`
+	// PEM client private key or ${env:NAME}; configure both tls_cert and tls_key. Omit on update to preserve; an empty string clears it. Literal keys are omitted from responses.
+	TlsKey *string `json:"tls_key,omitempty" toon:"tls_key,omitempty"`
+	// Maximum TLS version: 1.2 or 1.3; empty means no constraint. Must not be below the minimum.
+	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
+	// Minimum TLS version: 1.2 (default) or 1.3.
+	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
+	// Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty.
+	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
+	// Skip server certificate verification when TLS is enabled.
+	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+	// Authentication username; an ${env:NAME} reference is supported.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
+}
+
 // DsLokiConfig is generated from the Flashduty OpenAPI schema.
 type DsLokiConfig struct {
 	// Whether HTTP Basic Auth is enabled; when `false`, `basic_auth_username`/`basic_auth_password` are ignored.
@@ -2415,6 +2445,30 @@ type DsLokiConfig struct {
 	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
 	// Whether to skip server certificate verification (insecure, for self-signed setups only).
 	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+}
+
+// DsMongoDBConfig is generated from the Flashduty OpenAPI schema.
+type DsMongoDBConfig struct {
+	// Authentication database; defaults to admin. Username and password must be configured together. Client certificates are unsupported.
+	AuthSource string `json:"auth_source,omitempty" toon:"auth_source,omitempty"`
+	// Authentication password; supports ${env:NAME}. Omit on update to preserve; explicitly send an empty string to clear. Literal passwords are omitted from responses.
+	Password *string `json:"password,omitempty" toon:"password,omitempty"`
+	// Connection timeout in milliseconds; defaults to 3000 when omitted.
+	TimeoutMs int64 `json:"timeout_ms,omitempty" toon:"timeout_ms,omitempty"`
+	// PEM CA certificates or an ${env:NAME} reference.
+	TlsCa string `json:"tls_ca,omitempty" toon:"tls_ca,omitempty"`
+	// Whether TLS is enabled; defaults to false.
+	TlsEnabled bool `json:"tls_enabled,omitempty" toon:"tls_enabled,omitempty"`
+	// Maximum TLS version: 1.2 or 1.3; empty means no constraint. Must not be below the minimum.
+	TlsMaxVersion string `json:"tls_max_version,omitempty" toon:"tls_max_version,omitempty"`
+	// Minimum TLS version: 1.2 (default) or 1.3.
+	TlsMinVersion string `json:"tls_min_version,omitempty" toon:"tls_min_version,omitempty"`
+	// Server name used for TLS SNI and certificate verification; defaults to the host from the connection address when empty.
+	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
+	// Skip server certificate verification when TLS is enabled.
+	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+	// Authentication username; an ${env:NAME} reference is supported.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsMySqlConfig is generated from the Flashduty OpenAPI schema.
@@ -2469,14 +2523,19 @@ type DsOracleConfig struct {
 
 // DsPayload is generated from the Flashduty OpenAPI schema.
 type DsPayload struct {
-	Clickhouse    DsClickHouseConfig    `json:"clickhouse,omitzero" toon:"clickhouse,omitempty"`
-	Elasticsearch DsElasticSearchConfig `json:"elasticsearch,omitzero" toon:"elasticsearch,omitempty"`
-	Loki          DsLokiConfig          `json:"loki,omitzero" toon:"loki,omitempty"`
-	Mysql         DsMySqlConfig         `json:"mysql,omitzero" toon:"mysql,omitempty"`
-	Oracle        DsOracleConfig        `json:"oracle,omitzero" toon:"oracle,omitempty"`
-	Postgres      DsPostgresConfig      `json:"postgres,omitzero" toon:"postgres,omitempty"`
-	Prometheus    DsPrometheusConfig    `json:"prometheus,omitzero" toon:"prometheus,omitempty"`
-	SLS           DsslsConfig           `json:"sls,omitzero" toon:"sls,omitempty"`
+	Clickhouse    DsClickHouseConfig     `json:"clickhouse,omitzero" toon:"clickhouse,omitempty"`
+	Elasticsearch DsElasticSearchConfig  `json:"elasticsearch,omitzero" toon:"elasticsearch,omitempty"`
+	Kafka         *DsKafkaConfig         `json:"kafka,omitempty" toon:"kafka,omitempty"`
+	Loki          DsLokiConfig           `json:"loki,omitzero" toon:"loki,omitempty"`
+	MongodbMongod *DsMongoDBConfig       `json:"mongodb_mongod,omitempty" toon:"mongodb_mongod,omitempty"`
+	MongodbMongos *DsMongoDBConfig       `json:"mongodb_mongos,omitempty" toon:"mongodb_mongos,omitempty"`
+	Mysql         DsMySqlConfig          `json:"mysql,omitzero" toon:"mysql,omitempty"`
+	Oracle        DsOracleConfig         `json:"oracle,omitzero" toon:"oracle,omitempty"`
+	Postgres      DsPostgresConfig       `json:"postgres,omitzero" toon:"postgres,omitempty"`
+	Prometheus    DsPrometheusConfig     `json:"prometheus,omitzero" toon:"prometheus,omitempty"`
+	RedisNode     *DsRedisNodeConfig     `json:"redis_node,omitempty" toon:"redis_node,omitempty"`
+	RedisSentinel *DsRedisSentinelConfig `json:"redis_sentinel,omitempty" toon:"redis_sentinel,omitempty"`
+	SLS           DsslsConfig            `json:"sls,omitzero" toon:"sls,omitempty"`
 	// Tencent CLS credentials. Required when `type_ident` is `tencent_cls`.
 	TencentCls   DsTencentClsConfig   `json:"tencent_cls,omitzero" toon:"tencent_cls,omitempty"`
 	Victorialogs DsVictoriaLogsConfig `json:"victorialogs,omitzero" toon:"victorialogs,omitempty"`
@@ -2532,6 +2591,28 @@ type DsPrometheusConfig struct {
 	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
 	// Whether to skip server certificate verification (insecure, for self-signed setups only).
 	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+}
+
+// DsRedisNodeConfig is generated from the Flashduty OpenAPI schema.
+type DsRedisNodeConfig struct {
+	// Redis database number; defaults to 0.
+	Database int64 `json:"database,omitempty" toon:"database,omitempty"`
+	// Authentication password; supports ${env:NAME}. Omit on update to preserve; explicitly send an empty string to clear. Literal passwords are omitted from responses.
+	Password *string `json:"password,omitempty" toon:"password,omitempty"`
+	// Connection timeout in milliseconds; defaults to 3000 when omitted.
+	TimeoutMs int64 `json:"timeout_ms,omitempty" toon:"timeout_ms,omitempty"`
+	// Authentication username; an ${env:NAME} reference is supported.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
+}
+
+// DsRedisSentinelConfig is generated from the Flashduty OpenAPI schema.
+type DsRedisSentinelConfig struct {
+	// Authentication password; supports ${env:NAME}. Omit on update to preserve; explicitly send an empty string to clear. Literal passwords are omitted from responses.
+	Password *string `json:"password,omitempty" toon:"password,omitempty"`
+	// Connection timeout in milliseconds; defaults to 3000 when omitted.
+	TimeoutMs int64 `json:"timeout_ms,omitempty" toon:"timeout_ms,omitempty"`
+	// Authentication username; an ${env:NAME} reference is supported.
+	Username string `json:"username,omitempty" toon:"username,omitempty"`
 }
 
 // DsslsConfig is generated from the Flashduty OpenAPI schema.
@@ -2598,11 +2679,13 @@ type DsVictoriaLogsConfig struct {
 type DataSourceItem struct {
 	// Account ID.
 	AccountID uint64 `json:"account_id" toon:"account_id"`
-	// Connection address. For Prometheus/Loki/VictoriaLogs: HTTP URL. For MySQL/Oracle/Postgres/ClickHouse: `host:port`. For SLS: endpoint without http/https prefix.
+	// Connection address. For Prometheus/Loki/VictoriaLogs: HTTP URL. For MySQL/Oracle/Postgres/ClickHouse: `host:port`. For SLS: endpoint without http/https prefix. Redis/MongoDB diagnostic types: one host:port, bracket IPv6; no URI, userinfo or query. Kafka: 1–32 unique comma-separated host:port bootstrap addresses; payload has no broker list. At most 4096 characters after normalization.
 	Address string `json:"address" toon:"address"`
+	// Whether alert evaluation is allowed. Alerting also requires enabled=true and an alerting-capable type. Always false for diagnostic-only types; false does not block non-alerting queries or tools.
+	AlertingEnabled bool `json:"alerting_enabled" toon:"alerting_enabled"`
 	// Monitors edge cluster name responsible for evaluating rules using this datasource.
 	EdgeClusterName string `json:"edge_cluster_name" toon:"edge_cluster_name"`
-	// Whether the datasource is active.
+	// Whether business execution is enabled. Disabled datasources reject business queries and tools; enabling does not change alerting_enabled.
 	Enabled bool `json:"enabled" toon:"enabled"`
 	// Unique datasource ID.
 	ID uint64 `json:"id" toon:"id"`
@@ -2610,9 +2693,9 @@ type DataSourceItem struct {
 	Name string `json:"name" toon:"name"`
 	// Optional description.
 	Note string `json:"note" toon:"note"`
-	// Type-specific configuration block; must contain the key matching `type_ident`. Always `null` in `/monit/datasource/list` responses (the list query does not read the payload column); populated in create/update/info responses. For `tencent_cls`, `secret_key` is masked to an empty string unless it is an `${env:...}` reference.
+	// Type-specific configuration block; must contain the key matching `type_ident`. Always `null` in `/monit/datasource/list` responses (the list query does not read the payload column); populated in create/update/info responses. For `tencent_cls`, `secret_key` is masked to an empty string unless it is an `${env:...}` reference. For diagnostic types, password and Kafka tls_key are omitted from responses unless they are ${env:...} references. On update, omit those fields to preserve stored secrets; explicitly send an empty string to clear. Other configuration fields retain their existing behavior.
 	Payload any `json:"payload" toon:"payload"`
-	// Datasource type identifier. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`.
+	// Datasource type identifier. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`, `redis_node`, `redis_sentinel`, `mongodb_mongod`, `mongodb_mongos`, `kafka`。
 	TypeIdent string `json:"type_ident" toon:"type_ident"`
 	// Last update timestamp, Unix epoch seconds.
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
@@ -2620,28 +2703,61 @@ type DataSourceItem struct {
 
 // DataSourceListRequest is generated from the Flashduty OpenAPI schema.
 type DataSourceListRequest struct {
-	// Filter by datasource type identifier. Omit to return all types. Allowed values: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`.
+	// Datasource type identifier. Omit to return all types. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`, `redis_node`, `redis_sentinel`, `mongodb_mongod`, `mongodb_mongos`, `kafka`。
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
 
 // DataSourceUpsertRequest is generated from the Flashduty OpenAPI schema.
 type DataSourceUpsertRequest struct {
-	// Connection address. Required for every type except `elasticsearch` with `deployment: cloud`. Prometheus/Loki/VictoriaLogs: HTTP URL; MySQL/Oracle/Postgres/ClickHouse: `host:port`; SLS: endpoint without the `http(s)://` prefix; `tencent_cls`: must be `cls.tencentcloudapi.com` or `cls.internal.tencentcloudapi.com` (requires Monitors edge >= v0.66.0).
+	// Connection address. Required for every type except `elasticsearch` with `deployment: cloud`. Prometheus/Loki/VictoriaLogs: HTTP URL; MySQL/Oracle/Postgres/ClickHouse: `host:port`; SLS: endpoint without the `http(s)://` prefix; `tencent_cls`: must be `cls.tencentcloudapi.com` or `cls.internal.tencentcloudapi.com` (requires Monitors edge >= v0.66.0). Redis/MongoDB diagnostic types: one host:port, bracket IPv6; no URI, userinfo or query. Kafka: 1–32 unique comma-separated host:port bootstrap addresses; payload has no broker list. At most 4096 characters after normalization.
 	Address string `json:"address,omitempty" toon:"address,omitempty"`
+	// Whether this datasource may evaluate alerts. Omitted on create: true for alerting types, false for diagnostic-only types; omitted on update: preserve current value. null is invalid. redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka reject true. Disabling is rejected with conflict when enabled rules reference the datasource.
+	AlertingEnabled *bool `json:"alerting_enabled,omitempty" toon:"alerting_enabled,omitempty"`
 	// Monitors edge cluster name responsible for evaluating rules using this datasource.
 	EdgeClusterName string `json:"edge_cluster_name" toon:"edge_cluster_name"`
-	// Whether the datasource is enabled for rule evaluation. When omitted on create, the datasource is created disabled (`false`).
-	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Whether business execution is enabled. Omitted on create: true; omitted on update: preserve the current value. Explicit false disables execution; null is invalid. Does not change alerting_enabled.
+	Enabled *bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	// Datasource ID. Required for update; omit for create.
 	ID uint64 `json:"id,omitempty" toon:"id,omitempty"`
 	// Datasource display name. This is the name referenced as `ds_name` in query and diagnose APIs.
 	Name string `json:"name" toon:"name"`
 	// Optional description.
 	Note string `json:"note,omitempty" toon:"note,omitempty"`
-	// Type-specific configuration block. Must include the key matching `type_ident`.
+	// Type-specific configuration block. Must include the key matching `type_ident`. For diagnostic types, password and Kafka tls_key are omitted from responses unless they are ${env:...} references. On update, omit those fields to preserve stored secrets; explicitly send an empty string to clear. Other configuration fields retain their existing behavior.
 	Payload DsPayload `json:"payload" toon:"payload"`
-	// Datasource type identifier. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`.
+	// Datasource type identifier. Allowed: `prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`, `redis_node`, `redis_sentinel`, `mongodb_mongod`, `mongodb_mongos`, `kafka`。
 	TypeIdent string `json:"type_ident" toon:"type_ident"`
+}
+
+// DatasourceToolInvokeRequest is generated from the Flashduty OpenAPI schema.
+type DatasourceToolInvokeRequest struct {
+	// Optional consistency check; must equal the authenticated account.
+	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	// Datasource ID from /monit/datasource/list.
+	DatasourceID uint64 `json:"datasource_id" toon:"datasource_id"`
+	// Tool-specific JSON parameters; omitted means {}. Explicit null is invalid.
+	Params json.RawMessage `json:"params,omitempty" toon:"params,omitempty"`
+	// Single tool name prefixed by the datasource type, e.g. mysql.overview. Free SQL uses /monit/query/data; mysql.query and postgres.query are unsupported.
+	Tool string `json:"tool" toon:"tool"`
+}
+
+// DatasourceToolResult is generated from the Flashduty OpenAPI schema.
+type DatasourceToolResult struct {
+	// Tool-specific JSON evidence, preserved without conversion; never null. No nested legacy diagnose envelope.
+	Data json.RawMessage `json:"data" toon:"data"`
+	// Datasource ID from /monit/datasource/list.
+	DatasourceID uint64 `json:"datasource_id" toon:"datasource_id"`
+	// Optional non-empty summary.
+	Summary *string `json:"summary,omitempty" toon:"summary,omitempty"`
+	// Executed tool name matching the request.
+	Tool      string                    `json:"tool" toon:"tool"`
+	Truncated *DatasourceToolTruncation `json:"truncated,omitempty" toon:"truncated,omitempty"`
+}
+
+// DatasourceToolTruncation is generated from the Flashduty OpenAPI schema.
+type DatasourceToolTruncation struct {
+	// Why the result was truncated. Presence of this object indicates truncation.
+	Reason string `json:"reason" toon:"reason"`
 }
 
 // DeleteFieldRequest is generated from the Flashduty OpenAPI schema.
@@ -10644,9 +10760,9 @@ type TimeFilter struct {
 type ToolCatalogRequest struct {
 	// Optional consistency check. Must equal the authenticated account when supplied.
 	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// Optional target kind. When omitted, webapi infers it from current target routing. If the call returns `ambiguous_target_kind`, retry with a value from `target_kinds`.
+	// Optional target kind; only host is supported. Inferred when omitted.
 	TargetKind string `json:"target_kind,omitempty" toon:"target_kind,omitempty"`
-	// Target identifier (host name, MySQL address, …). Max 256 bytes; no whitespace, control characters, or `|`.
+	// Host name. Max 256 bytes; no whitespace, control characters or |.
 	TargetLocator string `json:"target_locator" toon:"target_locator"`
 }
 
@@ -10664,9 +10780,9 @@ type ToolCatalogResponse struct {
 type ToolInvokeRequest struct {
 	// Optional consistency check. Must equal the authenticated account when supplied.
 	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// Optional target kind; auto-inferred when omitted.
+	// Optional target kind; only host is supported. Inferred when omitted.
 	TargetKind string `json:"target_kind,omitempty" toon:"target_kind,omitempty"`
-	// Target identifier. Same validation rules as `/monit/tools/catalog`.
+	// Host name. Max 256 bytes; no whitespace, control characters or |.
 	TargetLocator string `json:"target_locator" toon:"target_locator"`
 	// Up to 8 tool calls; webapi executes them concurrently and returns results in input order.
 	Tools []ToolInvokeRequestToolsItem `json:"tools" toon:"tools"`
@@ -11848,7 +11964,7 @@ type TargetsListResponseItemsItem struct {
 	HostID string `json:"host_id" toon:"host_id"`
 	// ServiceMap capability and latest status of the target's host. Omitted when the reporting agent has no ServiceMap capability.
 	Servicemap TargetInventoryServiceMapCapability `json:"servicemap" toon:"servicemap"`
-	// Target kind, e.g. `host`, `mysql`. Filtering by kind is not supported in v1.
+	// Host target kind. Filtering by kind is not supported in v1.
 	TargetKind string `json:"target_kind" toon:"target_kind"`
 	// Target identifier; the list is sorted by this field ascending.
 	TargetLocator string `json:"target_locator" toon:"target_locator"`
@@ -11868,7 +11984,7 @@ type ToolCatalogResponseError struct {
 
 // ToolCatalogResponseTarget is generated from the Flashduty OpenAPI schema.
 type ToolCatalogResponseTarget struct {
-	// Resolved target kind, e.g. `host` or `mysql`; matches the `target_kind` inferred from or given in the request.
+	// Resolved host target kind.
 	Kind string `json:"kind" toon:"kind"`
 	// Echo of the target locator from the request.
 	Locator string `json:"locator" toon:"locator"`
@@ -11924,7 +12040,7 @@ type ToolInvokeResponseResultsItem struct {
 
 // ToolInvokeResponseTarget is generated from the Flashduty OpenAPI schema.
 type ToolInvokeResponseTarget struct {
-	// Resolved target kind, e.g. `host` or `mysql`; matches the `target_kind` inferred from or given in the request.
+	// Resolved host target kind.
 	Kind string `json:"kind" toon:"kind"`
 	// Echo of the target locator from the request.
 	Locator string `json:"locator" toon:"locator"`

@@ -25,6 +25,8 @@ func (s *DiagnosticsService) QueryData(ctx context.Context, req *QueryDataReques
 //
 // Run a synchronous diagnostic query (`log_patterns` for Loki/VictoriaLogs, `metric_trends` for Prometheus). Used by Flashduty AI SRE for log-pattern clustering and time-series trend analysis. Long-running — up to 35 s.
 //
+// Deprecated: migrate to /monit/datasource/tools/invoke with prometheus.metric_trends, loki.log_patterns or victorialogs.log_patterns. Retained for existing consumers; the legacy request and response remain unchanged.
+//
 // API: POST /monit/query/diagnose (monit-read-query-diagnose).
 func (s *DiagnosticsService) QueryDiagnose(ctx context.Context, req *DiagnoseRequest) (*DiagnoseResponse, *Response, error) {
 	out := new(DiagnoseResponse)
@@ -37,7 +39,7 @@ func (s *DiagnosticsService) QueryDiagnose(ctx context.Context, req *DiagnoseReq
 
 // List monitored targets.
 //
-// List the targets observed under the current tenant by the monit-agent route projection. Supports `target_locator` prefix search and cursor pagination. Use this to drive `target_locator` selection for `/monit/tools/catalog` and `/monit/tools/invoke`.
+// List the targets observed under the current tenant by the monit-agent route projection. Supports `target_locator` prefix search and cursor pagination. Use this to drive `target_locator` selection for `/monit/tools/catalog` and `/monit/tools/invoke`. Agent targets are host-only. Remote datasource evidence uses /monit/datasource/tools/invoke and datasource_id.
 //
 // API: POST /monit/targets (monit-read-targets-list).
 func (s *DiagnosticsService) TargetsList(ctx context.Context, req *TargetsListRequest) (*TargetsListResponse, *Response, error) {
@@ -51,7 +53,7 @@ func (s *DiagnosticsService) TargetsList(ctx context.Context, req *TargetsListRe
 
 // List target tool catalog.
 //
-// Look up the tools that the per-target monit-agent currently exposes for a given `target_locator` (host, mysql, …). Returns each tool's name, description, and JSON-Schema `input_schema`. Pair with `/monit/tools/invoke` to drive AI-SRE tool calls.
+// Look up the tools that the per-target monit-agent currently exposes for a given `target_locator` (host). Returns each tool's name, description, and JSON-Schema `input_schema`. Pair with `/monit/tools/invoke` to drive AI-SRE tool calls. Agent targets are host-only. Remote datasource evidence uses /monit/datasource/tools/invoke and datasource_id.
 //
 // API: POST /monit/tools/catalog (monit-read-tools-catalog).
 func (s *DiagnosticsService) ToolsCatalog(ctx context.Context, req *ToolCatalogRequest) (*ToolCatalogResponse, *Response, error) {
@@ -65,7 +67,7 @@ func (s *DiagnosticsService) ToolsCatalog(ctx context.Context, req *ToolCatalogR
 
 // Invoke target tools.
 //
-// Invoke up to 8 monit-agent tools concurrently on a single target. Results come back in the order of the input `tools` array. Long-running — individual tools have per-tool timeouts on the agent and the whole request may take tens of seconds.
+// Invoke up to 8 monit-agent tools concurrently on a single target. Results come back in the order of the input `tools` array. Long-running — individual tools have per-tool timeouts on the agent and the whole request may take tens of seconds. Agent targets are host-only. Remote datasource evidence uses /monit/datasource/tools/invoke and datasource_id.
 //
 // API: POST /monit/tools/invoke (monit-read-tools-invoke).
 func (s *DiagnosticsService) ToolsInvoke(ctx context.Context, req *ToolInvokeRequest) (*ToolInvokeResponse, *Response, error) {

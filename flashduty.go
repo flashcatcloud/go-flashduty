@@ -241,11 +241,11 @@ func (c *Client) processResponse(httpResp *http.Response, out any) (*Response, e
 	}
 
 	if env.Error != nil && isFailureCode(env.Error.Code) {
-		apiErr := &ErrorResponse{Response: httpResp, Code: env.Error.Code, Message: env.Error.Message, RequestID: resp.RequestID}
+		apiErr := &ErrorResponse{Response: httpResp, Code: env.Error.Code, Reason: env.Error.Reason, Message: env.Error.Message, RequestID: resp.RequestID}
 		return resp, asAPIError(apiErr, resp.RateLimit)
 	}
 	if httpResp.StatusCode < 200 || httpResp.StatusCode >= 300 {
-		apiErr := &ErrorResponse{Response: httpResp, Code: env.Error.codeOr(""), Message: env.Error.errMessageOr(string(raw)), RequestID: resp.RequestID}
+		apiErr := &ErrorResponse{Response: httpResp, Code: env.Error.codeOr(""), Reason: env.Error.reasonOrEmpty(), Message: env.Error.errMessageOr(string(raw)), RequestID: resp.RequestID}
 		return resp, asAPIError(apiErr, resp.RateLimit)
 	}
 
