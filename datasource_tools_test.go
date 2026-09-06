@@ -26,7 +26,7 @@ func TestDatasourceToolsInvokePreservesJSON(t *testing.T) {
 			t.Errorf("request changed: %+v", input)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"request_id":"trace-tools","data":{"datasource_id":42,"tool":"mysql.overview","data":%s,"summary":"bounded evidence","truncated":{"reason":"row_limit"}}}`, evidence)
+		_, _ = fmt.Fprintf(w, `{"request_id":"trace-tools","data":{"datasource_id":42,"tool":"mysql.overview","data":%s,"summary":"bounded evidence","truncated":{"reason":"row_limit"}}}`, evidence)
 	})
 	result, resp, err := client.DataSources.ToolsInvoke(context.Background(), &DatasourceToolInvokeRequest{DatasourceID: 42, Tool: "mysql.overview", Params: params})
 	if err != nil {
@@ -52,7 +52,7 @@ func TestDatasourceToolsInvokeHTTPErrorReason(t *testing.T) {
 				calls++
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(tc.status)
-				fmt.Fprintf(w, `{"request_id":"trace-error","error":{"code":"InvalidParameter","reason":%q,"message":"tool unavailable"}}`, tc.reason)
+				_, _ = fmt.Fprintf(w, `{"request_id":"trace-error","error":{"code":"InvalidParameter","reason":%q,"message":"tool unavailable"}}`, tc.reason)
 			})
 			result, _, err := client.DataSources.ToolsInvoke(context.Background(), &DatasourceToolInvokeRequest{DatasourceID: 42, Tool: "mysql.overview"})
 			var apiErr *ErrorResponse
@@ -94,7 +94,7 @@ func TestDatasourceWritePresenceAndDiagnosticSecrets(t *testing.T) {
 						t.Errorf("secret presence lost: %s", body)
 					}
 					w.Header().Set("Content-Type", "application/json")
-					io.WriteString(w, `{"request_id":"write","data":{"id":42,"enabled":false,"alerting_enabled":false,"type_ident":"redis_node","payload":{"redis_node":{"database":0}}}}`)
+					_, _ = io.WriteString(w, `{"request_id":"write","data":{"id":42,"enabled":false,"alerting_enabled":false,"type_ident":"redis_node","payload":{"redis_node":{"database":0}}}}`)
 				})
 				var req DataSourceUpsertRequest
 				raw := `{"id":42,"name":"cache","type_ident":"redis_node","edge_cluster_name":"default","address":"redis.example.com:6379","payload":{"redis_node":{"database":0}}}`
