@@ -14714,12 +14714,12 @@
       "post": {
         "operationId": "monit-datasource-read-list",
         "summary": "查询数据源列表",
-        "description": "返回当前账户下的所有数据源，可通过 `type_ident` 过滤类型。",
+        "description": "返回当前账户下的所有数据源，可通过 `type_ident` 过滤类型。 支持诊断类型 redis_node、redis_sentinel、mongodb_mongod、mongodb_mongos 和 kafka；enabled 与 alerting_enabled 相互独立。",
         "tags": [
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n## 使用说明\n\n- 省略 `type_ident` 可返回所有类型的数据源。\n- 列表响应中不返回敏感凭证字段（密码、密钥）。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n## 使用说明\n\n- 省略 `type_ident` 可返回所有类型的数据源。\n- 列表响应中不返回敏感凭证字段（密码、密钥）。\n\n完整支持类型与凭据行为见请求/响应 Schema。仅诊断类型不能启用告警。创建时省略 enabled 默认为 true，更新时省略保留当前值；enabled 或 alerting_enabled 的显式 null 非法。诊断密码及 Kafka 私钥在响应中省略，环境变量引用除外；更新时省略秘密字段保留原值，空字符串清除。其他数据源凭据可能返回，应作为敏感数据处理。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-read-list",
           "metadata": {
             "sidebarTitle": "查询数据源列表"
@@ -14758,7 +14758,8 @@
                       "address": "http://prometheus.example.com:9090",
                       "edge_cluster_name": "default",
                       "updated_at": 1712000000,
-                      "payload": null
+                      "payload": null,
+                      "alerting_enabled": true
                     }
                   ]
                 }
@@ -14797,12 +14798,12 @@
       "post": {
         "operationId": "monit-datasource-read-info",
         "summary": "查看数据源详情",
-        "description": "通过 ID 获取单个数据源的完整信息，包括 `payload` 配置及其中配置的连接与鉴权信息；请将该响应视为敏感信息，避免记录或转发。",
+        "description": "通过 ID 获取单个数据源的完整信息，包括 `payload` 配置及其中配置的连接与鉴权信息；请将该响应视为敏感信息，避免记录或转发。 支持诊断类型 redis_node、redis_sentinel、mongodb_mongod、mongodb_mongos 和 kafka；enabled 与 alerting_enabled 相互独立。",
         "tags": [
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应会按原样返回 `payload` 配置——`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段均如实返回，不做脱敏。唯一例外是 `payload.tencent_cls.secret_key`：始终掩码为空字符串（`${env:...}` 引用则原样返回）。请将这些响应视为敏感信息：避免记录日志或转发给第三方。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n完整支持类型与凭据行为见请求/响应 Schema。仅诊断类型不能启用告警。创建时省略 enabled 默认为 true，更新时省略保留当前值；enabled 或 alerting_enabled 的显式 null 非法。诊断密码及 Kafka 私钥在响应中省略，环境变量引用除外；更新时省略秘密字段保留原值，空字符串清除。其他数据源凭据可能返回，应作为敏感数据处理。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-read-info",
           "metadata": {
             "sidebarTitle": "查看数据源详情"
@@ -14847,7 +14848,8 @@
                       }
                     },
                     "edge_cluster_name": "default",
-                    "updated_at": 1712000000
+                    "updated_at": 1712000000,
+                    "alerting_enabled": true
                   }
                 }
               }
@@ -14885,12 +14887,12 @@
       "post": {
         "operationId": "monit-datasource-write-create",
         "summary": "创建数据源",
-        "description": "创建新的监控数据源，`payload` 中须包含对应类型的配置块。",
+        "description": "创建新的监控数据源，`payload` 中须包含对应类型的配置块。 支持诊断类型 redis_node、redis_sentinel、mongodb_mongod、mongodb_mongos 和 kafka；enabled 与 alerting_enabled 相互独立。",
         "tags": [
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- `type_ident` 必须为以下之一：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`tencent_cls`、`victorialogs`。\n- `edge_cluster_name` 指定使用该数据源进行规则评估的 Monitors Edge 集群。\n- 对于 `elasticsearch`，`payload.elasticsearch.deployment` 须设为 `cloud` 或 `self-managed`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应会按原样返回 `payload` 配置——`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段均如实返回，不做脱敏。唯一例外是 `payload.tencent_cls.secret_key`：始终掩码为空字符串（`${env:...}` 引用则原样返回）。请将这些响应视为敏感信息：避免记录日志或转发给第三方。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- `type_ident` 必须为以下之一：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`tencent_cls`、`victorialogs`、`redis_node`、`redis_sentinel`、`mongodb_mongod`、`mongodb_mongos`、`kafka`。\n- `edge_cluster_name` 指定使用该数据源进行规则评估的 Monitors Edge 集群。\n- 对于 `elasticsearch`，`payload.elasticsearch.deployment` 须设为 `cloud` 或 `self-managed`。\n- 每次调用都会记录到账户审计日志，仅通过凭据字段配置连接凭据。\n\n完整支持类型与凭据行为见请求/响应 Schema。仅诊断类型不能启用告警。创建时省略 enabled 默认为 true，更新时省略保留当前值；enabled 或 alerting_enabled 的显式 null 非法。诊断密码及 Kafka 私钥在响应中省略，环境变量引用除外；更新时省略秘密字段保留原值，空字符串清除。其他数据源凭据可能返回，应作为敏感数据处理。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-write-create",
           "metadata": {
             "sidebarTitle": "创建数据源"
@@ -14924,7 +14926,8 @@
                     "name": "Prometheus Prod",
                     "enabled": true,
                     "edge_cluster_name": "default",
-                    "updated_at": 1712000000
+                    "updated_at": 1712000000,
+                    "alerting_enabled": true
                   }
                 }
               }
@@ -14971,12 +14974,12 @@
       "post": {
         "operationId": "monit-datasource-write-update",
         "summary": "更新数据源",
-        "description": "更新已有数据源，需提供 `id` 及待修改的字段。",
+        "description": "更新已有数据源，需提供 `id` 及待修改的字段。 支持诊断类型 redis_node、redis_sentinel、mongodb_mongod、mongodb_mongos 和 kafka；enabled 与 alerting_enabled 相互独立。",
         "tags": [
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。\n\n## 凭据字段\n\n`info` / `create` / `update` 的响应会按原样返回 `payload` 配置——`password`、`basic_auth_password`、`api_key`、`service_token`、`access_key_secret`、`tls_key`、`tls_key_pwd` 等字段均如实返回，不做脱敏。唯一例外是 `payload.tencent_cls.secret_key`：始终掩码为空字符串（`${env:...}` 引用则原样返回）。请将这些响应视为敏感信息：避免记录日志或转发给第三方。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **数据源管理**（`monit`） |\n\n## 使用说明\n\n- 每次调用都会记录到账户审计日志，仅通过凭据字段配置连接凭据。\n\n完整支持类型与凭据行为见请求/响应 Schema。仅诊断类型不能启用告警。创建时省略 enabled 默认为 true，更新时省略保留当前值；enabled 或 alerting_enabled 的显式 null 非法。诊断密码及 Kafka 私钥在响应中省略，环境变量引用除外；更新时省略秘密字段保留原值，空字符串清除。其他数据源凭据可能返回，应作为敏感数据处理。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "更新数据源"
@@ -15010,7 +15013,8 @@
                     "name": "Prometheus Prod v2",
                     "enabled": true,
                     "edge_cluster_name": "default",
-                    "updated_at": 1712100000
+                    "updated_at": 1712100000,
+                    "alerting_enabled": true
                   }
                 }
               }
@@ -20103,7 +20107,7 @@
       "post": {
         "operationId": "monit-read-query-diagnose",
         "summary": "数据源诊断",
-        "description": "执行同步诊断查询(Loki/VictoriaLogs 使用 `log_patterns`,Prometheus 使用 `metric_trends`)。Flashduty AI SRE 用于日志模式聚类与时间序列趋势分析。长耗时——最长可达 35 秒。",
+        "description": "执行同步诊断查询(Loki/VictoriaLogs 使用 `log_patterns`,Prometheus 使用 `metric_trends`)。Flashduty AI SRE 用于日志模式聚类与时间序列趋势分析。长耗时——最长可达 35 秒。 已弃用：迁移到 /monit/datasource/tools/invoke 的 prometheus.metric_trends、loki.log_patterns 或 victorialogs.log_patterns。为现有消费者保留，旧请求与响应保持不变。",
         "tags": [
           "Monitors/诊断分析"
         ],
@@ -20277,14 +20281,15 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/monit/tools/catalog": {
       "post": {
         "operationId": "monit-read-tools-catalog",
         "summary": "查询监控对象工具能力清单",
-        "description": "根据 `target_locator`(host、mysql 等)查询该监控对象上 monit-agent 当前暴露的工具能力。返回每个工具的名称、描述以及 JSON-Schema `input_schema`。配合 `/monit/tools/invoke` 驱动 AI-SRE 的工具调用。",
+        "description": "根据 `target_locator`(host)查询该监控对象上 monit-agent 当前暴露的工具能力。返回每个工具的名称、描述以及 JSON-Schema `input_schema`。配合 `/monit/tools/invoke` 驱动 AI-SRE 的工具调用。 Agent 目标仅支持 host。远端数据源取证使用 /monit/datasource/tools/invoke 和 datasource_id。",
         "tags": [
           "Monitors/诊断分析"
         ],
@@ -20393,7 +20398,7 @@
       "post": {
         "operationId": "monit-read-tools-invoke",
         "summary": "调用监控对象工具",
-        "description": "在单个监控对象上并发调用至多 8 个 monit-agent 工具。结果按入参 `tools` 数组顺序返回。长耗时——单个工具在 Agent 上有自己的超时,整体请求可能耗时数十秒。",
+        "description": "在单个监控对象上并发调用至多 8 个 monit-agent 工具。结果按入参 `tools` 数组顺序返回。长耗时——单个工具在 Agent 上有自己的超时,整体请求可能耗时数十秒。 Agent 目标仅支持 host。远端数据源取证使用 /monit/datasource/tools/invoke 和 datasource_id。",
         "tags": [
           "Monitors/诊断分析"
         ],
@@ -20520,7 +20525,7 @@
       "post": {
         "operationId": "monit-read-targets-list",
         "summary": "监控对象列表",
-        "description": "列出当前租户下被 monit-agent 路由投影所观测到的监控对象。支持 `target_locator` 前缀搜索与游标分页。用于为 `/monit/tools/catalog` 与 `/monit/tools/invoke` 选择 `target_locator`。",
+        "description": "列出当前租户下被 monit-agent 路由投影所观测到的监控对象。支持 `target_locator` 前缀搜索与游标分页。用于为 `/monit/tools/catalog` 与 `/monit/tools/invoke` 选择 `target_locator`。 Agent 目标仅支持 host。远端数据源取证使用 /monit/datasource/tools/invoke 和 datasource_id。",
         "tags": [
           "Monitors/诊断分析"
         ],
@@ -31773,6 +31778,176 @@
           }
         }
       }
+    },
+    "/monit/datasource/tools/invoke": {
+      "post": {
+        "description": "对已配置的数据源执行单个确定性工具。要求集群所有当前在线可路由 Edge 会话支持 v0.71.0 基础 invoke 协议；具体工具可能需要更新实现。不提供工具目录、自动重放或 Agent/旧 diagnose 回退。请求体上限 128 KiB，完整成功响应上限 1 MiB，工具超时最多 25 秒。",
+        "operationId": "monit-datasource-tools-invoke",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "datasource_id": 10,
+                "params": {},
+                "tool": "mysql.overview"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/DatasourceToolInvokeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "data": {
+                      "version": "8.0.36"
+                    },
+                    "datasource_id": 10,
+                    "summary": "MySQL overview",
+                    "tool": "mysql.overview"
+                  },
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                },
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DatasourceToolResult"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：invalid_request, tool_not_supported, datasource_error."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：access_denied."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：datasource_not_found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：datasource_disabled, datasource_in_use."
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：source_too_large, result_too_large."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：overloaded."
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：canceled."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：internal."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：no_active_edge, edge_upgrade_required, mixed_edge_versions."
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：timeout."
+          }
+        },
+        "summary": "调用数据源工具",
+        "tags": [
+          "Monitors/Data sources"
+        ],
+        "x-mint": {
+          "content": "通过 `/monit/datasource/list` 获取数据源 ID。停用数据源返回 `datasource_disabled`，`alerting_enabled=false` 不阻断工具。错误使用非 2xx HTTP 状态和 `error.code`、`error.message`、`error.reason`。`tool_not_supported` 表示选中的执行端未提供该工具，不表示厂商权限不足。禁止自动切换 Edge 或回退旧 diagnose 重试。",
+          "href": "/zh/api-reference/monitors/data-sources/monit-datasource-tools-invoke",
+          "metadata": {
+            "sidebarTitle": "调用数据源工具"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -32067,6 +32242,11 @@
             "type": "string",
             "description": "用户可读的错误描述，语言会跟随调用方的 Accept-Language。可能包含字段名、ID 等请求上下文。",
             "example": "The specified parameter template_id is not valid."
+          },
+          "reason": {
+            "description": "可选的机器可读拒绝原因，包含数据源工具错误；结合 HTTP 状态及 code 判断。",
+            "type": "string",
+            "x-flashduty-preserve-absence": true
           }
         },
         "required": [
@@ -45471,7 +45651,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "description": "按数据源类型标识过滤，省略则返回所有类型。可选值：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`tencent_cls`、`victorialogs`。"
+            "description": "数据源类型标识。省略时返回全部类型。支持：`prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`, `redis_node`, `redis_sentinel`, `mongodb_mongod`, `mongodb_mongos`, `kafka`。"
           }
         }
       },
@@ -45509,6 +45689,26 @@
           "tencent_cls": {
             "$ref": "#/components/schemas/DSTencentCLSConfig",
             "description": "腾讯云 CLS 凭证。`type_ident` 为 `tencent_cls` 时必填。"
+          },
+          "kafka": {
+            "$ref": "#/components/schemas/DSKafkaConfig",
+            "x-flashduty-preserve-absence": true
+          },
+          "mongodb_mongod": {
+            "$ref": "#/components/schemas/DSMongoDBConfig",
+            "x-flashduty-preserve-absence": true
+          },
+          "mongodb_mongos": {
+            "$ref": "#/components/schemas/DSMongoDBConfig",
+            "x-flashduty-preserve-absence": true
+          },
+          "redis_node": {
+            "$ref": "#/components/schemas/DSRedisNodeConfig",
+            "x-flashduty-preserve-absence": true
+          },
+          "redis_sentinel": {
+            "$ref": "#/components/schemas/DSRedisSentinelConfig",
+            "x-flashduty-preserve-absence": true
           }
         }
       },
@@ -46020,7 +46220,8 @@
           "address",
           "edge_cluster_name",
           "updated_at",
-          "payload"
+          "payload",
+          "alerting_enabled"
         ],
         "properties": {
           "id": {
@@ -46035,7 +46236,7 @@
           },
           "type_ident": {
             "type": "string",
-            "description": "数据源类型标识，可选值：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`tencent_cls`、`victorialogs`。"
+            "description": "数据源类型标识。支持：`prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`, `redis_node`, `redis_sentinel`, `mongodb_mongod`, `mongodb_mongos`, `kafka`。"
           },
           "name": {
             "type": "string",
@@ -46043,7 +46244,7 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "数据源是否启用。"
+            "description": "是否启用业务执行。停用时拒绝业务查询和工具调用；重新启用不改变 alerting_enabled。"
           },
           "note": {
             "type": "string",
@@ -46051,7 +46252,8 @@
           },
           "address": {
             "type": "string",
-            "description": "连接地址。Prometheus/Loki/VictoriaLogs 为 HTTP URL；MySQL/Oracle/Postgres/ClickHouse 为 `host:port`；SLS 为不含 http/https 前缀的 endpoint。"
+            "description": "连接地址。Prometheus/Loki/VictoriaLogs 为 HTTP URL；MySQL/Oracle/Postgres/ClickHouse 为 `host:port`；SLS 为不含 http/https 前缀的 endpoint。 Redis/MongoDB 诊断类型使用单个 host:port（IPv6 加方括号），不接受 URI、userinfo 或查询参数。Kafka 使用 1–32 个不重复、逗号分隔的 host:port 引导地址；payload 不含 broker 列表。规范化后最多 4096 个字符。",
+            "maxLength": 4096
           },
           "payload": {
             "anyOf": [
@@ -46062,7 +46264,7 @@
                 "type": "null"
               }
             ],
-            "description": "类型相关配置块，必须包含与 `type_ident` 匹配的键。`/monit/datasource/list` 响应中恒为 `null`（列表查询不读取 payload 列）；创建/更新/详情响应中会返回。对于 `tencent_cls`，`secret_key` 会被掩码为空字符串，除非其值为 `${env:...}` 引用。"
+            "description": "类型相关配置块，必须包含与 `type_ident` 匹配的键。`/monit/datasource/list` 响应中恒为 `null`（列表查询不读取 payload 列）；创建/更新/详情响应中会返回。对于 `tencent_cls`，`secret_key` 会被掩码为空字符串，除非其值为 `${env:...}` 引用。 诊断类型的 password 和 Kafka tls_key 在响应中省略，${env:...} 引用除外；更新时省略保留已保存的秘密，显式空字符串清除。其他配置字段保持原有行为。"
           },
           "edge_cluster_name": {
             "type": "string",
@@ -46072,6 +46274,10 @@
             "type": "integer",
             "format": "int64",
             "description": "最后更新时间，Unix 时间戳（秒）。"
+          },
+          "alerting_enabled": {
+            "description": "是否允许告警评估。告警同时要求 enabled=true 且类型支持告警。仅诊断类型固定为 false；false 不阻断非告警查询或工具。",
+            "type": "boolean"
           }
         }
       },
@@ -46092,7 +46298,7 @@
           },
           "type_ident": {
             "type": "string",
-            "description": "数据源类型标识，可选值：`prometheus`、`loki`、`mysql`、`oracle`、`postgres`、`clickhouse`、`elasticsearch`、`sls`、`tencent_cls`、`victorialogs`。"
+            "description": "数据源类型标识。支持：`prometheus`, `loki`, `mysql`, `oracle`, `postgres`, `clickhouse`, `elasticsearch`, `sls`, `tencent_cls`, `victorialogs`, `redis_node`, `redis_sentinel`, `mongodb_mongod`, `mongodb_mongos`, `kafka`。"
           },
           "name": {
             "type": "string",
@@ -46104,11 +46310,12 @@
           },
           "address": {
             "type": "string",
-            "description": "连接地址。除 `elasticsearch` 的 `deployment: cloud` 部署外均为必填。Prometheus/Loki/VictoriaLogs 为 HTTP URL；MySQL/Oracle/Postgres/ClickHouse 为 `host:port`；SLS 为不含 `http(s)://` 前缀的 endpoint；`tencent_cls` 必须为 `cls.tencentcloudapi.com` 或 `cls.internal.tencentcloudapi.com`（要求 Monitors edge >= v0.66.0）。"
+            "description": "连接地址。除 `elasticsearch` 的 `deployment: cloud` 部署外均为必填。Prometheus/Loki/VictoriaLogs 为 HTTP URL；MySQL/Oracle/Postgres/ClickHouse 为 `host:port`；SLS 为不含 `http(s)://` 前缀的 endpoint；`tencent_cls` 必须为 `cls.tencentcloudapi.com` 或 `cls.internal.tencentcloudapi.com`（要求 Monitors edge >= v0.66.0）。 Redis/MongoDB 诊断类型使用单个 host:port（IPv6 加方括号），不接受 URI、userinfo 或查询参数。Kafka 使用 1–32 个不重复、逗号分隔的 host:port 引导地址；payload 不含 broker 列表。规范化后最多 4096 个字符。",
+            "maxLength": 4096
           },
           "payload": {
             "$ref": "#/components/schemas/DSPayload",
-            "description": "类型相关配置块，必须包含与 `type_ident` 匹配的键。"
+            "description": "类型相关配置块，必须包含与 `type_ident` 匹配的键。 诊断类型的 password 和 Kafka tls_key 在响应中省略，${env:...} 引用除外；更新时省略保留已保存的秘密，显式空字符串清除。其他配置字段保持原有行为。"
           },
           "edge_cluster_name": {
             "type": "string",
@@ -46116,7 +46323,13 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "数据源是否启用（参与规则评估）。创建时省略则默认禁用（`false`）。"
+            "description": "是否启用业务执行。创建时省略默认为 true；更新时省略保留当前值。显式 false 停用执行；null 非法。不改变 alerting_enabled。",
+            "x-flashduty-preserve-absence": true
+          },
+          "alerting_enabled": {
+            "description": "是否允许数据源用于告警。创建时省略：支持告警的类型默认为 true，仅诊断类型默认为 false；更新时省略保留当前值。null 非法。redis_node、redis_sentinel、mongodb_mongod、mongodb_mongos 和 kafka 不允许 true。有启用规则引用时，关闭用途返回冲突。",
+            "type": "boolean",
+            "x-flashduty-preserve-absence": true
           }
         }
       },
@@ -50121,11 +50334,14 @@
           },
           "target_locator": {
             "type": "string",
-            "description": "监控对象标识(主机名、MySQL 地址等)。最长 256 字节;不允许空白、控制字符或 `|`。"
+            "description": "主机名，最多 256 字节，不允许空白、控制字符或 |。"
           },
           "target_kind": {
             "type": "string",
-            "description": "可选的 target kind。省略时 webapi 会按当前监控对象路由自动推断。若返回 `ambiguous_target_kind`，请从 `target_kinds` 中选择一个值重试。"
+            "description": "可选目标类型，仅支持 host，省略时推断。",
+            "enum": [
+              "host"
+            ]
           }
         }
       },
@@ -50138,7 +50354,7 @@
             "properties": {
               "kind": {
                 "type": "string",
-                "description": "解析出的目标类型（target kind），如 `host`、`mysql`；与请求推断或指定的 `target_kind` 一致。"
+                "description": "解析后的 host 目标类型。"
               },
               "locator": {
                 "type": "string",
@@ -50218,11 +50434,14 @@
           },
           "target_locator": {
             "type": "string",
-            "description": "监控对象标识。校验规则与 `/monit/tools/catalog` 相同。"
+            "description": "主机名，最多 256 字节，不允许空白、控制字符或 |。"
           },
           "target_kind": {
             "type": "string",
-            "description": "可选的 target kind;省略时自动推断。"
+            "description": "可选目标类型，仅支持 host，省略时推断。",
+            "enum": [
+              "host"
+            ]
           },
           "tools": {
             "type": "array",
@@ -50258,7 +50477,7 @@
             "properties": {
               "kind": {
                 "type": "string",
-                "description": "解析出的目标类型（target kind），如 `host`、`mysql`；与请求推断或指定的 `target_kind` 一致。"
+                "description": "解析后的 host 目标类型。"
               },
               "locator": {
                 "type": "string",
@@ -50389,7 +50608,7 @@
               "properties": {
                 "target_kind": {
                   "type": "string",
-                  "description": "Target kind,如 `host`、`mysql`。v1 不支持按 kind 过滤。"
+                  "description": "主机目标类型 host。v1 不支持按 kind 过滤。"
                 },
                 "target_locator": {
                   "type": "string",
@@ -61997,6 +62216,255 @@
           "size",
           "content_type"
         ]
+      },
+      "DSKafkaConfig": {
+        "description": "诊断数据源连接配置。",
+        "properties": {
+          "password": {
+            "description": "认证密码，支持 ${env:NAME}。更新时省略保留；显式空字符串清除。响应中省略字面密码。",
+            "type": "string",
+            "x-flashduty-preserve-absence": true
+          },
+          "sasl_mechanism": {
+            "default": "none",
+            "description": "SASL 机制：none（默认，不接受凭据）、plain、scram-sha-256、scram-sha-512（需要用户名与密码）。",
+            "enum": [
+              "none",
+              "plain",
+              "scram-sha-256",
+              "scram-sha-512"
+            ],
+            "type": "string"
+          },
+          "timeout_ms": {
+            "default": 5000,
+            "description": "连接超时，单位毫秒；省略默认为 5000。",
+            "maximum": 10000,
+            "minimum": 1000,
+            "type": "integer"
+          },
+          "tls_ca": {
+            "description": "PEM CA 证书或 ${env:NAME} 引用。",
+            "type": "string"
+          },
+          "tls_cert": {
+            "description": "PEM 客户端证书或 ${env:NAME}，须配对配置 tls_cert 与 tls_key。",
+            "type": "string"
+          },
+          "tls_enabled": {
+            "default": false,
+            "description": "是否启用 TLS，默认为 false。",
+            "type": "boolean"
+          },
+          "tls_key": {
+            "description": "PEM 客户端私钥或 ${env:NAME}，须配对配置 tls_cert 与 tls_key。 更新时省略保留，空字符串清除；响应中省略字面私钥。",
+            "type": "string",
+            "x-flashduty-preserve-absence": true
+          },
+          "tls_max_version": {
+            "description": "最高 TLS 版本：1.2 或 1.3；空值表示不限制，不能低于最低版本。",
+            "type": "string"
+          },
+          "tls_min_version": {
+            "description": "最低 TLS 版本：1.2（默认）或 1.3。",
+            "type": "string"
+          },
+          "tls_server_name": {
+            "description": "TLS 握手使用的 SNI / 证书校验主机名；留空时取连接地址中的主机名。",
+            "type": "string"
+          },
+          "tls_skip_verify": {
+            "description": "启用 TLS 时是否跳过服务端证书验证。",
+            "type": "boolean"
+          },
+          "username": {
+            "description": "认证用户名，支持 ${env:NAME} 引用。",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DSMongoDBConfig": {
+        "description": "诊断数据源连接配置。",
+        "properties": {
+          "auth_source": {
+            "default": "admin",
+            "description": "认证数据库，默认为 admin。用户名与密码必须同时配置。不支持客户端证书。",
+            "type": "string"
+          },
+          "password": {
+            "description": "认证密码，支持 ${env:NAME}。更新时省略保留；显式空字符串清除。响应中省略字面密码。",
+            "type": "string",
+            "x-flashduty-preserve-absence": true
+          },
+          "timeout_ms": {
+            "default": 3000,
+            "description": "连接超时，单位毫秒；省略默认为 3000。",
+            "maximum": 10000,
+            "minimum": 1000,
+            "type": "integer"
+          },
+          "tls_ca": {
+            "description": "PEM CA 证书或 ${env:NAME} 引用。",
+            "type": "string"
+          },
+          "tls_enabled": {
+            "default": false,
+            "description": "是否启用 TLS，默认为 false。",
+            "type": "boolean"
+          },
+          "tls_max_version": {
+            "description": "最高 TLS 版本：1.2 或 1.3；空值表示不限制，不能低于最低版本。",
+            "type": "string"
+          },
+          "tls_min_version": {
+            "description": "最低 TLS 版本：1.2（默认）或 1.3。",
+            "type": "string"
+          },
+          "tls_server_name": {
+            "description": "TLS 握手使用的 SNI / 证书校验主机名；留空时取连接地址中的主机名。",
+            "type": "string"
+          },
+          "tls_skip_verify": {
+            "description": "启用 TLS 时是否跳过服务端证书验证。",
+            "type": "boolean"
+          },
+          "username": {
+            "description": "认证用户名，支持 ${env:NAME} 引用。",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DSRedisNodeConfig": {
+        "description": "诊断数据源连接配置。",
+        "properties": {
+          "database": {
+            "default": 0,
+            "description": "Redis 数据库编号，默认为 0。",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "password": {
+            "description": "认证密码，支持 ${env:NAME}。更新时省略保留；显式空字符串清除。响应中省略字面密码。",
+            "type": "string",
+            "x-flashduty-preserve-absence": true
+          },
+          "timeout_ms": {
+            "default": 3000,
+            "description": "连接超时，单位毫秒；省略默认为 3000。",
+            "maximum": 10000,
+            "minimum": 1000,
+            "type": "integer"
+          },
+          "username": {
+            "description": "认证用户名，支持 ${env:NAME} 引用。",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DSRedisSentinelConfig": {
+        "description": "诊断数据源连接配置。",
+        "properties": {
+          "password": {
+            "description": "认证密码，支持 ${env:NAME}。更新时省略保留；显式空字符串清除。响应中省略字面密码。",
+            "type": "string",
+            "x-flashduty-preserve-absence": true
+          },
+          "timeout_ms": {
+            "default": 3000,
+            "description": "连接超时，单位毫秒；省略默认为 3000。",
+            "maximum": 10000,
+            "minimum": 1000,
+            "type": "integer"
+          },
+          "username": {
+            "description": "认证用户名，支持 ${env:NAME} 引用。",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DatasourceToolInvokeRequest": {
+        "properties": {
+          "account_id": {
+            "description": "可选一致性检查，必须等于认证账户。",
+            "format": "uint64",
+            "type": "integer"
+          },
+          "datasource_id": {
+            "description": "通过 /monit/datasource/list 获取的数据源 ID。",
+            "format": "uint64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "params": {
+            "additionalProperties": true,
+            "description": "工具专属 JSON 参数，省略时为 {}，显式 null 非法。",
+            "type": "object",
+            "x-flashduty-raw-json": true
+          },
+          "tool": {
+            "description": "以数据源类型为前缀的单个工具名，如 mysql.overview。自由 SQL 使用 /monit/query/data；不支持 mysql.query 和 postgres.query。",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "datasource_id",
+          "tool"
+        ],
+        "type": "object"
+      },
+      "DatasourceToolResult": {
+        "properties": {
+          "data": {
+            "description": "工具专属 JSON 证据，原样保留，不为 null，不包含旧 diagnose 额外信封。",
+            "not": {
+              "type": "null"
+            },
+            "x-flashduty-raw-json": true
+          },
+          "datasource_id": {
+            "description": "通过 /monit/datasource/list 获取的数据源 ID。",
+            "format": "uint64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "summary": {
+            "description": "可选非空摘要。",
+            "type": "string",
+            "x-flashduty-preserve-absence": true
+          },
+          "tool": {
+            "description": "执行的工具名，与请求一致。",
+            "type": "string"
+          },
+          "truncated": {
+            "$ref": "#/components/schemas/DatasourceToolTruncation",
+            "x-flashduty-preserve-absence": true
+          }
+        },
+        "required": [
+          "datasource_id",
+          "tool",
+          "data"
+        ],
+        "type": "object"
+      },
+      "DatasourceToolTruncation": {
+        "properties": {
+          "reason": {
+            "description": "结果截断原因；该对象存在即表示发生截断。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
       }
     }
   }

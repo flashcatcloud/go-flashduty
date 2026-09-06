@@ -648,6 +648,9 @@ func (g *Gen) emitModels() string {
 		structs.WriteString(g.emitStruct(n, schema))
 	}
 
+	if strings.Contains(structs.String(), "json.RawMessage") {
+		b.WriteString("import \"encoding/json\"\n\n")
+	}
 	b.WriteString(enumsAndAliases.String())
 	b.WriteString(structs.String())
 	b.WriteString(g.emitGetRequests())
@@ -814,13 +817,14 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		preserveAbsence, _ := pv["x-flashduty-preserve-absence"].(bool)
 		isOptionalResponseField := isOptionalUnionField || (!inReq && preserveAbsence)
 		needsPointer = needsPointer || (isOptionalResponseField && (pointerizableScalar(gt) || isStructField || strings.HasPrefix(gt, "[]") || strings.HasPrefix(gt, "map[")))
-		// A request object marked x-flashduty-preserve-absence branches
+		// A request field marked x-flashduty-preserve-absence branches
 		// server-side on the key's presence (e.g. /rum/application/update
 		// leaves an omitted alerting/links container untouched but replaces
 		// the stored config when the object is present). A bare struct with
 		// `,omitzero` cannot put an all-zero object on the wire, so emit a
 		// pointer: nil stays absent, a non-nil pointer always serializes.
-		needsPointer = needsPointer || (inReq && !required[k] && preserveAbsence && isStructField)
+		// Scalars use the same rule so false and empty secrets stay explicit.
+		needsPointer = needsPointer || (inReq && !required[k] && preserveAbsence && (isStructField || pointerizableScalar(gt)))
 		if needsPointer {
 			gt = "*" + gt
 		}
@@ -881,6 +885,10 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 // goTypeOf resolves a schema map to a Go type string, synthesizing nested
 // struct types (queued for emission) as needed.
 func (g *Gen) goTypeOf(s map[string]any, hint string) string {
+	// Preserve arbitrary tool JSON, including integer and decimal precision.
+	if raw, _ := s["x-flashduty-raw-json"].(bool); raw {
+		return "json.RawMessage"
+	}
 	if s == nil {
 		return "any"
 	}

@@ -9,7 +9,7 @@ type DataSourcesService service
 
 // Get datasource detail.
 //
-// Retrieve full details of a single data source by its ID, including the `payload` configuration with its configured connection and authentication settings; treat the response as sensitive and avoid logging or forwarding it.
+// Retrieve full details of a single data source by its ID, including the `payload` configuration with its configured connection and authentication settings; treat the response as sensitive and avoid logging or forwarding it. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
 //
 // API: POST /monit/datasource/info (monit-datasource-read-info).
 func (s *DataSourcesService) ReadInfo(ctx context.Context, req *IDRequest) (*DataSourceItem, *Response, error) {
@@ -23,7 +23,7 @@ func (s *DataSourcesService) ReadInfo(ctx context.Context, req *IDRequest) (*Dat
 
 // List datasources.
 //
-// Return all data sources for the current account. Optionally filter by `type_ident`.
+// Return all data sources for the current account. Optionally filter by `type_ident`. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
 //
 // API: POST /monit/datasource/list (monit-datasource-read-list).
 func (s *DataSourcesService) ReadList(ctx context.Context, req *DataSourceListRequest) (*DataSourceListResponse, *Response, error) {
@@ -63,9 +63,23 @@ func (s *DataSourcesService) ReadSLSProjects(ctx context.Context, req *SLSProjec
 	return out, resp, nil
 }
 
+// Invoke datasource tool.
+//
+// Execute one deterministic tool against a configured datasource. Requires all currently online routable Edge sessions in the cluster to support the v0.71.0 base invoke protocol; individual tools may require a newer implementation. No tool catalog, automatic replay, or fallback to Agent/legacy diagnose. Request body limit 128 KiB; complete success response limit 1 MiB; tool timeout at most 25 seconds.
+//
+// API: POST /monit/datasource/tools/invoke (monit-datasource-tools-invoke).
+func (s *DataSourcesService) ToolsInvoke(ctx context.Context, req *DatasourceToolInvokeRequest) (*DatasourceToolResult, *Response, error) {
+	out := new(DatasourceToolResult)
+	resp, err := s.client.do(ctx, "/monit/datasource/tools/invoke", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Create datasource.
 //
-// Create a new monitoring data source. The `payload` must include the type-specific configuration block.
+// Create a new monitoring data source. The `payload` must include the type-specific configuration block. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
 //
 // API: POST /monit/datasource/create (monit-datasource-write-create).
 func (s *DataSourcesService) WriteCreate(ctx context.Context, req *DataSourceUpsertRequest) (*DataSourceItem, *Response, error) {
@@ -88,7 +102,7 @@ func (s *DataSourcesService) WriteDelete(ctx context.Context, req *IDRequest) (*
 
 // Update datasource.
 //
-// Update an existing data source. Supply `id` plus the fields to change.
+// Update an existing data source. Supply `id` plus the fields to change. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
 //
 // API: POST /monit/datasource/update (monit-datasource-write-update).
 func (s *DataSourcesService) WriteUpdate(ctx context.Context, req *DataSourceUpsertRequest) (*DataSourceItem, *Response, error) {
