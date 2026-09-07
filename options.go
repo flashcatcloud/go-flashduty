@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -11,12 +12,19 @@ import (
 type Option func(*Client)
 
 // WithBaseURL overrides the API base URL (default https://api.flashcat.cloud).
+// A path prefix is preserved: with "https://gateway.example.com/api", requests
+// go to /api/<endpoint>. The path is normalized to end with "/" so that
+// relative resolution appends endpoint paths instead of replacing the last
+// path segment.
 func WithBaseURL(raw string) Option {
 	parsed, err := url.Parse(raw)
 	return func(c *Client) {
 		if err != nil || parsed == nil || parsed.Host == "" {
 			c.optionErr = fmt.Errorf("flashduty: invalid base URL %q: %w", raw, err)
 			return
+		}
+		if !strings.HasSuffix(parsed.Path, "/") {
+			parsed.Path += "/"
 		}
 		c.BaseURL = parsed
 	}

@@ -18,7 +18,7 @@ func TestNewClientDefaultsAndOptions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.BaseURL.String() != "https://example.test" {
+	if c.BaseURL.String() != "https://example.test/" {
 		t.Fatalf("BaseURL = %s", c.BaseURL)
 	}
 	if c.UserAgent != "ua/1" {
@@ -32,6 +32,32 @@ func TestNewClientDefaultsAndOptions(t *testing.T) {
 func TestWithBaseURLInvalidReturnsError(t *testing.T) {
 	if _, err := NewClient("KEY", WithBaseURL("://bad")); err == nil {
 		t.Fatal("expected error for invalid base URL")
+	}
+}
+
+func TestWithBaseURLPreservesPathPrefix(t *testing.T) {
+	for _, tc := range []struct {
+		base string
+		want string
+	}{
+		{"https://example.test", "https://example.test/rum/data/query"},
+		{"https://example.test/", "https://example.test/rum/data/query"},
+		{"https://example.test/api", "https://example.test/api/rum/data/query"},
+		{"https://example.test/api/", "https://example.test/api/rum/data/query"},
+		{"https://example.test/a/b", "https://example.test/a/b/rum/data/query"},
+	} {
+		c, err := NewClient("KEY", WithBaseURL(tc.base))
+		if err != nil {
+			t.Fatalf("NewClient(%q): %v", tc.base, err)
+		}
+		req, err := c.newRequest(t.Context(), http.MethodPost, "/rum/data/query", nil)
+		if err != nil {
+			t.Fatalf("newRequest with base %q: %v", tc.base, err)
+		}
+		req.URL.RawQuery = ""
+		if got := req.URL.String(); got != tc.want {
+			t.Errorf("base %q: request URL = %q, want %q", tc.base, got, tc.want)
+		}
 	}
 }
 
