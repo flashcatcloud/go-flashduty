@@ -45,6 +45,8 @@ func TestWithBaseURLPreservesPathPrefix(t *testing.T) {
 		{"https://example.test/api", "https://example.test/api/rum/data/query"},
 		{"https://example.test/api/", "https://example.test/api/rum/data/query"},
 		{"https://example.test/a/b", "https://example.test/a/b/rum/data/query"},
+		{"http://192.0.2.10:12345", "http://192.0.2.10:12345/rum/data/query"},
+		{"http://192.0.2.10:12345/api", "http://192.0.2.10:12345/api/rum/data/query"},
 	} {
 		c, err := NewClient("KEY", WithBaseURL(tc.base))
 		if err != nil {
