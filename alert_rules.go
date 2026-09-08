@@ -63,20 +63,6 @@ func (s *AlertRulesService) ReadCounterNode(ctx context.Context) (*RuleCounterNo
 	return out, resp, nil
 }
 
-// Get rule status counters for top-level folders.
-//
-// Return trigger status summary for all top-level folder nodes — used for the overview dashboard.
-//
-// API: POST /monit/rule/counter/status (monit-rule-read-counter-status).
-func (s *AlertRulesService) ReadCounterStatus(ctx context.Context) (*RuleStatusResponse, *Response, error) {
-	out := new(RuleStatusResponse)
-	resp, err := s.client.do(ctx, "/monit/rule/counter/status", nil, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // Get rule counter time series.
 //
 // Return the stored time series of the total rule count across the account — one sample per `clock` timestamp.
