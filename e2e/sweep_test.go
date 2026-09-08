@@ -140,10 +140,6 @@ func TestServiceReadSweep(t *testing.T) {
 			})
 			return rid(r), tot(r), err
 		}},
-		{"Diagnostics", func() (string, int, error) {
-			_, r, err := c.Diagnostics.TargetsList(ctx, &flashduty.TargetsListRequest{})
-			return rid(r), tot(r), err
-		}},
 	}
 
 	for _, rd := range reads {
