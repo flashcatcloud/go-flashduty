@@ -7,6 +7,20 @@ import "context"
 // SchedulesService handles the "On-call/Schedules" API resource.
 type SchedulesService service
 
+// Get member on-call status.
+//
+// Get a member's current and next on-call shifts and every enabled schedule they participate in.
+//
+// API: POST /schedule/by-person (scheduleByPerson).
+func (s *SchedulesService) ByPerson(ctx context.Context, req *ScheduleByPersonRequest) (*ScheduleByPersonResponse, *Response, error) {
+	out := new(ScheduleByPersonResponse)
+	resp, err := s.client.do(ctx, "/schedule/by-person", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Create schedule.
 //
 // Create a new on-call schedule (escalation rule schedule).
