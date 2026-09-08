@@ -37,7 +37,7 @@ func TestServiceReadSweep(t *testing.T) {
 	// generically (e.g. a status-page id — this API surface has no list-pages
 	// endpoint). These are skipped with the server's reason when the server
 	// rejects on InvalidParameter, rather than failed — never silently passed.
-	needsResource := map[string]bool{"StatusPages": true, "RuleSets": true}
+	needsResource := map[string]bool{"StatusPages": true}
 
 	// One representative read per service. Listed in client field order.
 	reads := []struct {
@@ -96,10 +96,6 @@ func TestServiceReadSweep(t *testing.T) {
 		}},
 		{"RolesPermissions", func() (string, int, error) {
 			_, r, err := c.RolesPermissions.ReadList(ctx, &flashduty.RoleListRequest{})
-			return rid(r), tot(r), err
-		}},
-		{"RuleSets", func() (string, int, error) {
-			_, r, err := c.RuleSets.List(ctx, &flashduty.StoreRulesetListRequest{TypeIdent: "prometheus"})
 			return rid(r), tot(r), err
 		}},
 		{"Schedules", func() (string, int, error) {
