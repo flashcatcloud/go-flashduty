@@ -19,7 +19,6 @@ type genServices struct {
 	DataSources              *DataSourcesService
 	Diagnostics              *DiagnosticsService
 	RuleSets                 *RuleSetsService
-	ServiceMap               *ServiceMapService
 	AlertEnrichment          *AlertEnrichmentService
 	Alerts                   *AlertsService
 	Analytics                *AnalyticsService
@@ -63,7 +62,6 @@ func (c *Client) initServices() {
 	c.DataSources = (*DataSourcesService)(&c.common)
 	c.Diagnostics = (*DiagnosticsService)(&c.common)
 	c.RuleSets = (*RuleSetsService)(&c.common)
-	c.ServiceMap = (*ServiceMapService)(&c.common)
 	c.AlertEnrichment = (*AlertEnrichmentService)(&c.common)
 	c.Alerts = (*AlertsService)(&c.common)
 	c.Analytics = (*AnalyticsService)(&c.common)
