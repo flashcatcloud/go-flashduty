@@ -9710,28 +9710,6 @@ type StringMapPatch struct {
 	Set map[string]string `json:"set,omitempty" toon:"set,omitempty"`
 }
 
-// TargetsListRequest is generated from the Flashduty OpenAPI schema.
-type TargetsListRequest struct {
-	// Optional consistency check. Must equal the authenticated account when supplied.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// Opaque pagination cursor from the previous response's `next_cursor`. Omit / pass empty string for the first page. Reset whenever `keyword`, `limit`, or tenant changes.
-	Cursor string `json:"cursor,omitempty" toon:"cursor,omitempty"`
-	// Prefix match against `target_locator`. ASCII only, no whitespace, no `|`, max 256 bytes. Substring search is not supported.
-	Keyword string `json:"keyword,omitempty" toon:"keyword,omitempty"`
-	// Page size. Default 50, max 200.
-	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
-}
-
-// TargetsListResponse is generated from the Flashduty OpenAPI schema.
-type TargetsListResponse struct {
-	// The current page of invocable targets, sorted ascending by `target_locator`.
-	Items []TargetsListResponseItemsItem `json:"items" toon:"items"`
-	// Opaque cursor for the next page. Absent / empty means this is the last page.
-	NextCursor *string `json:"next_cursor,omitempty" toon:"next_cursor,omitempty"`
-	// Total matches for the current `(account_id, keyword)` pair, independent of `cursor`.
-	Total int64 `json:"total" toon:"total"`
-}
-
 // TeamBriefItem is generated from the Flashduty OpenAPI schema.
 type TeamBriefItem struct {
 	// Array of person IDs belonging to the team; empty array (never null) when the team has no members.
@@ -10053,48 +10031,6 @@ type TimeFilter struct {
 	Repeat []int64 `json:"repeat,omitempty" toon:"repeat,omitempty"`
 	// Start of the window in `HH:MM`.
 	Start string `json:"start,omitempty" toon:"start,omitempty"`
-}
-
-// ToolCatalogRequest is generated from the Flashduty OpenAPI schema.
-type ToolCatalogRequest struct {
-	// Optional consistency check. Must equal the authenticated account when supplied.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// Optional target kind; only host is supported. Inferred when omitted.
-	TargetKind string `json:"target_kind,omitempty" toon:"target_kind,omitempty"`
-	// Host name. Max 256 bytes; no whitespace, control characters or |.
-	TargetLocator string `json:"target_locator" toon:"target_locator"`
-}
-
-// ToolCatalogResponse is generated from the Flashduty OpenAPI schema.
-type ToolCatalogResponse struct {
-	// Request-level business error. Omitted on success. Returned with HTTP 200 — do not rely on the status code alone.
-	Error *ToolCatalogResponseError `json:"error,omitempty" toon:"error,omitempty"`
-	// Resolved target. Omitted when `target_kind` was not supplied and the locator could not be uniquely inferred.
-	Target *ToolCatalogResponseTarget `json:"target,omitempty" toon:"target,omitempty"`
-	// Tool metadata advertised by the target's agent. Always present; an empty array when `error` is set.
-	Tools []ToolCatalogResponseToolsItem `json:"tools" toon:"tools"`
-}
-
-// ToolInvokeRequest is generated from the Flashduty OpenAPI schema.
-type ToolInvokeRequest struct {
-	// Optional consistency check. Must equal the authenticated account when supplied.
-	AccountID int64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
-	// Optional target kind; only host is supported. Inferred when omitted.
-	TargetKind string `json:"target_kind,omitempty" toon:"target_kind,omitempty"`
-	// Host name. Max 256 bytes; no whitespace, control characters or |.
-	TargetLocator string `json:"target_locator" toon:"target_locator"`
-	// Up to 8 tool calls; webapi executes them concurrently and returns results in input order.
-	Tools []ToolInvokeRequestToolsItem `json:"tools" toon:"tools"`
-}
-
-// ToolInvokeResponse is generated from the Flashduty OpenAPI schema.
-type ToolInvokeResponse struct {
-	// Request-level business error. Omitted on success. Returned with HTTP 200 — do not rely on the status code alone.
-	Error *ToolInvokeResponseError `json:"error,omitempty" toon:"error,omitempty"`
-	// Per-tool results, aligned with the request `tools[]` order. Empty when a request-level `error` is present.
-	Results []ToolInvokeResponseResultsItem `json:"results" toon:"results"`
-	// Resolved target. Omitted when `target_kind` was not supplied and the locator could not be uniquely inferred.
-	Target *ToolInvokeResponseTarget `json:"target,omitempty" toon:"target,omitempty"`
 }
 
 // TryLinkPersonRequest is generated from the Flashduty OpenAPI schema.
@@ -11251,96 +11187,6 @@ type RUMIssueItemSuspectedCause struct {
 	Value string `json:"value" toon:"value"`
 }
 
-// TargetsListResponseItemsItem is generated from the Flashduty OpenAPI schema.
-type TargetsListResponseItemsItem struct {
-	// Most recently observed Agent version.
-	AgentVersion string `json:"agent_version" toon:"agent_version"`
-	// Edge cluster name.
-	ClusterName string `json:"cluster_name" toon:"cluster_name"`
-	// Edge instance address (`ip:port`), surfaced for diagnostics.
-	EdgeIpport string `json:"edge_ipport" toon:"edge_ipport"`
-	// Host target kind. Filtering by kind is not supported in v1.
-	TargetKind string `json:"target_kind" toon:"target_kind"`
-	// Target identifier; the list is sorted by this field ascending.
-	TargetLocator string `json:"target_locator" toon:"target_locator"`
-	// Last route-projection upsert time, Unix seconds. Treat as 'most recently observed', not a live-online indicator.
-	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
-}
-
-// ToolCatalogResponseError is generated from the Flashduty OpenAPI schema.
-type ToolCatalogResponseError struct {
-	// Request-level error code: `target_unavailable` target unreachable, `timeout` resolution timed out, `forward_failed` cross-instance forwarding failed, `invalid_tool_result` agent returned an invalid result, `ambiguous_target_kind` target kind not uniquely inferable.
-	Code string `json:"code" toon:"code"`
-	// Human-readable error detail.
-	Message string `json:"message" toon:"message"`
-	// Returned for `ambiguous_target_kind`; lists the candidate kinds.
-	TargetKinds *[]string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
-}
-
-// ToolCatalogResponseTarget is generated from the Flashduty OpenAPI schema.
-type ToolCatalogResponseTarget struct {
-	// Resolved host target kind.
-	Kind string `json:"kind" toon:"kind"`
-	// Echo of the target locator from the request.
-	Locator string `json:"locator" toon:"locator"`
-}
-
-// ToolCatalogResponseToolsItem is generated from the Flashduty OpenAPI schema.
-type ToolCatalogResponseToolsItem struct {
-	// Tool capability description for UI / AI-SRE consumption.
-	Description string `json:"description" toon:"description"`
-	// JSON Schema for `tools[].params`.
-	InputSchema map[string]any `json:"input_schema" toon:"input_schema"`
-	// Tool name; pass into `/monit/tools/invoke` as `tools[].tool`.
-	Name string `json:"name" toon:"name"`
-	// Target kind this tool applies to.
-	TargetKind string `json:"target_kind" toon:"target_kind"`
-}
-
-// ToolInvokeRequestToolsItem is generated from the Flashduty OpenAPI schema.
-type ToolInvokeRequestToolsItem struct {
-	// Tool parameters matching the catalog `input_schema`. For no-arg tools pass `{}` explicitly.
-	Params map[string]any `json:"params,omitempty" toon:"params,omitempty"`
-	// Tool name, typically from `/monit/tools/catalog`.
-	Tool string `json:"tool" toon:"tool"`
-}
-
-// ToolInvokeResponseError is generated from the Flashduty OpenAPI schema.
-type ToolInvokeResponseError struct {
-	// Request-level error code: `target_unavailable` target unreachable, `forward_failed` cross-instance forwarding failed, `ambiguous_target_kind` target kind not uniquely inferable.
-	Code string `json:"code" toon:"code"`
-	// Human-readable error detail.
-	Message string `json:"message" toon:"message"`
-	// Returned only when `code` is `ambiguous_target_kind`, listing the candidate target kinds matched by the locator; omitted otherwise.
-	TargetKinds *[]string `json:"target_kinds,omitempty" toon:"target_kinds,omitempty"`
-}
-
-// ToolInvokeResponseResultsItem is generated from the Flashduty OpenAPI schema.
-type ToolInvokeResponseResultsItem struct {
-	// Tool business payload. Present only on success. Webapi already unwraps the monit-agent result envelope, so there is no nested `data.data`.
-	Data *map[string]any `json:"data,omitempty" toon:"data,omitempty"`
-	// Per-tool failure. Present only on failure, and mutually exclusive with `data` / `summary` / `truncated`.
-	Error *ToolInvokeResponseResultsItemError `json:"error,omitempty" toon:"error,omitempty"`
-	// Request params echoed back by webapi. Normalized to `{}` when the request omitted them or sent null.
-	Params map[string]any `json:"params" toon:"params"`
-	// Human/LLM-readable one-line distillation of the result. Present only when non-empty.
-	Summary *string `json:"summary,omitempty" toon:"summary,omitempty"`
-	// Tool name, aligned one-to-one with the request `tools[]` order.
-	Tool string `json:"tool" toon:"tool"`
-	// Agent-executed tool version. Omitted when the failure occurred before the agent picked a version.
-	ToolVersion *string `json:"tool_version,omitempty" toon:"tool_version,omitempty"`
-	// Present only when the result was actually truncated — the field's presence is the signal, so there is no redundant `truncated: true`.
-	Truncated *ToolInvokeResponseResultsItemTruncated `json:"truncated,omitempty" toon:"truncated,omitempty"`
-}
-
-// ToolInvokeResponseTarget is generated from the Flashduty OpenAPI schema.
-type ToolInvokeResponseTarget struct {
-	// Resolved host target kind.
-	Kind string `json:"kind" toon:"kind"`
-	// Echo of the target locator from the request.
-	Locator string `json:"locator" toon:"locator"`
-}
-
 // UpsertStatusPageComponentRequestComponentsItem is generated from the Flashduty OpenAPI schema.
 type UpsertStatusPageComponentRequestComponentsItem struct {
 	// Time the component became (or becomes) available, in Unix seconds. On create, defaults to the current time; on update, replaces the stored value.
@@ -11455,20 +11301,6 @@ type RuleConfigsCheckThresholdRecovery struct {
 	Mode string `json:"mode,omitempty" toon:"mode,omitempty"`
 	// Numeric result fields the recovery `condition` references as `$A.<field>`; same semantics as the query's `value_fields`. Omitted when empty.
 	ValueFields []string `json:"value_fields,omitempty" toon:"value_fields,omitempty"`
-}
-
-// ToolInvokeResponseResultsItemError is generated from the Flashduty OpenAPI schema.
-type ToolInvokeResponseResultsItemError struct {
-	// Common WebAPI codes: `timeout`, `target_unavailable`, `invalid_tool_result`, `internal`, `invalid_args`, `unsupported_syntax`, `path_not_found`, and `catalog_changed`. Agent-specific tool errors may also be returned unchanged.
-	Code string `json:"code" toon:"code"`
-	// Human-readable detail for this tool's failure; agent-side messages may be forwarded verbatim.
-	Message string `json:"message" toon:"message"`
-}
-
-// ToolInvokeResponseResultsItemTruncated is generated from the Flashduty OpenAPI schema.
-type ToolInvokeResponseResultsItemTruncated struct {
-	// Why the result was truncated.
-	Reason string `json:"reason" toon:"reason"`
 }
 
 // CreateChannelRequestEscalateRuleTargetBy is generated from the Flashduty OpenAPI schema.
