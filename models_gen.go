@@ -138,14 +138,8 @@ type RuleBasicListResponse []AlertRuleBasic
 // RuleCounterChannelResponse is a map response payload.
 type RuleCounterChannelResponse map[string]int64
 
-// RuleCounterNodeResponse is a map response payload.
-type RuleCounterNodeResponse map[string]int64
-
 // RuleCounterTotalResponse is a list response payload.
 type RuleCounterTotalResponse []AlertRuleCounter
-
-// RuleDsTypesResponse is a list response payload.
-type RuleDsTypesResponse []DsType
 
 // RuleImportRequest is a list response payload.
 type RuleImportRequest []AlertRule
@@ -839,7 +833,7 @@ type AlertRule struct {
 	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
 	// Data source name patterns (supports wildcards). At least one of `ds_list` / `ds_ids` must be non-empty; the two are merged to decide which datasources the rule monitors.
 	DsList []string `json:"ds_list,omitempty" toon:"ds_list,omitempty"`
-	// Datasource type identifier; allowed values are listed by `POST /monit/rule/dstypes` (e.g. `prometheus`, `elasticsearch`).
+	// Datasource type identifier (e.g. `prometheus`, `elasticsearch`).
 	DsType string `json:"ds_type" toon:"ds_type"`
 	// Whether the rule is enabled. Updating to `false` makes the server clean up the rule's active alerts.
 	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
@@ -867,6 +861,24 @@ type AlertRule struct {
 	UpdaterID uint64 `json:"updater_id,omitempty" toon:"updater_id,omitempty"`
 	// Last updater name. Filled by the server; do not provide.
 	UpdaterName string `json:"updater_name,omitempty" toon:"updater_name,omitempty"`
+}
+
+// AlertRuleAnyDataV2 is generated from the Flashduty OpenAPI schema.
+type AlertRuleAnyDataV2 struct {
+	// Fire after the alert condition is met this many times; when enabled, minimum 1 and maximum 10000. Combined with `alerting_window_size` it means at least N hits within the last M evaluations.
+	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
+	// Optional sliding window size M: fire only when the condition is met at least `alerting_check_times` times within the last M evaluations. Omit for consecutive mode. Must satisfy `alerting_check_times` <= M <= 10000.
+	AlertingWindowSize int64 `json:"alerting_window_size,omitempty" toon:"alerting_window_size,omitempty"`
+	// Whether the any-data check is enabled: any returned data row triggers an alert.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Recovery evaluation config. Required (with non-empty `recovery.expr`) only when `recovery_mode` is `recovery_query_match`; must be omitted for the other modes.
+	Recovery AlertRuleRecoveryQueryV2 `json:"recovery,omitzero" toon:"recovery,omitempty"`
+	// Recover after the recovery condition is met this many times; minimum 1 when enabled.
+	RecoveryCheckTimes int64 `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
+	// How recovery is decided (lifecycle v2); required when enabled. `data_absent` = recover when the query returns no data; `recovery` is not allowed. `recovery_query_match` = recover when the `recovery.expr` query expression evaluates true; only a single query (`name=A`) is allowed. `manual` = never recover automatically; alerts need manual handling, no recovery event is pushed, and `recovery` is not allowed.
+	RecoveryMode string `json:"recovery_mode,omitempty" toon:"recovery_mode,omitempty"`
+	// Severity of any-data alerts, case-sensitive; required when enabled.
+	Severity string `json:"severity,omitempty" toon:"severity,omitempty"`
 }
 
 // AlertRuleAudit is generated from the Flashduty OpenAPI schema.
@@ -944,6 +956,20 @@ type AlertRuleBasic struct {
 	UpdaterName string `json:"updater_name" toon:"updater_name"`
 }
 
+// AlertRuleConfigsV2 is generated from the Flashduty OpenAPI schema.
+type AlertRuleConfigsV2 struct {
+	// Any-data check configuration: fires when a query returns any data row. See `AlertRuleAnyDataV2`.
+	CheckAnydata AlertRuleAnyDataV2 `json:"check_anydata,omitzero" toon:"check_anydata,omitempty"`
+	// No-data check configuration. See `AlertRuleNoDataV2`.
+	CheckNodata AlertRuleNoDataV2 `json:"check_nodata,omitzero" toon:"check_nodata,omitempty"`
+	// Threshold check configuration. See `AlertRuleThresholdV2`.
+	CheckThreshold AlertRuleThresholdV2 `json:"check_threshold,omitzero" toon:"check_threshold,omitempty"`
+	// Query list with at least one entry; each needs a unique `name` (`R` and `__all__` are reserved) and a non-empty, non-duplicated `expr`.
+	Queries []AlertRuleConfigsV2QueriesItem `json:"queries" toon:"queries"`
+	// Optional auxiliary queries whose results attach to alert events as context. Each entry needs a unique `name` (not colliding with any query name) and a non-empty `expr`.
+	RelateQueries []AlertRuleConfigsV2RelateQueriesItem `json:"relate_queries,omitempty" toon:"relate_queries,omitempty"`
+}
+
 // AlertRuleCounter is generated from the Flashduty OpenAPI schema.
 type AlertRuleCounter struct {
 	// ID of the account this snapshot belongs to.
@@ -993,62 +1019,118 @@ type AlertRuleExport struct {
 	Timezone string `json:"timezone" toon:"timezone"`
 }
 
-// AlertRuleInfoResponse is generated from the Flashduty OpenAPI schema.
-type AlertRuleInfoResponse struct {
-	// Account ID. Filled by the server from the authenticated identity; do not provide.
-	AccountID uint64 `json:"account_id" toon:"account_id"`
-	// Annotation key-value pairs delivered with alert events; keys must not start with `$` (reserved for query fields).
-	Annotations map[string]string `json:"annotations" toon:"annotations"`
-	// Channel IDs to send alerts to.
-	ChannelIDs []uint64 `json:"channel_ids" toon:"channel_ids"`
-	// Creation time as a Unix timestamp in seconds. Generated by the server; do not provide.
-	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
-	// Creator user ID. Filled by the server from the current user; do not provide.
-	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
-	// Creator name. Filled by the server; do not provide.
-	CreatorName string `json:"creator_name" toon:"creator_name"`
-	// Schedule expression: a 6-field cron (with seconds) or an `@every 30s` interval descriptor. Must not start with `CRON_TZ=` or `TZ=`; use the `timezone` field instead.
+// AlertRuleNoDataV2 is generated from the Flashduty OpenAPI schema.
+type AlertRuleNoDataV2 struct {
+	// Whether to alert when all queries return empty results (global empty-result check).
+	AlertOnEmptyResult bool `json:"alert_on_empty_result,omitempty" toon:"alert_on_empty_result,omitempty"`
+	// Severity of empty-result alerts, case-sensitive; only takes effect and is required when `alert_on_empty_result` is on.
+	AlertOnEmptyResultSeverity string `json:"alert_on_empty_result_severity,omitempty" toon:"alert_on_empty_result_severity,omitempty"`
+	// Fire after the alert condition is met this many times; when enabled, minimum 1 and maximum 10000. Combined with `alerting_window_size` it means at least N hits within the last M evaluations.
+	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
+	// Optional sliding window size M: fire only when the condition is met at least `alerting_check_times` times within the last M evaluations. Omit for consecutive mode. Must satisfy `alerting_check_times` <= M <= 10000.
+	AlertingWindowSize int64 `json:"alerting_window_size,omitempty" toon:"alerting_window_size,omitempty"`
+	// Seconds to wait before auto-closing. Allowed and required to be positive only when `end_mode` is `data_reappears_or_timeout`; must be 0 for the other modes.
+	AutoCloseAfterSeconds int64 `json:"auto_close_after_seconds,omitempty" toon:"auto_close_after_seconds,omitempty"`
+	// Whether the per-series no-data check is enabled: series that previously reported data trigger an alert when data disappears.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// How a no-data alert ends (lifecycle v2); required when enabled. `data_reappears` = recover when data reappears. `data_reappears_or_timeout` = end when data reappears or after `auto_close_after_seconds` seconds, whichever comes first; requires the per-series no-data check and a positive `auto_close_after_seconds`. `manual` = never end automatically; alerts need manual handling and no recovery event is pushed. For `data_reappears` and `manual`, `auto_close_after_seconds` must be 0.
+	EndMode string `json:"end_mode,omitempty" toon:"end_mode,omitempty"`
+	// Recover after the recovery condition is met this many times; minimum 1 when enabled.
+	RecoveryCheckTimes int64 `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
+	// Severity of no-data alerts, case-sensitive; required when the per-series check is enabled.
+	Severity string `json:"severity,omitempty" toon:"severity,omitempty"`
+}
+
+// AlertRuleRecoveryQueryV2 is generated from the Flashduty OpenAPI schema.
+type AlertRuleRecoveryQueryV2 struct {
+	// Datasource-specific parameters for the recovery query; keys follow the same `<datasource>.<param>` convention as a query's `args`. Not returned when empty.
+	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
+	// Recovery condition expression: a threshold expression (e.g. `$A < 90`) in `expression_match` mode, a query expression in `recovery_query_match` mode. Required and non-empty when the corresponding mode is enabled.
+	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
+	// Numeric result fields the recovery expression references as `$A.<field>`; same semantics as a query's `value_fields`. Not returned when empty.
+	ValueFields []string `json:"value_fields,omitempty" toon:"value_fields,omitempty"`
+}
+
+// AlertRuleThresholdV2 is generated from the Flashduty OpenAPI schema.
+type AlertRuleThresholdV2 struct {
+	// Fire after the alert condition is met this many times; when enabled, minimum 1 and maximum 10000. Combined with `alerting_window_size` it means at least N hits within the last M evaluations.
+	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
+	// Optional sliding window size M: fire only when the condition is met at least `alerting_check_times` times within the last M evaluations. Omit for consecutive mode (N consecutive hits). Must satisfy `alerting_check_times` <= M <= 10000.
+	AlertingWindowSize int64 `json:"alerting_window_size,omitempty" toon:"alerting_window_size,omitempty"`
+	// Critical threshold expression referencing query results as `$<query>` or `$<query>.<value_field>`, e.g. `$A > 90`; when enabled at least one of the three severities must be set.
+	Critical string `json:"critical,omitempty" toon:"critical,omitempty"`
+	// Whether the threshold check is enabled.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Info threshold expression; same syntax as `critical`.
+	Info string `json:"info,omitempty" toon:"info,omitempty"`
+	// Recovery evaluation config. Required (with non-empty `recovery.expr`) only when `recovery_mode` is `expression_match` or `recovery_query_match`; must be omitted for the other modes.
+	Recovery AlertRuleRecoveryQueryV2 `json:"recovery,omitzero" toon:"recovery,omitempty"`
+	// Recover after the recovery condition is met this many times; minimum 1 when enabled.
+	RecoveryCheckTimes int64 `json:"recovery_check_times,omitempty" toon:"recovery_check_times,omitempty"`
+	// How recovery is decided (lifecycle v2); required when enabled. `condition_clear` = recover once the alert expression no longer holds; `recovery` is not allowed. `expression_match` = recover when the `recovery.expr` threshold expression holds. `recovery_query_match` = recover when the `recovery.expr` query expression evaluates true. `manual` = never recover automatically; alerts need manual handling, no recovery event is pushed, and `recovery` is not allowed.
+	RecoveryMode string `json:"recovery_mode,omitempty" toon:"recovery_mode,omitempty"`
+	// Warning threshold expression; same syntax as `critical`.
+	Warning string `json:"warning,omitempty" toon:"warning,omitempty"`
+}
+
+// AlertRuleV2 is generated from the Flashduty OpenAPI schema.
+type AlertRuleV2 struct {
+	// Account ID, filled by the server from the authentication context; any client-supplied value is ignored.
+	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
+	// Extra annotation key-value pairs delivered with alert events; keys must not start with `$` (reserved for query fields).
+	Annotations map[string]string `json:"annotations,omitempty" toon:"annotations,omitempty"`
+	// Collaboration space IDs alerts are sent to. May be empty; alerts then route through the global integration.
+	ChannelIDs []uint64 `json:"channel_ids,omitempty" toon:"channel_ids,omitempty"`
+	// Creation time as a Unix timestamp in seconds, generated by the server; any client-supplied value is ignored.
+	CreatedAt int64 `json:"created_at,omitempty" toon:"created_at,omitempty"`
+	// Creator member ID, filled by the server from the current user; any client-supplied value is ignored.
+	CreatorID uint64 `json:"creator_id,omitempty" toon:"creator_id,omitempty"`
+	// Creator name, filled by the server; any client-supplied value is ignored.
+	CreatorName string `json:"creator_name,omitempty" toon:"creator_name,omitempty"`
+	// Schedule expression: a 6-field cron (with seconds) or an `@every 30s` interval. Must not start with `CRON_TZ=` or `TZ=`; set the timezone in the `timezone` field instead.
 	CronPattern string `json:"cron_pattern" toon:"cron_pattern"`
-	// Whether to enable debug logging; the edge emits detailed evaluation logs, useful for troubleshooting rules that do not trigger as expected.
-	DebugLogEnabled bool `json:"debug_log_enabled" toon:"debug_log_enabled"`
-	// Seconds to shift the evaluation query window backward, compensating for data ingestion latency.
-	DelaySeconds int64 `json:"delay_seconds" toon:"delay_seconds"`
-	// Rule description, in Markdown.
-	Description string `json:"description" toon:"description"`
-	// Format for the description. Defaults to `text` when omitted or empty. `text` = plain text; `markdown` = Markdown, rendered as Markdown in alert details.
-	DescriptionType string `json:"description_type" toon:"description_type"`
-	// Datasource IDs, merged with `ds_list` to decide which datasources the rule monitors; IDs survive datasource renames. At least one of `ds_list` and `ds_ids` must be provided.
-	DsIDs []uint64 `json:"ds_ids" toon:"ds_ids"`
-	// Data source name patterns (supports wildcards). At least one of `ds_list` / `ds_ids` must be non-empty; the two are merged to decide which datasources the rule monitors.
-	DsList []string `json:"ds_list" toon:"ds_list"`
-	// Datasource type identifier; allowed values are listed by `POST /monit/rule/dstypes` (e.g. `prometheus`, `elasticsearch`).
+	// Enable debug logging; the edge then emits detailed evaluation logs for this rule, useful when the rule does not trigger as expected.
+	DebugLogEnabled bool `json:"debug_log_enabled,omitempty" toon:"debug_log_enabled,omitempty"`
+	// Seconds the evaluation query window is shifted back, compensating for data ingestion latency.
+	DelaySeconds int64 `json:"delay_seconds,omitempty" toon:"delay_seconds,omitempty"`
+	// Rule description, Markdown format.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Format of the description content. Empty or omitted defaults to `text`. `text` = plain text; `markdown` = Markdown, rendered as such in alert details.
+	DescriptionType string `json:"description_type,omitempty" toon:"description_type,omitempty"`
+	// Datasource ID list, merged with `ds_list` to decide the monitored datasources; IDs survive datasource renames. At least one of `ds_list` / `ds_ids` must be provided.
+	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
+	// Datasource name match patterns (wildcards supported). At least one of `ds_list` / `ds_ids` must be non-empty; both are merged to decide which datasources the rule monitors.
+	DsList []string `json:"ds_list,omitempty" toon:"ds_list,omitempty"`
+	// Datasource type identifier (e.g. `prometheus`, `elasticsearch`).
 	DsType string `json:"ds_type" toon:"ds_type"`
-	// Whether the rule is enabled. Updating to `false` makes the server clean up the rule's active alerts.
+	// Whether the rule is enabled. Required — the server enforces an explicit value (including `false`) while decoding. Setting it to `false` on update clears the rule's active alerts.
 	Enabled bool `json:"enabled" toon:"enabled"`
-	// Time windows when the rule is active. Defaults to all days from 00:00 to 23:59 when omitted or empty.
-	EnabledTimes []AlertRuleInfoResponseEnabledTimesItem `json:"enabled_times" toon:"enabled_times"`
-	// ID of the folder the rule belongs to. Obtainable via `POST /monit/folder/list`.
+	// Time windows during which the rule is in effect. When omitted or empty, the rule is active 00:00–23:59 every day.
+	EnabledTimes []AlertRuleV2EnabledTimesItem `json:"enabled_times,omitempty" toon:"enabled_times,omitempty"`
+	// ID of the folder the rule belongs to; list folders via `POST /monit/folder/list`. Cannot be changed through the update API — use `/monit/rule/move` instead.
 	FolderID uint64 `json:"folder_id" toon:"folder_id"`
-	// Rule ID. Required for update; omit for create (assigned by the server).
-	ID uint64 `json:"id" toon:"id"`
+	// Rule ID. Required on update; omit on create (assigned by the server).
+	ID uint64 `json:"id,omitempty" toon:"id,omitempty"`
+	// Drill-down entries linked from the alert event detail page; at most 20 items, duplicates rejected. On update the field is presence-based: omit it to keep the current value, pass `[]` to clear.
+	InvestigationTargets []InvestigationTarget `json:"investigation_targets,omitzero" toon:"investigation_targets,omitempty"`
 	// Custom labels.
-	Labels map[string]string `json:"labels" toon:"labels"`
-	// Rule name. Must be unique within the same folder.
+	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	// Rule name. Must be unique within the folder and at most 128 characters.
 	Name string `json:"name" toon:"name"`
-	// Notification repeat interval in seconds.
-	RepeatInterval int64 `json:"repeat_interval" toon:"repeat_interval"`
-	// Max number of repeat notifications.
-	RepeatTotal int64 `json:"repeat_total" toon:"repeat_total"`
-	// Check configuration: query list plus trigger/recovery conditions. Structure see `RuleConfigs`.
-	RuleConfigs RuleConfigs `json:"rule_configs" toon:"rule_configs"`
-	// Timezone in which the rule executes. Determines how the cron schedule and effective time windows are interpreted. Only IANA timezone names are accepted (e.g. `Asia/Shanghai`, `UTC`, `Europe/London`); shortcuts and offsets such as `Local`, `UTC+8`, or `CST` are rejected. Treated as `Asia/Shanghai` if empty.
-	Timezone string `json:"timezone" toon:"timezone"`
-	// Last update time as a Unix timestamp in seconds. Generated by the server; do not provide.
-	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
-	// Last updater user ID. Filled by the server; do not provide.
-	UpdaterID uint64 `json:"updater_id" toon:"updater_id"`
-	// Last updater name. Filled by the server; do not provide.
-	UpdaterName string `json:"updater_name" toon:"updater_name"`
+	// Notification repeat interval in seconds. Values below 1 fall back to the default 3600.
+	RepeatInterval int64 `json:"repeat_interval,omitempty" toon:"repeat_interval,omitempty"`
+	// Maximum number of repeat notifications. Values below 1 fall back to the default 3.
+	RepeatTotal int64 `json:"repeat_total,omitempty" toon:"repeat_total,omitempty"`
+	// Detection configuration: query list plus trigger/recovery conditions. See `AlertRuleConfigsV2`.
+	RuleConfigs AlertRuleConfigsV2 `json:"rule_configs" toon:"rule_configs"`
+	// Timezone the rule runs in; it decides how the cron schedule and enabled time windows are interpreted. Only IANA names are accepted (e.g. `Asia/Shanghai`, `UTC`, `Europe/London`); abbreviations or offsets like `Local`, `UTC+8`, `CST` are rejected. Empty falls back to `Asia/Shanghai`.
+	Timezone string `json:"timezone,omitempty" toon:"timezone,omitempty"`
+	// Last update time as a Unix timestamp in seconds, generated by the server; any client-supplied value is ignored.
+	UpdatedAt int64 `json:"updated_at,omitempty" toon:"updated_at,omitempty"`
+	// ID of the member who last updated the rule, filled by the server; any client-supplied value is ignored.
+	UpdaterID uint64 `json:"updater_id,omitempty" toon:"updater_id,omitempty"`
+	// Name of the member who last updated the rule, filled by the server; any client-supplied value is ignored.
+	UpdaterName string `json:"updater_name,omitempty" toon:"updater_name,omitempty"`
 }
 
 // AlertShort is generated from the Flashduty OpenAPI schema.
@@ -2615,20 +2697,6 @@ type DsTencentClsConfig struct {
 	SecretKey string `json:"secret_key,omitempty" toon:"secret_key,omitempty"`
 }
 
-// DsType is generated from the Flashduty OpenAPI schema.
-type DsType struct {
-	// Owning account ID. `0` for global types.
-	AccountID uint64 `json:"account_id" toon:"account_id"`
-	// ID of the datasource type record.
-	ID uint64 `json:"id" toon:"id"`
-	// Identifier used as the `ds_type` of rules, e.g. `prometheus`.
-	Ident string `json:"ident" toon:"ident"`
-	// Display name, e.g. `Prometheus`.
-	Name string `json:"name" toon:"name"`
-	// Display order weight; higher appears first.
-	Weight int64 `json:"weight" toon:"weight"`
-}
-
 // DsVictoriaLogsConfig is generated from the Flashduty OpenAPI schema.
 type DsVictoriaLogsConfig struct {
 	// Whether HTTP Basic Auth is enabled; when `false`, `basic_auth_username`/`basic_auth_password` are ignored.
@@ -2655,6 +2723,16 @@ type DsVictoriaLogsConfig struct {
 	TlsServerName string `json:"tls_server_name,omitempty" toon:"tls_server_name,omitempty"`
 	// Whether to skip server certificate verification (insecure, for self-signed setups only).
 	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
+}
+
+// DashboardInvestigationTarget is generated from the Flashduty OpenAPI schema.
+type DashboardInvestigationTarget struct {
+	// Target dashboard ID; must be a canonical UUIDv7.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Panel ID inside the dashboard; must be a canonical UUIDv7. Optional.
+	TargetID string `json:"target_id,omitempty" toon:"target_id,omitempty"`
+	// Dashboard variable bindings, keyed by dashboard variable name.
+	VariableBindings map[string]InvestigationVariableBinding `json:"variable_bindings,omitempty" toon:"variable_bindings,omitempty"`
 }
 
 // DataSourceItem is generated from the Flashduty OpenAPI schema.
@@ -3750,6 +3828,21 @@ type Flapping struct {
 	MuteMins int64 `json:"mute_mins,omitempty" toon:"mute_mins,omitempty"`
 }
 
+// GetRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type GetRemoteConfigRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+}
+
+// GetRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type GetRemoteConfigResponse struct {
+	Config RemoteConfig `json:"config" toon:"config"`
+	// Unix timestamp in milliseconds - when the current version was published. 0 when never configured.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Version the live configuration is stored under. 0 means the application has never been configured.
+	Version int64 `json:"version" toon:"version"`
+}
+
 // GetWarRoomDefaultObserversRequest is generated from the Flashduty OpenAPI schema.
 type GetWarRoomDefaultObserversRequest struct {
 	// Incident ID, a MongoDB ObjectID hex string.
@@ -4418,6 +4511,22 @@ type InsightTopkAlertByLabelRequest struct {
 	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
 }
 
+// InvestigationTarget is generated from the Flashduty OpenAPI schema.
+type InvestigationTarget struct {
+	// Configuration for the `dashboard` kind; required when `kind` is `dashboard`.
+	Dashboard DashboardInvestigationTarget `json:"dashboard,omitzero" toon:"dashboard,omitempty"`
+	// Entry type; currently only `dashboard` is supported.
+	Kind string `json:"kind" toon:"kind"`
+}
+
+// InvestigationVariableBinding is generated from the Flashduty OpenAPI schema.
+type InvestigationVariableBinding struct {
+	// Alert event label name; must follow Prometheus label naming rules and must not be a reserved label.
+	Key string `json:"key" toon:"key"`
+	// Where the bound value comes from; currently only `event_label` (the alert event's label value) is supported.
+	Source string `json:"source" toon:"source"`
+}
+
 // InviteMemberItem is generated from the Flashduty OpenAPI schema.
 type InviteMemberItem struct {
 	// ISO 3166-1 alpha-2 region code for `phone` (e.g. "CN"). Validated and normalized to upper case before storage; invalid values are rejected with a 400. Also the parsing hint when `phone` has no "+" prefix (defaults to "CN").
@@ -4909,6 +5018,27 @@ type ListPostMortemsResponse struct {
 	// Cursor for forward pagination.
 	SearchAfterCtx string `json:"search_after_ctx" toon:"search_after_ctx"`
 	// Total matching reports.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// ListRemoteConfigHistoryRequest is generated from the Flashduty OpenAPI schema.
+type ListRemoteConfigHistoryRequest struct {
+	ListOptions
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Ascending order. Default: false (descending).
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Sort field. Default: `updated_at`.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+}
+
+// ListRemoteConfigHistoryResponse is generated from the Flashduty OpenAPI schema.
+type ListRemoteConfigHistoryResponse struct {
+	// Whether more pages remain.
+	HasNextPage bool `json:"has_next_page" toon:"has_next_page"`
+	// Version items, newest first by default.
+	Items []RemoteConfigHistoryItem `json:"items" toon:"items"`
+	// Total number of versions.
 	Total int64 `json:"total" toon:"total"`
 }
 
@@ -5563,6 +5693,8 @@ type MemberListRequest struct {
 	ListOptions
 	// Ascending order. Default: false (descending)
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Filter by member ID. Return only the member with this ID.
+	MemberID uint64 `json:"member_id,omitempty" toon:"member_id,omitempty"`
 	// Sort field. Default: `updated_at`
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
 	// Substring match on member name or email; if the keyword parses as a phone number, an exact phone match is also applied
@@ -5578,6 +5710,18 @@ type MemberListResponse struct {
 	Items []MemberItem `json:"items" toon:"items"`
 	// Total count
 	Total int64 `json:"total" toon:"total"`
+}
+
+// MemberOncallInterval is generated from the Flashduty OpenAPI schema.
+type MemberOncallInterval struct {
+	// Unix timestamp in seconds - when the shift ends. Absent while the shift is ongoing.
+	EndAt Timestamp `json:"end_at" toon:"end_at"`
+	// Owning schedule ID.
+	ScheduleID int64 `json:"schedule_id" toon:"schedule_id"`
+	// Owning schedule name.
+	ScheduleName string `json:"schedule_name" toon:"schedule_name"`
+	// Unix timestamp in seconds - when the shift starts.
+	StartAt Timestamp `json:"start_at" toon:"start_at"`
 }
 
 // MemberResetInfoRequest is generated from the Flashduty OpenAPI schema.
@@ -5644,6 +5788,14 @@ type MemberRoleUpdateRequest struct {
 	MemberID uint64 `json:"member_id" toon:"member_id"`
 	// New role ID set. Replaces the member's existing roles entirely (not additive); get IDs from `POST /role/list`. Leave empty to reset to the built-in Viewer role (ID 8)
 	RoleIDs []uint64 `json:"role_ids,omitempty" toon:"role_ids,omitempty"`
+}
+
+// MemberScheduleItem is generated from the Flashduty OpenAPI schema.
+type MemberScheduleItem struct {
+	// Schedule ID.
+	ScheduleID int64 `json:"schedule_id" toon:"schedule_id"`
+	// Schedule name.
+	ScheduleName string `json:"schedule_name" toon:"schedule_name"`
 }
 
 // MergeIncidentsRequest is generated from the Flashduty OpenAPI schema.
@@ -6118,6 +6270,26 @@ type PreviewIncidentCardFixedField struct {
 	Value string `json:"value" toon:"value"`
 }
 
+// PreviewRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type PreviewRemoteConfigRequest struct {
+	// App version the simulated client reports.
+	AppVersion string `json:"app_version,omitempty" toon:"app_version,omitempty"`
+	// RUM application ID.
+	ApplicationID string       `json:"application_id" toon:"application_id"`
+	Config        RemoteConfig `json:"config,omitzero" toon:"config,omitempty"`
+	// Environment the simulated client reports.
+	Env string `json:"env,omitempty" toon:"env,omitempty"`
+	// SDK name and version the simulated client reports, e.g. `web@2.4.1`.
+	Sdk string `json:"sdk,omitempty" toon:"sdk,omitempty"`
+}
+
+// PreviewRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type PreviewRemoteConfigResponse struct {
+	// 0-based index of the rule that decided the result, or -1 when only the default applied.
+	HitRuleIndex int64              `json:"hit_rule_index" toon:"hit_rule_index"`
+	Values       RemoteConfigValues `json:"values" toon:"values"`
+}
+
 // PreviewTemplateRequest is generated from the Flashduty OpenAPI schema.
 type PreviewTemplateRequest struct {
 	// Template content to render.
@@ -6289,6 +6461,59 @@ type QuerySamplesResult struct {
 	Kind string `json:"kind" toon:"kind"`
 	// Instant samples with their complete label sets.
 	Samples []QuerySample `json:"samples" toon:"samples"`
+}
+
+// RemoteConfig is generated from the Flashduty OpenAPI schema.
+type RemoteConfig struct {
+	// How a change lands on a client that is already running: `next_session` (the default, and what an empty value means) leaves running sessions untouched and applies the change to new sessions; `immediate` ends the running session as soon as the change arrives so a new session starts under the new configuration.
+	Activation string `json:"activation,omitempty" toon:"activation,omitempty"`
+	// Application-defined pass-through values handed to the host app verbatim. At most 5 keys, each key up to 64 bytes, each value up to 4 KB of JSON nested at most 3 levels, 16 KB in total. Anyone holding the public client token can read it.
+	Custom  map[string]any     `json:"custom,omitempty" toon:"custom,omitempty"`
+	Default RemoteConfigValues `json:"default,omitzero" toon:"default,omitempty"`
+	// Kill switch. When false the engine reports no values at all and SDKs fall back to their init values.
+	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
+	// Let clients re-check the configuration when they return to the foreground instead of waiting for the next poll.
+	RefreshOnForeground bool `json:"refresh_on_foreground,omitempty" toon:"refresh_on_foreground,omitempty"`
+	// Targeting rules, evaluated in order; at most 20 per application.
+	Rules []RemoteConfigRule `json:"rules,omitempty" toon:"rules,omitempty"`
+}
+
+// RemoteConfigHistoryItem is generated from the Flashduty OpenAPI schema.
+type RemoteConfigHistoryItem struct {
+	Config RemoteConfig `json:"config" toon:"config"`
+	// Hash of the configuration content; lets the console identify versions with identical content.
+	ContentHash string `json:"content_hash" toon:"content_hash"`
+	// Earliest version carrying the same content, when that is not this version itself.
+	EquivalentTo int64 `json:"equivalent_to" toon:"equivalent_to"`
+	// Operator's note left when the version was published. Empty when none was given.
+	Reason string `json:"reason" toon:"reason"`
+	// Unix timestamp in milliseconds - when the version was published.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// ID of the member who published the version.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Name of the member who published the version.
+	UpdatedByName string `json:"updated_by_name" toon:"updated_by_name"`
+	// Version number, unique within the application.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RemoteConfigRule is generated from the Flashduty OpenAPI schema.
+type RemoteConfigRule struct {
+	// Key/value conditions the SDK's config request must equal. Keys are limited to `env`, `app_version` and `sdk`; values are at most 256 bytes.
+	Match map[string]string  `json:"match" toon:"match"`
+	Set   RemoteConfigValues `json:"set" toon:"set"`
+}
+
+// RemoteConfigValues is generated from the Flashduty OpenAPI schema.
+type RemoteConfigValues struct {
+	// How Session Replay masks a page by default.
+	DefaultPrivacyLevel *string `json:"defaultPrivacyLevel,omitempty" toon:"defaultPrivacyLevel,omitempty"`
+	// Session Replay sampling rate (0-100).
+	SessionReplaySampleRate *int64 `json:"sessionReplaySampleRate,omitempty" toon:"sessionReplaySampleRate,omitempty"`
+	// Session sampling rate (0-100).
+	SessionSampleRate *int64 `json:"sessionSampleRate,omitempty" toon:"sessionSampleRate,omitempty"`
+	// Trace sampling rate (0-100): which sessions inject trace headers into their requests.
+	TraceSampleRate *int64 `json:"traceSampleRate,omitempty" toon:"traceSampleRate,omitempty"`
 }
 
 // RemoveIncidentRequest is generated from the Flashduty OpenAPI schema.
@@ -6474,6 +6699,22 @@ type ResponseEnvelope struct {
 	Error any `json:"error" toon:"error"`
 	// Unique ID for this request. Mirrored in the Flashcat-Request-Id header. Include it when reporting issues.
 	RequestID string `json:"request_id" toon:"request_id"`
+}
+
+// RevertRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type RevertRemoteConfigRequest struct {
+	// RUM application ID.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Operator's note. The console fills in `rolled back to vN` when left empty.
+	Reason string `json:"reason,omitempty" toon:"reason,omitempty"`
+	// History version to republish.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RevertRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type RevertRemoteConfigResponse struct {
+	// New version number created by the revert.
+	Version int64 `json:"version" toon:"version"`
 }
 
 // RoleDeleteRequest is generated from the Flashduty OpenAPI schema.
@@ -6693,7 +6934,7 @@ type RuleFieldsUpdateRequest struct {
 	DsIDs []uint64 `json:"ds_ids,omitempty" toon:"ds_ids,omitempty"`
 	// Datasource name match patterns; wildcards supported. Effective only when `fields` includes `ds_list`.
 	DsList []string `json:"ds_list,omitempty" toon:"ds_list,omitempty"`
-	// Datasource type identifier; allowed values are listed by `POST /monit/rule/dstypes`. Effective only when `fields` includes `ds_type`.
+	// Datasource type identifier. Effective only when `fields` includes `ds_type`.
 	DsType string `json:"ds_type,omitempty" toon:"ds_type,omitempty"`
 	// Whether the rule is enabled. Setting it to `false` makes the server clean up the rule's active alerts. Effective only when `fields` includes `enabled`.
 	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
@@ -8030,6 +8271,20 @@ type SLSProjectsResponse struct {
 	Projects []SLSProject `json:"projects" toon:"projects"`
 	// Total number of projects matching `query`, independent of pagination.
 	Total int64 `json:"total" toon:"total"`
+}
+
+// ScheduleByPersonRequest is generated from the Flashduty OpenAPI schema.
+type ScheduleByPersonRequest struct {
+	// Member ID whose on-call status is returned.
+	PersonID int64 `json:"person_id" toon:"person_id"`
+}
+
+// ScheduleByPersonResponse is generated from the Flashduty OpenAPI schema.
+type ScheduleByPersonResponse struct {
+	Current MemberOncallInterval `json:"current" toon:"current"`
+	Next    MemberOncallInterval `json:"next" toon:"next"`
+	// All enabled schedules the member participates in.
+	Schedules []MemberScheduleItem `json:"schedules" toon:"schedules"`
 }
 
 // ScheduleCalculatedLayer is generated from the Flashduty OpenAPI schema.
@@ -9825,6 +10080,21 @@ type UpdateInhibitRuleRequest struct {
 	TargetFilters FilterGroup `json:"target_filters,omitempty" toon:"target_filters,omitempty"`
 }
 
+// UpdateRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
+type UpdateRemoteConfigRequest struct {
+	// RUM application ID.
+	ApplicationID string       `json:"application_id" toon:"application_id"`
+	Config        RemoteConfig `json:"config" toon:"config"`
+	// Operator's note on why this version was published. Stored verbatim.
+	Reason string `json:"reason,omitempty" toon:"reason,omitempty"`
+}
+
+// UpdateRemoteConfigResponse is generated from the Flashduty OpenAPI schema.
+type UpdateRemoteConfigResponse struct {
+	// New published version number.
+	Version int64 `json:"version" toon:"version"`
+}
+
 // UpdateSilenceRuleRequest is generated from the Flashduty OpenAPI schema.
 type UpdateSilenceRuleRequest struct {
 	// Owning channel ID; obtain it from `POST /channel/list`.
@@ -10291,14 +10561,38 @@ type AlertRuleEnabledTimesItem struct {
 	Stime string `json:"stime,omitempty" toon:"stime,omitempty"`
 }
 
-// AlertRuleInfoResponseEnabledTimesItem is generated from the Flashduty OpenAPI schema.
-type AlertRuleInfoResponseEnabledTimesItem struct {
+// AlertRuleConfigsV2QueriesItem is generated from the Flashduty OpenAPI schema.
+type AlertRuleConfigsV2QueriesItem struct {
+	// Datasource-specific query parameters; keys follow the `<datasource>.<param>` convention (e.g. `es.type`, `tencent_cls.limit`). Most datasources need none.
+	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
+	// Query expression.
+	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
+	// Result fields used as alert event labels; rows with the same label set form one alert. Must not overlap `value_fields`; applies to tabular results (SQL/ES-like datasources).
+	LabelFields []string `json:"label_fields,omitempty" toon:"label_fields,omitempty"`
+	// Query identifier (e.g. `A`), must match `[A-Za-z][A-Za-z0-9_]*`; `R` and `__all__` are reserved and cannot be used.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Numeric result fields evaluated by threshold expressions (referenced as `$A.<field>`); required for threshold checks when the datasource is not `prometheus`/`loki`/`victorialogs`. Field names must not contain `.`.
+	ValueFields []string `json:"value_fields,omitempty" toon:"value_fields,omitempty"`
+}
+
+// AlertRuleConfigsV2RelateQueriesItem is generated from the Flashduty OpenAPI schema.
+type AlertRuleConfigsV2RelateQueriesItem struct {
+	// Datasource-specific parameters for the auxiliary query; same convention as `queries[].args`.
+	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
+	// Query expression.
+	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
+	// Auxiliary query identifier.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+}
+
+// AlertRuleV2EnabledTimesItem is generated from the Flashduty OpenAPI schema.
+type AlertRuleV2EnabledTimesItem struct {
 	// Days of week (0=Sunday).
-	Days []int64 `json:"days" toon:"days"`
+	Days []int64 `json:"days,omitempty" toon:"days,omitempty"`
 	// End time, e.g. `18:00`.
-	Etime string `json:"etime" toon:"etime"`
+	Etime string `json:"etime,omitempty" toon:"etime,omitempty"`
 	// Start time, e.g. `09:00`.
-	Stime string `json:"stime" toon:"stime"`
+	Stime string `json:"stime,omitempty" toon:"stime,omitempty"`
 }
 
 // AssignedToNotify is generated from the Flashduty OpenAPI schema.

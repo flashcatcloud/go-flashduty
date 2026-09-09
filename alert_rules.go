@@ -49,20 +49,6 @@ func (s *AlertRulesService) ReadCounterChannel(ctx context.Context) (*RuleCounte
 	return out, resp, nil
 }
 
-// Get rule counts by folder node.
-//
-// Return an object mapping top-level folder name to the total number of rules under that folder and all its descendants.
-//
-// API: POST /monit/rule/counter/node (monit-rule-read-counter-node).
-func (s *AlertRulesService) ReadCounterNode(ctx context.Context) (*RuleCounterNodeResponse, *Response, error) {
-	out := new(RuleCounterNodeResponse)
-	resp, err := s.client.do(ctx, "/monit/rule/counter/node", nil, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // Get rule counter time series.
 //
 // Return the stored time series of the total rule count across the account — one sample per `clock` timestamp.
@@ -71,20 +57,6 @@ func (s *AlertRulesService) ReadCounterNode(ctx context.Context) (*RuleCounterNo
 func (s *AlertRulesService) ReadCounterTotal(ctx context.Context) (*RuleCounterTotalResponse, *Response, error) {
 	out := new(RuleCounterTotalResponse)
 	resp, err := s.client.do(ctx, "/monit/rule/counter/total", nil, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// List available datasource types.
-//
-// Return the list of datasource types (`DSType` records) that the current account can use when authoring alert rules — combines global types and account-scoped types.
-//
-// API: POST /monit/rule/dstypes (monit-rule-read-dstypes).
-func (s *AlertRulesService) ReadDstypes(ctx context.Context) (*RuleDsTypesResponse, *Response, error) {
-	out := new(RuleDsTypesResponse)
-	resp, err := s.client.do(ctx, "/monit/rule/dstypes", nil, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -105,14 +77,14 @@ func (s *AlertRulesService) ReadExport(ctx context.Context, req *RuleIDsRequest)
 	return out, resp, nil
 }
 
-// Get alert rule detail.
+// Get alert rule detail (V2).
 //
-// Return the full configuration of an alert rule by its ID, including rule queries, thresholds, and notification settings.
+// Return the full V2 configuration of an alert rule by ID, including lifecycle v2 recovery and ending modes.
 //
-// API: POST /monit/rule/info (monit-rule-read-info).
-func (s *AlertRulesService) ReadInfo(ctx context.Context, req *RuleIDRequest) (*AlertRuleInfoResponse, *Response, error) {
-	out := new(AlertRuleInfoResponse)
-	resp, err := s.client.do(ctx, "/monit/rule/info", req, out)
+// API: POST /monit/rule/v2/info (monit-rule-read-info-v2).
+func (s *AlertRulesService) ReadInfoV2(ctx context.Context, req *RuleIDRequest) (*AlertRuleV2, *Response, error) {
+	out := new(AlertRuleV2)
+	resp, err := s.client.do(ctx, "/monit/rule/v2/info", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -121,7 +93,7 @@ func (s *AlertRulesService) ReadInfo(ctx context.Context, req *RuleIDRequest) (*
 
 // List alert rules.
 //
-// Return the basic information of all alert rules in a folder. For full rule details, call `POST /monit/rule/info`.
+// Return the basic information of all alert rules in a folder. For full rule details, call `POST /monit/rule/v2/info`.
 //
 // API: POST /monit/rule/list/basic (monit-rule-read-list).
 func (s *AlertRulesService) ReadList(ctx context.Context, req *RuleListRequest) (*RuleBasicListResponse, *Response, error) {
@@ -133,14 +105,14 @@ func (s *AlertRulesService) ReadList(ctx context.Context, req *RuleListRequest) 
 	return out, resp, nil
 }
 
-// Create alert rule.
+// Create alert rule (V2).
 //
-// Create a new alert rule. Returns the created rule with its assigned ID.
+// Create a new V2 alert rule. Returns the created rule with its assigned ID.
 //
-// API: POST /monit/rule/create (monit-rule-write-create).
-func (s *AlertRulesService) WriteCreate(ctx context.Context, req *AlertRule) (*AlertRule, *Response, error) {
-	out := new(AlertRule)
-	resp, err := s.client.do(ctx, "/monit/rule/create", req, out)
+// API: POST /monit/rule/v2/create (monit-rule-write-create-v2).
+func (s *AlertRulesService) WriteCreateV2(ctx context.Context, req *AlertRuleV2) (*AlertRuleV2, *Response, error) {
+	out := new(AlertRuleV2)
+	resp, err := s.client.do(ctx, "/monit/rule/v2/create", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -207,14 +179,14 @@ func (s *AlertRulesService) WriteMove(ctx context.Context, req *RuleMoveRequest)
 	return out, resp, nil
 }
 
-// Update alert rule.
+// Update alert rule (V2).
 //
-// Replace the full configuration of an existing alert rule. All fields are overwritten.
+// Replace an alert rule's V2 configuration in full by ID. Returns the updated rule.
 //
-// API: POST /monit/rule/update (monit-rule-write-update).
-func (s *AlertRulesService) WriteUpdate(ctx context.Context, req *AlertRule) (*AlertRule, *Response, error) {
-	out := new(AlertRule)
-	resp, err := s.client.do(ctx, "/monit/rule/update", req, out)
+// API: POST /monit/rule/v2/update (monit-rule-write-update-v2).
+func (s *AlertRulesService) WriteUpdateV2(ctx context.Context, req *AlertRuleV2) (*AlertRuleV2, *Response, error) {
+	out := new(AlertRuleV2)
+	resp, err := s.client.do(ctx, "/monit/rule/v2/update", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
