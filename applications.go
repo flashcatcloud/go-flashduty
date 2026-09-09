@@ -49,6 +49,76 @@ func (s *ApplicationsService) ReadList(ctx context.Context, req *RUMApplicationL
 	return out, resp, nil
 }
 
+// Get remote config detail.
+//
+// Retrieve the live remote configuration of a RUM application and the version it is stored under.
+//
+// API: POST /rum/application/remote-config/get (rum-application-remote-config-read-get).
+func (s *ApplicationsService) RemoteConfigReadGet(ctx context.Context, req *GetRemoteConfigRequest) (*GetRemoteConfigResponse, *Response, error) {
+	out := new(GetRemoteConfigResponse)
+	resp, err := s.client.do(ctx, "/rum/application/remote-config/get", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// List remote config history.
+//
+// List published remote configuration versions of a RUM application.
+//
+// API: POST /rum/application/remote-config/history/list (rum-application-remote-config-read-history-list).
+func (s *ApplicationsService) RemoteConfigReadHistoryList(ctx context.Context, req *ListRemoteConfigHistoryRequest) (*ListRemoteConfigHistoryResponse, *Response, error) {
+	out := new(ListRemoteConfigHistoryResponse)
+	resp, err := s.client.do(ctx, "/rum/application/remote-config/history/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Preview remote config.
+//
+// Evaluate a draft remote configuration against a client context without publishing it.
+//
+// API: POST /rum/application/remote-config/preview (rum-application-remote-config-read-preview).
+func (s *ApplicationsService) RemoteConfigReadPreview(ctx context.Context, req *PreviewRemoteConfigRequest) (*PreviewRemoteConfigResponse, *Response, error) {
+	out := new(PreviewRemoteConfigResponse)
+	resp, err := s.client.do(ctx, "/rum/application/remote-config/preview", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Revert remote config.
+//
+// Republish an earlier remote configuration version's content as a new version.
+//
+// API: POST /rum/application/remote-config/history/revert (rum-application-remote-config-write-history-revert).
+func (s *ApplicationsService) RemoteConfigWriteHistoryRevert(ctx context.Context, req *RevertRemoteConfigRequest) (*RevertRemoteConfigResponse, *Response, error) {
+	out := new(RevertRemoteConfigResponse)
+	resp, err := s.client.do(ctx, "/rum/application/remote-config/history/revert", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Update remote config.
+//
+// Publish a complete new remote configuration version for a RUM application.
+//
+// API: POST /rum/application/remote-config/update (rum-application-remote-config-write-update).
+func (s *ApplicationsService) RemoteConfigWriteUpdate(ctx context.Context, req *UpdateRemoteConfigRequest) (*UpdateRemoteConfigResponse, *Response, error) {
+	out := new(UpdateRemoteConfigResponse)
+	resp, err := s.client.do(ctx, "/rum/application/remote-config/update", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Test application webhook.
 //
 // Send a sample RUM alert event to verify an application's webhook URL.

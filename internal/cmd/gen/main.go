@@ -853,6 +853,11 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		case inReq && needsPointer && (isNullable(pv) || preserveAbsence):
 			jsonTag = k + ",omitempty"
 			toonTag = k + ",omitempty"
+		case inReq && !required[k] && preserveAbsence && strings.HasPrefix(gt, "[]"):
+			// Preserve nil (omitted) versus an explicit empty slice (clear).
+			// omitempty would drop both and silently keep the stored value.
+			jsonTag = k + ",omitzero"
+			toonTag = k + ",omitempty"
 		case inReq && !required[k]:
 			toonTag = k + ",omitempty"
 			if isStructField {
