@@ -7556,7 +7556,7 @@
           "from_ms": {
             "type": "integer",
             "format": "int64",
-            "description": "窗口或范围的起始时间，Unix 毫秒时间戳。`range` 和 `window` 必填；Loki 和 VictoriaLogs 的 `instant` 可选；Prometheus 的 `instant` 拒绝该字段。"
+            "description": "窗口或范围的起始时间，Unix 毫秒时间戳。`range` 和 `window` 必填，VictoriaLogs 的任何执行类型都必填；Loki 的 `instant` 可选；Prometheus 的 `instant` 拒绝该字段。"
           },
           "to_ms": {
             "type": "integer",

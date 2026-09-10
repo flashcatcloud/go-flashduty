@@ -7556,7 +7556,7 @@
           "from_ms": {
             "type": "integer",
             "format": "int64",
-            "description": "Window or range start as a Unix epoch timestamp in milliseconds. Required for `range` and `window`; optional for Loki and VictoriaLogs `instant`; rejected by Prometheus `instant`."
+            "description": "Window or range start as a Unix epoch timestamp in milliseconds. Required for `range`, `window`, and every VictoriaLogs execution; optional for Loki `instant`; rejected by Prometheus `instant`."
           },
           "to_ms": {
             "type": "integer",
