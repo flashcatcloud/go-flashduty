@@ -2795,9 +2795,9 @@ type DatasourceToolInvokeRequest struct {
 	AccountID uint64 `json:"account_id,omitempty" toon:"account_id,omitempty"`
 	// Datasource ID from /monit/datasource/list.
 	DatasourceID uint64 `json:"datasource_id" toon:"datasource_id"`
-	// Tool-specific JSON parameters; omitted means {}. Explicit null is invalid.
+	// Tool-specific JSON parameters; omitted means {}. Explicit null is invalid. Query tools (`<type>.query`) use the per-datasource params schemas named in the `tool` description.
 	Params json.RawMessage `json:"params,omitempty" toon:"params,omitempty"`
-	// Single tool name prefixed by the datasource type, e.g. mysql.overview. Free SQL uses /monit/query/data; mysql.query and postgres.query are unsupported.
+	// Single tool name prefixed by the datasource type. Diagnostic tools are defined by the executing Edge (e.g. `mysql.overview`). Query tools are `<type>.query` where `<type>` is one of `prometheus`, `mysql`, `postgres`, `oracle`, `clickhouse`, `elasticsearch`, `loki`, `victorialogs`, `sls`, `tencent_cls`; their `params` follow `PrometheusQueryParams`, `MySQLQueryParams`, `PostgresQueryParams`, `OracleQueryParams`, `ClickHouseQueryParams`, `ElasticsearchQueryParams`, `LokiQueryParams`, `VictoriaLogsQueryParams`, `SLSQueryParams`, or `TencentCLSQueryParams` respectively.
 	Tool string `json:"tool" toon:"tool"`
 }
 

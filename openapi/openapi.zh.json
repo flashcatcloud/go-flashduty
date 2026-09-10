@@ -7536,6 +7536,318 @@
         ],
         "type": "object"
       },
+      "DatasourceQueryExecution": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "kind",
+          "to_ms"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "instant",
+              "range",
+              "window"
+            ],
+            "description": "执行模式：`instant` 在单个时间点求值，`range` 按步长求值时间序列，`window` 在单个有界时间窗口内求值。"
+          },
+          "from_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "窗口或范围的起始时间，Unix 毫秒时间戳。`range` 和 `window` 必填，VictoriaLogs 的任何执行类型都必填；Loki 的 `instant` 可选；Prometheus 的 `instant` 拒绝该字段。"
+          },
+          "to_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "查询截止时间，Unix 毫秒时间戳；`instant` 模式下为求值时间点。"
+          },
+          "max_data_points": {
+            "type": "integer",
+            "format": "int64",
+            "description": "仅 `range` 且必填：最大返回点数；服务端按时间窗口计算实际步长。"
+          },
+          "min_step_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "仅 `range`，可选：计算步长的正数下限（秒）。"
+          }
+        }
+      },
+      "PrometheusQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "prometheus.query 参数。`expr` 为 PromQL。`execution.kind` 取 `instant` 或 `range`；`instant` 只接受 `to_ms`。"
+      },
+      "MySQLQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "mysql.query 参数。`expr` 为单条只读 SQL。`execution.kind` 必须为 `window`。"
+      },
+      "PostgresQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "postgres.query 参数。`expr` 为单条只读 SQL。`execution.kind` 必须为 `window`。"
+      },
+      "OracleQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "oracle.query 参数。`expr` 为单条只读 SQL。`execution.kind` 必须为 `window`。"
+      },
+      "ClickHouseQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "clickhouse.query 参数。`expr` 为单条只读 SQL。`execution.kind` 必须为 `window`。"
+      },
+      "ElasticsearchQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "elasticsearch.query 参数。`expr` 为单条 SQL 语句；不支持 Elasticsearch DSL 查询。`execution.kind` 必须为 `window`。"
+      },
+      "LokiQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "返回的原始日志最大条数（1–1000）。只约束原始日志，不代表 SQL 行数或扫描量；省略时沿用执行端默认值。显式 null 非法。"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "原始日志检索方向：`latest` 先返回最新条目，`earliest` 先返回最旧条目。省略时沿用执行端默认值。"
+          }
+        },
+        "description": "loki.query 参数。`expr` 为 LogQL。`execution.kind` 取 `instant` 或 `range`；`instant` 保留完整时间上下文以便 `$__auto` 范围解析。`limit` 和 `direction` 只作用于原始日志结果。"
+      },
+      "VictoriaLogsQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "返回的原始日志最大条数（1–1000）。只约束原始日志，不代表 SQL 行数或扫描量；省略时沿用执行端默认值。显式 null 非法。"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "原始日志检索方向：`latest` 先返回最新条目，`earliest` 先返回最旧条目。省略时沿用执行端默认值。"
+          }
+        },
+        "description": "victorialogs.query 参数。`expr` 为 LogsQL。`window` 用于原始日志（允许 `limit`/`direction`）；`instant`/`range` 统计查询必须带 `from_ms`（拒绝 `limit`/`direction`）。"
+      },
+      "SLSQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution",
+          "project",
+          "logstore"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "返回的原始日志最大条数（1–100）。只约束原始日志，不代表 SQL 行数或扫描量；省略时沿用执行端默认值。显式 null 非法。"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "原始日志检索方向：`latest` 先返回最新条目，`earliest` 先返回最旧条目。省略时沿用执行端默认值。"
+          },
+          "project": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SLS Project 名称。"
+          },
+          "logstore": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SLS Logstore 名称。"
+          },
+          "powersql": {
+            "type": "boolean",
+            "description": "是否以 SLS PowerSQL 执行查询。省略时沿用执行端默认值；显式 null 非法。"
+          }
+        },
+        "description": "阿里云 SLS 的 sls.query 参数。`execution.kind` 必须为 `window`。"
+      },
+      "TencentCLSQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution",
+          "region",
+          "topic_id",
+          "syntax"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "由数据源求值的查询表达式；方言取决于数据源类型。"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "返回的原始日志最大条数（1–1000）。只约束原始日志，不代表 SQL 行数或扫描量；省略时沿用执行端默认值。显式 null 非法。"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "原始日志检索方向：`latest` 先返回最新条目，`earliest` 先返回最旧条目。省略时沿用执行端默认值。"
+          },
+          "region": {
+            "type": "string",
+            "minLength": 1,
+            "description": "腾讯云地域，如 `ap-guangzhou`。"
+          },
+          "topic_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "CLS 日志主题 ID。"
+          },
+          "syntax": {
+            "type": "string",
+            "enum": [
+              "cql",
+              "lucene"
+            ],
+            "description": "检索语法：`cql` 或 `lucene`。"
+          }
+        },
+        "description": "腾讯云 CLS 的 tencent_cls.query 参数。`execution.kind` 必须为 `window`。"
+      },
       "DatasourceToolInvokeRequest": {
         "properties": {
           "account_id": {
@@ -7551,12 +7863,12 @@
           },
           "params": {
             "additionalProperties": true,
-            "description": "工具专属 JSON 参数，省略时为 {}，显式 null 非法。",
+            "description": "工具专属 JSON 参数；省略等同于 {}。显式 null 非法。查询工具（`<type>.query`）使用 `tool` 描述中按数据源列出的专属参数 Schema。",
             "type": "object",
             "x-flashduty-raw-json": true
           },
           "tool": {
-            "description": "以数据源类型为前缀的单个工具名，如 mysql.overview。自由 SQL 使用 /monit/query/data；不支持 mysql.query 和 postgres.query。",
+            "description": "以数据源类型为前缀的单个工具名。诊断工具由执行端 Edge 定义（如 `mysql.overview`）。查询工具为 `<type>.query`，`<type>` 取 `prometheus`、`mysql`、`postgres`、`oracle`、`clickhouse`、`elasticsearch`、`loki`、`victorialogs`、`sls`、`tencent_cls` 之一；`params` 分别遵循 `PrometheusQueryParams`、`MySQLQueryParams`、`PostgresQueryParams`、`OracleQueryParams`、`ClickHouseQueryParams`、`ElasticsearchQueryParams`、`LokiQueryParams`、`VictoriaLogsQueryParams`、`SLSQueryParams`、`TencentCLSQueryParams`。",
             "maxLength": 128,
             "minLength": 1,
             "type": "string"
@@ -42073,18 +42385,35 @@
     },
     "/monit/datasource/tools/invoke": {
       "post": {
-        "description": "对已配置的数据源执行单个确定性工具。要求集群所有当前在线可路由 Edge 会话支持 v0.71.0 基础 invoke 协议；具体工具可能需要更新实现。不提供工具目录、自动重放或 Agent/旧 diagnose 回退。请求体上限 128 KiB，完整成功响应上限 1 MiB，工具超时最多 25 秒。",
+        "description": "对已配置的数据源执行单个确定性诊断或查询工具。",
         "operationId": "monit-datasource-tools-invoke",
         "requestBody": {
           "content": {
             "application/json": {
-              "example": {
-                "datasource_id": 10,
-                "params": {},
-                "tool": "mysql.overview"
-              },
               "schema": {
                 "$ref": "#/components/schemas/DatasourceToolInvokeRequest"
+              },
+              "examples": {
+                "diagnostic": {
+                  "value": {
+                    "datasource_id": 10,
+                    "params": {},
+                    "tool": "mysql.overview"
+                  }
+                },
+                "query": {
+                  "value": {
+                    "datasource_id": 24000,
+                    "tool": "prometheus.query",
+                    "params": {
+                      "expr": "sum(rate(http_requests_total[5m]))",
+                      "execution": {
+                        "kind": "instant",
+                        "to_ms": 1789000000000
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -42094,17 +42423,6 @@
           "200": {
             "content": {
               "application/json": {
-                "example": {
-                  "data": {
-                    "data": {
-                      "version": "8.0.36"
-                    },
-                    "datasource_id": 10,
-                    "summary": "MySQL overview",
-                    "tool": "mysql.overview"
-                  },
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
-                },
                 "schema": {
                   "allOf": [
                     {
@@ -42119,6 +42437,45 @@
                       "type": "object"
                     }
                   ]
+                },
+                "examples": {
+                  "diagnostic": {
+                    "value": {
+                      "data": {
+                        "data": {
+                          "version": "8.0.36"
+                        },
+                        "datasource_id": 10,
+                        "summary": "MySQL overview",
+                        "tool": "mysql.overview"
+                      },
+                      "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                    }
+                  },
+                  "query": {
+                    "value": {
+                      "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                      "data": {
+                        "datasource_id": 24000,
+                        "tool": "prometheus.query",
+                        "data": {
+                          "format": "explore_result.v1",
+                          "result": {
+                            "kind": "samples",
+                            "samples": [
+                              {
+                                "labels": {
+                                  "__name__": "up",
+                                  "instance": "10.101.214.50:7070"
+                                },
+                                "value": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -42233,7 +42590,7 @@
           "Monitors/告警数据源"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **2,000 次/分钟**；**32 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n通过 `/monit/datasource/list` 获取数据源 ID。停用数据源返回 `datasource_disabled`，`alerting_enabled=false` 不阻断工具。错误使用非 2xx HTTP 状态和 `error.code`、`error.message`、`error.reason`。`tool_not_supported` 表示选中的执行端未提供该工具，不表示厂商权限不足。禁止自动切换 Edge 或回退旧 diagnose 重试。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **2,000 次/分钟**；**32 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n\n通过 `/monit/datasource/list` 获取数据源 ID。停用数据源返回 `datasource_disabled`，`alerting_enabled=false` 不阻断工具。错误使用非 2xx HTTP 状态和 `error.code`、`error.message`、`error.reason`。`tool_not_supported` 表示选中的执行端未提供该工具，不表示厂商权限不足。禁止自动切换 Edge 或回退旧 diagnose 重试。\n\n## 使用说明\n\n- 本入口共用两类工具：由执行端 Edge 定义的诊断工具（如 `mysql.overview`、`prometheus.metric_trends`）和命名为 `<type>.query` 的查询工具。工具前缀必须与数据源类型一致。\n- 查询工具要求 Edge 集群支持 Explore 查询（协议里程碑 v0.68.0）；诊断工具要求 v0.71.0 基础 invoke 协议。不支持的集群返回 `edge_upgrade_required`、`mixed_edge_versions` 或 `edge_version_unknown`；禁止自动回退 `/monit/query/data` 或其他接口。\n- 查询工具的 `params` 遵循 `tool` 字段描述中按数据源列出的专属 Schema。`expr` 和 `execution` 必填。`limit`/`direction` 只约束原始日志条数与检索方向，不代表 SQL 行数或扫描量。未知扩展字段被容忍，但不参与执行也不透传。\n- 查询结果的 `data` 是完整 Explore 结果：`format` 为 `explore_result.v1`，`result.kind` 为 `samples`、`frames` 或 `logs`；日志结果保留 `applied_limit` 和 `has_more`。查询结果不合成 `summary` 或 `truncated`。\n- 请求体上限 128 KiB；两类工具的完整成功响应上限均为 10 MiB；诊断工具超时最多 25 秒。",
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-tools-invoke",
           "metadata": {
             "sidebarTitle": "调用数据源工具"

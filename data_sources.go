@@ -65,7 +65,7 @@ func (s *DataSourcesService) ReadSLSProjects(ctx context.Context, req *SLSProjec
 
 // Invoke datasource tool.
 //
-// Execute one deterministic tool against a configured datasource. Requires all currently online routable Edge sessions in the cluster to support the v0.71.0 base invoke protocol; individual tools may require a newer implementation. No tool catalog, automatic replay, or fallback to Agent/legacy diagnose. Request body limit 128 KiB; complete success response limit 1 MiB; tool timeout at most 25 seconds.
+// Execute one deterministic diagnostic or query tool against a configured datasource.
 //
 // API: POST /monit/datasource/tools/invoke (monit-datasource-tools-invoke).
 func (s *DataSourcesService) ToolsInvoke(ctx context.Context, req *DatasourceToolInvokeRequest) (*DatasourceToolResult, *Response, error) {
