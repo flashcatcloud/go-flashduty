@@ -7536,6 +7536,318 @@
         ],
         "type": "object"
       },
+      "DatasourceQueryExecution": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "kind",
+          "to_ms"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "instant",
+              "range",
+              "window"
+            ],
+            "description": "Execution mode: `instant` evaluates at a single timestamp, `range` evaluates a stepped series, and `window` evaluates one bounded time window."
+          },
+          "from_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Window or range start as a Unix epoch timestamp in milliseconds. Required for `range` and `window`; optional for Loki and VictoriaLogs `instant`; rejected by Prometheus `instant`."
+          },
+          "to_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Query end time as a Unix epoch timestamp in milliseconds; for `instant` it is the evaluation timestamp."
+          },
+          "max_data_points": {
+            "type": "integer",
+            "format": "int64",
+            "description": "`range` only, required: maximum returned data points; the server computes the effective step from the window."
+          },
+          "min_step_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "`range` only, optional: positive lower bound in seconds for the computed step."
+          }
+        }
+      },
+      "PrometheusQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "prometheus.query parameters. `expr` is PromQL. `execution.kind` must be `instant` or `range`; `instant` accepts only `to_ms`."
+      },
+      "MySQLQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "mysql.query parameters. `expr` is a single read-only SQL statement. `execution.kind` must be `window`."
+      },
+      "PostgresQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "postgres.query parameters. `expr` is a single read-only SQL statement. `execution.kind` must be `window`."
+      },
+      "OracleQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "oracle.query parameters. `expr` is a single read-only SQL statement. `execution.kind` must be `window`."
+      },
+      "ClickHouseQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "clickhouse.query parameters. `expr` is a single read-only SQL statement. `execution.kind` must be `window`."
+      },
+      "ElasticsearchQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          }
+        },
+        "description": "elasticsearch.query parameters. `expr` is a single SQL statement; Elasticsearch DSL queries are not supported. `execution.kind` must be `window`."
+      },
+      "LokiQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Maximum raw-log entries to return (1–1000). Only bounds raw logs, not SQL rows or scanned data; omitted keeps the executor default. Explicit null is invalid."
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "Raw-log retrieval order: `latest` returns the newest entries first, `earliest` the oldest. Omitted keeps the executor default."
+          }
+        },
+        "description": "loki.query parameters. `expr` is LogQL. `execution.kind` must be `instant` or `range`; `instant` keeps the full time context so `$__auto` ranges resolve. `limit` and `direction` only apply to raw-log results."
+      },
+      "VictoriaLogsQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Maximum raw-log entries to return (1–1000). Only bounds raw logs, not SQL rows or scanned data; omitted keeps the executor default. Explicit null is invalid."
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "Raw-log retrieval order: `latest` returns the newest entries first, `earliest` the oldest. Omitted keeps the executor default."
+          }
+        },
+        "description": "victorialogs.query parameters. `expr` is LogsQL. Use `window` for raw logs (`limit`/`direction` allowed) or `instant`/`range` with `from_ms` for stats queries (`limit`/`direction` rejected)."
+      },
+      "SLSQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution",
+          "project",
+          "logstore"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Maximum raw-log entries to return (1–100). Only bounds raw logs, not SQL rows or scanned data; omitted keeps the executor default. Explicit null is invalid."
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "Raw-log retrieval order: `latest` returns the newest entries first, `earliest` the oldest. Omitted keeps the executor default."
+          },
+          "project": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SLS project name."
+          },
+          "logstore": {
+            "type": "string",
+            "minLength": 1,
+            "description": "SLS logstore name."
+          },
+          "powersql": {
+            "type": "boolean",
+            "description": "Whether to run the query with SLS PowerSQL. Omitted keeps the executor default; explicit null is invalid."
+          }
+        },
+        "description": "sls.query parameters for Alibaba Cloud SLS. `execution.kind` must be `window`."
+      },
+      "TencentCLSQueryParams": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "expr",
+          "execution",
+          "region",
+          "topic_id",
+          "syntax"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Query expression evaluated by the datasource; dialect depends on the datasource type."
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DatasourceQueryExecution"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Maximum raw-log entries to return (1–1000). Only bounds raw logs, not SQL rows or scanned data; omitted keeps the executor default. Explicit null is invalid."
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "earliest"
+            ],
+            "description": "Raw-log retrieval order: `latest` returns the newest entries first, `earliest` the oldest. Omitted keeps the executor default."
+          },
+          "region": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tencent Cloud region, e.g. `ap-guangzhou`."
+          },
+          "topic_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "CLS log topic ID."
+          },
+          "syntax": {
+            "type": "string",
+            "enum": [
+              "cql",
+              "lucene"
+            ],
+            "description": "Search syntax: `cql` or `lucene`."
+          }
+        },
+        "description": "tencent_cls.query parameters for Tencent Cloud CLS. `execution.kind` must be `window`."
+      },
       "DatasourceToolInvokeRequest": {
         "properties": {
           "account_id": {
@@ -7551,12 +7863,12 @@
           },
           "params": {
             "additionalProperties": true,
-            "description": "Tool-specific JSON parameters; omitted means {}. Explicit null is invalid.",
+            "description": "Tool-specific JSON parameters; omitted means {}. Explicit null is invalid. Query tools (`<type>.query`) use the per-datasource params schemas named in the `tool` description.",
             "type": "object",
             "x-flashduty-raw-json": true
           },
           "tool": {
-            "description": "Single tool name prefixed by the datasource type, e.g. mysql.overview. Free SQL uses /monit/query/data; mysql.query and postgres.query are unsupported.",
+            "description": "Single tool name prefixed by the datasource type. Diagnostic tools are defined by the executing Edge (e.g. `mysql.overview`). Query tools are `<type>.query` where `<type>` is one of `prometheus`, `mysql`, `postgres`, `oracle`, `clickhouse`, `elasticsearch`, `loki`, `victorialogs`, `sls`, `tencent_cls`; their `params` follow `PrometheusQueryParams`, `MySQLQueryParams`, `PostgresQueryParams`, `OracleQueryParams`, `ClickHouseQueryParams`, `ElasticsearchQueryParams`, `LokiQueryParams`, `VictoriaLogsQueryParams`, `SLSQueryParams`, or `TencentCLSQueryParams` respectively.",
             "maxLength": 128,
             "minLength": 1,
             "type": "string"
@@ -42073,18 +42385,35 @@
     },
     "/monit/datasource/tools/invoke": {
       "post": {
-        "description": "Execute one deterministic tool against a configured datasource. Requires all currently online routable Edge sessions in the cluster to support the v0.71.0 base invoke protocol; individual tools may require a newer implementation. No tool catalog, automatic replay, or fallback to Agent/legacy diagnose. Request body limit 128 KiB; complete success response limit 1 MiB; tool timeout at most 25 seconds.",
+        "description": "Execute one deterministic diagnostic or query tool against a configured datasource.",
         "operationId": "monit-datasource-tools-invoke",
         "requestBody": {
           "content": {
             "application/json": {
-              "example": {
-                "datasource_id": 10,
-                "params": {},
-                "tool": "mysql.overview"
-              },
               "schema": {
                 "$ref": "#/components/schemas/DatasourceToolInvokeRequest"
+              },
+              "examples": {
+                "diagnostic": {
+                  "value": {
+                    "datasource_id": 10,
+                    "params": {},
+                    "tool": "mysql.overview"
+                  }
+                },
+                "query": {
+                  "value": {
+                    "datasource_id": 24000,
+                    "tool": "prometheus.query",
+                    "params": {
+                      "expr": "sum(rate(http_requests_total[5m]))",
+                      "execution": {
+                        "kind": "instant",
+                        "to_ms": 1789000000000
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -42094,17 +42423,6 @@
           "200": {
             "content": {
               "application/json": {
-                "example": {
-                  "data": {
-                    "data": {
-                      "version": "8.0.36"
-                    },
-                    "datasource_id": 10,
-                    "summary": "MySQL overview",
-                    "tool": "mysql.overview"
-                  },
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
-                },
                 "schema": {
                   "allOf": [
                     {
@@ -42119,6 +42437,45 @@
                       "type": "object"
                     }
                   ]
+                },
+                "examples": {
+                  "diagnostic": {
+                    "value": {
+                      "data": {
+                        "data": {
+                          "version": "8.0.36"
+                        },
+                        "datasource_id": 10,
+                        "summary": "MySQL overview",
+                        "tool": "mysql.overview"
+                      },
+                      "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                    }
+                  },
+                  "query": {
+                    "value": {
+                      "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                      "data": {
+                        "datasource_id": 24000,
+                        "tool": "prometheus.query",
+                        "data": {
+                          "format": "explore_result.v1",
+                          "result": {
+                            "kind": "samples",
+                            "samples": [
+                              {
+                                "labels": {
+                                  "__name__": "up",
+                                  "instance": "10.101.214.50:7070"
+                                },
+                                "value": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -42233,7 +42590,7 @@
           "Monitors/Data sources"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **2,000 requests/minute**; **32 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |\n\nUse datasource IDs from `/monit/datasource/list`. Disabled datasources return `datasource_disabled`; `alerting_enabled=false` does not block tools. Errors use non-2xx HTTP status and `error.code`, `error.message`, `error.reason`. `tool_not_supported` indicates the selected executor does not provide this tool; it is not a vendor permission error. Never retry through another Edge or the legacy diagnose endpoint automatically.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **2,000 requests/minute**; **32 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |\n\nUse datasource IDs from `/monit/datasource/list`. Disabled datasources return `datasource_disabled`; `alerting_enabled=false` does not block tools. Errors use non-2xx HTTP status and `error.code`, `error.message`, `error.reason`. `tool_not_supported` indicates the selected executor does not provide this tool; it is not a vendor permission error. Never retry through another Edge or the legacy diagnose endpoint automatically.\n\n## Usage\n\n- Two tool families share this entry: diagnostic tools defined by the executing Edge (e.g. `mysql.overview`, `prometheus.metric_trends`) and query tools named `<type>.query`. The tool prefix must match the datasource type.\n- Query tools require the Edge cluster to support Explore queries (protocol milestone v0.68.0); diagnostic tools require the v0.71.0 base invoke protocol. Unsupported clusters fail with `edge_upgrade_required`, `mixed_edge_versions`, or `edge_version_unknown`; never fall back to `/monit/query/data` or another endpoint automatically.\n- For query tools, `params` follows the per-datasource schema named in the `tool` field description. `expr` and `execution` are always required. `limit`/`direction` only bound raw-log retrieval, never SQL rows or scanned data. Unknown extension fields are tolerated but never executed or forwarded.\n- Query `data` is the complete Explore result: `format` is `explore_result.v1` and `result.kind` is `samples`, `frames`, or `logs`; log results keep `applied_limit` and `has_more`. Query results never synthesize `summary` or `truncated`.\n- Request body limit 128 KiB; complete success response limit 10 MiB for both families; diagnostic tool timeout at most 25 seconds.",
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-tools-invoke",
           "metadata": {
             "sidebarTitle": "Invoke datasource tool"

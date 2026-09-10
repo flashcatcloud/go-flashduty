@@ -99,6 +99,24 @@ func run() error {
 			"DutyError":                   true,
 			"AutomationRuleUpdateRequest": true, // hand-written to preserve partial-update pointer semantics.
 			"SkillUploadRequest":          true, // multipart form schema; the hand-written WriteUpload carries the file as an io.Reader.
+			// The <type>.query tool params are request-side schemas, but they are
+			// not reachable from any requestBody (the invoke request carries
+			// params as x-flashduty-raw-json), so the generator would emit them
+			// as response-side types: epoch-millis fields would become
+			// TimestampMilli (marshaling to RFC3339 strings) and optional fields
+			// would lose omitempty. They are hand-written in
+			// datasource_query_params.go with request-side pointer semantics.
+			"DatasourceQueryExecution": true,
+			"PrometheusQueryParams":    true,
+			"MySQLQueryParams":         true,
+			"PostgresQueryParams":      true,
+			"OracleQueryParams":        true,
+			"ClickHouseQueryParams":    true,
+			"ElasticsearchQueryParams": true,
+			"LokiQueryParams":          true,
+			"VictoriaLogsQueryParams":  true,
+			"SLSQueryParams":           true,
+			"TencentCLSQueryParams":    true,
 		},
 		queued:   map[string]bool{},
 		synth:    map[string]any{},
