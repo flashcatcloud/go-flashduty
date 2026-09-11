@@ -9151,6 +9151,309 @@
         ],
         "type": "object"
       },
+      "ExploreData": {
+        "description": "探索查询结果载荷。",
+        "properties": {
+          "execution": {
+            "$ref": "#/components/schemas/ExploreResponseExecution"
+          },
+          "format": {
+            "description": "结果契约版本，固定为 `explore_result.v1`。",
+            "enum": [
+              "explore_result.v1"
+            ],
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ExploreResult"
+          }
+        },
+        "required": [
+          "format",
+          "result"
+        ],
+        "type": "object"
+      },
+      "ExploreField": {
+        "description": "Frame 的一列。取值按列组织，可以包含 null。",
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "该列的标签集合。仅 `time_series` 的取值字段可以携带标签，`table` 字段不允许。",
+            "type": "object"
+          },
+          "name": {
+            "description": "列名，最长 1 MiB 的 UTF-8 字符串。",
+            "type": "string"
+          },
+          "type": {
+            "description": "列类型。`time_series` 内不接受 `string`；`float` 存放数值，`time` 取值为 UTC RFC3339Nano 字符串。",
+            "enum": [
+              "string",
+              "float",
+              "time"
+            ],
+            "type": "string"
+          },
+          "values": {
+            "description": "按行顺序排列的列取值。",
+            "items": {
+              "description": "单个单元格。`time` 为 UTC RFC3339Nano 字符串，`float` 可以是字符串 `NaN`、`+Inf`、`-Inf`，除 `time_series` 中的时间值外均可以为 null。"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "values"
+        ],
+        "type": "object"
+      },
+      "ExploreFrame": {
+        "description": "单个列式 Frame，Frame 内所有字段的取值数量一致。",
+        "properties": {
+          "fields": {
+            "description": "Frame 的列。",
+            "items": {
+              "$ref": "#/components/schemas/ExploreField"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "description": "Frame 形态。`table` 为无标签表格，`time_series` 恰好包含一个时间字段和一个 float 字段。",
+            "enum": [
+              "table",
+              "time_series"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "fields"
+        ],
+        "type": "object"
+      },
+      "ExploreLogEntry": {
+        "description": "单条日志。",
+        "properties": {
+          "fields": {
+            "additionalProperties": true,
+            "description": "日志字段的原始 JSON 取值。超出 JavaScript 安全整数范围的整数字面量会以十进制字符串返回。",
+            "type": "object"
+          },
+          "timestamp_ns": {
+            "description": "条目时间，使用 Unix 纪元纳秒的规范无符号十进制字符串表示，最长 20 位。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp_ns",
+          "fields"
+        ],
+        "type": "object"
+      },
+      "ExploreResponseExecution": {
+        "description": "实际使用的执行信息，数据源返回带步长结果时出现。",
+        "properties": {
+          "effective_step_seconds": {
+            "description": "应用 `max_data_points` 与 `min_step_seconds` 后实际执行的步长（秒）。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "执行类型；该对象出现时固定为 `range`。",
+            "enum": [
+              "range"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "effective_step_seconds"
+        ],
+        "type": "object"
+      },
+      "ExploreResult": {
+        "description": "结果主体。`frames`、`samples`、`entries` 三者中只有与 `kind` 匹配的一个会出现。",
+        "properties": {
+          "applied_limit": {
+            "description": "日志结果实际生效的条数上限，最大 1000。",
+            "type": "integer"
+          },
+          "entries": {
+            "description": "日志条目列表，`kind` 为 `logs` 时出现，长度不超过 `applied_limit`。",
+            "items": {
+              "$ref": "#/components/schemas/ExploreLogEntry"
+            },
+            "type": "array"
+          },
+          "frames": {
+            "description": "列式 Frame 列表，`kind` 为 `frames` 时出现，最多 1,000 个。",
+            "items": {
+              "$ref": "#/components/schemas/ExploreFrame"
+            },
+            "type": "array"
+          },
+          "has_more": {
+            "description": "日志结果是否因 `applied_limit` 被截断。",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "结果形态。`frames` 返回列式表格或时序，`samples` 返回带标签的瞬时值，`logs` 返回日志条目。",
+            "enum": [
+              "frames",
+              "samples",
+              "logs"
+            ],
+            "type": "string"
+          },
+          "samples": {
+            "description": "瞬时采样列表，`kind` 为 `samples` 时出现，最多 1,000 条。",
+            "items": {
+              "$ref": "#/components/schemas/ExploreSample"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "ExploreSample": {
+        "description": "单个瞬时采样。",
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "采样的标签集合。可以为空，但不能为 null。",
+            "type": "object"
+          },
+          "value": {
+            "description": "采样值：数字，或字符串 `NaN`、`+Inf`、`-Inf`。不能为 null。"
+          }
+        },
+        "required": [
+          "labels",
+          "value"
+        ],
+        "type": "object"
+      },
+      "PrometheusLabelValuesResponse": {
+        "description": "所查询数据源返回的原生 Prometheus HTTP API 响应。本接口不会把结果包装进 Flashduty 统一响应 envelope。",
+        "properties": {
+          "data": {
+            "description": "标签值列表，`status` 为 `success` 时出现。",
+            "items": {
+              "description": "一个标签值。",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "error": {
+            "description": "Prometheus 错误信息，`status` 为 `error` 时出现。",
+            "type": "string"
+          },
+          "errorType": {
+            "description": "Prometheus 错误类别，`status` 为 `error` 时出现。",
+            "type": "string"
+          },
+          "status": {
+            "description": "Prometheus 结果状态。`success` 携带 `data`，`error` 携带 `errorType` 与 `error`。",
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "QueryExploreExecution": {
+        "description": "查询的时间语义。可接受的配套字段取决于 `kind`：`instant` 只需 `to_ms`（`from_ms` 可选），`range` 需要 `from_ms`、`to_ms` 和 `max_data_points`，`window` 需要 `from_ms` 和 `to_ms`。HTTP 接口不接受 `step_seconds`。",
+        "properties": {
+          "from_ms": {
+            "description": "范围起点的 Unix 毫秒时间戳。`range` 和 `window` 必填，`instant` 可选。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "执行类型。`instant` 在单个时间点取值，`range` 在时间范围内取序列，`window` 返回时间窗口内的原始行。",
+            "enum": [
+              "instant",
+              "range",
+              "window"
+            ],
+            "type": "string"
+          },
+          "max_data_points": {
+            "description": "返回的数据点数量上限。`range` 必填，`instant` 与 `window` 不接受该字段。",
+            "format": "int64",
+            "maximum": 5000,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "min_step_seconds": {
+            "description": "由 `max_data_points` 推导出的步长下限（秒）。可选，仅在 `range` 下接受。",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "to_ms": {
+            "description": "范围终点的 Unix 毫秒时间戳。所有执行类型均必填。",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "QueryExploreRequest": {
+        "description": "探索查询请求。四个顶层字段均为必填，未知字段会被拒绝。",
+        "properties": {
+          "args": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "宏替换参数，按变量名索引，用于 Grafana 风格变量。键最长 256 字节，值最长 64 KiB，总预算 128 KiB。",
+            "maxProperties": 128,
+            "type": "object"
+          },
+          "datasource_id": {
+            "description": "数据源 ID，来自 `/monit/datasource/list`。必须是正数且不超过 JavaScript 安全整数范围，且属于当前账户。",
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/QueryExploreExecution"
+          },
+          "expr": {
+            "description": "使用数据源原生语言的查询表达式（如 PromQL、LogsQL、SQL 等）。非空 UTF-8 字符串，最长 64 KiB；部分数据源类型限制更小。",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "datasource_id",
+          "expr",
+          "args",
+          "execution"
+        ],
+        "type": "object"
+      },
       "ExportStatusPageSubscribersRequest": {
         "description": "导出状态页订阅者列表所需的参数。",
         "properties": {
@@ -42682,6 +42985,291 @@
           "href": "/zh/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "更新数据源"
+          }
+        }
+      }
+    },
+    "/monit/prometheus/api/v1/label/{label_name}/values": {
+      "get": {
+        "description": "通过监控代理从 Prometheus 兼容数据源读取标签值列表。",
+        "operationId": "monit-prometheus-read-label-values",
+        "parameters": [
+          {
+            "description": "要枚举取值的标签名，例如 `job`。",
+            "in": "path",
+            "name": "label_name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "要查询的数据源 ID，必须是当前账户下 Prometheus 兼容类型的数据源。",
+            "in": "header",
+            "name": "X-DSID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    "api",
+                    "db",
+                    "worker"
+                  ],
+                  "status": "success"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/PrometheusLabelValuesResponse"
+                }
+              }
+            },
+            "description": "数据源返回的原生 Prometheus 标签值响应。"
+          },
+          "400": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "`X-DSID` 请求头缺失或非法、数据源不存在，或该数据源不是 Prometheus 类型。以 `text/plain` 返回。"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "数据源查询或代理请求失败。以 `text/plain` 返回。"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "数据源所在集群中没有支持数据源资源代理的 monit-edge。以 `text/plain` 返回，请升级 monit-edge。"
+          }
+        },
+        "summary": "查询 Prometheus 标签值列表",
+        "tags": [
+          "Monitors/告警数据源"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 任意有效的 `app_key`（只读，不受特定权限分类限制） |\n| Edge 版本要求 | 受支持的部署要求 **monit-edge v0.35.0 或更高版本** |\n\n## 使用说明\n\n- 通过 `X-DSID` 请求头指定目标数据源，必须是当前账户下 Prometheus 兼容类型的数据源；可用 `/monit/datasource/list` 获取 ID。\n- 200 响应体是数据源原生的 Prometheus HTTP API 结构，**不是**统一的 `{ request_id, data }` envelope。未到达数据源前发生的失败以 `text/plain` 返回，并携带对应的 4xx/5xx 状态码。\n- 省略 `X-DSID` 时会回退到平台自有的 Prometheus 代理；需要查询指定数据源时必须携带该请求头。",
+          "href": "/zh/api-reference/monitors/data-sources/monit-prometheus-read-label-values",
+          "metadata": {
+            "sidebarTitle": "查询 Prometheus 标签值列表"
+          }
+        }
+      }
+    },
+    "/monit/query/explore": {
+      "post": {
+        "description": "对已配置的数据源执行探索查询，返回 frames、samples 或 logs 形态的结果。",
+        "operationId": "monit-read-query-explore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "args": {},
+                "datasource_id": 101,
+                "execution": {
+                  "from_ms": 1787187600000,
+                  "kind": "range",
+                  "max_data_points": 1200,
+                  "min_step_seconds": 15,
+                  "to_ms": 1787191200000
+                },
+                "expr": "rate(http_requests_total[5m])"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/QueryExploreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "execution": {
+                      "effective_step_seconds": 60,
+                      "kind": "range"
+                    },
+                    "format": "explore_result.v1",
+                    "result": {
+                      "frames": [
+                        {
+                          "fields": [
+                            {
+                              "name": "time",
+                              "type": "time",
+                              "values": [
+                                "2026-08-20T10:00:00Z",
+                                "2026-08-20T10:01:00Z"
+                              ]
+                            },
+                            {
+                              "labels": {
+                                "job": "api"
+                              },
+                              "name": "value",
+                              "type": "float",
+                              "values": [
+                                1.25,
+                                null
+                              ]
+                            }
+                          ],
+                          "kind": "time_series"
+                        }
+                      ],
+                      "kind": "frames"
+                    }
+                  },
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                },
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ExploreData"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：invalid_request。"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：access_denied。"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：datasource_not_found。"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：source_too_large、result_too_large。"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：overloaded。"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：canceled。"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：internal。"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：no_active_edge、edge_upgrade_required、mixed_edge_versions、edge_unavailable。"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "标准 HTTP 错误；error.reason：timeout。"
+          }
+        },
+        "summary": "执行探索查询",
+        "tags": [
+          "Monitors/诊断分析"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **100 次/分钟**；**16 次/秒** |\n| 权限要求 | **数据源查看**（`monit`） |\n| Edge 版本要求 | 受支持的部署要求 **monit-edge v0.68.0 或更高版本** |\n\n## 使用说明\n\n- 需要数据源原生结果形态时使用本接口；`/monit/query/data` 返回稳定的 `query_result.v1` 契约。本接口根据 `data.result.kind`（`frames`、`samples` 或 `logs`）分发结果。\n- `execution.kind` 决定可接受的配套字段：`instant` 只需 `to_ms`，`range` 需要 `from_ms`、`to_ms` 和 `max_data_points`，`window` 需要 `from_ms` 和 `to_ms`。不接受 `step_seconds`，步长由 `max_data_points` 与 `min_step_seconds` 推导。\n- `args` 用于宏替换（例如 Grafana 风格变量），取值均为字符串。\n- `logs` 结果最多返回 1,000 条，并通过 `applied_limit` 与 `has_more` 说明截断情况。时序与采样结果各最多 1,000 条，成功响应整体上限 8 MiB。\n- WebAPI 跨实例转发与 Edge 执行合计可能耗时 35 秒，客户端超时建议至少 40 秒。",
+          "href": "/zh/api-reference/monitors/diagnostics/monit-read-query-explore",
+          "metadata": {
+            "sidebarTitle": "执行探索查询"
           }
         }
       }

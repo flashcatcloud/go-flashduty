@@ -20,3 +20,17 @@ func (s *DiagnosticsService) QueryData(ctx context.Context, req *QueryDataReques
 	}
 	return out, resp, nil
 }
+
+// Run Explore query.
+//
+// Run an Explore query against a configured data source and return frames, samples, or logs.
+//
+// API: POST /monit/query/explore (monit-read-query-explore).
+func (s *DiagnosticsService) QueryExplore(ctx context.Context, req *QueryExploreRequest) (*ExploreData, *Response, error) {
+	out := new(ExploreData)
+	resp, err := s.client.do(ctx, "/monit/query/explore", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}

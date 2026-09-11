@@ -3252,6 +3252,74 @@ type EventItem struct {
 	UsageMetadata map[string]any `json:"usage_metadata" toon:"usage_metadata"`
 }
 
+// ExploreData is generated from the Flashduty OpenAPI schema.
+type ExploreData struct {
+	Execution ExploreResponseExecution `json:"execution" toon:"execution"`
+	// Result contract version; always `explore_result.v1`.
+	Format string        `json:"format" toon:"format"`
+	Result ExploreResult `json:"result" toon:"result"`
+}
+
+// ExploreField is generated from the Flashduty OpenAPI schema.
+type ExploreField struct {
+	// Label set of this column. Only `time_series` value fields may carry labels; a `table` field must not.
+	Labels map[string]string `json:"labels" toon:"labels"`
+	// Column name, at most 1 MiB of UTF-8.
+	Name string `json:"name" toon:"name"`
+	// Column type. `string` is rejected inside a `time_series` frame; `float` holds numbers and `time` holds UTC RFC3339Nano strings.
+	Type string `json:"type" toon:"type"`
+	// Column values in row order.
+	Values []any `json:"values" toon:"values"`
+}
+
+// ExploreFrame is generated from the Flashduty OpenAPI schema.
+type ExploreFrame struct {
+	// Columns of the frame.
+	Fields []ExploreField `json:"fields" toon:"fields"`
+	// Frame shape. `table` is an unlabeled table, while `time_series` carries exactly one time field and one float field.
+	Kind string `json:"kind" toon:"kind"`
+}
+
+// ExploreLogEntry is generated from the Flashduty OpenAPI schema.
+type ExploreLogEntry struct {
+	// Log fields as raw JSON values. Integer literals outside JavaScript's safe integer range are returned as decimal strings.
+	Fields map[string]any `json:"fields" toon:"fields"`
+	// Entry time as a canonical unsigned decimal string of Unix epoch nanoseconds, at most 20 digits.
+	TimestampNs string `json:"timestamp_ns" toon:"timestamp_ns"`
+}
+
+// ExploreResponseExecution is generated from the Flashduty OpenAPI schema.
+type ExploreResponseExecution struct {
+	// Step, in seconds, the query was executed with after applying `max_data_points` and `min_step_seconds`.
+	EffectiveStepSeconds int64 `json:"effective_step_seconds" toon:"effective_step_seconds"`
+	// Execution kind; always `range` when this object is present.
+	Kind string `json:"kind" toon:"kind"`
+}
+
+// ExploreResult is generated from the Flashduty OpenAPI schema.
+type ExploreResult struct {
+	// Entry limit applied to a logs result; at most 1000.
+	AppliedLimit int64 `json:"applied_limit" toon:"applied_limit"`
+	// Log entries. Present when `kind` is `logs`; never longer than `applied_limit`.
+	Entries []ExploreLogEntry `json:"entries" toon:"entries"`
+	// Columnar frames. Present when `kind` is `frames`; at most 1,000 frames.
+	Frames []ExploreFrame `json:"frames" toon:"frames"`
+	// Whether a logs result was truncated by `applied_limit`.
+	HasMore bool `json:"has_more" toon:"has_more"`
+	// Result shape. `frames` returns columnar tables or time series, `samples` returns instant values with labels, and `logs` returns log entries.
+	Kind string `json:"kind" toon:"kind"`
+	// Instant samples. Present when `kind` is `samples`; at most 1,000 samples.
+	Samples []ExploreSample `json:"samples" toon:"samples"`
+}
+
+// ExploreSample is generated from the Flashduty OpenAPI schema.
+type ExploreSample struct {
+	// Label set of the sample. May be empty but never null.
+	Labels map[string]string `json:"labels" toon:"labels"`
+	// Sample value: a number, or one of the strings `NaN`, `+Inf`, and `-Inf`. Never null.
+	Value any `json:"value" toon:"value"`
+}
+
 // ExportStatusPageSubscribersRequest is generated from the Flashduty OpenAPI schema.
 type ExportStatusPageSubscribersRequest struct {
 	// Optional component IDs to filter subscribers by.
@@ -6314,6 +6382,18 @@ type PreviewTemplateResponse struct {
 	Success bool `json:"success" toon:"success"`
 }
 
+// PrometheusLabelValuesResponse is generated from the Flashduty OpenAPI schema.
+type PrometheusLabelValuesResponse struct {
+	// Label values, present when `status` is `success`.
+	Data []string `json:"data" toon:"data"`
+	// Human-readable Prometheus error message, present when `status` is `error`.
+	Error string `json:"error" toon:"error"`
+	// Prometheus error class, present when `status` is `error`.
+	ErrorType string `json:"errorType" toon:"errorType"`
+	// Prometheus result status. `success` carries `data`; `error` carries `errorType` and `error`.
+	Status string `json:"status" toon:"status"`
+}
+
 // PublishedArtifactItem is generated from the Flashduty OpenAPI schema.
 type PublishedArtifactItem struct {
 	// Artifact ID (`art_` prefix). Also the key of the public-share link.
@@ -6381,6 +6461,31 @@ type QueryDataResponse struct {
 	// Public result-contract version. It is independent of the internal monit-edge query protocol version. Fixed at `query_result.v1`, which defines the structure of the `result` field.
 	Format string      `json:"format" toon:"format"`
 	Result QueryResult `json:"result" toon:"result"`
+}
+
+// QueryExploreExecution is generated from the Flashduty OpenAPI schema.
+type QueryExploreExecution struct {
+	// Unix timestamp in milliseconds for the start of the range. Required for `range` and `window`; optional for `instant`.
+	FromMs int64 `json:"from_ms,omitempty" toon:"from_ms,omitempty"`
+	// Execution kind. `instant` evaluates at a single point in time, `range` evaluates a series over a range, and `window` returns raw rows inside a time window.
+	Kind string `json:"kind" toon:"kind"`
+	// Maximum number of points to return. Required for `range` and rejected for `instant` and `window`.
+	MaxDataPoints int64 `json:"max_data_points,omitempty" toon:"max_data_points,omitempty"`
+	// Lower bound, in seconds, for the step derived from `max_data_points`. Optional and only accepted for `range`.
+	MinStepSeconds int64 `json:"min_step_seconds,omitempty" toon:"min_step_seconds,omitempty"`
+	// Unix timestamp in milliseconds for the end of the range. Required for every execution kind.
+	ToMs int64 `json:"to_ms,omitempty" toon:"to_ms,omitempty"`
+}
+
+// QueryExploreRequest is generated from the Flashduty OpenAPI schema.
+type QueryExploreRequest struct {
+	// Macro substitutions keyed by variable name, used for Grafana-style variables. Keys are at most 256 bytes, values at most 64 KiB, with a 128 KiB total budget.
+	Args map[string]string `json:"args" toon:"args"`
+	// Data source ID from `/monit/datasource/list`. Must be a positive JavaScript-safe integer and belong to the authenticated account.
+	DatasourceID int64                 `json:"datasource_id" toon:"datasource_id"`
+	Execution    QueryExploreExecution `json:"execution" toon:"execution"`
+	// Query expression in the data source's native language (PromQL, LogsQL, SQL, and so on). Non-empty UTF-8 of at most 64 KiB; some data source types enforce a lower limit.
+	Expr string `json:"expr" toon:"expr"`
 }
 
 // QueryField is generated from the Flashduty OpenAPI schema.
