@@ -102,6 +102,7 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /member/info":                                  func(d json.RawMessage) error { var v MemberInfoResponse; return json.Unmarshal(d, &v) },
 	"POST /member/invite":                                func(d json.RawMessage) error { var v MemberInviteResponse; return json.Unmarshal(d, &v) },
 	"POST /member/list":                                  func(d json.RawMessage) error { var v MemberListResponse; return json.Unmarshal(d, &v) },
+	"POST /member/notify":                                func(d json.RawMessage) error { var v MemberNotifyResponse; return json.Unmarshal(d, &v) },
 	"POST /monit/datasource/create":                      func(d json.RawMessage) error { var v DataSourceItem; return json.Unmarshal(d, &v) },
 	"POST /monit/datasource/info":                        func(d json.RawMessage) error { var v DataSourceItem; return json.Unmarshal(d, &v) },
 	"POST /monit/datasource/list":                        func(d json.RawMessage) error { var v DataSourceListResponse; return json.Unmarshal(d, &v) },

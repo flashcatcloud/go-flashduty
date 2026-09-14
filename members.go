@@ -67,6 +67,20 @@ func (s *MembersService) MemberList(ctx context.Context, req *MemberListRequest)
 	return out, resp, nil
 }
 
+// Notify members.
+//
+// Send an email to account members on behalf of the caller, with content the caller supplies. Only callable with a credential minted for an AI SRE session; any other credential is rejected with `AccessDenied`. Delivery is asynchronous — `accepted` means the email was queued, not that it was delivered. Call it with `dry_run` set to `true` before sending: `html` in the response is the email exactly as recipients will get it, so you can confirm the sanitizer kept everything the message depends on.
+//
+// API: POST /member/notify (memberNotify).
+func (s *MembersService) MemberNotify(ctx context.Context, req *MemberNotifyRequest) (*MemberNotifyResponse, *Response, error) {
+	out := new(MemberNotifyResponse)
+	resp, err := s.client.do(ctx, "/member/notify", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Reset member info.
 //
 // Identify a member and reset the specified profile fields.

@@ -28947,6 +28947,94 @@
           "source",
           "key"
         ]
+      },
+      "MemberNotifyRequest": {
+        "type": "object",
+        "description": "邮件通知成员请求",
+        "required": [
+          "subject",
+          "html"
+        ],
+        "properties": {
+          "person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "maxItems": 20,
+            "uniqueItems": true,
+            "description": "收件人成员 ID 列表。可选，最多 20 个，不可重复；省略或为空时仅发送给调用方本人。"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "邮件主题，按原样使用。必填，1–200 个字符；换行会被替换为空格，首尾空白会被去除。"
+          },
+          "html": {
+            "type": "string",
+            "maxLength": 102400,
+            "description": "邮件正文，HTML 片段（无需 `<html>`/`<head>`/`<body>` 包裹），即收件人看到的完整邮件正文。必填，原始 UTF-8 内容不超过 102,400 字节（更大的正文会被常见邮件客户端截断），且清洗后不能为空。服务端会进行清洗：`<script>`、`<style>`、`<iframe>`、`<object>`、`<embed>`、`<form>`、`<input>`、`<button>`、`<svg>`、`<meta>`、`<link>`、`<base>` 标签及所有 `on*` 事件处理属性会被移除；图片仅在 `src` 为 `https` 时保留，其他来源或没有 `src` 的图片（包括 `data:`）会被移除；链接仅允许 `http`、`https`、`mailto`。内联 `style` 属性按原样保留。"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false,
+            "description": "仅检查不发送。为 `true` 时执行全部检查，并在响应的 `html` 中返回将要发送的完整邮件，但不会入队，也不占用每小时限额和同轮次去重。默认 `false`。"
+          }
+        }
+      },
+      "MemberNotifyResponse": {
+        "type": "object",
+        "description": "邮件通知成员响应",
+        "properties": {
+          "recipients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberNotifyResultItem"
+            },
+            "description": "每个已解析收件人对应一条结果，顺序与解析后的收件人列表一致。`dry_run` 时为实际发送将得到的结果。"
+          },
+          "html": {
+            "type": "string",
+            "description": "仅当 `dry_run` 为 `true` 时返回：清洗后、收件人将收到的完整邮件 HTML。"
+          }
+        }
+      },
+      "MemberNotifyResultItem": {
+        "type": "object",
+        "description": "单个收件人的通知结果",
+        "required": [
+          "person_id",
+          "status"
+        ],
+        "properties": {
+          "person_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "收件人成员 ID。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "skipped"
+            ],
+            "description": "投递状态。`accepted` —— 邮件已入队等待异步投递；`skipped` —— 未入队，具体原因见 `reason`。"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "not_member",
+              "no_email",
+              "email_disabled",
+              "duplicate",
+              "rate_limited",
+              "send_failed"
+            ],
+            "description": "跳过原因，仅当 `status` 为 `skipped` 时出现。`not_member` —— 不是调用方账户的活跃成员；`no_email` —— 该成员没有邮箱地址；`email_disabled` —— 该成员针对此类消息的通知偏好中未包含邮件；`duplicate` —— 该收件人在同一个 AI SRE 会话轮次中已经收到过一次消息；`rate_limited` —— 该收件人通过该接口在过去一小时内已被发送 20 封邮件；`send_failed` —— 邮件入队失败。"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -60044,6 +60132,96 @@
           "href": "/zh/api-reference/on-call/integrations/webhook-history-list",
           "metadata": {
             "sidebarTitle": "查询 Webhook 推送历史"
+          }
+        }
+      }
+    },
+    "/member/notify": {
+      "post": {
+        "operationId": "memberNotify",
+        "summary": "通知成员",
+        "description": "以调用方身份向账户成员发送邮件，邮件内容由调用方提供。仅可使用 AI SRE 会话凭据调用；使用其他凭据调用会返回 AccessDenied 错误。邮件投递是异步的——`accepted` 表示邮件已入队，并不代表已送达。发送前先将 `dry_run` 设为 `true` 调用一次：响应中的 `html` 就是收件人将收到的邮件，可据此确认清洗后正文依赖的内容都还在。",
+        "tags": [
+          "平台/成员管理"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ----- |\n| 速率限制 | 每个账户 **200 次/分钟**；**10 次/秒** |\n| 权限要求 | 无——仅可使用 AI SRE 会话凭据调用；使用其他凭据调用会返回 AccessDenied |\n\n## 使用说明\n\n- 不是调用方账户内活跃成员、或没有邮箱地址的收件人会被跳过，不会导致整个请求失败。\n- 是否发送邮件取决于每个收件人针对此类消息的通知偏好设置；未设置偏好的收件人默认会收到邮件。\n- 收件人收到的邮件正文就是清洗后的 `html`，平台不会在其前后添加任何内容；发件人名称显示为调用方姓名加“(via AI SRE)”。\n- 将 `dry_run` 设为 `true` 可执行全部检查并在 `html` 中返回将要发送的完整邮件，但不会发送：不会入队，也不占用每小时限额和同轮次去重。\n- 同一收件人通过该接口每小时最多收到 20 封邮件；超出后同一窗口内该收件人的后续投递会被跳过并返回 `rate_limited`。\n- 在同一个 AI SRE 会话轮次内重复调用，不会向已收到邮件的收件人重复发送；重复的收件人会被跳过并返回 `duplicate`。",
+          "href": "/zh/api-reference/platform/members/member-notify",
+          "metadata": {
+            "sidebarTitle": "通知成员"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/MemberNotifyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "recipients": [
+                      {
+                        "person_id": 5068740052131,
+                        "status": "accepted"
+                      },
+                      {
+                        "person_id": 5068740052132,
+                        "status": "skipped",
+                        "reason": "email_disabled"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberNotifyRequest"
+              },
+              "example": {
+                "person_ids": [
+                  5068740052131,
+                  5068740052132
+                ],
+                "subject": "Incident 20260914-1 needs your input",
+                "html": "<p>Can you confirm the rollback window?</p>"
+              }
+            }
           }
         }
       }

@@ -5780,6 +5780,36 @@ type MemberListResponse struct {
 	Total int64 `json:"total" toon:"total"`
 }
 
+// MemberNotifyRequest is generated from the Flashduty OpenAPI schema.
+type MemberNotifyRequest struct {
+	// Check without sending. When `true`, every check runs and the response returns the exact email in `html`, but nothing is queued and neither the hourly limit nor the per-turn duplicate check is consumed. Defaults to `false`.
+	DryRun bool `json:"dry_run,omitempty" toon:"dry_run,omitempty"`
+	// Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed); recipients receive it as the whole email body. Required, up to 102,400 bytes of raw UTF-8 input (larger messages are clipped by common email clients), and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; images are kept only when their `src` is `https` — images with any other or no `src`, including `data:`, are removed; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes are kept as written.
+	HTML string `json:"html" toon:"html"`
+	// Recipient member IDs. Optional, up to 20, no duplicates. Omitted or empty sends to the caller only.
+	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
+	// Email subject, used as written. Required, 1–200 characters. Line breaks are replaced with a space; leading/trailing whitespace is trimmed.
+	Subject string `json:"subject" toon:"subject"`
+}
+
+// MemberNotifyResponse is generated from the Flashduty OpenAPI schema.
+type MemberNotifyResponse struct {
+	// Only present when `dry_run` is `true`: the complete email HTML exactly as recipients would receive it, after sanitization.
+	HTML string `json:"html" toon:"html"`
+	// One result per resolved recipient, in the same order as the resolved recipient list. With `dry_run`, each result is what a real send would return.
+	Recipients []MemberNotifyResultItem `json:"recipients" toon:"recipients"`
+}
+
+// MemberNotifyResultItem is generated from the Flashduty OpenAPI schema.
+type MemberNotifyResultItem struct {
+	// Recipient member ID.
+	PersonID int64 `json:"person_id" toon:"person_id"`
+	// Why the recipient was skipped. Only present when `status` is `skipped`. `not_member` — not an active member of the caller's account; `no_email` — the member has no email address on file; `email_disabled` — the member's notification preferences for this kind of message exclude email; `duplicate` — this recipient already received a message from the same AI SRE session turn; `rate_limited` — this recipient has already been sent 20 emails through this endpoint within the last hour; `send_failed` — enqueueing the email failed.
+	Reason string `json:"reason" toon:"reason"`
+	// Delivery status. `accepted` — the email was queued for asynchronous delivery; `skipped` — no email was queued, see `reason`.
+	Status string `json:"status" toon:"status"`
+}
+
 // MemberOncallInterval is generated from the Flashduty OpenAPI schema.
 type MemberOncallInterval struct {
 	// Unix timestamp in seconds - when the shift ends. Absent while the shift is ongoing.
