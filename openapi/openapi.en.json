@@ -28947,6 +28947,85 @@
           "source",
           "key"
         ]
+      },
+      "MemberNotifyRequest": {
+        "type": "object",
+        "description": "Notify members by email request",
+        "required": [
+          "subject",
+          "html"
+        ],
+        "properties": {
+          "person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "maxItems": 20,
+            "uniqueItems": true,
+            "description": "Recipient member IDs. Optional, up to 20, no duplicates. Omitted or empty sends to the caller only."
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Email subject. Required, 1–200 characters. Line breaks are replaced with a space; leading/trailing whitespace is trimmed."
+          },
+          "html": {
+            "type": "string",
+            "maxLength": 512000,
+            "description": "Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed). Required, up to 512,000 bytes of raw UTF-8 input, and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; image `src` values are kept only when they are `https` — non-`https` and `data:` image sources are dropped; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes are kept as written."
+          }
+        }
+      },
+      "MemberNotifyResponse": {
+        "type": "object",
+        "description": "Notify members by email response",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberNotifyResultItem"
+            },
+            "description": "One result per resolved recipient, in the same order as the resolved recipient list."
+          }
+        }
+      },
+      "MemberNotifyResultItem": {
+        "type": "object",
+        "description": "Per-recipient notify result",
+        "required": [
+          "person_id",
+          "status"
+        ],
+        "properties": {
+          "person_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Recipient member ID."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "skipped"
+            ],
+            "description": "Delivery status. `accepted` — the email was queued for asynchronous delivery; `skipped` — no email was queued, see `reason`."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "not_member",
+              "no_email",
+              "email_disabled",
+              "duplicate",
+              "rate_limited",
+              "send_failed"
+            ],
+            "description": "Why the recipient was skipped. Only present when `status` is `skipped`. `not_member` — not an active member of the caller's account; `no_email` — the member has no email address on file; `email_disabled` — the member's notification preferences for this kind of message exclude email; `duplicate` — this recipient already received a message from the same AI SRE session turn; `rate_limited` — this recipient already received more than 20 emails through this endpoint in the last hour; `send_failed` — enqueueing the email failed."
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -60044,6 +60123,96 @@
           "href": "/en/api-reference/on-call/integrations/webhook-history-list",
           "metadata": {
             "sidebarTitle": "List webhook delivery history"
+          }
+        }
+      }
+    },
+    "/member/notify": {
+      "post": {
+        "operationId": "memberNotify",
+        "summary": "Notify members",
+        "description": "Send an email to account members on behalf of the caller, with content the caller supplies. Only callable with a credential minted for an AI SRE session; any other credential is rejected with `AccessDenied`. Delivery is asynchronous — `accepted` means the email was queued, not that it was delivered.",
+        "tags": [
+          "Platform/Members"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **200 requests/minute**; **10 requests/second** per account |\n| Permissions | None — callable only with an AI SRE session credential; any other credential is rejected with `AccessDenied` |\n\n## Usage\n\n- Recipients that are not active members of the caller's account, or that have no email address on file, are skipped rather than failing the whole request.\n- Whether email is included follows each recipient's own notification preferences for this kind of message; a recipient with no preference set defaults to receiving it.\n- The email is wrapped in the standard Flashduty notification layout, credited to the caller by name, with a link back to the originating AI SRE session.\n- At most 20 emails are delivered to the same recipient through this endpoint per hour; further deliveries to that recipient in the same window are skipped with `rate_limited`.\n- Retrying the same call within the same AI SRE session turn does not send a duplicate email to a recipient who already received one; the repeat is skipped with `duplicate`.\n- Every call is recorded in the account audit log.",
+          "href": "/en/api-reference/platform/members/member-notify",
+          "metadata": {
+            "sidebarTitle": "Notify members"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/MemberNotifyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "person_id": 5068740052131,
+                        "status": "accepted"
+                      },
+                      {
+                        "person_id": 5068740052132,
+                        "status": "skipped",
+                        "reason": "email_disabled"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberNotifyRequest"
+              },
+              "example": {
+                "person_ids": [
+                  5068740052131,
+                  5068740052132
+                ],
+                "subject": "Incident 20260914-1 needs your input",
+                "html": "<p>Can you confirm the rollback window?</p>"
+              }
+            }
           }
         }
       }
