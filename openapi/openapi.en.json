@@ -28970,12 +28970,17 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 200,
-            "description": "Email subject. Required, 1–200 characters. Line breaks are replaced with a space; leading/trailing whitespace is trimmed."
+            "description": "Email subject, used as written. Required, 1–200 characters. Line breaks are replaced with a space; leading/trailing whitespace is trimmed."
           },
           "html": {
             "type": "string",
             "maxLength": 102400,
-            "description": "Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed). Required, up to 102,400 bytes of raw UTF-8 input (larger messages are clipped by common email clients), and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; image `src` values are kept only when they are `https` — non-`https` and `data:` image sources are dropped; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes keep only common text, color, spacing, border and sizing properties; properties that can move content outside the message body (such as `position` or negative margins) and CSS `url()` values are removed."
+            "description": "Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed); recipients receive it as the whole email body. Required, up to 102,400 bytes of raw UTF-8 input (larger messages are clipped by common email clients), and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; images are kept only when their `src` is `https` — images with any other or no `src`, including `data:`, are removed; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes are kept as written."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false,
+            "description": "Check without sending. When `true`, every check runs and the response returns the exact email in `html`, but nothing is queued and neither the hourly limit nor the per-turn duplicate check is consumed. Defaults to `false`."
           }
         }
       },
@@ -28988,7 +28993,11 @@
             "items": {
               "$ref": "#/components/schemas/MemberNotifyResultItem"
             },
-            "description": "One result per resolved recipient, in the same order as the resolved recipient list."
+            "description": "One result per resolved recipient, in the same order as the resolved recipient list. With `dry_run`, each result is what a real send would return."
+          },
+          "html": {
+            "type": "string",
+            "description": "Only present when `dry_run` is `true`: the complete email HTML exactly as recipients would receive it, after sanitization."
           }
         }
       },
@@ -60136,7 +60145,7 @@
           "Platform/Members"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **200 requests/minute**; **10 requests/second** per account |\n| Permissions | None — callable only with an AI SRE session credential; any other credential is rejected with `AccessDenied` |\n\n## Usage\n\n- Recipients that are not active members of the caller's account, or that have no email address on file, are skipped rather than failing the whole request.\n- Whether email is included follows each recipient's own notification preferences for this kind of message; a recipient with no preference set defaults to receiving it.\n- The email is wrapped in the standard Flashduty notification layout, credited to the caller by name, with a link back to the originating AI SRE session.\n- At most 20 emails are delivered to the same recipient through this endpoint per hour; further deliveries to that recipient in the same window are skipped with `rate_limited`.\n- Retrying the same call within the same AI SRE session turn does not send a duplicate email to a recipient who already received one; the repeat is skipped with `duplicate`.\n- Every call is recorded in the account audit log.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **200 requests/minute**; **10 requests/second** per account |\n| Permissions | None — callable only with an AI SRE session credential; any other credential is rejected with `AccessDenied` |\n\n## Usage\n\n- Recipients that are not active members of the caller's account, or that have no email address on file, are skipped rather than failing the whole request.\n- Whether email is included follows each recipient's own notification preferences for this kind of message; a recipient with no preference set defaults to receiving it.\n- Recipients receive exactly the sanitized `html` as the email body, with nothing added around it. The sender name shows the caller's name followed by \"(via AI SRE)\".\n- Set `dry_run` to `true` to run every check and get the exact email back in `html` without sending: nothing is queued, and neither the hourly limit nor the per-turn duplicate check is consumed.\n- At most 20 emails are delivered to the same recipient through this endpoint per hour; further deliveries to that recipient in the same window are skipped with `rate_limited`.\n- Retrying the same call within the same AI SRE session turn does not send a duplicate email to a recipient who already received one; the repeat is skipped with `duplicate`.",
           "href": "/en/api-reference/platform/members/member-notify",
           "metadata": {
             "sidebarTitle": "Notify members"

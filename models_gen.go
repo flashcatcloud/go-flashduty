@@ -5782,17 +5782,21 @@ type MemberListResponse struct {
 
 // MemberNotifyRequest is generated from the Flashduty OpenAPI schema.
 type MemberNotifyRequest struct {
-	// Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed). Required, up to 102,400 bytes of raw UTF-8 input (larger messages are clipped by common email clients), and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; image `src` values are kept only when they are `https` — non-`https` and `data:` image sources are dropped; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes keep only common text, color, spacing, border and sizing properties; properties that can move content outside the message body (such as `position` or negative margins) and CSS `url()` values are removed.
+	// Check without sending. When `true`, every check runs and the response returns the exact email in `html`, but nothing is queued and neither the hourly limit nor the per-turn duplicate check is consumed. Defaults to `false`.
+	DryRun bool `json:"dry_run,omitempty" toon:"dry_run,omitempty"`
+	// Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed); recipients receive it as the whole email body. Required, up to 102,400 bytes of raw UTF-8 input (larger messages are clipped by common email clients), and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; images are kept only when their `src` is `https` — images with any other or no `src`, including `data:`, are removed; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes are kept as written.
 	HTML string `json:"html" toon:"html"`
 	// Recipient member IDs. Optional, up to 20, no duplicates. Omitted or empty sends to the caller only.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
-	// Email subject. Required, 1–200 characters. Line breaks are replaced with a space; leading/trailing whitespace is trimmed.
+	// Email subject, used as written. Required, 1–200 characters. Line breaks are replaced with a space; leading/trailing whitespace is trimmed.
 	Subject string `json:"subject" toon:"subject"`
 }
 
 // MemberNotifyResponse is generated from the Flashduty OpenAPI schema.
 type MemberNotifyResponse struct {
-	// One result per resolved recipient, in the same order as the resolved recipient list.
+	// Only present when `dry_run` is `true`: the complete email HTML exactly as recipients would receive it, after sanitization.
+	HTML string `json:"html" toon:"html"`
+	// One result per resolved recipient, in the same order as the resolved recipient list. With `dry_run`, each result is what a real send would return.
 	Items []MemberNotifyResultItem `json:"items" toon:"items"`
 }
 
