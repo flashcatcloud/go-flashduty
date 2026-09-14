@@ -9151,6 +9151,309 @@
         ],
         "type": "object"
       },
+      "ExploreData": {
+        "description": "Explore query result payload.",
+        "properties": {
+          "execution": {
+            "$ref": "#/components/schemas/ExploreResponseExecution"
+          },
+          "format": {
+            "description": "Result contract version; always `explore_result.v1`.",
+            "enum": [
+              "explore_result.v1"
+            ],
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ExploreResult"
+          }
+        },
+        "required": [
+          "format",
+          "result"
+        ],
+        "type": "object"
+      },
+      "ExploreField": {
+        "description": "One column of a frame. Values are columnar and may contain nulls.",
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Label set of this column. Only `time_series` value fields may carry labels; a `table` field must not.",
+            "type": "object"
+          },
+          "name": {
+            "description": "Column name, at most 1 MiB of UTF-8.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Column type. `string` is rejected inside a `time_series` frame; `float` holds numbers and `time` holds UTC RFC3339Nano strings.",
+            "enum": [
+              "string",
+              "float",
+              "time"
+            ],
+            "type": "string"
+          },
+          "values": {
+            "description": "Column values in row order.",
+            "items": {
+              "description": "One cell. `time` cells are UTC RFC3339Nano strings; `float` cells may be the strings `NaN`, `+Inf`, and `-Inf`; any cell may be null except a time value inside a `time_series` frame."
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "values"
+        ],
+        "type": "object"
+      },
+      "ExploreFrame": {
+        "description": "One columnar frame. Every field in the frame has the same number of values.",
+        "properties": {
+          "fields": {
+            "description": "Columns of the frame.",
+            "items": {
+              "$ref": "#/components/schemas/ExploreField"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "description": "Frame shape. `table` is an unlabeled table, while `time_series` carries exactly one time field and one float field.",
+            "enum": [
+              "table",
+              "time_series"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "fields"
+        ],
+        "type": "object"
+      },
+      "ExploreLogEntry": {
+        "description": "One log entry.",
+        "properties": {
+          "fields": {
+            "additionalProperties": true,
+            "description": "Log fields as raw JSON values. Integer literals outside JavaScript's safe integer range are returned as decimal strings.",
+            "type": "object"
+          },
+          "timestamp_ns": {
+            "description": "Entry time as a canonical unsigned decimal string of Unix epoch nanoseconds, at most 20 digits.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp_ns",
+          "fields"
+        ],
+        "type": "object"
+      },
+      "ExploreResponseExecution": {
+        "description": "Execution actually used, present when the data source returned a stepped result.",
+        "properties": {
+          "effective_step_seconds": {
+            "description": "Step, in seconds, the query was executed with after applying `max_data_points` and `min_step_seconds`.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "Execution kind; always `range` when this object is present.",
+            "enum": [
+              "range"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "effective_step_seconds"
+        ],
+        "type": "object"
+      },
+      "ExploreResult": {
+        "description": "Result body. Exactly one of `frames`, `samples`, or `entries` is present and matches `kind`.",
+        "properties": {
+          "applied_limit": {
+            "description": "Entry limit applied to a logs result; at most 1000.",
+            "type": "integer"
+          },
+          "entries": {
+            "description": "Log entries. Present when `kind` is `logs`; never longer than `applied_limit`.",
+            "items": {
+              "$ref": "#/components/schemas/ExploreLogEntry"
+            },
+            "type": "array"
+          },
+          "frames": {
+            "description": "Columnar frames. Present when `kind` is `frames`; at most 1,000 frames.",
+            "items": {
+              "$ref": "#/components/schemas/ExploreFrame"
+            },
+            "type": "array"
+          },
+          "has_more": {
+            "description": "Whether a logs result was truncated by `applied_limit`.",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Result shape. `frames` returns columnar tables or time series, `samples` returns instant values with labels, and `logs` returns log entries.",
+            "enum": [
+              "frames",
+              "samples",
+              "logs"
+            ],
+            "type": "string"
+          },
+          "samples": {
+            "description": "Instant samples. Present when `kind` is `samples`; at most 1,000 samples.",
+            "items": {
+              "$ref": "#/components/schemas/ExploreSample"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "ExploreSample": {
+        "description": "One instant sample.",
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Label set of the sample. May be empty but never null.",
+            "type": "object"
+          },
+          "value": {
+            "description": "Sample value: a number, or one of the strings `NaN`, `+Inf`, and `-Inf`. Never null."
+          }
+        },
+        "required": [
+          "labels",
+          "value"
+        ],
+        "type": "object"
+      },
+      "PrometheusLabelValuesResponse": {
+        "description": "Native Prometheus HTTP API response returned by the queried data source. This endpoint does not wrap the payload in the Flashduty response envelope.",
+        "properties": {
+          "data": {
+            "description": "Label values, present when `status` is `success`.",
+            "items": {
+              "description": "One label value.",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "error": {
+            "description": "Human-readable Prometheus error message, present when `status` is `error`.",
+            "type": "string"
+          },
+          "errorType": {
+            "description": "Prometheus error class, present when `status` is `error`.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Prometheus result status. `success` carries `data`; `error` carries `errorType` and `error`.",
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "QueryExploreExecution": {
+        "description": "Time semantics of the query. The accepted companion fields depend on `kind`: `instant` takes only `to_ms` (plus optional `from_ms`), `range` requires `from_ms`, `to_ms`, and `max_data_points`, and `window` takes only `from_ms` and `to_ms`. `step_seconds` is never accepted over HTTP.",
+        "properties": {
+          "from_ms": {
+            "description": "Unix timestamp in milliseconds for the start of the range. Required for `range` and `window`; optional for `instant`.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "Execution kind. `instant` evaluates at a single point in time, `range` evaluates a series over a range, and `window` returns raw rows inside a time window.",
+            "enum": [
+              "instant",
+              "range",
+              "window"
+            ],
+            "type": "string"
+          },
+          "max_data_points": {
+            "description": "Maximum number of points to return. Required for `range` and rejected for `instant` and `window`.",
+            "format": "int64",
+            "maximum": 5000,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "min_step_seconds": {
+            "description": "Lower bound, in seconds, for the step derived from `max_data_points`. Optional and only accepted for `range`.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "to_ms": {
+            "description": "Unix timestamp in milliseconds for the end of the range. Required for every execution kind.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "QueryExploreRequest": {
+        "description": "Explore query request. All four top-level fields are required and unknown fields are rejected.",
+        "properties": {
+          "args": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Macro substitutions keyed by variable name, used for Grafana-style variables. Keys are at most 256 bytes, values at most 64 KiB, with a 128 KiB total budget.",
+            "maxProperties": 128,
+            "type": "object"
+          },
+          "datasource_id": {
+            "description": "Data source ID from `/monit/datasource/list`. Must be a positive JavaScript-safe integer and belong to the authenticated account.",
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "execution": {
+            "$ref": "#/components/schemas/QueryExploreExecution"
+          },
+          "expr": {
+            "description": "Query expression in the data source's native language (PromQL, LogsQL, SQL, and so on). Non-empty UTF-8 of at most 64 KiB; some data source types enforce a lower limit.",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "datasource_id",
+          "expr",
+          "args",
+          "execution"
+        ],
+        "type": "object"
+      },
       "ExportStatusPageSubscribersRequest": {
         "description": "Parameters for exporting a status page subscriber list.",
         "properties": {
@@ -42682,6 +42985,291 @@
           "href": "/en/api-reference/monitors/data-sources/monit-datasource-write-update",
           "metadata": {
             "sidebarTitle": "Update datasource"
+          }
+        }
+      }
+    },
+    "/monit/prometheus/api/v1/label/{label_name}/values": {
+      "get": {
+        "description": "Read label values from a Prometheus-compatible data source through the Monitors proxy.",
+        "operationId": "monit-prometheus-read-label-values",
+        "parameters": [
+          {
+            "description": "Label name to enumerate values for, for example `job`.",
+            "in": "path",
+            "name": "label_name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Data source ID to query. Must reference a Prometheus-compatible data source owned by the authenticated account.",
+            "in": "header",
+            "name": "X-DSID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    "api",
+                    "db",
+                    "worker"
+                  ],
+                  "status": "success"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/PrometheusLabelValuesResponse"
+                }
+              }
+            },
+            "description": "Native Prometheus label-values response returned by the data source."
+          },
+          "400": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The `X-DSID` header is missing or invalid, the data source does not exist, or it is not a Prometheus data source. Returned as `text/plain`."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The data source lookup or the proxied request failed. Returned as `text/plain`."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "No monit-edge in the data source's cluster supports the data source resource proxy. Returned as `text/plain`; upgrade monit-edge."
+          }
+        },
+        "summary": "List Prometheus label values",
+        "tags": [
+          "Monitors/Data sources"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | Any valid `app_key` (read-only; not gated by a specific permission class) |\n| Edge requirement | Supported deployments require **monit-edge v0.35.0 or later** |\n\n## Usage\n\n- Pass the target data source in the `X-DSID` header. It must be a Prometheus-compatible data source owned by the authenticated account; use `/monit/datasource/list` to obtain its ID.\n- The 200 body is the data source's native Prometheus HTTP API payload, **not** the standard `{ request_id, data }` envelope. Failures raised before the data source is reached are returned as `text/plain` with the matching 4xx or 5xx status.\n- When `X-DSID` is omitted, the request falls back to the platform's own Prometheus proxy. Send the header to query a specific data source.",
+          "href": "/en/api-reference/monitors/data-sources/monit-prometheus-read-label-values",
+          "metadata": {
+            "sidebarTitle": "List Prometheus label values"
+          }
+        }
+      }
+    },
+    "/monit/query/explore": {
+      "post": {
+        "description": "Run an Explore query against a configured data source and return frames, samples, or logs.",
+        "operationId": "monit-read-query-explore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "args": {},
+                "datasource_id": 101,
+                "execution": {
+                  "from_ms": 1787187600000,
+                  "kind": "range",
+                  "max_data_points": 1200,
+                  "min_step_seconds": 15,
+                  "to_ms": 1787191200000
+                },
+                "expr": "rate(http_requests_total[5m])"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/QueryExploreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "execution": {
+                      "effective_step_seconds": 60,
+                      "kind": "range"
+                    },
+                    "format": "explore_result.v1",
+                    "result": {
+                      "frames": [
+                        {
+                          "fields": [
+                            {
+                              "name": "time",
+                              "type": "time",
+                              "values": [
+                                "2026-08-20T10:00:00Z",
+                                "2026-08-20T10:01:00Z"
+                              ]
+                            },
+                            {
+                              "labels": {
+                                "job": "api"
+                              },
+                              "name": "value",
+                              "type": "float",
+                              "values": [
+                                1.25,
+                                null
+                              ]
+                            }
+                          ],
+                          "kind": "time_series"
+                        }
+                      ],
+                      "kind": "frames"
+                    }
+                  },
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
+                },
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ExploreData"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: invalid_request."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: access_denied."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: datasource_not_found."
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: source_too_large, result_too_large."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: overloaded."
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: canceled."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: internal."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: no_active_edge, edge_upgrade_required, mixed_edge_versions, edge_unavailable."
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Standard HTTP error; error.reason: timeout."
+          }
+        },
+        "summary": "Run Explore query",
+        "tags": [
+          "Monitors/Diagnostics"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **100 requests/minute**; **16 requests/second** per account |\n| Permissions | **Datasources Read** (`monit`) |\n| Edge requirement | Supported deployments require **monit-edge v0.68.0 or later** |\n\n## Usage\n\n- Use this endpoint when you need the data source's native result shape; `/monit/query/data` returns the stable `query_result.v1` contract instead. Dispatch on `data.result.kind` (`frames`, `samples`, or `logs`) here.\n- `execution.kind` decides which companion fields are accepted: `instant` needs only `to_ms`, `range` requires `from_ms`, `to_ms`, and `max_data_points`, and `window` takes `from_ms` and `to_ms`. `step_seconds` is not accepted; the step is derived from `max_data_points` and `min_step_seconds`.\n- `args` carries macro substitutions such as Grafana-style variables; every value is a string.\n- A `logs` result is capped at 1,000 entries and reports `applied_limit` plus `has_more`. Time-series and sample results are capped at 1,000 items each and the whole success response at 8 MiB.\n- Query execution may take up to 35 seconds across WebAPI forwarding and Edge execution. Configure client timeouts to at least 40 seconds.",
+          "href": "/en/api-reference/monitors/diagnostics/monit-read-query-explore",
+          "metadata": {
+            "sidebarTitle": "Run Explore query"
           }
         }
       }
