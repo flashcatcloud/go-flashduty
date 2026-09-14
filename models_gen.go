@@ -5782,7 +5782,7 @@ type MemberListResponse struct {
 
 // MemberNotifyRequest is generated from the Flashduty OpenAPI schema.
 type MemberNotifyRequest struct {
-	// Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed). Required, up to 512,000 bytes of raw UTF-8 input, and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; image `src` values are kept only when they are `https` — non-`https` and `data:` image sources are dropped; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes are kept as written.
+	// Email body as an HTML fragment (no `<html>`/`<head>`/`<body>` wrapper needed). Required, up to 512,000 bytes of raw UTF-8 input, and must be non-empty after sanitization. Sanitized server-side: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`, `<meta>`, `<link>`, and `<base>` tags and all `on*` event handlers are removed; image `src` values are kept only when they are `https` — non-`https` and `data:` image sources are dropped; links are restricted to `http`, `https`, and `mailto`. Inline `style` attributes keep only common text, color, spacing, border and sizing properties; properties that can move content outside the message body (such as `position` or negative margins) and CSS `url()` values are removed.
 	HTML string `json:"html" toon:"html"`
 	// Recipient member IDs. Optional, up to 20, no duplicates. Omitted or empty sends to the caller only.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
@@ -5800,7 +5800,7 @@ type MemberNotifyResponse struct {
 type MemberNotifyResultItem struct {
 	// Recipient member ID.
 	PersonID int64 `json:"person_id" toon:"person_id"`
-	// Why the recipient was skipped. Only present when `status` is `skipped`. `not_member` — not an active member of the caller's account; `no_email` — the member has no email address on file; `email_disabled` — the member's notification preferences for this kind of message exclude email; `duplicate` — this recipient already received a message from the same AI SRE session turn; `rate_limited` — this recipient already received more than 20 emails through this endpoint in the last hour; `send_failed` — enqueueing the email failed.
+	// Why the recipient was skipped. Only present when `status` is `skipped`. `not_member` — not an active member of the caller's account; `no_email` — the member has no email address on file; `email_disabled` — the member's notification preferences for this kind of message exclude email; `duplicate` — this recipient already received a message from the same AI SRE session turn; `rate_limited` — this recipient has already been sent 20 emails through this endpoint within the last hour; `send_failed` — enqueueing the email failed.
 	Reason string `json:"reason" toon:"reason"`
 	// Delivery status. `accepted` — the email was queued for asynchronous delivery; `skipped` — no email was queued, see `reason`.
 	Status string `json:"status" toon:"status"`

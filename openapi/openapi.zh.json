@@ -28975,7 +28975,7 @@
           "html": {
             "type": "string",
             "maxLength": 512000,
-            "description": "邮件正文，HTML 片段（无需 `<html>`/`<head>`/`<body>` 包裹）。必填，原始 UTF-8 内容不超过 512,000 字节，且清洗后不能为空。服务端会进行清洗：`<script>`、`<style>`、`<iframe>`、`<object>`、`<embed>`、`<form>`、`<input>`、`<button>`、`<svg>`、`<meta>`、`<link>`、`<base>` 标签及所有 `on*` 事件处理属性会被移除；图片 `src` 仅保留 `https`，非 `https` 及 `data:` 图片来源会被移除；链接仅允许 `http`、`https`、`mailto`。内联 `style` 属性会原样保留。"
+            "description": "邮件正文，HTML 片段（无需 `<html>`/`<head>`/`<body>` 包裹）。必填，原始 UTF-8 内容不超过 512,000 字节，且清洗后不能为空。服务端会进行清洗：`<script>`、`<style>`、`<iframe>`、`<object>`、`<embed>`、`<form>`、`<input>`、`<button>`、`<svg>`、`<meta>`、`<link>`、`<base>` 标签及所有 `on*` 事件处理属性会被移除；图片 `src` 仅保留 `https`，非 `https` 及 `data:` 图片来源会被移除；链接仅允许 `http`、`https`、`mailto`。内联 `style` 属性仅保留文本、颜色、间距、边框和尺寸等常见属性；可能使内容脱离邮件正文范围的属性（如 `position`、负值 margin）以及 CSS `url()` 取值会被移除。"
           }
         }
       },
@@ -29023,7 +29023,7 @@
               "rate_limited",
               "send_failed"
             ],
-            "description": "跳过原因，仅当 `status` 为 `skipped` 时出现。`not_member` —— 不是调用方账户的活跃成员；`no_email` —— 该成员没有邮箱地址；`email_disabled` —— 该成员针对此类消息的通知偏好中未包含邮件；`duplicate` —— 该收件人在同一个 AI SRE 会话轮次中已经收到过一次消息；`rate_limited` —— 该收件人通过该接口在过去一小时内已收到超过 20 封邮件；`send_failed` —— 邮件入队失败。"
+            "description": "跳过原因，仅当 `status` 为 `skipped` 时出现。`not_member` —— 不是调用方账户的活跃成员；`no_email` —— 该成员没有邮箱地址；`email_disabled` —— 该成员针对此类消息的通知偏好中未包含邮件；`duplicate` —— 该收件人在同一个 AI SRE 会话轮次中已经收到过一次消息；`rate_limited` —— 该收件人通过该接口在过去一小时内已被发送 20 封邮件；`send_failed` —— 邮件入队失败。"
           }
         }
       }
