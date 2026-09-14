@@ -60140,7 +60140,7 @@
       "post": {
         "operationId": "memberNotify",
         "summary": "通知成员",
-        "description": "以调用方身份向账户成员发送邮件，邮件内容由调用方提供。仅可使用 AI SRE 会话凭据调用；使用其他凭据调用会返回 AccessDenied 错误。邮件投递是异步的——`accepted` 表示邮件已入队，并不代表已送达。",
+        "description": "以调用方身份向账户成员发送邮件，邮件内容由调用方提供。仅可使用 AI SRE 会话凭据调用；使用其他凭据调用会返回 AccessDenied 错误。邮件投递是异步的——`accepted` 表示邮件已入队，并不代表已送达。发送前先将 `dry_run` 设为 `true` 调用一次：响应中的 `html` 就是收件人将收到的邮件，可据此确认清洗后正文依赖的内容都还在。",
         "tags": [
           "平台/成员管理"
         ],
