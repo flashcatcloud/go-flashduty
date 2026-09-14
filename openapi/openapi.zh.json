@@ -28974,8 +28974,8 @@
           },
           "html": {
             "type": "string",
-            "maxLength": 512000,
-            "description": "邮件正文，HTML 片段（无需 `<html>`/`<head>`/`<body>` 包裹）。必填，原始 UTF-8 内容不超过 512,000 字节，且清洗后不能为空。服务端会进行清洗：`<script>`、`<style>`、`<iframe>`、`<object>`、`<embed>`、`<form>`、`<input>`、`<button>`、`<svg>`、`<meta>`、`<link>`、`<base>` 标签及所有 `on*` 事件处理属性会被移除；图片 `src` 仅保留 `https`，非 `https` 及 `data:` 图片来源会被移除；链接仅允许 `http`、`https`、`mailto`。内联 `style` 属性仅保留文本、颜色、间距、边框和尺寸等常见属性；可能使内容脱离邮件正文范围的属性（如 `position`、负值 margin）以及 CSS `url()` 取值会被移除。"
+            "maxLength": 102400,
+            "description": "邮件正文，HTML 片段（无需 `<html>`/`<head>`/`<body>` 包裹）。必填，原始 UTF-8 内容不超过 102,400 字节（更大的正文会被常见邮件客户端截断），且清洗后不能为空。服务端会进行清洗：`<script>`、`<style>`、`<iframe>`、`<object>`、`<embed>`、`<form>`、`<input>`、`<button>`、`<svg>`、`<meta>`、`<link>`、`<base>` 标签及所有 `on*` 事件处理属性会被移除；图片 `src` 仅保留 `https`，非 `https` 及 `data:` 图片来源会被移除；链接仅允许 `http`、`https`、`mailto`。内联 `style` 属性仅保留文本、颜色、间距、边框和尺寸等常见属性；可能使内容脱离邮件正文范围的属性（如 `position`、负值 margin）以及 CSS `url()` 取值会被移除。"
           }
         }
       },
