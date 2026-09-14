@@ -5797,7 +5797,7 @@ type MemberNotifyResponse struct {
 	// Only present when `dry_run` is `true`: the complete email HTML exactly as recipients would receive it, after sanitization.
 	HTML string `json:"html" toon:"html"`
 	// One result per resolved recipient, in the same order as the resolved recipient list. With `dry_run`, each result is what a real send would return.
-	Items []MemberNotifyResultItem `json:"items" toon:"items"`
+	Recipients []MemberNotifyResultItem `json:"recipients" toon:"recipients"`
 }
 
 // MemberNotifyResultItem is generated from the Flashduty OpenAPI schema.

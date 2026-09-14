@@ -28988,7 +28988,7 @@
         "type": "object",
         "description": "Notify members by email response",
         "properties": {
-          "items": {
+          "recipients": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MemberNotifyResultItem"
@@ -60174,7 +60174,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "items": [
+                    "recipients": [
                       {
                         "person_id": 5068740052131,
                         "status": "accepted"
