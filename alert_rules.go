@@ -63,20 +63,6 @@ func (s *AlertRulesService) ReadCounterTotal(ctx context.Context) (*RuleCounterT
 	return out, resp, nil
 }
 
-// Export alert rules.
-//
-// Export the configuration of selected alert rules as a portable JSON array, compatible with `POST /monit/rule/import`.
-//
-// API: POST /monit/rule/export (monit-rule-read-export).
-func (s *AlertRulesService) ReadExport(ctx context.Context, req *RuleIDsRequest) (*AlertRuleExportListResponse, *Response, error) {
-	out := new(AlertRuleExportListResponse)
-	resp, err := s.client.do(ctx, "/monit/rule/export", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
 // Get alert rule detail (V2).
 //
 // Return the full V2 configuration of an alert rule by ID, including lifecycle v2 recovery and ending modes.
@@ -145,20 +131,6 @@ func (s *AlertRulesService) WriteDeleteBatch(ctx context.Context, req *RuleIDsRe
 func (s *AlertRulesService) WriteFieldsUpdate(ctx context.Context, req *RuleFieldsUpdateRequest) (*RuleNameMessageListResponse, *Response, error) {
 	out := new(RuleNameMessageListResponse)
 	resp, err := s.client.do(ctx, "/monit/rule/update/fields", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Import alert rules.
-//
-// Import one or more alert rules from a JSON array. Returns the result for each rule, indicating success or failure.
-//
-// API: POST /monit/rule/import (monit-rule-write-import).
-func (s *AlertRulesService) WriteImport(ctx context.Context, req *RuleImportRequest) (*RuleImportResponse, *Response, error) {
-	out := new(RuleImportResponse)
-	resp, err := s.client.do(ctx, "/monit/rule/import", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
