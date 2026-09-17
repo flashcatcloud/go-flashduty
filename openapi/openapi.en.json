@@ -2982,7 +2982,7 @@
             "type": "integer"
           },
           "credential_type": {
-            "description": "Credential type used for the call. `app_key` when authenticated with an app key; empty string for member sessions.",
+            "description": "Credential type used for the call. `app_key` for a long-lived console app key, `ephemeral_app_key` for a short-lived key issued to AI SRE, and an empty string for member sessions.",
             "type": "string"
           },
           "ip": {
@@ -3494,7 +3494,8 @@
           },
           "limit": {
             "default": 20,
-            "description": "Page size.",
+            "description": "Page size. Values below 1 fall back to 20; values above 200 are capped at 200.",
+            "maximum": 200,
             "type": "integer"
           },
           "p": {
@@ -7575,6 +7576,46 @@
           }
         }
       },
+      "PendingUserMessage": {
+        "type": "object",
+        "description": "A queued user message that the agent has not consumed yet, as carried by `pending_messages`.",
+        "required": [
+          "invocation_id",
+          "person_id",
+          "query"
+        ],
+        "properties": {
+          "invocation_id": {
+            "type": "string",
+            "description": "Invocation ID of the queued message."
+          },
+          "client_msg_id": {
+            "type": "string",
+            "description": "Client-supplied message ID, echoed back for de-duplication. Omitted when absent."
+          },
+          "person_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Person ID of the sender."
+          },
+          "steering": {
+            "type": "boolean",
+            "description": "True when the message was sent as a mid-turn steering instruction. Omitted when false."
+          },
+          "query": {
+            "type": "string",
+            "description": "Message text."
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "description": "Request parts passed through verbatim (text, file, ref, or skill entries). Omitted when the original message carried none."
+          }
+        }
+      },
       "PrometheusQueryParams": {
         "type": "object",
         "additionalProperties": true,
@@ -10511,6 +10552,14 @@
             "description": "Last update timestamp in Unix epoch milliseconds.",
             "format": "int64",
             "type": "integer"
+          },
+          "via": {
+            "type": "string",
+            "description": "Surface that wrote the entry on a user's behalf; currently only `ai_sre`. Omitted when a user created the entry directly."
+          },
+          "agent_session_id": {
+            "type": "string",
+            "description": "AI SRE session that produced the entry. Omitted when no agent wrote it."
           }
         },
         "required": [
@@ -17263,6 +17312,14 @@
             "description": "Template content to render.",
             "type": "string"
           },
+          "feishu_app_card_v2_enabled": {
+            "type": "boolean",
+            "description": "Render the preview as a Feishu app card v2 message."
+          },
+          "feishu_app_card_v2_preserve_blank_lines": {
+            "type": "boolean",
+            "description": "Keep blank lines in the body of the Feishu app card v2 preview."
+          },
           "incident_card_hidden_fields": {
             "$ref": "#/components/schemas/IncidentCardHiddenFields",
             "description": "Incident card fields to hide per IM app when previewing."
@@ -19368,6 +19425,14 @@
             "$ref": "#/components/schemas/RumApplicationLinks",
             "description": "Optional external-link integration configuration."
           },
+          "repositories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumApplicationRepository"
+            },
+            "maxItems": 10,
+            "description": "Source code repositories to link, in order; the first entry is the primary repository. At most 10 entries."
+          },
           "no_geo": {
             "description": "Do not infer geographic location.",
             "type": "boolean"
@@ -19513,6 +19578,14 @@
           "links": {
             "$ref": "#/components/schemas/RumApplicationLinks",
             "description": "External-link integration configuration."
+          },
+          "repositories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumApplicationRepository"
+            },
+            "maxItems": 10,
+            "description": "Linked source code repositories, in order; the first entry is the primary repository. Linking grants no access by itself: AI sessions can only read repositories granted to the account's GitHub App installations."
           },
           "no_geo": {
             "description": "If `true`, geographic location is not inferred from IP.",
@@ -19768,6 +19841,15 @@
           "links": {
             "$ref": "#/components/schemas/RumApplicationLinks",
             "description": "External-link integration configuration. Omit to leave unchanged.",
+            "x-flashduty-preserve-absence": true
+          },
+          "repositories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RumApplicationRepository"
+            },
+            "maxItems": 10,
+            "description": "Replaces the linked source code repositories when present; an empty array removes all links, and omitting the field leaves them unchanged. At most 10 entries.",
             "x-flashduty-preserve-absence": true
           },
           "no_geo": {
@@ -23643,13 +23725,21 @@
           "suggest_init": {
             "description": "Account-wide onboarding flag: true when the account has zero knowledge packs in any scope; not specific to this session.",
             "type": "boolean"
+          },
+          "pending_messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingUserMessage"
+            },
+            "description": "Human messages queued but not yet picked up by the agent, in execution order. Always an array — empty when nothing is queued."
           }
         },
         "required": [
           "session",
           "events",
           "has_more_older",
-          "suggest_init"
+          "suggest_init",
+          "pending_messages"
         ],
         "type": "object"
       },
@@ -23760,6 +23850,10 @@
             "description": "True when an agent turn is currently in flight for this session.",
             "type": "boolean"
           },
+          "standing_tasks": {
+            "type": "integer",
+            "description": "Number of process-type tasks (background shell or monitor) still alive when the response was rendered."
+          },
           "last_event_at": {
             "description": "Unix timestamp in milliseconds of the most recent assistant-side event.",
             "format": "int64",
@@ -23772,6 +23866,10 @@
           "person_id": {
             "description": "Creator person id.",
             "type": "string"
+          },
+          "creator_name": {
+            "type": "string",
+            "description": "Display name of the session creator, resolved when the response is rendered. Omitted when the member lookup fails."
           },
           "pinned_at": {
             "description": "Caller's per-user pin time as a Unix timestamp in milliseconds; 0 means not pinned.",
@@ -23864,6 +23962,7 @@
           "archived_at",
           "pinned_at",
           "is_running",
+          "standing_tasks",
           "has_unread",
           "current_turn_started_at",
           "current_turn_active_ms",
@@ -26086,10 +26185,32 @@
             "description": "Feishu app message template source.",
             "type": "string"
           },
+          "feishu_app_card_v2_preserve_blank_lines": {
+            "type": "boolean",
+            "description": "Keep blank lines in the body of Feishu app card v2 messages."
+          },
           "feishu_app_card_v2_table_enabled": {
             "default": false,
             "description": "Render alert labels as a table in Feishu app cards.",
             "type": "boolean"
+          },
+          "feishu_app_war_room_enabled": {
+            "type": "boolean",
+            "description": "Show the Create War Room button on Feishu app cards."
+          },
+          "incident_card_closed_action_apps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "feishu_app",
+                "dingtalk_app",
+                "wecom_app",
+                "slack_app",
+                "teams_app"
+              ]
+            },
+            "description": "IM apps whose closed-incident cards keep the custom action buttons. Supported values: `feishu_app`, `dingtalk_app`, `wecom_app`, `slack_app`, `teams_app`. An empty list hides the buttons on every app."
           },
           "incident_card_hidden_fields": {
             "$ref": "#/components/schemas/IncidentCardHiddenFields",
@@ -26139,6 +26260,10 @@
           "wecom_app": {
             "description": "WeCom app message template source.",
             "type": "string"
+          },
+          "wecom_markdown_v2_enabled": {
+            "type": "boolean",
+            "description": "Send WeCom robot notifications as `markdown_v2` messages instead of plain markdown."
           },
           "zoom": {
             "description": "Zoom bot message template source.",
@@ -26233,9 +26358,31 @@
             "description": "Feishu app message template source.",
             "type": "string"
           },
+          "feishu_app_card_v2_preserve_blank_lines": {
+            "type": "boolean",
+            "description": "Whether Feishu app card v2 messages keep blank lines in the body."
+          },
           "feishu_app_card_v2_table_enabled": {
             "description": "Whether alert labels use table rendering in Feishu app cards.",
             "type": "boolean"
+          },
+          "feishu_app_war_room_enabled": {
+            "type": "boolean",
+            "description": "Whether Feishu app cards show the Create War Room button. Hidden when the incident has no responders."
+          },
+          "incident_card_closed_action_apps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "feishu_app",
+                "dingtalk_app",
+                "wecom_app",
+                "slack_app",
+                "teams_app"
+              ]
+            },
+            "description": "IM apps whose closed-incident cards keep the custom action buttons. Supported values: `feishu_app`, `dingtalk_app`, `wecom_app`, `slack_app`, `teams_app`. An empty list hides the buttons on every app."
           },
           "incident_card_hidden_fields": {
             "$ref": "#/components/schemas/IncidentCardHiddenFields",
@@ -26307,6 +26454,10 @@
             "description": "WeCom app message template source.",
             "type": "string"
           },
+          "wecom_markdown_v2_enabled": {
+            "type": "boolean",
+            "description": "Whether WeCom robot notifications use the `markdown_v2` message format."
+          },
           "zoom": {
             "description": "Zoom bot message template source.",
             "type": "string"
@@ -26326,6 +26477,9 @@
           "feishu",
           "feishu_app",
           "feishu_app_card_v2_table_enabled",
+          "wecom_markdown_v2_enabled",
+          "feishu_app_card_v2_preserve_blank_lines",
+          "feishu_app_war_room_enabled",
           "dingtalk_app",
           "wecom_app",
           "slack_app",
@@ -26338,6 +26492,7 @@
           "updated_by",
           "created_at",
           "updated_at",
+          "incident_card_closed_action_apps",
           "incident_card_hidden_fields"
         ],
         "type": "object"
@@ -26476,12 +26631,40 @@
               "null"
             ]
           },
+          "feishu_app_card_v2_preserve_blank_lines": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "When set, keep or drop blank lines in the body of Feishu app card v2 messages. Omit to keep the existing setting."
+          },
           "feishu_app_card_v2_table_enabled": {
             "description": "When set, enable or disable table rendering for alert labels in Feishu app cards. Omit to keep the existing setting.",
             "type": [
               "boolean",
               "null"
             ]
+          },
+          "feishu_app_war_room_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "When set, show or hide the Create War Room button on Feishu app cards. Omit to keep the existing setting."
+          },
+          "incident_card_closed_action_apps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "feishu_app",
+                "dingtalk_app",
+                "wecom_app",
+                "slack_app",
+                "teams_app"
+              ]
+            },
+            "description": "Replaces the retained-app list when sent. Supported values: `feishu_app`, `dingtalk_app`, `wecom_app`, `slack_app`, `teams_app`. Omit the field to leave it unchanged."
           },
           "incident_card_hidden_fields": {
             "$ref": "#/components/schemas/IncidentCardHiddenFields",
@@ -26562,6 +26745,13 @@
               "string",
               "null"
             ]
+          },
+          "wecom_markdown_v2_enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "When set, switch WeCom robot notifications between `markdown_v2` and plain markdown. Omit to keep the existing setting."
           },
           "zoom": {
             "description": "Zoom bot message template source. Omit to keep the current content; send an empty string to clear it.",
@@ -27965,6 +28155,14 @@
               "deleted"
             ],
             "type": "string"
+          },
+          "chat_name": {
+            "type": "string",
+            "description": "Display name of the group chat on the IM side."
+          },
+          "integration_unavailable": {
+            "type": "boolean",
+            "description": "True when the IM integration behind this war room is disabled or no longer exists."
           }
         },
         "required": [
@@ -27975,7 +28173,8 @@
           "incident_id",
           "status",
           "created_at",
-          "plugin_type"
+          "plugin_type",
+          "chat_name"
         ],
         "type": "object"
       },
@@ -28585,6 +28784,7 @@
             "items": {
               "$ref": "#/components/schemas/InvestigationTarget"
             },
+            "maxItems": 20,
             "description": "Drill-down entries linked from the alert event detail page; at most 20 items, duplicates rejected. On update the field is presence-based: omit it to keep the current value, pass `[]` to clear.",
             "x-flashduty-preserve-absence": true
           },
@@ -28885,14 +29085,23 @@
       },
       "InvestigationTarget": {
         "type": "object",
-        "description": "Drill-down entry linked to alert events. A deliberately closed tagged union: new kinds require explicit server support.",
+        "description": "Alert-event drill-down entry. A deliberately closed tagged union: new kinds require explicit server support, and unknown fields inside a target are rejected.",
         "properties": {
           "kind": {
             "type": "string",
             "enum": [
-              "dashboard"
+              "dashboard",
+              "query"
             ],
-            "description": "Entry type; currently only `dashboard` is supported."
+            "description": "Entry kind: `dashboard` opens a dashboard panel, `query` opens an Explore query. It decides whether `dashboard` or `query` must be supplied; supplying the other one is rejected."
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/InvestigationTimeRange",
+            "description": "Window around the event time, required on every saved entry. A zero-length window is rejected; defaults belong to the editor."
+          },
+          "query": {
+            "$ref": "#/components/schemas/QueryInvestigationTarget",
+            "description": "Configuration for the `query` kind; required when `kind` is `query`, and rejected when `kind` is `dashboard`."
           },
           "dashboard": {
             "$ref": "#/components/schemas/DashboardInvestigationTarget",
@@ -28900,7 +29109,8 @@
           }
         },
         "required": [
-          "kind"
+          "kind",
+          "time_range"
         ]
       },
       "DashboardInvestigationTarget": {
@@ -28915,37 +29125,103 @@
             "type": "string",
             "description": "Panel ID inside the dashboard; must be a canonical UUIDv7. Optional."
           },
-          "variable_bindings": {
+          "variables": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/InvestigationVariableBinding"
+              "type": "string"
             },
-            "description": "Dashboard variable bindings, keyed by dashboard variable name."
+            "description": "Dashboard variable values, keyed by variable name. Values may reference event labels through `{{ }}` templates; defaults to an empty object."
           }
         },
         "required": [
-          "dashboard_id"
+          "dashboard_id",
+          "variables"
         ]
       },
-      "InvestigationVariableBinding": {
+      "InvestigationTimeRange": {
         "type": "object",
-        "description": "Binding between a dashboard variable and alert event data.",
+        "description": "Window around the alert event time, expressed as two offsets. Both directions must be non-negative and at least one must be greater than zero, so an entry never resolves to an empty window.",
         "properties": {
-          "source": {
-            "type": "string",
-            "enum": [
-              "event_label"
-            ],
-            "description": "Where the bound value comes from; currently only `event_label` (the alert event's label value) is supported."
+          "before_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740,
+            "description": "Seconds to look back from the event time."
           },
-          "key": {
-            "type": "string",
-            "description": "Alert event label name; must follow Prometheus label naming rules and must not be a reserved label."
+          "after_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740,
+            "description": "Seconds to look forward from the event time, so behaviour after the event stays visible."
           }
         },
         "required": [
-          "source",
-          "key"
+          "before_seconds",
+          "after_seconds"
+        ]
+      },
+      "QueryInvestigationTarget": {
+        "type": "object",
+        "description": "Explore query used by a `query` drill-down entry. The expression may reference event labels through `{{ }}` templates, while `args` values may not.",
+        "properties": {
+          "datasource_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Data source the query runs against."
+          },
+          "query": {
+            "$ref": "#/components/schemas/DashboardQuery",
+            "description": "Query payload."
+          }
+        },
+        "required": [
+          "datasource_id",
+          "query"
+        ]
+      },
+      "DashboardQuery": {
+        "type": "object",
+        "description": "Query payload shared by dashboards and drill-down entries.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "instant",
+              "range",
+              "window"
+            ],
+            "description": "Evaluation mode: `instant` evaluates at a single timestamp, `range` evaluates a stepped series, `window` returns raw rows inside a time window."
+          },
+          "expr": {
+            "type": "string",
+            "description": "Query expression in the target data source's language. May reference event labels through `{{ }}` templates."
+          },
+          "args": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Named query arguments; defaults to an empty object. Values are passed through verbatim and must not contain `{{ }}` templates."
+          },
+          "min_step_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 9007199254740,
+            "description": "Minimum step, in seconds. Only accepted when `mode` is `range`, and must be greater than zero; omit or pass null to let the server decide."
+          }
+        },
+        "required": [
+          "mode",
+          "expr",
+          "args"
         ]
       },
       "MemberNotifyRequest": {
@@ -29033,6 +29309,29 @@
               "send_failed"
             ],
             "description": "Why the recipient was skipped. Only present when `status` is `skipped`. `not_member` — not an active member of the caller's account; `no_email` — the member has no email address on file; `email_disabled` — the member's notification preferences for this kind of message exclude email; `duplicate` — this recipient already received a message from the same AI SRE session turn; `rate_limited` — this recipient has already been sent 20 emails through this endpoint within the last hour; `send_failed` — enqueueing the email failed."
+          }
+        }
+      },
+      "RumApplicationRepository": {
+        "type": "object",
+        "description": "Source code repository that builds the application.",
+        "required": [
+          "repo"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string",
+            "description": "GitHub repository in `owner/name` form.",
+            "examples": [
+              "acme/web-app"
+            ]
+          },
+          "subdir": {
+            "type": "string",
+            "description": "Directory holding the application inside the repository, relative to the repository root. `.` is the repository root; an empty value is saved as `.`.",
+            "examples": [
+              "apps/web"
+            ]
           }
         }
       }
@@ -43928,180 +44227,6 @@
           "href": "/en/api-reference/monitors/alert-rules/monit-rule-write-delete-batch",
           "metadata": {
             "sidebarTitle": "Batch delete alert rules"
-          }
-        }
-      }
-    },
-    "/monit/rule/export": {
-      "post": {
-        "description": "Export the configuration of selected alert rules as a portable JSON array, compatible with `POST /monit/rule/import`.",
-        "operationId": "monit-rule-read-export",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "example": {
-                "ids": [
-                  50001
-                ]
-              },
-              "schema": {
-                "$ref": "#/components/schemas/RuleIDsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "data": [
-                    {
-                      "cron_pattern": "0 * * * * *",
-                      "ds_list": [
-                        "prometheus*"
-                      ],
-                      "ds_type": "prometheus",
-                      "enabled": true,
-                      "name": "CPU High"
-                    }
-                  ],
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
-                },
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/AlertRuleExportListResponse"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "summary": "Export alert rules",
-        "tags": [
-          "Monitors/Alert rules"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/day**; **200 requests/minute**; **20 requests/second** per account |\n| Permissions | **Alerting Rules Read** (`monit`) |",
-          "href": "/en/api-reference/monitors/alert-rules/monit-rule-read-export",
-          "metadata": {
-            "sidebarTitle": "Export alert rules"
-          }
-        }
-      }
-    },
-    "/monit/rule/import": {
-      "post": {
-        "description": "Import one or more alert rules from a JSON array. Returns the result for each rule, indicating success or failure.",
-        "operationId": "monit-rule-write-import",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "example": [
-                {
-                  "cron_pattern": "0 * * * * *",
-                  "ds_list": [
-                    "prometheus*"
-                  ],
-                  "ds_type": "prometheus",
-                  "enabled": true,
-                  "folder_id": 100,
-                  "name": "CPU High",
-                  "rule_configs": {
-                    "queries": [
-                      {
-                        "expr": "avg(cpu_usage_idle) < 10",
-                        "name": "A"
-                      }
-                    ]
-                  }
-                }
-              ],
-              "schema": {
-                "$ref": "#/components/schemas/RuleImportRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "data": [
-                    {
-                      "message": "",
-                      "name": "CPU High"
-                    }
-                  ],
-                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
-                },
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/SuccessEnvelope"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/RuleImportResponse"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "summary": "Import alert rules",
-        "tags": [
-          "Monitors/Alert rules"
-        ],
-        "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **20 requests/minute**; **2 requests/second** per account |\n| Permissions | **Alerting Rules Manage** (`monit`) |\n\n## Usage\n\n- The request body is a JSON array of rule export objects (compatible with the output of `POST /monit/rule/export`).\n- Each object must include `folder_id`, `ds_type`, and either `ds_list` or `ds_ids`.\n- Some rules may fail (e.g. duplicate name). Check each result for individual status.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
-          "href": "/en/api-reference/monitors/alert-rules/monit-rule-write-import",
-          "metadata": {
-            "sidebarTitle": "Import alert rules"
           }
         }
       }
