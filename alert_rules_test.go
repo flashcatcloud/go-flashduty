@@ -21,9 +21,11 @@ func TestAlertRuleUpdateV2PreservesInvestigationTargetsPresence(t *testing.T) {
 				Kind: "dashboard",
 				Dashboard: DashboardInvestigationTarget{
 					DashboardID: "01900000-0000-7000-8000-000000000001",
+					Variables:   map[string]string{},
 				},
+				TimeRange: InvestigationTimeRange{BeforeSeconds: 1800, AfterSeconds: 600},
 			}},
-			want: `[{"dashboard":{"dashboard_id":"01900000-0000-7000-8000-000000000001"},"kind":"dashboard"}]`,
+			want: `[{"dashboard":{"dashboard_id":"01900000-0000-7000-8000-000000000001","variables":{}},"kind":"dashboard","time_range":{"after_seconds":600,"before_seconds":1800}}]`,
 		},
 	}
 	for _, tt := range tests {
