@@ -2370,8 +2370,10 @@ type CreateWarRoomRequest struct {
 
 // CreateWorkItemRequest is generated from the Flashduty OpenAPI schema.
 type CreateWorkItemRequest struct {
-	// Initial assignee member IDs. Assignees must be active members who can already read the anchor; assignment never grants access.
+	// Legacy alias for the initial assignees. Equivalent to `assignees` with every entry `type` `person`. Mutually exclusive with `assignees`: sending both returns an error. Assignees must be active members who can already read the anchor; assignment never grants access.
 	AssigneeIDs []int64 `json:"assignee_ids,omitempty" toon:"assignee_ids,omitempty"`
+	// Initial assignees. Each entry is `{type, id?}`. `type` is `person` or `ai_sre`; an `ai_sre` entry omits `id`. Mutually exclusive with `assignee_ids`: sending both returns an error. `assignee_ids` is the legacy alias and is equivalent to an all-`person` list. At most 20 entries. Person assignees must be active members who can already read the anchor; assignment never grants access.
+	Assignees []WorkItemAssignee `json:"assignees,omitempty" toon:"assignees,omitempty"`
 	// Optional longer description (max 65,535 characters).
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
 	// Client-generated idempotency key (max 128 characters; letters, digits, `_`, `-`, `.`, `:` only).
@@ -5216,8 +5218,10 @@ type ListWebhookHistoryResponse struct {
 
 // ListWorkItemRequest is generated from the Flashduty OpenAPI schema.
 type ListWorkItemRequest struct {
-	// Restrict results to items assigned to this member ID. Listing by assignee alone requires being that assignee or an account admin.
+	// Restrict results to items assigned to this member ID. Listing by assignee alone requires being that assignee or an account admin. Ignored when `assignee_type` is `ai_sre`.
 	AssigneeID int64 `json:"assignee_id,omitempty" toon:"assignee_id,omitempty"`
+	// Filter by assignee type: `person` or `ai_sre`. `ai_sre` returns items assigned to AI SRE (an AI caller uses this to list its own tasks) and does not require `assignee_id`. `person` together with `assignee_id` restricts results to that member. Omitted with a positive `assignee_id` means `person`.
+	AssigneeType string `json:"assignee_type,omitempty" toon:"assignee_type,omitempty"`
 	// Pagination cursor from a previous response's `next_cursor`.
 	Cursor string `json:"cursor,omitempty" toon:"cursor,omitempty"`
 	// Incident ID (MongoDB ObjectID). Also returns follow-ups anchored on the incident's post-mortem.
@@ -6781,8 +6785,10 @@ type ResetPostMortemTitleRequest struct {
 
 // ResetWorkItemAssigneesRequest is generated from the Flashduty OpenAPI schema.
 type ResetWorkItemAssigneesRequest struct {
-	// New assignee member IDs, replacing the current set. An empty array clears all assignees.
+	// Legacy alias for the replacement assignee set. Equivalent to `assignees` with every entry `type` `person`. Mutually exclusive with `assignees`: sending both returns an error. An empty array clears all assignees.
 	AssigneeIDs []int64 `json:"assignee_ids,omitempty" toon:"assignee_ids,omitempty"`
+	// Replacement assignee set. Each entry is `{type, id?}`. `type` is `person` or `ai_sre`; an `ai_sre` entry omits `id`. Mutually exclusive with `assignee_ids`: sending both returns an error. `assignee_ids` is the legacy alias and is equivalent to an all-`person` list. At most 20 entries. An empty array clears all assignees.
+	Assignees []WorkItemAssignee `json:"assignees,omitempty" toon:"assignees,omitempty"`
 	// Current item version for optimistic locking. Must match the stored version.
 	Version int64 `json:"version" toon:"version"`
 	// Work item ID (opaque string, max 128 characters).
@@ -10688,6 +10694,14 @@ type WebhookHistoryItem struct {
 	WebhookType string `json:"webhook_type" toon:"webhook_type"`
 }
 
+// WorkItemAssignee is generated from the Flashduty OpenAPI schema.
+type WorkItemAssignee struct {
+	// Member ID. Required when `type` is `person`. Omitted when `type` is `ai_sre`.
+	ID int64 `json:"id,omitempty" toon:"id,omitempty"`
+	// Assignee kind: `person` (a member) or `ai_sre` (the account AI SRE).
+	Type string `json:"type" toon:"type"`
+}
+
 // WorkItemCreateResult is generated from the Flashduty OpenAPI schema.
 type WorkItemCreateResult struct {
 	// Assignee member IDs that were newly added (and notified).
@@ -10699,8 +10713,14 @@ type WorkItemCreateResult struct {
 
 // WorkItemItem is generated from the Flashduty OpenAPI schema.
 type WorkItemItem struct {
-	// Member IDs of the current assignees. Never null; an empty array means unassigned.
+	// ID of the AI SRE session executing this item. Omitted when no session is recorded.
+	AgentSessionID string `json:"agent_session_id" toon:"agent_session_id"`
+	// Where that AI SRE session runs: `web` or `im`. Omitted when no session is recorded.
+	AgentSessionVenue string `json:"agent_session_venue" toon:"agent_session_venue"`
+	// Member IDs of the current person assignees. AI SRE is not included. Never null; an empty array means no person assignee.
 	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
+	// Current assignees. Each entry is `{type, id?}`. `type` is `person` or `ai_sre`; an `ai_sre` entry omits `id`. Never null; an empty array means unassigned. `assignee_ids` is the person-only subset of this list.
+	Assignees []WorkItemAssignee `json:"assignees" toon:"assignees"`
 	// Conversion time as a Unix timestamp in seconds. Present only after conversion.
 	ConvertedAtSeconds Timestamp `json:"converted_at_seconds" toon:"converted_at_seconds"`
 	// Member ID of the operator who converted the action into a follow-up. Present only after conversion.

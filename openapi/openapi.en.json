@@ -6592,11 +6592,19 @@
         "description": "Parameters for creating an incident work item.",
         "properties": {
           "assignee_ids": {
-            "description": "Initial assignee member IDs. Assignees must be active members who can already read the anchor; assignment never grants access.",
+            "description": "Legacy alias for the initial assignees. Equivalent to `assignees` with every entry `type` `person`. Mutually exclusive with `assignees`: sending both returns an error. Assignees must be active members who can already read the anchor; assignment never grants access.",
             "items": {
               "format": "int64",
               "type": "integer"
             },
+            "type": "array"
+          },
+          "assignees": {
+            "description": "Initial assignees. Each entry is `{type, id?}`. `type` is `person` or `ai_sre`; an `ai_sre` entry omits `id`. Mutually exclusive with `assignee_ids`: sending both returns an error. `assignee_ids` is the legacy alias and is equivalent to an all-`person` list. At most 20 entries. Person assignees must be active members who can already read the anchor; assignment never grants access.",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "maxItems": 20,
             "type": "array"
           },
           "description": {
@@ -14456,12 +14464,20 @@
         "type": "object"
       },
       "ListWorkItemRequest": {
-        "description": "Filters for listing work items. At least one of `incident_id`, `post_mortem_id`, or `assignee_id` is required.",
+        "description": "Filters for listing work items. At least one of `incident_id`, `post_mortem_id`, `assignee_id`, or `assignee_type` = `ai_sre` is required.",
         "properties": {
           "assignee_id": {
-            "description": "Restrict results to items assigned to this member ID. Listing by assignee alone requires being that assignee or an account admin.",
+            "description": "Restrict results to items assigned to this member ID. Listing by assignee alone requires being that assignee or an account admin. Ignored when `assignee_type` is `ai_sre`.",
             "format": "int64",
             "type": "integer"
+          },
+          "assignee_type": {
+            "description": "Filter by assignee type: `person` or `ai_sre`. `ai_sre` returns items assigned to AI SRE (an AI caller uses this to list its own tasks) and does not require `assignee_id`. `person` together with `assignee_id` restricts results to that member. Omitted with a positive `assignee_id` means `person`.",
+            "enum": [
+              "person",
+              "ai_sre"
+            ],
+            "type": "string"
           },
           "cursor": {
             "description": "Pagination cursor from a previous response's `next_cursor`.",
@@ -18130,11 +18146,19 @@
         "description": "Full replacement of a work item's assignee set.",
         "properties": {
           "assignee_ids": {
-            "description": "New assignee member IDs, replacing the current set. An empty array clears all assignees.",
+            "description": "Legacy alias for the replacement assignee set. Equivalent to `assignees` with every entry `type` `person`. Mutually exclusive with `assignees`: sending both returns an error. An empty array clears all assignees.",
             "items": {
               "format": "int64",
               "type": "integer"
             },
+            "type": "array"
+          },
+          "assignees": {
+            "description": "Replacement assignee set. Each entry is `{type, id?}`. `type` is `person` or `ai_sre`; an `ai_sre` entry omits `id`. Mutually exclusive with `assignee_ids`: sending both returns an error. `assignee_ids` is the legacy alias and is equivalent to an all-`person` list. At most 20 entries. An empty array clears all assignees.",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "maxItems": 20,
             "type": "array"
           },
           "version": {
@@ -28429,6 +28453,28 @@
         ],
         "type": "object"
       },
+      "WorkItemAssignee": {
+        "description": "One assignee on a work item.",
+        "properties": {
+          "id": {
+            "description": "Member ID. Required when `type` is `person`. Omitted when `type` is `ai_sre`.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": "Assignee kind: `person` (a member) or `ai_sre` (the account AI SRE).",
+            "enum": [
+              "person",
+              "ai_sre"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "WorkItemCreateResult": {
         "description": "Result of creating a work item.",
         "properties": {
@@ -28456,11 +28502,30 @@
       "WorkItemItem": {
         "description": "A structured incident work item (action or post-mortem follow-up) with its assignees.",
         "properties": {
+          "agent_session_id": {
+            "description": "ID of the AI SRE session executing this item. Omitted when no session is recorded.",
+            "type": "string"
+          },
+          "agent_session_venue": {
+            "description": "Where that AI SRE session runs: `web` or `im`. Omitted when no session is recorded.",
+            "enum": [
+              "web",
+              "im"
+            ],
+            "type": "string"
+          },
           "assignee_ids": {
-            "description": "Member IDs of the current assignees. Never null; an empty array means unassigned.",
+            "description": "Member IDs of the current person assignees. AI SRE is not included. Never null; an empty array means no person assignee.",
             "items": {
               "format": "int64",
               "type": "integer"
+            },
+            "type": "array"
+          },
+          "assignees": {
+            "description": "Current assignees. Each entry is `{type, id?}`. `type` is `person` or `ai_sre`; an `ai_sre` entry omits `id`. Never null; an empty array means unassigned. `assignee_ids` is the person-only subset of this list.",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
             },
             "type": "array"
           },
@@ -28563,6 +28628,7 @@
           "source_kind",
           "version",
           "assignee_ids",
+          "assignees",
           "created_by",
           "updated_by",
           "created_at_seconds",
@@ -40265,6 +40331,20 @@
                         4756301322131,
                         5068740052131
                       ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
+                      ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
                       "incident_id": "6a5f1e28807515413b384bce",
@@ -40321,7 +40401,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Requires the On-call Pro license.\n- Full replacement of the assignee set — an empty array clears all assignees.\n- Only newly added assignees are notified; removals never notify.\n- Audited — changes are recorded in the audit log.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Requires the On-call Pro license.\n- Full replacement of the assignee set — an empty array clears all assignees.\n- Set either `assignees` or the legacy `assignee_ids`, not both (sending both returns an error). An `ai_sre` entry omits `id`.\n- Only newly added assignees are notified; removals never notify.\n- Audited — changes are recorded in the audit log.",
           "href": "/en/api-reference/on-call/incidents/incident-work-item-reset-assignees",
           "metadata": {
             "sidebarTitle": "Reset work item assignees"
@@ -40360,6 +40440,20 @@
                         3790925372131,
                         4756301322131,
                         5068740052131
+                      ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
                       ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
@@ -40453,6 +40547,20 @@
                         3790925372131,
                         4756301322131,
                         5068740052131
+                      ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
                       ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
@@ -40554,6 +40662,12 @@
                       "assignee_ids": [
                         3790925372131
                       ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        }
+                      ],
                       "created_at_seconds": 1785496400,
                       "created_by": 3790925372131,
                       "incident_id": "6a5f1e28807515413b384bce",
@@ -40606,7 +40720,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Requires the On-call Pro license.\n- An `action` anchors to an active incident and must NOT set `post_mortem_id`; a `follow_up` REQUIRES the `post_mortem_id` of a post-mortem linked to `incident_id`.\n- Assignees must be active members who can already read the anchor incident or post-mortem — assignment never grants access.\n- Newly added assignees are notified.\n- Retrying with the same (`creator`, `idempotency_key`) replays the original item with `idempotent_replay: true` instead of creating a duplicate.\n- Audited — changes are recorded in the audit log.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Manage** (`on-call`) |\n\n## Usage\n\n- Requires the On-call Pro license.\n- An `action` anchors to an active incident and must NOT set `post_mortem_id`; a `follow_up` REQUIRES the `post_mortem_id` of a post-mortem linked to `incident_id`.\n- Set either `assignees` or the legacy `assignee_ids`, not both. `assignees` entries are `{type, id?}` with `type` `person` or `ai_sre`; an `ai_sre` entry omits `id`. `assignee_ids` is equivalent to an all-`person` list. Sending both returns an error.\n- Person assignees must be active members who can already read the anchor incident or post-mortem — assignment never grants access.\n- Newly added assignees are notified.\n- Retrying with the same (`creator`, `idempotency_key`) replays the original item with `idempotent_replay: true` instead of creating a duplicate.\n- Audited — changes are recorded in the audit log.",
           "href": "/en/api-reference/on-call/incidents/incident-work-item-create",
           "metadata": {
             "sidebarTitle": "Create a work item"
@@ -40717,6 +40831,20 @@
                           4756301322131,
                           5068740052131
                         ],
+                        "assignees": [
+                          {
+                            "id": 3790925372131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 4756301322131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
+                        ],
                         "created_at_seconds": 1785495329,
                         "created_by": 5329873302131,
                         "incident_id": "6a5f1e28807515413b384bce",
@@ -40733,6 +40861,12 @@
                       {
                         "assignee_ids": [
                           5068740052131
+                        ],
+                        "assignees": [
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
                         ],
                         "created_at_seconds": 1785495164,
                         "created_by": 3790925372131,
@@ -40789,7 +40923,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Read** (`on-call`) |\n\n## Usage\n\n- At least one of `incident_id`, `post_mortem_id`, or `assignee_id` is required.\n- Cursor pagination sorted by `updated_at_seconds` descending — pass the previous response's `next_cursor` as `cursor` until `has_more` is false.\n- Listing by `incident_id` also includes follow-ups anchored on the incident's post-mortem.\n- Listing by `assignee_id` alone requires being that assignee or an account admin.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Incidents Read** (`on-call`) |\n\n## Usage\n\n- At least one of `incident_id`, `post_mortem_id`, `assignee_id`, or `assignee_type` = `ai_sre` is required.\n- `assignee_type` = `ai_sre` lists items assigned to AI SRE and can be used on its own.\n- Cursor pagination sorted by `updated_at_seconds` descending — pass the previous response's `next_cursor` as `cursor` until `has_more` is false.\n- Listing by `incident_id` also includes follow-ups anchored on the incident's post-mortem.\n- Listing by `assignee_id` alone requires being that assignee or an account admin.",
           "href": "/en/api-reference/on-call/incidents/incident-work-item-list",
           "metadata": {
             "sidebarTitle": "List work items"
@@ -40830,6 +40964,20 @@
                           4756301322131,
                           5068740052131
                         ],
+                        "assignees": [
+                          {
+                            "id": 3790925372131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 4756301322131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
+                        ],
                         "created_at_seconds": 1785495329,
                         "created_by": 5329873302131,
                         "incident_id": "6a5f1e28807515413b384bce",
@@ -40846,6 +40994,12 @@
                       {
                         "assignee_ids": [
                           5068740052131
+                        ],
+                        "assignees": [
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
                         ],
                         "created_at_seconds": 1785495164,
                         "created_by": 3790925372131,
@@ -40940,6 +41094,20 @@
                         3790925372131,
                         4756301322131,
                         5068740052131
+                      ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
                       ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
