@@ -6592,11 +6592,19 @@
         "description": "创建故障跟进事项的参数。",
         "properties": {
           "assignee_ids": {
-            "description": "初始负责人成员 ID 列表。负责人须为已能查看锚定对象的活跃成员；指派不会授予访问权限。",
+            "description": "初始负责人的旧版别名，等价于全部为 `person` 的 `assignees`。与 `assignees` 互斥，同时出现会报错。负责人须为已能查看锚定对象的活跃成员；指派不会授予访问权限。",
             "items": {
               "format": "int64",
               "type": "integer"
             },
+            "type": "array"
+          },
+          "assignees": {
+            "description": "初始负责人列表。每项为 `{type, id?}`。`type` 取 `person` 或 `ai_sre`；`ai_sre` 不带 `id`。与 `assignee_ids` 互斥，同时出现会报错。`assignee_ids` 是旧版别名，等价于全部为 `person`。最多 20 项。`person` 须为已能查看锚定对象的活跃成员；指派不会授予访问权限。",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "maxItems": 20,
             "type": "array"
           },
           "description": {
@@ -14456,12 +14464,20 @@
         "type": "object"
       },
       "ListWorkItemRequest": {
-        "description": "查询跟进事项的过滤条件。`incident_id`、`post_mortem_id`、`assignee_id` 至少提供一个。",
+        "description": "查询跟进事项的过滤条件。`incident_id`、`post_mortem_id`、`assignee_id`，或 `assignee_type` 为 `ai_sre`，至少满足一个。",
         "properties": {
           "assignee_id": {
-            "description": "按负责人成员 ID 过滤结果。仅按负责人查询时，须为本人或账户管理员。",
+            "description": "按负责人成员 ID 过滤结果。仅按负责人查询时，须为本人或账户管理员。`assignee_type` 为 `ai_sre` 时忽略本字段。",
             "format": "int64",
             "type": "integer"
+          },
+          "assignee_type": {
+            "description": "按负责人类型过滤：`person` 或 `ai_sre`。`ai_sre` 返回指派给 AI SRE 的事项（AI 用它查询自己的任务），不需要 `assignee_id`。`person` 与 `assignee_id` 一起使用时，只返回该成员负责的事项。省略本字段且 `assignee_id` 为正数时，按 `person` 过滤。",
+            "enum": [
+              "person",
+              "ai_sre"
+            ],
+            "type": "string"
           },
           "cursor": {
             "description": "分页游标，取自上一次响应的 `next_cursor`。",
@@ -18130,11 +18146,19 @@
         "description": "整体替换跟进事项的负责人集合。",
         "properties": {
           "assignee_ids": {
-            "description": "新的负责人成员 ID 列表，整体替换当前集合。空数组表示清空所有负责人。",
+            "description": "替换后负责人集合的旧版别名，等价于全部为 `person` 的 `assignees`。与 `assignees` 互斥，同时出现会报错。空数组表示清空所有负责人。",
             "items": {
               "format": "int64",
               "type": "integer"
             },
+            "type": "array"
+          },
+          "assignees": {
+            "description": "替换后的负责人集合。每项为 `{type, id?}`。`type` 取 `person` 或 `ai_sre`；`ai_sre` 不带 `id`。与 `assignee_ids` 互斥，同时出现会报错。`assignee_ids` 是旧版别名，等价于全部为 `person`。最多 20 项。空数组表示清空所有负责人。",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "maxItems": 20,
             "type": "array"
           },
           "version": {
@@ -28429,6 +28453,28 @@
         ],
         "type": "object"
       },
+      "WorkItemAssignee": {
+        "description": "跟进事项的一名负责人。",
+        "properties": {
+          "id": {
+            "description": "成员 ID。`type` 为 `person` 时必填；`type` 为 `ai_sre` 时省略。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": "负责人类型：`person` 为成员，`ai_sre` 为账户的 AI SRE。",
+            "enum": [
+              "person",
+              "ai_sre"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "WorkItemCreateResult": {
         "description": "创建跟进事项的结果。",
         "properties": {
@@ -28456,11 +28502,30 @@
       "WorkItemItem": {
         "description": "结构化的故障跟进事项（行动项或复盘后续行动）及其负责人。",
         "properties": {
+          "agent_session_id": {
+            "description": "执行该事项的 AI SRE 会话 ID。没有会话时省略。",
+            "type": "string"
+          },
+          "agent_session_venue": {
+            "description": "该 AI SRE 会话所在位置：`web` 或 `im`。没有会话时省略。",
+            "enum": [
+              "web",
+              "im"
+            ],
+            "type": "string"
+          },
           "assignee_ids": {
-            "description": "当前负责人的成员 ID 列表。不会为 null；空数组表示未指派。",
+            "description": "当前人员负责人的成员 ID。不含 AI SRE。不会为 null；空数组表示没有人员负责人。",
             "items": {
               "format": "int64",
               "type": "integer"
+            },
+            "type": "array"
+          },
+          "assignees": {
+            "description": "当前负责人。每项为 `{type, id?}`。`type` 取 `person` 或 `ai_sre`；`ai_sre` 不带 `id`。不会为 null；空数组表示未指派。`assignee_ids` 是其中仅含 `person` 的子集。",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
             },
             "type": "array"
           },
@@ -28563,6 +28628,7 @@
           "source_kind",
           "version",
           "assignee_ids",
+          "assignees",
           "created_by",
           "updated_by",
           "created_at_seconds",
@@ -40265,6 +40331,20 @@
                         4756301322131,
                         5068740052131
                       ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
+                      ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
                       "incident_id": "6a5f1e28807515413b384bce",
@@ -40321,7 +40401,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 整体替换负责人集合 —— 空数组表示清空所有负责人。\n- 仅新添加的负责人会收到通知；移除不通知。\n- 已审计 —— 变更会记录到审计日志。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- 整体替换负责人集合 —— 空数组表示清空所有负责人。\n- 使用 `assignees` 或旧版 `assignee_ids`。两者同时出现会报错。`ai_sre` 条目不带 `id`。\n- 仅新添加的负责人会收到通知；移除不通知。\n- 已审计 —— 变更会记录到审计日志。",
           "href": "/zh/api-reference/on-call/incidents/incident-work-item-reset-assignees",
           "metadata": {
             "sidebarTitle": "重置跟进事项负责人"
@@ -40360,6 +40440,20 @@
                         3790925372131,
                         4756301322131,
                         5068740052131
+                      ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
                       ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
@@ -40453,6 +40547,20 @@
                         3790925372131,
                         4756301322131,
                         5068740052131
+                      ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
                       ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
@@ -40554,6 +40662,12 @@
                       "assignee_ids": [
                         3790925372131
                       ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        }
+                      ],
                       "created_at_seconds": 1785496400,
                       "created_by": 3790925372131,
                       "incident_id": "6a5f1e28807515413b384bce",
@@ -40606,7 +40720,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- `action` 锚定活动故障，且不得设置 `post_mortem_id`；`follow_up` 必须设置为关联到 `incident_id` 的故障复盘 ID。\n- 负责人须为已能查看锚定故障或复盘的活跃成员 —— 指派不会授予访问权限。\n- 新添加的负责人会收到通知。\n- 以相同的（`creator`、`idempotency_key`）重试时，返回原事项并标记 `idempotent_replay: true`，不会创建重复事项。\n- 已审计 —— 变更会记录到审计日志。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障管理**（`on-call`） |\n\n## 使用说明\n\n- 需要 On-call Pro 许可。\n- `action` 锚定活动故障，且不得设置 `post_mortem_id`；`follow_up` 必须设置为关联到 `incident_id` 的故障复盘 ID。\n- 使用 `assignees`（`person` 带 `id`，或 `ai_sre` 不带 `id`），或使用旧版 `assignee_ids`（全部为 `person`）。两者同时出现会报错。\n- 人员负责人须为已能查看锚定故障或复盘的活跃成员 —— 指派不会授予访问权限。\n- 新添加的负责人会收到通知。\n- 以相同的（`creator`、`idempotency_key`）重试时，返回原事项并标记 `idempotent_replay: true`，不会创建重复事项。\n- 已审计 —— 变更会记录到审计日志。",
           "href": "/zh/api-reference/on-call/incidents/incident-work-item-create",
           "metadata": {
             "sidebarTitle": "创建跟进事项"
@@ -40717,6 +40831,20 @@
                           4756301322131,
                           5068740052131
                         ],
+                        "assignees": [
+                          {
+                            "id": 3790925372131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 4756301322131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
+                        ],
                         "created_at_seconds": 1785495329,
                         "created_by": 5329873302131,
                         "incident_id": "6a5f1e28807515413b384bce",
@@ -40733,6 +40861,12 @@
                       {
                         "assignee_ids": [
                           5068740052131
+                        ],
+                        "assignees": [
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
                         ],
                         "created_at_seconds": 1785495164,
                         "created_by": 3790925372131,
@@ -40789,7 +40923,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- `incident_id`、`post_mortem_id`、`assignee_id` 至少提供一个。\n- 按 `updated_at_seconds` 倒序的游标分页 —— 将上一次响应的 `next_cursor` 作为 `cursor` 传入，直到 `has_more` 为 false。\n- 按 `incident_id` 查询时，同时包含锚定在该故障复盘上的后续行动。\n- 仅按 `assignee_id` 查询时，须为本人或账户管理员。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **故障查看**（`on-call`） |\n\n## 使用说明\n\n- `incident_id`、`post_mortem_id`、`assignee_id`，或 `assignee_type` 为 `ai_sre`，至少满足一个。\n- `assignee_type` 为 `ai_sre` 时返回指派给 AI SRE 的事项，可单独作为查询条件。\n- 按 `updated_at_seconds` 倒序的游标分页 —— 将上一次响应的 `next_cursor` 作为 `cursor` 传入，直到 `has_more` 为 false。\n- 按 `incident_id` 查询时，同时包含锚定在该故障复盘上的后续行动。\n- 仅按 `assignee_id` 查询时，须为本人或账户管理员。",
           "href": "/zh/api-reference/on-call/incidents/incident-work-item-list",
           "metadata": {
             "sidebarTitle": "查询跟进事项列表"
@@ -40830,6 +40964,20 @@
                           4756301322131,
                           5068740052131
                         ],
+                        "assignees": [
+                          {
+                            "id": 3790925372131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 4756301322131,
+                            "type": "person"
+                          },
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
+                        ],
                         "created_at_seconds": 1785495329,
                         "created_by": 5329873302131,
                         "incident_id": "6a5f1e28807515413b384bce",
@@ -40846,6 +40994,12 @@
                       {
                         "assignee_ids": [
                           5068740052131
+                        ],
+                        "assignees": [
+                          {
+                            "id": 5068740052131,
+                            "type": "person"
+                          }
                         ],
                         "created_at_seconds": 1785495164,
                         "created_by": 3790925372131,
@@ -40940,6 +41094,20 @@
                         3790925372131,
                         4756301322131,
                         5068740052131
+                      ],
+                      "assignees": [
+                        {
+                          "id": 3790925372131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 4756301322131,
+                          "type": "person"
+                        },
+                        {
+                          "id": 5068740052131,
+                          "type": "person"
+                        }
                       ],
                       "created_at_seconds": 1785495329,
                       "created_by": 5329873302131,
