@@ -1541,6 +1541,10 @@
             "description": "告警描述。",
             "type": "string"
           },
+          "detail_url": {
+            "description": "这条告警的控制台页面（`{控制台}/alert/detail/{alert_id}`）。部署没有配置控制台地址时为空。",
+            "type": "string"
+          },
           "end_time": {
             "description": "恢复时间，Unix 时间戳（秒）。活跃时为 0。",
             "format": "int64",
