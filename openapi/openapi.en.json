@@ -1320,6 +1320,10 @@
             "description": "Alert description.",
             "type": "string"
           },
+          "detail_url": {
+            "description": "Console URL of this alert (`{console}/alert/detail/{alert_id}`). Empty when the deployment has no console base configured.",
+            "type": "string"
+          },
           "end_time": {
             "description": "Unix timestamp (seconds) when the alert recovered. 0 if still active.",
             "format": "int64",

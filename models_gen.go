@@ -564,6 +564,8 @@ type AlertInfo struct {
 	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Alert description.
 	Description string `json:"description" toon:"description"`
+	// Console URL of this alert (`{console}/alert/detail/{alert_id}`). Empty when the deployment has no console base configured.
+	DetailURL string `json:"detail_url" toon:"detail_url"`
 	// Unix timestamp (seconds) when the alert recovered. 0 if still active.
 	EndTime Timestamp `json:"end_time" toon:"end_time"`
 	// Total number of raw events merged into this alert.
