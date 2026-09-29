@@ -1844,6 +1844,7 @@ type ChangeEventItem struct {
 	// | `Processing` | Being executed. |
 	// | `Canceled` | Canceled. |
 	// | `Done` | Completed. |
+	// | `Failed` | Failed. |
 	ChangeStatus string `json:"change_status" toon:"change_status"`
 	// Collaboration channel this change event is routed to.
 	ChannelID int64 `json:"channel_id" toon:"channel_id"`
@@ -1885,6 +1886,7 @@ type ChangeItem struct {
 	// | `Processing` | Being executed. |
 	// | `Canceled` | Canceled. |
 	// | `Done` | Completed. |
+	// | `Failed` | Failed. |
 	ChangeStatus string `json:"change_status" toon:"change_status"`
 	// Collaboration channel this change is routed to.
 	ChannelID int64 `json:"channel_id" toon:"channel_id"`

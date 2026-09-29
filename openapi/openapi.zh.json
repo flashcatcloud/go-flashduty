@@ -4502,13 +4502,14 @@
             "type": "string"
           },
           "change_status": {
-            "description": "变更事件的生命周期状态。由变更事件源按执行进度上报。\n| 值 | 含义 |\n|---|---|\n| `Planned` | 已计划，尚未开始。 |\n| `Ready` | 已就绪，待执行。 |\n| `Processing` | 正在执行。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |",
+            "description": "变更事件的生命周期状态。由变更事件源按执行进度上报。\n| 值 | 含义 |\n|---|---|\n| `Planned` | 已计划，尚未开始。 |\n| `Ready` | 已就绪，待执行。 |\n| `Processing` | 正在执行。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |\n| `Failed` | 失败。 |",
             "enum": [
               "Planned",
               "Ready",
               "Processing",
               "Canceled",
-              "Done"
+              "Done",
+              "Failed"
             ],
             "type": "string"
           },
@@ -4584,13 +4585,14 @@
             "type": "string"
           },
           "change_status": {
-            "description": "变更的当前生命周期状态。\n| 取值 | 含义 |\n|---|---|\n| `Planned` | 已计划，未开始。 |\n| `Ready` | 就绪，待执行。 |\n| `Processing` | 执行中。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |",
+            "description": "变更的当前生命周期状态。\n| 取值 | 含义 |\n|---|---|\n| `Planned` | 已计划，未开始。 |\n| `Ready` | 就绪，待执行。 |\n| `Processing` | 执行中。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |\n| `Failed` | 失败。 |",
             "enum": [
               "Planned",
               "Ready",
               "Processing",
               "Canceled",
-              "Done"
+              "Done",
+              "Failed"
             ],
             "type": "string"
           },
