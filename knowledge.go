@@ -23,7 +23,7 @@ func (s *KnowledgeService) FileReadGet(ctx context.Context, req *KnowledgeFileGe
 
 // List knowledge files.
 //
-// List the files in a knowledge pack with metadata such as size and checksum.
+// List knowledge files with metadata such as size and checksum.
 //
 // API: POST /safari/knowledge/file/list (knowledge-file-read-list).
 func (s *KnowledgeService) FileReadList(ctx context.Context, req *KnowledgeFileListRequest) (*KnowledgeFileListResponse, *Response, error) {
@@ -37,7 +37,7 @@ func (s *KnowledgeService) FileReadList(ctx context.Context, req *KnowledgeFileL
 
 // Delete knowledge file.
 //
-// Delete a file from a knowledge pack by its relative path.
+// Delete a knowledge file by its relative path.
 //
 // API: POST /safari/knowledge/file/delete (knowledge-file-write-delete).
 func (s *KnowledgeService) FileWriteDelete(ctx context.Context, req *KnowledgeFileDeleteRequest) (*KnowledgeFileDeleteResponse, *Response, error) {
@@ -51,7 +51,7 @@ func (s *KnowledgeService) FileWriteDelete(ctx context.Context, req *KnowledgeFi
 
 // Upload knowledge file.
 //
-// Create or overwrite a file in a knowledge pack with base64-encoded content.
+// Create or overwrite a knowledge file with base64-encoded content.
 //
 // API: POST /safari/knowledge/file/put (knowledge-file-write-put).
 func (s *KnowledgeService) FileWritePut(ctx context.Context, req *KnowledgeFilePutRequest) (*KnowledgeFilePutResponse, *Response, error) {
@@ -63,9 +63,9 @@ func (s *KnowledgeService) FileWritePut(ctx context.Context, req *KnowledgeFileP
 	return out, resp, nil
 }
 
-// Get account knowledge pack.
+// Get account knowledge.
 //
-// Return the account-scope knowledge pack metadata and its file list.
+// Return the metadata and file list of the account-scope knowledge.
 //
 // API: POST /safari/knowledge/get (knowledge-pack-read-get).
 func (s *KnowledgeService) PackReadGet(ctx context.Context) (*KnowledgeGetResponse, *Response, error) {
@@ -77,9 +77,9 @@ func (s *KnowledgeService) PackReadGet(ctx context.Context) (*KnowledgeGetRespon
 	return out, resp, nil
 }
 
-// List knowledge packs.
+// List knowledge.
 //
-// List knowledge packs visible to the caller across account and team scopes.
+// List the knowledge visible to the caller across account and team scopes.
 //
 // API: POST /safari/knowledge/pack/list (knowledge-pack-read-list).
 func (s *KnowledgeService) PackReadList(ctx context.Context, req *KnowledgePackListRequest) (*KnowledgePackListResponse, *Response, error) {
@@ -91,9 +91,9 @@ func (s *KnowledgeService) PackReadList(ctx context.Context, req *KnowledgePackL
 	return out, resp, nil
 }
 
-// Delete knowledge pack.
+// Delete knowledge.
 //
-// Delete a knowledge pack and all of its files.
+// Delete knowledge and all of its files.
 //
 // API: POST /safari/knowledge/pack/delete (knowledge-pack-write-delete).
 func (s *KnowledgeService) PackWriteDelete(ctx context.Context, req *KnowledgePackDeleteRequest) (*KnowledgePackDeleteResponse, *Response, error) {
@@ -105,9 +105,9 @@ func (s *KnowledgeService) PackWriteDelete(ctx context.Context, req *KnowledgePa
 	return out, resp, nil
 }
 
-// Ensure knowledge pack.
+// Ensure knowledge.
 //
-// Idempotently create the knowledge pack at the given scope, or return the existing one.
+// Idempotently create the knowledge at the given scope, or return the existing one.
 //
 // API: POST /safari/knowledge/pack/ensure (knowledge-pack-write-ensure).
 func (s *KnowledgeService) PackWriteEnsure(ctx context.Context, req *KnowledgePackEnsureRequest) (*KnowledgePackItem, *Response, error) {
@@ -119,9 +119,9 @@ func (s *KnowledgeService) PackWriteEnsure(ctx context.Context, req *KnowledgePa
 	return out, resp, nil
 }
 
-// Update knowledge pack.
+// Update knowledge.
 //
-// Move a knowledge pack to a different account or team scope.
+// Move knowledge to a different account or team scope.
 //
 // API: POST /safari/knowledge/pack/update (knowledge-pack-write-update).
 func (s *KnowledgeService) PackWriteUpdate(ctx context.Context, req *KnowledgePackUpdateRequest) (*KnowledgePackItem, *Response, error) {

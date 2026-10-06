@@ -16,8 +16,10 @@ type genServices struct {
 	Sessions                 *SessionsService
 	Skills                   *SkillsService
 	AlertRules               *AlertRulesService
+	Dashboards               *DashboardsService
 	DataSources              *DataSourcesService
 	Diagnostics              *DiagnosticsService
+	RuleFolders              *RuleFoldersService
 	AlertEnrichment          *AlertEnrichmentService
 	Alerts                   *AlertsService
 	Analytics                *AnalyticsService
@@ -58,8 +60,10 @@ func (c *Client) initServices() {
 	c.Sessions = (*SessionsService)(&c.common)
 	c.Skills = (*SkillsService)(&c.common)
 	c.AlertRules = (*AlertRulesService)(&c.common)
+	c.Dashboards = (*DashboardsService)(&c.common)
 	c.DataSources = (*DataSourcesService)(&c.common)
 	c.Diagnostics = (*DiagnosticsService)(&c.common)
+	c.RuleFolders = (*RuleFoldersService)(&c.common)
 	c.AlertEnrichment = (*AlertEnrichmentService)(&c.common)
 	c.Alerts = (*AlertsService)(&c.common)
 	c.Analytics = (*AnalyticsService)(&c.common)

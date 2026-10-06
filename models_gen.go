@@ -2058,15 +2058,15 @@ type CompleteWorkItemRequest struct {
 
 // ContextResolvedItem is generated from the Flashduty OpenAPI schema.
 type ContextResolvedItem struct {
-	// Resolved account-scoped pack id.
+	// Resolved account-scope knowledge ID.
 	AccountPackID string `json:"account_pack_id" toon:"account_pack_id"`
 	// Bound incident id, when war-room originated.
 	IncidentID string `json:"incident_id" toon:"incident_id"`
-	// Unix timestamp in milliseconds when the packs were resolved.
+	// Unix timestamp in milliseconds when the knowledge was resolved.
 	ResolvedAtMs TimestampMilli `json:"resolved_at_ms" toon:"resolved_at_ms"`
-	// Resolved team-scoped pack id.
+	// Resolved team-scope knowledge ID.
 	TeamPackID string `json:"team_pack_id" toon:"team_pack_id"`
-	// Per-pack resolved version map.
+	// Resolved version map, one entry per knowledge.
 	Versions map[string]int64 `json:"versions" toon:"versions"`
 }
 
@@ -2237,6 +2237,28 @@ type CreateInhibitRuleRequest struct {
 	SourceFilters [][]CreateInhibitRuleRequestSourceFiltersItemItem `json:"source_filters,omitempty" toon:"source_filters,omitempty"`
 	// Conditions the incoming target alert event must match to be suppressed; empty means every event is a target.
 	TargetFilters [][]CreateInhibitRuleRequestTargetFiltersItemItem `json:"target_filters,omitempty" toon:"target_filters,omitempty"`
+}
+
+// CreateIntegrationRequest is generated from the Flashduty OpenAPI schema.
+type CreateIntegrationRequest struct {
+	// Free-form description, at most 499 characters.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Integration name. 2–49 characters.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Integration type. Must be one listed by `POST /integration/type/list` with `supports_api_create: true`.
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
+	// Type-specific configuration; the accepted keys depend on `plugin_type`.
+	Settings map[string]any `json:"settings,omitempty" toon:"settings,omitempty"`
+	// Owning team ID.
+	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// CreateIntegrationResponse is generated from the Flashduty OpenAPI schema.
+type CreateIntegrationResponse struct {
+	// ID of the new integration.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Key used to authenticate inbound pushes to this integration. Returned here only; fetch a new one with `POST /integration/key/rotate`.
+	IntegrationKey string `json:"integration_key" toon:"integration_key"`
 }
 
 // CreateSilenceRuleRequest is generated from the Flashduty OpenAPI schema.
@@ -2733,6 +2755,217 @@ type DsVictoriaLogsConfig struct {
 	TlsSkipVerify bool `json:"tls_skip_verify,omitempty" toon:"tls_skip_verify,omitempty"`
 }
 
+// DashboardAbsoluteTimeRange is generated from the Flashduty OpenAPI schema.
+type DashboardAbsoluteTimeRange struct {
+	// Unix timestamp in milliseconds.
+	FromMs int64 `json:"from_ms" toon:"from_ms"`
+	// Unix timestamp in milliseconds.
+	ToMs int64 `json:"to_ms" toon:"to_ms"`
+}
+
+// DashboardActor is generated from the Flashduty OpenAPI schema.
+type DashboardActor struct {
+	// Member ID.
+	ID uint64 `json:"id" toon:"id"`
+	// Member display name.
+	Name string `json:"name" toon:"name"`
+}
+
+// DashboardBarViz is generated from the Flashduty OpenAPI schema.
+type DashboardBarViz struct {
+	// Field supplying the category axis.
+	CategoryField string            `json:"category_field" toon:"category_field"`
+	DataLink      DashboardDataLink `json:"data_link,omitzero" toon:"data_link,omitempty"`
+	// Fixed decimal places; omit or send null to let the renderer decide.
+	Decimals *int64 `json:"decimals,omitempty" toon:"decimals,omitempty"`
+	// Visualization kind discriminator; always `bar`.
+	Kind string `json:"kind" toon:"kind"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options   map[string]any     `json:"options" toon:"options"`
+	Threshold DashboardThreshold `json:"threshold,omitzero" toon:"threshold,omitempty"`
+	// Display unit for the panel's numeric values: `unitless` = raw number; `ratio` = fraction of 1; `percent` = percentage; `milliseconds` = duration in milliseconds; `seconds` = duration in seconds; `bytes` = size in bytes; `bits` = size in bits; `count_per_second` = per-second count; `bytes_per_second` = bytes per second; `bits_per_second` = bits per second.
+	Unit string `json:"unit,omitempty" toon:"unit,omitempty"`
+	// Fields supplying the bar values.
+	ValueFields []string `json:"value_fields" toon:"value_fields"`
+}
+
+// DashboardCandidate is generated from the Flashduty OpenAPI schema.
+type DashboardCandidate struct {
+	// Label shown in the picker.
+	Text string `json:"text" toon:"text"`
+	// Value substituted into templates.
+	Value string `json:"value" toon:"value"`
+}
+
+// DashboardColumnOption is generated from the Flashduty OpenAPI schema.
+type DashboardColumnOption struct {
+	DataLink DashboardDataLink `json:"data_link,omitzero" toon:"data_link,omitempty"`
+	// Header text replacing the raw field name.
+	DisplayName string `json:"display_name,omitempty" toon:"display_name,omitempty"`
+	// Hide the column; omit to keep it visible.
+	Hidden    *bool              `json:"hidden,omitempty" toon:"hidden,omitempty"`
+	Threshold DashboardThreshold `json:"threshold,omitzero" toon:"threshold,omitempty"`
+	// How the threshold is painted: `text` = colours the cell text; `background` = colours the cell background.
+	ThresholdDisplay string `json:"threshold_display,omitempty" toon:"threshold_display,omitempty"`
+	// Unit override for the column: `unitless` = raw number; `ratio` = fraction of 1; `percent` = percentage; `milliseconds` = duration in milliseconds; `seconds` = duration in seconds; `bytes` = size in bytes; `bits` = size in bits; `count_per_second` = per-second count; `bytes_per_second` = bytes per second; `bits_per_second` = bits per second.
+	Unit string `json:"unit,omitempty" toon:"unit,omitempty"`
+	// Column width in pixels, 80–1200.
+	WidthPx *int64 `json:"width_px,omitempty" toon:"width_px,omitempty"`
+}
+
+// DashboardCreateRequest is generated from the Flashduty OpenAPI schema.
+type DashboardCreateRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string              `json:"dashboard_id" toon:"dashboard_id"`
+	Definition  DashboardDefinition `json:"definition" toon:"definition"`
+	// Folder the dashboard is created in. Must be a folder the caller can write.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Wire schema version; only `dashboard.v1` is accepted.
+	SchemaVersion string `json:"schema_version" toon:"schema_version"`
+}
+
+// DashboardCustomVariable is generated from the Flashduty OpenAPI schema.
+type DashboardCustomVariable struct {
+	Default DashboardSelection `json:"default,omitzero" toon:"default,omitempty"`
+	// Variable kind discriminator; always `custom`, with candidates from a fixed list supplied inline.
+	Kind string `json:"kind" toon:"kind"`
+	// Optional display label; falls back to `name`.
+	Label string `json:"label,omitempty" toon:"label,omitempty"`
+	// Variable name used in `{{ }}` templates, at most 64 characters.
+	Name string `json:"name" toon:"name"`
+	// Candidate list, 1–1000 entries. Values must be non-empty, unique and must not be `$__all`.
+	Options   []DashboardCandidate     `json:"options" toon:"options"`
+	Selection DashboardSelectionConfig `json:"selection" toon:"selection"`
+}
+
+// DashboardDataLink is generated from the Flashduty OpenAPI schema.
+type DashboardDataLink struct {
+	// Target dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// When true the current time range is forwarded to the target.
+	PassTime bool `json:"pass_time" toon:"pass_time"`
+	// Optional tab, section or panel ID to focus in the target dashboard.
+	TargetID string `json:"target_id,omitempty" toon:"target_id,omitempty"`
+	// Maps target variable names to a source value such as a column or a source variable.
+	VariableMappings map[string]DashboardLinkMapping `json:"variable_mappings" toon:"variable_mappings"`
+}
+
+// DashboardDatasourceRef is generated from the Flashduty OpenAPI schema.
+type DashboardDatasourceRef struct {
+	// Datasource ID. Required when `kind` is `fixed`, forbidden when `kind` is `variable`.
+	DatasourceID uint64 `json:"datasource_id,omitempty" toon:"datasource_id,omitempty"`
+	// Datasource type identifier, e.g. `prometheus` or `victorialogs`.
+	DatasourceType string `json:"datasource_type" toon:"datasource_type"`
+	// `fixed` uses `datasource_id`; `variable` resolves `name` against a datasource variable.
+	Kind string `json:"kind" toon:"kind"`
+	// Datasource variable name. Required when `kind` is `variable`, forbidden when `kind` is `fixed`.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+}
+
+// DashboardDatasourceVariable is generated from the Flashduty OpenAPI schema.
+type DashboardDatasourceVariable struct {
+	// Datasource type the candidates are drawn from.
+	DatasourceType string `json:"datasource_type" toon:"datasource_type"`
+	// Default datasource ID. Without a usable default the runtime picks the first candidate by name, then ID.
+	DefaultDatasourceID uint64 `json:"default_datasource_id,omitempty" toon:"default_datasource_id,omitempty"`
+	// Variable kind discriminator; always `datasource`, selecting a datasource.
+	Kind string `json:"kind" toon:"kind"`
+	// Optional display label; falls back to `name`.
+	Label string `json:"label,omitempty" toon:"label,omitempty"`
+	// Variable name used in `{{ }}` templates, at most 64 characters.
+	Name string `json:"name" toon:"name"`
+	// Wildcard patterns narrowing the candidates; empty means every datasource of the type.
+	NamePatterns []string `json:"name_patterns,omitempty" toon:"name_patterns,omitempty"`
+}
+
+// DashboardDefinition is generated from the Flashduty OpenAPI schema.
+type DashboardDefinition struct {
+	DefaultTimeRange DashboardRelativeTimeRange `json:"default_time_range" toon:"default_time_range"`
+	// Optional description, at most 1024 Unicode code points.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Auto-refresh cadence applied by the console: `off` disables auto-refresh; `30s` = every 30 seconds; `1m` = every minute; `5m` = every 5 minutes.
+	RefreshInterval string `json:"refresh_interval" toon:"refresh_interval"`
+	// Tabs, 1–10. Every tab title is unique and every tab or section ID must be a canonical UUIDv7 used only once across the definition.
+	Tabs []DashboardTab `json:"tabs" toon:"tabs"`
+	// Dashboard title, 1–189 Unicode code points after trimming.
+	Title string `json:"title" toon:"title"`
+	// Dashboard variables, at most 20. Names must be unique within the definition and match the variable-name pattern.
+	Variables []DashboardVariable `json:"variables" toon:"variables"`
+}
+
+// DashboardDeleteOutput is generated from the Flashduty OpenAPI schema.
+type DashboardDeleteOutput struct {
+	// Dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Revision recorded for the deletion.
+	Revision uint64 `json:"revision" toon:"revision"`
+}
+
+// DashboardDeleteRequest is generated from the Flashduty OpenAPI schema.
+type DashboardDeleteRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Revision the caller last read. The write fails with `DashboardRevisionConflict` unless it still matches the stored revision.
+	ExpectedRevision uint64 `json:"expected_revision" toon:"expected_revision"`
+}
+
+// DashboardDraftContext is generated from the Flashduty OpenAPI schema.
+type DashboardDraftContext struct {
+	// Required for `existing`, forbidden for `new`.
+	DashboardID string `json:"dashboard_id,omitempty" toon:"dashboard_id,omitempty"`
+	// Required for `new`, forbidden for `existing`.
+	FolderID uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
+	// Draft context kind: `existing` = targets a stored dashboard (`dashboard_id` required); `new` = a folder that does not contain one yet (`folder_id` required).
+	Kind string `json:"kind" toon:"kind"`
+}
+
+// DashboardFieldSort is generated from the Flashduty OpenAPI schema.
+type DashboardFieldSort struct {
+	// Sort direction: `asc` = ascending; `desc` = descending.
+	Direction string `json:"direction" toon:"direction"`
+	// Field name to sort by.
+	Field string `json:"field" toon:"field"`
+}
+
+// DashboardGaugeViz is generated from the Flashduty OpenAPI schema.
+type DashboardGaugeViz struct {
+	// Fixed decimal places; omit or send null to let the renderer decide.
+	Decimals *int64 `json:"decimals,omitempty" toon:"decimals,omitempty"`
+	// Visualization kind discriminator; always `gauge`.
+	Kind string `json:"kind" toon:"kind"`
+	// Scale upper bound; must exceed `min` when both are set.
+	Max *float64 `json:"max,omitempty" toon:"max,omitempty"`
+	// Scale lower bound.
+	Min *float64 `json:"min,omitempty" toon:"min,omitempty"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options map[string]any `json:"options" toon:"options"`
+	// Reduction applied across the returned rows: `last_non_null` = most recent non-null value; `min` = minimum; `max` = maximum; `mean` = average; `sum` = sum.
+	Reducer   string             `json:"reducer" toon:"reducer"`
+	Threshold DashboardThreshold `json:"threshold,omitzero" toon:"threshold,omitempty"`
+	// Display unit for the panel's numeric values: `unitless` = raw number; `ratio` = fraction of 1; `percent` = percentage; `milliseconds` = duration in milliseconds; `seconds` = duration in seconds; `bytes` = size in bytes; `bits` = size in bits; `count_per_second` = per-second count; `bytes_per_second` = bytes per second; `bits_per_second` = bits per second.
+	Unit string `json:"unit,omitempty" toon:"unit,omitempty"`
+	// Fields reduced to the gauge value.
+	ValueFields []string `json:"value_fields" toon:"value_fields"`
+}
+
+// DashboardGridPosition is generated from the Flashduty OpenAPI schema.
+type DashboardGridPosition struct {
+	// Height in grid rows, 1–100.
+	H int64 `json:"h" toon:"h"`
+	// Width in grid columns, 1–24.
+	W int64 `json:"w" toon:"w"`
+	// Zero-based column offset.
+	X int64 `json:"x" toon:"x"`
+	// Zero-based row offset.
+	Y int64 `json:"y" toon:"y"`
+}
+
+// DashboardIDRequest is generated from the Flashduty OpenAPI schema.
+type DashboardIDRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+}
+
 // DashboardInvestigationTarget is generated from the Flashduty OpenAPI schema.
 type DashboardInvestigationTarget struct {
 	// Target dashboard ID; must be a canonical UUIDv7.
@@ -2741,6 +2974,341 @@ type DashboardInvestigationTarget struct {
 	TargetID string `json:"target_id,omitempty" toon:"target_id,omitempty"`
 	// Dashboard variable values, keyed by variable name. Values may reference event labels through `{{ }}` templates; defaults to an empty object.
 	Variables map[string]string `json:"variables" toon:"variables"`
+}
+
+// DashboardLabelFilter is generated from the Flashduty OpenAPI schema.
+type DashboardLabelFilter struct {
+	// Label name.
+	Label string `json:"label" toon:"label"`
+	// Matcher operator: `=` = equals; `!=` = not equals; `=~` = regex match; `!~` = regex does-not-match.
+	Op string `json:"op" toon:"op"`
+	// Matcher value; may reference other variables through `{{ }}`.
+	Value string `json:"value" toon:"value"`
+}
+
+// DashboardLinkMapping is generated from the Flashduty OpenAPI schema.
+type DashboardLinkMapping struct {
+	// Source column name; required when `source` is `row_column`.
+	Column string `json:"column,omitempty" toon:"column,omitempty"`
+	// Source dashboard variable name; required when `source` is `variable`.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Where the value comes from: `variable` = a dashboard variable; `row_column` = a table column (requires `column`); `category` = the bar category; `series` = the series name; `value` = the value itself. `category`, `series` and `value` are only valid for bar panels.
+	Source string `json:"source" toon:"source"`
+}
+
+// DashboardListItem is generated from the Flashduty OpenAPI schema.
+type DashboardListItem struct {
+	// Dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Dashboard description; empty when unset.
+	Description string `json:"description" toon:"description"`
+	// Folder path from the root.
+	FolderBreadcrumb []string `json:"folder_breadcrumb" toon:"folder_breadcrumb"`
+	// Folder ID.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Current revision number.
+	Revision uint64 `json:"revision" toon:"revision"`
+	// Dashboard title.
+	Title string `json:"title" toon:"title"`
+	// Unix timestamp in seconds.
+	UpdatedAt Timestamp      `json:"updated_at" toon:"updated_at"`
+	UpdatedBy DashboardActor `json:"updated_by" toon:"updated_by"`
+}
+
+// DashboardListOutput is generated from the Flashduty OpenAPI schema.
+type DashboardListOutput struct {
+	// Dashboards in this page.
+	Items []DashboardListItem `json:"items" toon:"items"`
+	// Total number of matching dashboards across all pages.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// DashboardListRequest is generated from the Flashduty OpenAPI schema.
+type DashboardListRequest struct {
+	ListOptions
+	// Folder whose dashboards are listed.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Optional space-separated search words matched against title and description; at most 128 Unicode code points.
+	Query string `json:"query,omitempty" toon:"query,omitempty"`
+	// Sort keys; defaults to `updated_at` descending.
+	Sort []DashboardSort `json:"sort,omitempty" toon:"sort,omitempty"`
+}
+
+// DashboardLogsVariableQuery is generated from the Flashduty OpenAPI schema.
+type DashboardLogsVariableQuery struct {
+	// Named query arguments; defaults to an empty object.
+	Args map[string]string `json:"args" toon:"args"`
+	// Logs query expression; may reference other variables through `{{ }}`.
+	Expr string `json:"expr" toon:"expr"`
+	// Log field whose values become candidates.
+	Field string `json:"field" toon:"field"`
+	// Query kind discriminator; always `logs`, a logs query returning one field's values as candidates.
+	Kind string `json:"kind" toon:"kind"`
+}
+
+// DashboardLogsViz is generated from the Flashduty OpenAPI schema.
+type DashboardLogsViz struct {
+	// Log fields rendered for each row.
+	DisplayFields []string `json:"display_fields,omitempty" toon:"display_fields,omitempty"`
+	// Visualization kind discriminator; always `logs`.
+	Kind string `json:"kind" toon:"kind"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options map[string]any `json:"options" toon:"options"`
+}
+
+// DashboardMoveRequest is generated from the Flashduty OpenAPI schema.
+type DashboardMoveRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Revision the caller last read. The write fails with `DashboardRevisionConflict` unless it still matches the stored revision.
+	ExpectedRevision uint64 `json:"expected_revision" toon:"expected_revision"`
+	// Destination folder ID.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+}
+
+// DashboardOutline is generated from the Flashduty OpenAPI schema.
+type DashboardOutline struct {
+	Dashboard DashboardOutlineInfo   `json:"dashboard" toon:"dashboard"`
+	Folder    DashboardOutlineFolder `json:"folder" toon:"folder"`
+	// Tabs, narrowed by `target_id` when supplied.
+	Tabs []DashboardOutlineTab `json:"tabs" toon:"tabs"`
+	// Variable summaries.
+	Variables []DashboardOutlineVariable `json:"variables" toon:"variables"`
+}
+
+// DashboardOutlineFolder is generated from the Flashduty OpenAPI schema.
+type DashboardOutlineFolder struct {
+	// Folder names from the root.
+	Breadcrumb []string `json:"breadcrumb" toon:"breadcrumb"`
+	// Folder ID.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+}
+
+// DashboardOutlineInfo is generated from the Flashduty OpenAPI schema.
+type DashboardOutlineInfo struct {
+	// Dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Dashboard description; empty when unset.
+	Description string `json:"description" toon:"description"`
+	// Current revision number.
+	Revision uint64 `json:"revision" toon:"revision"`
+	// Dashboard title.
+	Title string `json:"title" toon:"title"`
+	// Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+}
+
+// DashboardOutlinePanel is generated from the Flashduty OpenAPI schema.
+type DashboardOutlinePanel struct {
+	// Full path of titles from the dashboard down to the panel.
+	Breadcrumb []string `json:"breadcrumb" toon:"breadcrumb"`
+	// Datasource type the panel queries; empty when the panel has no datasource (text panels).
+	DatasourceType string `json:"datasource_type" toon:"datasource_type"`
+	// Panel description; empty when unset.
+	Description string `json:"description" toon:"description"`
+	// Panel ID.
+	ID string `json:"id" toon:"id"`
+	// Panel title.
+	Title     string                    `json:"title" toon:"title"`
+	VizConfig DashboardOutlineVizConfig `json:"viz_config" toon:"viz_config"`
+}
+
+// DashboardOutlineRequest is generated from the Flashduty OpenAPI schema.
+type DashboardOutlineRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Optional tab, section or panel ID. When set, the response keeps only the branch that contains it, and an unknown ID returns `TargetNotFound`.
+	TargetID string `json:"target_id,omitempty" toon:"target_id,omitempty"`
+}
+
+// DashboardOutlineSection is generated from the Flashduty OpenAPI schema.
+type DashboardOutlineSection struct {
+	// Dashboard, tab and section titles.
+	Breadcrumb []string `json:"breadcrumb" toon:"breadcrumb"`
+	// Section description; empty when unset.
+	Description string `json:"description" toon:"description"`
+	// Section ID.
+	ID string `json:"id" toon:"id"`
+	// Panels in the section.
+	Panels []DashboardOutlinePanel `json:"panels" toon:"panels"`
+	// Section title.
+	Title string `json:"title" toon:"title"`
+}
+
+// DashboardOutlineTab is generated from the Flashduty OpenAPI schema.
+type DashboardOutlineTab struct {
+	// Dashboard title followed by the tab title.
+	Breadcrumb []string `json:"breadcrumb" toon:"breadcrumb"`
+	// Tab description; empty when unset.
+	Description string `json:"description" toon:"description"`
+	// Tab ID.
+	ID string `json:"id" toon:"id"`
+	// Sections on the tab.
+	Sections []DashboardOutlineSection `json:"sections" toon:"sections"`
+	// Tab title.
+	Title string `json:"title" toon:"title"`
+	// Panels placed directly on the tab.
+	TopPanels []DashboardOutlinePanel `json:"top_panels" toon:"top_panels"`
+}
+
+// DashboardOutlineVariable is generated from the Flashduty OpenAPI schema.
+type DashboardOutlineVariable struct {
+	// Variable kind: `datasource` = selects a datasource; `custom` = fixed inline list; `query` = resolved by running a query.
+	Kind string `json:"kind" toon:"kind"`
+	// Display label; empty when unset.
+	Label string `json:"label" toon:"label"`
+	// Variable name.
+	Name      string                   `json:"name" toon:"name"`
+	Selection DashboardSelectionConfig `json:"selection" toon:"selection"`
+}
+
+// DashboardOutlineVizConfig is generated from the Flashduty OpenAPI schema.
+type DashboardOutlineVizConfig struct {
+	// Visualization kind: `time_series` = time series; `table` = table; `stat` = single value; `bar` = bar chart; `gauge` = gauge; `logs` = log stream; `text` = Markdown text.
+	Kind string `json:"kind" toon:"kind"`
+}
+
+// DashboardPanel is generated from the Flashduty OpenAPI schema.
+type DashboardPanel struct {
+	DatasourceRef DashboardDatasourceRef `json:"datasource_ref,omitzero" toon:"datasource_ref,omitempty"`
+	// Optional panel description.
+	Description string                `json:"description,omitempty" toon:"description,omitempty"`
+	Grid        DashboardGridPosition `json:"grid" toon:"grid"`
+	// Canonical UUIDv7 identifying the panel; unique across the definition.
+	ID string `json:"id" toon:"id"`
+	// Queries in the panel. `time_series` accepts 1–26, `text` accepts none, every other kind accepts exactly one.
+	Queries []DashboardPanelQuery `json:"queries" toon:"queries"`
+	// Panel title.
+	Title     string             `json:"title" toon:"title"`
+	VizConfig DashboardVizConfig `json:"viz_config" toon:"viz_config"`
+}
+
+// DashboardPanelPreviewRequest is generated from the Flashduty OpenAPI schema.
+type DashboardPanelPreviewRequest struct {
+	Context DashboardDraftContext `json:"context" toon:"context"`
+	// Downsampling target, 2–5000 points.
+	MaxDataPoints *int64         `json:"max_data_points,omitempty" toon:"max_data_points,omitempty"`
+	Panel         DashboardPanel `json:"panel" toon:"panel"`
+	// Selections keyed by variable name.
+	Selections map[string]DashboardSelection `json:"selections" toon:"selections"`
+	Time       DashboardAbsoluteTimeRange    `json:"time" toon:"time"`
+	// Draft variables the panel may reference.
+	Variables []DashboardVariable `json:"variables" toon:"variables"`
+}
+
+// DashboardPanelPreviewResponse is generated from the Flashduty OpenAPI schema.
+type DashboardPanelPreviewResponse struct {
+	Budget  DashboardPanelRunBudget `json:"budget" toon:"budget"`
+	Display DashboardVizConfig      `json:"display" toon:"display"`
+	// Panel ID.
+	PanelID string `json:"panel_id" toon:"panel_id"`
+	// One entry per query in the panel.
+	Refs []DashboardPanelRunRef `json:"refs" toon:"refs"`
+	// Aggregate state of the run: `success` = all queries succeeded; `partial` = some succeeded; `incompatible` = at least one query is incompatible with its datasource; `cancelled` = the run was cancelled; `error` = all queries failed.
+	RunState string                     `json:"run_state" toon:"run_state"`
+	Time     DashboardAbsoluteTimeRange `json:"time" toon:"time"`
+	// Selections that resolved successfully.
+	Variables map[string]DashboardSelection `json:"variables" toon:"variables"`
+}
+
+// DashboardPanelQuery is generated from the Flashduty OpenAPI schema.
+type DashboardPanelQuery struct {
+	// Optional legend label; supports the same variable templates as `expr`.
+	LegendAlias string         `json:"legend_alias,omitempty" toon:"legend_alias,omitempty"`
+	Query       DashboardQuery `json:"query" toon:"query"`
+	// Single uppercase letter (A–Z) naming the query inside its panel.
+	RefID string `json:"ref_id" toon:"ref_id"`
+}
+
+// DashboardPanelRunBudget is generated from the Flashduty OpenAPI schema.
+type DashboardPanelRunBudget struct {
+	// Number of queries launched.
+	ExecutionCount int64 `json:"execution_count" toon:"execution_count"`
+	// Concurrency cap applied to the panel's queries.
+	MaxConcurrency int64 `json:"max_concurrency" toon:"max_concurrency"`
+}
+
+// DashboardPanelRunRef is generated from the Flashduty OpenAPI schema.
+type DashboardPanelRunRef struct {
+	// Request ID of the underlying datasource execution; use it when tracing a single query.
+	ChildRequestID string                `json:"child_request_id" toon:"child_request_id"`
+	Error          DashboardRuntimeError `json:"error" toon:"error"`
+	// Datasource-specific execution payload, passed through unmodified.
+	Execution map[string]any `json:"execution" toon:"execution"`
+	// Panel-local query reference.
+	RefID string `json:"ref_id" toon:"ref_id"`
+	// Per-query execution state: `success` = the query executed; `error` = the query failed; `incompatible` = the datasource accepted the call but the query mode or field selection does not fit the datasource type.
+	State string `json:"state" toon:"state"`
+}
+
+// DashboardPanelRunRequest is generated from the Flashduty OpenAPI schema.
+type DashboardPanelRunRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Downsampling target, 2–5000 points; omit or send null for the server default of 100.
+	MaxDataPoints *int64 `json:"max_data_points,omitempty" toon:"max_data_points,omitempty"`
+	// Panel to execute.
+	PanelID string `json:"panel_id" toon:"panel_id"`
+	// Revision guard; when set it must equal the current revision.
+	Revision uint64                     `json:"revision,omitempty" toon:"revision,omitempty"`
+	Time     DashboardAbsoluteTimeRange `json:"time" toon:"time"`
+	// Selections keyed by variable name, at most 20 entries.
+	Variables map[string]DashboardSelection `json:"variables" toon:"variables"`
+}
+
+// DashboardPanelRunResponse is generated from the Flashduty OpenAPI schema.
+type DashboardPanelRunResponse struct {
+	Budget DashboardPanelRunBudget `json:"budget" toon:"budget"`
+	// Dashboard ID.
+	DashboardID string             `json:"dashboard_id" toon:"dashboard_id"`
+	Display     DashboardVizConfig `json:"display" toon:"display"`
+	// Panel ID.
+	PanelID string `json:"panel_id" toon:"panel_id"`
+	// One entry per query in the panel.
+	Refs []DashboardPanelRunRef `json:"refs" toon:"refs"`
+	// Revision the run executed against.
+	Revision uint64 `json:"revision" toon:"revision"`
+	// Aggregate state of the run: `success` = all queries succeeded; `partial` = some succeeded; `incompatible` = at least one query is incompatible with its datasource; `cancelled` = the run was cancelled; `error` = all queries failed.
+	RunState string                     `json:"run_state" toon:"run_state"`
+	Time     DashboardAbsoluteTimeRange `json:"time" toon:"time"`
+	// Selections that resolved successfully.
+	Variables map[string]DashboardSelection `json:"variables" toon:"variables"`
+}
+
+// DashboardPrometheusVariableQuery is generated from the Flashduty OpenAPI schema.
+type DashboardPrometheusVariableQuery struct {
+	// Query kind discriminator; always `prometheus`, a label-values query against Prometheus.
+	Kind string `json:"kind" toon:"kind"`
+	// Label whose values become candidates.
+	Label string `json:"label" toon:"label"`
+	// Optional matchers narrowing the series before label values are read.
+	LabelFilters []DashboardLabelFilter `json:"label_filters,omitempty" toon:"label_filters,omitempty"`
+	// Optional metric used to restrict the series considered.
+	Metric string `json:"metric,omitempty" toon:"metric,omitempty"`
+}
+
+// DashboardQueriesResolveRequest is generated from the Flashduty OpenAPI schema.
+type DashboardQueriesResolveRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Panels to resolve, 1–100 unique IDs. A panel that does not exist yields an `error` arm rather than failing the call.
+	PanelIDs []string                   `json:"panel_ids" toon:"panel_ids"`
+	Time     DashboardAbsoluteTimeRange `json:"time" toon:"time"`
+	// Selections keyed by variable name, at most 20 entries.
+	Variables map[string]DashboardSelection `json:"variables" toon:"variables"`
+}
+
+// DashboardQueriesResolveResponse is generated from the Flashduty OpenAPI schema.
+type DashboardQueriesResolveResponse struct {
+	// Dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Per-panel results.
+	Panels []DashboardResolvedPanelQueries `json:"panels" toon:"panels"`
+	// Revision the resolution ran against.
+	Revision uint64                     `json:"revision" toon:"revision"`
+	Time     DashboardAbsoluteTimeRange `json:"time" toon:"time"`
+	// Selections that resolved successfully.
+	Variables map[string]DashboardSelection `json:"variables" toon:"variables"`
 }
 
 // DashboardQuery is generated from the Flashduty OpenAPI schema.
@@ -2753,6 +3321,477 @@ type DashboardQuery struct {
 	MinStepSeconds *int64 `json:"min_step_seconds,omitempty" toon:"min_step_seconds,omitempty"`
 	// Evaluation mode: `instant` evaluates at a single timestamp, `range` evaluates a stepped series, `window` returns raw rows inside a time window.
 	Mode string `json:"mode" toon:"mode"`
+}
+
+// DashboardQueryVariable is generated from the Flashduty OpenAPI schema.
+type DashboardQueryVariable struct {
+	DatasourceRef DashboardDatasourceRef `json:"datasource_ref" toon:"datasource_ref"`
+	Default       DashboardSelection     `json:"default,omitzero" toon:"default,omitempty"`
+	// Variable kind discriminator; always `query`, with candidates resolved by running a query against a datasource.
+	Kind string `json:"kind" toon:"kind"`
+	// Optional display label; falls back to `name`.
+	Label string `json:"label,omitempty" toon:"label,omitempty"`
+	// Variable name used in `{{ }}` templates, at most 64 characters.
+	Name string `json:"name" toon:"name"`
+	// When the candidates are recomputed: `on_dashboard_load` = once when the dashboard loads; `on_time_range_change` = every time the time range changes.
+	Refresh       string                   `json:"refresh" toon:"refresh"`
+	Selection     DashboardSelectionConfig `json:"selection" toon:"selection"`
+	VariableQuery DashboardVariableQuery   `json:"variable_query" toon:"variable_query"`
+}
+
+// DashboardRelativeTimeRange is generated from the Flashduty OpenAPI schema.
+type DashboardRelativeTimeRange struct {
+	// Start offset relative to `to`: `now-15m` = 15 minutes ago; `now-30m` = 30 minutes ago; `now-1h` = 1 hour ago; `now-3h` = 3 hours ago; `now-6h` = 6 hours ago; `now-12h` = 12 hours ago; `now-24h` = 24 hours ago; `now-7d` = 7 days ago.
+	From string `json:"from" toon:"from"`
+	// End of the window; only `now` is accepted.
+	To string `json:"to" toon:"to"`
+}
+
+// DashboardResolvedPanelQueries is generated from the Flashduty OpenAPI schema.
+type DashboardResolvedPanelQueries struct {
+	Error DashboardRuntimeError `json:"error" toon:"error"`
+	// Panel ID.
+	PanelID string `json:"panel_id" toon:"panel_id"`
+	// Successfully resolved queries.
+	Queries []DashboardResolvedQuery `json:"queries" toon:"queries"`
+	// Aggregate state of the panel's queries: `success` = every query resolved; `partial` = some resolved; `error` = none resolved.
+	State string `json:"state" toon:"state"`
+}
+
+// DashboardResolvedQuery is generated from the Flashduty OpenAPI schema.
+type DashboardResolvedQuery struct {
+	// Query arguments; empty object when none.
+	Args       map[string]string          `json:"args" toon:"args"`
+	Datasource DashboardRuntimeDatasource `json:"datasource" toon:"datasource"`
+	// Expression with variable templates substituted.
+	Expr string `json:"expr" toon:"expr"`
+	// Minimum step in seconds; null when unset.
+	MinStepSeconds int64 `json:"min_step_seconds" toon:"min_step_seconds"`
+	// Evaluation mode: `range` = a stepped time series; `instant` = a single point in time; `window` = raw rows inside a bounded time window.
+	Mode string `json:"mode" toon:"mode"`
+	// Panel-local query reference.
+	RefID string `json:"ref_id" toon:"ref_id"`
+}
+
+// DashboardResolvedVariable is generated from the Flashduty OpenAPI schema.
+type DashboardResolvedVariable struct {
+	// Resolved candidates, at most 1000.
+	Candidates []DashboardCandidate       `json:"candidates" toon:"candidates"`
+	Datasource DashboardRuntimeDatasource `json:"datasource" toon:"datasource"`
+	Error      DashboardRuntimeError      `json:"error" toon:"error"`
+	// Variable kind: `datasource` = selects a datasource; `custom` = fixed inline list; `query` = resolved by running a query.
+	Kind string `json:"kind" toon:"kind"`
+	// Variable name.
+	Name      string             `json:"name" toon:"name"`
+	Selection DashboardSelection `json:"selection" toon:"selection"`
+}
+
+// DashboardResource is generated from the Flashduty OpenAPI schema.
+type DashboardResource struct {
+	// Unix timestamp in seconds.
+	CreatedAt Timestamp      `json:"created_at" toon:"created_at"`
+	CreatedBy DashboardActor `json:"created_by" toon:"created_by"`
+	// Canonical UUIDv7 assigned by the caller at creation time.
+	DashboardID string              `json:"dashboard_id" toon:"dashboard_id"`
+	Definition  DashboardDefinition `json:"definition" toon:"definition"`
+	// Folder names from the root down to `folder_id`.
+	FolderBreadcrumb []string `json:"folder_breadcrumb" toon:"folder_breadcrumb"`
+	// ID of the dashboard's folder.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Current revision number.
+	Revision uint64 `json:"revision" toon:"revision"`
+	// Wire schema version of `definition`; only `dashboard.v1` is accepted.
+	SchemaVersion string `json:"schema_version" toon:"schema_version"`
+	// Unix timestamp in seconds.
+	UpdatedAt Timestamp      `json:"updated_at" toon:"updated_at"`
+	UpdatedBy DashboardActor `json:"updated_by" toon:"updated_by"`
+}
+
+// DashboardRestoreRequest is generated from the Flashduty OpenAPI schema.
+type DashboardRestoreRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Revision the caller last read. The write fails with `DashboardRevisionConflict` unless it still matches the stored revision.
+	ExpectedRevision uint64 `json:"expected_revision" toon:"expected_revision"`
+	// Destination folder. Omit to restore to the original folder; when the original folder is no longer writable the call fails with `RestoreFolderRequired` and you must pass one.
+	FolderID *uint64 `json:"folder_id,omitempty" toon:"folder_id,omitempty"`
+}
+
+// DashboardRevisionGetRequest is generated from the Flashduty OpenAPI schema.
+type DashboardRevisionGetRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Revision number to fetch.
+	Revision uint64 `json:"revision" toon:"revision"`
+}
+
+// DashboardRevisionItem is generated from the Flashduty OpenAPI schema.
+type DashboardRevisionItem struct {
+	Actor DashboardActor `json:"actor" toon:"actor"`
+	// Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Folder the dashboard sat in at that revision.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Optional commit message; at most 1024 Unicode code points.
+	Message string `json:"message" toon:"message"`
+	// Revision number.
+	Revision uint64 `json:"revision" toon:"revision"`
+}
+
+// DashboardRevisionListOutput is generated from the Flashduty OpenAPI schema.
+type DashboardRevisionListOutput struct {
+	// Revisions, at most 20.
+	Items []DashboardRevisionItem `json:"items" toon:"items"`
+}
+
+// DashboardRevisionResource is generated from the Flashduty OpenAPI schema.
+type DashboardRevisionResource struct {
+	Actor DashboardActor `json:"actor" toon:"actor"`
+	// Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Dashboard ID.
+	DashboardID string              `json:"dashboard_id" toon:"dashboard_id"`
+	Definition  DashboardDefinition `json:"definition" toon:"definition"`
+	// Folder the dashboard sat in at that revision.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Optional commit message.
+	Message string `json:"message" toon:"message"`
+	// Revision number.
+	Revision uint64 `json:"revision" toon:"revision"`
+	// Wire schema version of `definition`; only `dashboard.v1` is accepted.
+	SchemaVersion string `json:"schema_version" toon:"schema_version"`
+}
+
+// DashboardRuntimeDatasource is generated from the Flashduty OpenAPI schema.
+type DashboardRuntimeDatasource struct {
+	// Datasource ID.
+	ID uint64 `json:"id" toon:"id"`
+	// Datasource name.
+	Name string `json:"name" toon:"name"`
+	// Datasource type identifier.
+	Type string `json:"type" toon:"type"`
+}
+
+// DashboardRuntimeError is generated from the Flashduty OpenAPI schema.
+type DashboardRuntimeError struct {
+	// Human-readable detail for the failure.
+	Message string `json:"message" toon:"message"`
+	// Machine-readable failure reason. Observed values include `invalid_request`, `variable_invalid`, `panel_missing`, `field_missing`, `datasource_permission_denied`, `timeout`, `panel_deadline`, `panel_canceled`, `canceled`, `overloaded`, `source_too_large`, `edge_unavailable`, `edge_upgrade_required`, `edge_version_unknown`, `mixed_edge_versions` and `internal`.
+	Reason string `json:"reason" toon:"reason"`
+}
+
+// DashboardSqlVariableQuery is generated from the Flashduty OpenAPI schema.
+type DashboardSqlVariableQuery struct {
+	// Named query arguments; defaults to an empty object.
+	Args map[string]string `json:"args" toon:"args"`
+	// SQL statement; may reference other variables through `{{ }}`.
+	Expr string `json:"expr" toon:"expr"`
+	// Query kind discriminator; always `sql`, a SQL query returning one column of candidates.
+	Kind string `json:"kind" toon:"kind"`
+	// Column used as the candidate label; defaults to the value column.
+	TextField string `json:"text_field,omitempty" toon:"text_field,omitempty"`
+	// Column used as the candidate value.
+	ValueField string `json:"value_field" toon:"value_field"`
+}
+
+// DashboardSearchRequest is generated from the Flashduty OpenAPI schema.
+type DashboardSearchRequest struct {
+	ListOptions
+	// Space-separated search words; at least one word and at most 128 Unicode code points.
+	Query string `json:"query" toon:"query"`
+	// Sort keys; defaults to `updated_at` descending.
+	Sort []DashboardSort `json:"sort,omitempty" toon:"sort,omitempty"`
+}
+
+// DashboardSection is generated from the Flashduty OpenAPI schema.
+type DashboardSection struct {
+	// Whether the section renders collapsed by default.
+	Collapsed bool `json:"collapsed" toon:"collapsed"`
+	// Optional section description.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Canonical UUIDv7 identifying the section; unique across the definition.
+	ID string `json:"id" toon:"id"`
+	// Panels in the section, at most 30.
+	Panels []DashboardPanel `json:"panels" toon:"panels"`
+	// Section title.
+	Title string `json:"title" toon:"title"`
+}
+
+// DashboardSelection is generated from the Flashduty OpenAPI schema.
+type DashboardSelection struct {
+	// `values` selects the listed entries, `all` selects everything (only allowed when `include_all` is true).
+	Kind string `json:"kind" toon:"kind"`
+	// Selected values, unique and never `$__all`. Must be empty when `kind` is `all`.
+	Values []string `json:"values,omitempty" toon:"values,omitempty"`
+}
+
+// DashboardSelectionConfig is generated from the Flashduty OpenAPI schema.
+type DashboardSelectionConfig struct {
+	// When true the variable also offers an `all` selection.
+	IncludeAll bool `json:"include_all" toon:"include_all"`
+	// Selection cardinality: `single` makes the resolved selection hold exactly one value; `multi` allows multiple values.
+	Mode string `json:"mode" toon:"mode"`
+}
+
+// DashboardSort is generated from the Flashduty OpenAPI schema.
+type DashboardSort struct {
+	// Sort direction: `asc` = ascending; `desc` = descending.
+	Direction string `json:"direction" toon:"direction"`
+	// `title` is available everywhere; `updated_at` only on list/search, `deleted_at` only on the trash listing.
+	Field string `json:"field" toon:"field"`
+}
+
+// DashboardStatViz is generated from the Flashduty OpenAPI schema.
+type DashboardStatViz struct {
+	// Fixed decimal places; omit or send null to let the renderer decide.
+	Decimals *int64 `json:"decimals,omitempty" toon:"decimals,omitempty"`
+	// Visualization kind discriminator; always `stat`.
+	Kind string `json:"kind" toon:"kind"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options map[string]any `json:"options" toon:"options"`
+	// Reduction applied across the returned rows: `last_non_null` = most recent non-null value; `min` = minimum; `max` = maximum; `mean` = average; `sum` = sum.
+	Reducer   string             `json:"reducer" toon:"reducer"`
+	Threshold DashboardThreshold `json:"threshold,omitzero" toon:"threshold,omitempty"`
+	// Display unit for the panel's numeric values: `unitless` = raw number; `ratio` = fraction of 1; `percent` = percentage; `milliseconds` = duration in milliseconds; `seconds` = duration in seconds; `bytes` = size in bytes; `bits` = size in bits; `count_per_second` = per-second count; `bytes_per_second` = bytes per second; `bits_per_second` = bits per second.
+	Unit string `json:"unit,omitempty" toon:"unit,omitempty"`
+	// Fields reduced to the displayed values.
+	ValueFields []string `json:"value_fields" toon:"value_fields"`
+}
+
+// DashboardTab is generated from the Flashduty OpenAPI schema.
+type DashboardTab struct {
+	// Optional tab description.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Canonical UUIDv7 identifying the tab; unique across the definition.
+	ID string `json:"id" toon:"id"`
+	// Sections on the tab, at most 10.
+	Sections []DashboardSection `json:"sections" toon:"sections"`
+	// Tab title, 1–189 Unicode code points. Unique among tabs.
+	Title string `json:"title" toon:"title"`
+	// Panels placed directly on the tab, at most 30.
+	TopPanels []DashboardPanel `json:"top_panels" toon:"top_panels"`
+}
+
+// DashboardTableViz is generated from the Flashduty OpenAPI schema.
+type DashboardTableViz struct {
+	// Per-column display overrides keyed by field name, at most 100 entries.
+	ColumnOptions map[string]DashboardColumnOption `json:"column_options,omitempty" toon:"column_options,omitempty"`
+	// Visualization kind discriminator; always `table`.
+	Kind string `json:"kind" toon:"kind"`
+	// Drill-down links rendered as table columns. Together with per-column links a table allows at most 5.
+	LinkColumns []DashboardDataLink `json:"link_columns,omitempty" toon:"link_columns,omitempty"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options map[string]any `json:"options" toon:"options"`
+	// Initial sort keys; fields must be unique.
+	Sort []DashboardFieldSort `json:"sort,omitempty" toon:"sort,omitempty"`
+}
+
+// DashboardTextViz is generated from the Flashduty OpenAPI schema.
+type DashboardTextViz struct {
+	// Visualization kind discriminator; always `text`.
+	Kind string `json:"kind" toon:"kind"`
+	// Markdown body, at most 64 KiB. Only a restricted node set (headings, lists, tables, links, code) survives validation.
+	Markdown string `json:"markdown" toon:"markdown"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options map[string]any `json:"options" toon:"options"`
+}
+
+// DashboardThreshold is generated from the Flashduty OpenAPI schema.
+type DashboardThreshold struct {
+	// Critical bound; must be finite.
+	Critical *float64 `json:"critical,omitempty" toon:"critical,omitempty"`
+	// Direction of the comparison: `higher_is_worse` = values at or above the bound breach it; `lower_is_worse` = values at or below the bound breach it.
+	Mode string `json:"mode" toon:"mode"`
+	// Warning bound; must be finite.
+	Warning *float64 `json:"warning,omitempty" toon:"warning,omitempty"`
+}
+
+// DashboardTimeSeriesViz is generated from the Flashduty OpenAPI schema.
+type DashboardTimeSeriesViz struct {
+	// Fixed decimal places; omit or send null to let the renderer decide.
+	Decimals *int64 `json:"decimals,omitempty" toon:"decimals,omitempty"`
+	// Visualization kind discriminator; always `time_series`.
+	Kind string `json:"kind" toon:"kind"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options   map[string]any     `json:"options" toon:"options"`
+	Threshold DashboardThreshold `json:"threshold,omitzero" toon:"threshold,omitempty"`
+	// Display unit for the panel's numeric values: `unitless` = raw number; `ratio` = fraction of 1; `percent` = percentage; `milliseconds` = duration in milliseconds; `seconds` = duration in seconds; `bytes` = size in bytes; `bits` = size in bits; `count_per_second` = per-second count; `bytes_per_second` = bytes per second; `bits_per_second` = bits per second.
+	Unit string `json:"unit,omitempty" toon:"unit,omitempty"`
+}
+
+// DashboardTrashItem is generated from the Flashduty OpenAPI schema.
+type DashboardTrashItem struct {
+	// Dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Unix timestamp in seconds.
+	DeletedAt Timestamp      `json:"deleted_at" toon:"deleted_at"`
+	DeletedBy DashboardActor `json:"deleted_by" toon:"deleted_by"`
+	// Dashboard description; empty when unset.
+	Description string `json:"description" toon:"description"`
+	// Folder path from the root.
+	FolderBreadcrumb []string `json:"folder_breadcrumb" toon:"folder_breadcrumb"`
+	// Folder the dashboard sat in when deleted.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Revision the dashboard had when deleted.
+	Revision uint64 `json:"revision" toon:"revision"`
+	// Dashboard title.
+	Title string `json:"title" toon:"title"`
+}
+
+// DashboardTrashListOutput is generated from the Flashduty OpenAPI schema.
+type DashboardTrashListOutput struct {
+	// Deleted dashboards in this page.
+	Items []DashboardTrashItem `json:"items" toon:"items"`
+	// Total number of deleted dashboards.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// DashboardTrashListRequest is generated from the Flashduty OpenAPI schema.
+type DashboardTrashListRequest struct {
+	ListOptions
+	// Sort keys; only `title` and `deleted_at` are accepted here.
+	Sort []DashboardSort `json:"sort,omitempty" toon:"sort,omitempty"`
+}
+
+// DashboardUpdateOutput is generated from the Flashduty OpenAPI schema.
+type DashboardUpdateOutput struct {
+	// Whether the stored dashboard actually changed.
+	Changed  bool              `json:"changed" toon:"changed"`
+	Resource DashboardResource `json:"resource" toon:"resource"`
+}
+
+// DashboardUpdateRequest is generated from the Flashduty OpenAPI schema.
+type DashboardUpdateRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string              `json:"dashboard_id" toon:"dashboard_id"`
+	Definition  DashboardDefinition `json:"definition" toon:"definition"`
+	// Revision the caller last read. The write fails with `DashboardRevisionConflict` unless it still matches the stored revision.
+	ExpectedRevision uint64 `json:"expected_revision" toon:"expected_revision"`
+	// Optional revision message, at most 1024 Unicode code points. Stored with the revision and never returned by this endpoint.
+	Message string `json:"message,omitempty" toon:"message,omitempty"`
+	// Wire schema version; only `dashboard.v1` is accepted.
+	SchemaVersion string `json:"schema_version" toon:"schema_version"`
+}
+
+// DashboardVariable is generated from the Flashduty OpenAPI schema.
+type DashboardVariable struct {
+	DatasourceRef DashboardDatasourceRef `json:"datasource_ref,omitzero" toon:"datasource_ref,omitempty"`
+	// Datasource type the candidates are drawn from.
+	DatasourceType string             `json:"datasource_type,omitempty" toon:"datasource_type,omitempty"`
+	Default        DashboardSelection `json:"default,omitzero" toon:"default,omitempty"`
+	// Default datasource ID. Without a usable default the runtime picks the first candidate by name, then ID.
+	DefaultDatasourceID uint64 `json:"default_datasource_id,omitempty" toon:"default_datasource_id,omitempty"`
+	// Variable kind discriminator; always `query`, with candidates resolved by running a query against a datasource.
+	Kind string `json:"kind" toon:"kind"`
+	// Optional display label; falls back to `name`.
+	Label string `json:"label,omitempty" toon:"label,omitempty"`
+	// Variable name used in `{{ }}` templates, at most 64 characters.
+	Name string `json:"name" toon:"name"`
+	// Wildcard patterns narrowing the candidates; empty means every datasource of the type.
+	NamePatterns []string `json:"name_patterns,omitempty" toon:"name_patterns,omitempty"`
+	// Candidate list, 1–1000 entries. Values must be non-empty, unique and must not be `$__all`.
+	Options []DashboardCandidate `json:"options,omitempty" toon:"options,omitempty"`
+	// When the candidates are recomputed: `on_dashboard_load` = once when the dashboard loads; `on_time_range_change` = every time the time range changes.
+	Refresh       string                   `json:"refresh,omitempty" toon:"refresh,omitempty"`
+	Selection     DashboardSelectionConfig `json:"selection,omitzero" toon:"selection,omitempty"`
+	VariableQuery DashboardVariableQuery   `json:"variable_query,omitempty" toon:"variable_query,omitempty"`
+}
+
+// DashboardVariableQuery is generated from the Flashduty OpenAPI schema.
+type DashboardVariableQuery struct {
+	// Named query arguments; defaults to an empty object.
+	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
+	// Logs query expression; may reference other variables through `{{ }}`.
+	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
+	// Log field whose values become candidates.
+	Field string `json:"field,omitempty" toon:"field,omitempty"`
+	// Query kind discriminator; always `logs`, a logs query returning one field's values as candidates.
+	Kind string `json:"kind" toon:"kind"`
+	// Label whose values become candidates.
+	Label string `json:"label,omitempty" toon:"label,omitempty"`
+	// Optional matchers narrowing the series before label values are read.
+	LabelFilters []DashboardLabelFilter `json:"label_filters,omitempty" toon:"label_filters,omitempty"`
+	// Optional metric used to restrict the series considered.
+	Metric string `json:"metric,omitempty" toon:"metric,omitempty"`
+	// Column used as the candidate label; defaults to the value column.
+	TextField string `json:"text_field,omitempty" toon:"text_field,omitempty"`
+	// Column used as the candidate value.
+	ValueField string `json:"value_field,omitempty" toon:"value_field,omitempty"`
+}
+
+// DashboardVariablesPreviewRequest is generated from the Flashduty OpenAPI schema.
+type DashboardVariablesPreviewRequest struct {
+	Context DashboardDraftContext `json:"context" toon:"context"`
+	// Selections keyed by variable name, at most 20 entries.
+	Selections map[string]DashboardSelection `json:"selections" toon:"selections"`
+	Time       DashboardAbsoluteTimeRange    `json:"time" toon:"time"`
+	// Draft variables, at most 20.
+	Variables []DashboardVariable `json:"variables" toon:"variables"`
+}
+
+// DashboardVariablesPreviewResponse is generated from the Flashduty OpenAPI schema.
+type DashboardVariablesPreviewResponse struct {
+	// Effective selections keyed by variable name.
+	Selections map[string]DashboardSelection `json:"selections" toon:"selections"`
+	// Resolved variables.
+	Variables []DashboardResolvedVariable `json:"variables" toon:"variables"`
+}
+
+// DashboardVariablesResolveRequest is generated from the Flashduty OpenAPI schema.
+type DashboardVariablesResolveRequest struct {
+	// Canonical UUIDv7 of the dashboard.
+	DashboardID string                     `json:"dashboard_id" toon:"dashboard_id"`
+	Time        DashboardAbsoluteTimeRange `json:"time" toon:"time"`
+	// Selections already made, keyed by variable name, at most 20 entries. Variables omitted here fall back to their stored defaults.
+	Variables map[string]DashboardSelection `json:"variables" toon:"variables"`
+}
+
+// DashboardVariablesResolveResponse is generated from the Flashduty OpenAPI schema.
+type DashboardVariablesResolveResponse struct {
+	// Dashboard ID.
+	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Revision the resolution ran against.
+	Revision uint64 `json:"revision" toon:"revision"`
+	// Effective selections keyed by variable name; only variables that resolved successfully appear.
+	Selections map[string]DashboardSelection `json:"selections" toon:"selections"`
+	// Resolved variables, in definition order.
+	Variables []DashboardResolvedVariable `json:"variables" toon:"variables"`
+}
+
+// DashboardVizConfig is generated from the Flashduty OpenAPI schema.
+type DashboardVizConfig struct {
+	// Field supplying the category axis.
+	CategoryField string `json:"category_field,omitempty" toon:"category_field,omitempty"`
+	// Per-column display overrides keyed by field name, at most 100 entries.
+	ColumnOptions map[string]DashboardColumnOption `json:"column_options,omitempty" toon:"column_options,omitempty"`
+	DataLink      DashboardDataLink                `json:"data_link,omitzero" toon:"data_link,omitempty"`
+	// Fixed decimal places; omit or send null to let the renderer decide.
+	Decimals *int64 `json:"decimals,omitempty" toon:"decimals,omitempty"`
+	// Log fields rendered for each row.
+	DisplayFields []string `json:"display_fields,omitempty" toon:"display_fields,omitempty"`
+	// Visualization kind discriminator; always `text`.
+	Kind string `json:"kind" toon:"kind"`
+	// Drill-down links rendered as table columns. Together with per-column links a table allows at most 5.
+	LinkColumns []DashboardDataLink `json:"link_columns,omitempty" toon:"link_columns,omitempty"`
+	// Markdown body, at most 64 KiB. Only a restricted node set (headings, lists, tables, links, code) survives validation.
+	Markdown string `json:"markdown,omitempty" toon:"markdown,omitempty"`
+	// Scale upper bound; must exceed `min` when both are set.
+	Max *float64 `json:"max,omitempty" toon:"max,omitempty"`
+	// Scale lower bound.
+	Min *float64 `json:"min,omitempty" toon:"min,omitempty"`
+	// Open options object for the chosen visualization kind; the only part of the definition that round-trips losslessly. Missing or null normalizes to `{}`.
+	Options map[string]any `json:"options" toon:"options"`
+	// Reduction applied across the returned rows: `last_non_null` = most recent non-null value; `min` = minimum; `max` = maximum; `mean` = average; `sum` = sum.
+	Reducer string `json:"reducer,omitempty" toon:"reducer,omitempty"`
+	// Initial sort keys; fields must be unique.
+	Sort      []DashboardFieldSort `json:"sort,omitempty" toon:"sort,omitempty"`
+	Threshold DashboardThreshold   `json:"threshold,omitzero" toon:"threshold,omitempty"`
+	// Display unit for the panel's numeric values: `unitless` = raw number; `ratio` = fraction of 1; `percent` = percentage; `milliseconds` = duration in milliseconds; `seconds` = duration in seconds; `bytes` = size in bytes; `bits` = size in bits; `count_per_second` = per-second count; `bytes_per_second` = bytes per second; `bits_per_second` = bits per second.
+	Unit string `json:"unit,omitempty" toon:"unit,omitempty"`
+	// Fields reduced to the gauge value.
+	ValueFields []string `json:"value_fields,omitempty" toon:"value_fields,omitempty"`
 }
 
 // DataSourceItem is generated from the Flashduty OpenAPI schema.
@@ -3920,6 +4959,42 @@ type Flapping struct {
 	MuteMins int64 `json:"mute_mins,omitempty" toon:"mute_mins,omitempty"`
 }
 
+// FolderItem is generated from the Flashduty OpenAPI schema.
+type FolderItem struct {
+	// Owning account ID.
+	AccountID uint64 `json:"account_id" toon:"account_id"`
+	// Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Member ID of the creator.
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
+	// Name of the creator.
+	CreatorName string `json:"creator_name" toon:"creator_name"`
+	// Folder ID.
+	ID uint64 `json:"id" toon:"id"`
+	// Folder name.
+	Name string `json:"name" toon:"name"`
+	// Free-form note.
+	Note string `json:"note" toon:"note"`
+	// Parent folder ID; 0 at the root.
+	ParentID uint64 `json:"parent_id" toon:"parent_id"`
+	// Comma-separated ancestor IDs from the root, excluding this folder; empty at the root.
+	ParentPath string `json:"parent_path" toon:"parent_path"`
+	// Team the folder is scoped to; 0 when account-wide.
+	TeamID uint64 `json:"team_id" toon:"team_id"`
+	// Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// Member ID of the last updater.
+	UpdaterID uint64 `json:"updater_id" toon:"updater_id"`
+	// Name of the last updater.
+	UpdaterName string `json:"updater_name" toon:"updater_name"`
+}
+
+// GetIntegrationRequest is generated from the Flashduty OpenAPI schema.
+type GetIntegrationRequest struct {
+	// Integration ID.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+}
+
 // GetRemoteConfigRequest is generated from the Flashduty OpenAPI schema.
 type GetRemoteConfigRequest struct {
 	// RUM application ID.
@@ -4603,6 +5678,85 @@ type InsightTopkAlertByLabelRequest struct {
 	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
 }
 
+// IntegrationDetail is generated from the Flashduty OpenAPI schema.
+type IntegrationDetail struct {
+	Category       any `json:"category" toon:"category"`
+	CreatedAt      any `json:"created_at" toon:"created_at"`
+	Description    any `json:"description" toon:"description"`
+	IntegrationID  any `json:"integration_id" toon:"integration_id"`
+	LastTime       any `json:"last_time" toon:"last_time"`
+	Name           any `json:"name" toon:"name"`
+	PluginType     any `json:"plugin_type" toon:"plugin_type"`
+	PluginTypeName any `json:"plugin_type_name" toon:"plugin_type_name"`
+	RefID          any `json:"ref_id" toon:"ref_id"`
+	// Type-specific configuration. Sensitive values (endpoint, headers, secrets, passwords) are returned masked as `******`.
+	Settings  map[string]any `json:"settings" toon:"settings"`
+	Status    any            `json:"status" toon:"status"`
+	TeamID    any            `json:"team_id" toon:"team_id"`
+	UpdatedAt any            `json:"updated_at" toon:"updated_at"`
+}
+
+// IntegrationItem is generated from the Flashduty OpenAPI schema.
+type IntegrationItem struct {
+	// Category the integration belongs to: `event.alert` alert events, `event.change` change events, `im` IM bots, `webhook` custom webhooks.
+	Category string `json:"category" toon:"category"`
+	// Unix timestamp in seconds when the integration was created.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Free-form description.
+	Description string `json:"description" toon:"description"`
+	// Integration ID.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Unix timestamp in seconds of the most recent event received. `0` when no event has arrived yet.
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
+	// Integration name.
+	Name string `json:"name" toon:"name"`
+	// Integration type, for example `standard.alert` or `zabbix.alert`.
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
+	// Display name of the integration type, in the language of the request.
+	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
+	// Source reference ID: `a_`-prefixed for an account-scoped integration, `c_`-prefixed when it is shared into a channel, `w_`-prefixed on legacy workspace-scoped integrations.
+	RefID string `json:"ref_id" toon:"ref_id"`
+	// Lifecycle status: `enabled` while the integration accepts events, `disabled` when it is paused.
+	Status string `json:"status" toon:"status"`
+	// ID of the team that owns the integration. `0` when it is not assigned to a team.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Unix timestamp in seconds when the integration was last updated.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+}
+
+// IntegrationLifecycleRequest is generated from the Flashduty OpenAPI schema.
+type IntegrationLifecycleRequest struct {
+	// Integration ID.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+}
+
+// IntegrationTypeItem is generated from the Flashduty OpenAPI schema.
+type IntegrationTypeItem struct {
+	// Category the type belongs to: `event.alert` alert events, `event.change` change events, `im` IM bots, `webhook` custom webhooks.
+	Category string `json:"category" toon:"category"`
+	// Type identifier to pass as `plugin_type` when creating an integration.
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
+	// Logo URL of the type.
+	PluginTypeLogoURL string `json:"plugin_type_logo_url" toon:"plugin_type_logo_url"`
+	// Display name of the type.
+	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
+	// Platform status of the type.
+	Status string `json:"status" toon:"status"`
+	// Whether `POST /integration/create` accepts this type.
+	SupportsAPICreate bool `json:"supports_api_create" toon:"supports_api_create"`
+}
+
+// IntegrationTypeListRequest is generated from the Flashduty OpenAPI schema.
+type IntegrationTypeListRequest struct {
+	ListOptions
+	// Sort ascending when `true` (the default); descending when `false`.
+	Asc *bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Filter by category. Accepts a comma-separated list, for example `event.alert,event.change`.
+	Category string `json:"category,omitempty" toon:"category,omitempty"`
+	// Sort field. When omitted, types are returned in console ranking order.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+}
+
 // InvestigationTarget is generated from the Flashduty OpenAPI schema.
 type InvestigationTarget struct {
 	// Configuration for the `dashboard` kind; required when `kind` is `dashboard`.
@@ -4645,25 +5799,25 @@ type InviteMemberItem struct {
 
 // KnowledgeFileDeleteRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgeFileDeleteRequest struct {
-	// Delete even when other pack files reference this file; the referrers are then returned as warnings instead of blocking the delete.
+	// Delete even when other knowledge files reference this file; the referrers are then returned as warnings instead of blocking the delete.
 	Force bool `json:"force,omitempty" toon:"force,omitempty"`
-	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	// Knowledge ID; defaults to the caller's account-scope knowledge.
 	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
-	// Path of the file relative to the pack root.
+	// Path of the file relative to the knowledge root.
 	RelPath string `json:"rel_path" toon:"rel_path"`
 }
 
 // KnowledgeFileDeleteResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeFileDeleteResponse struct {
-	// Non-blocking warnings after deletion; `code=still_referenced_by` means the (force-)deleted file is still @ref-referenced by other files in the pack (`refs` lists the referrers). Absent when there are no warnings (omitempty).
+	// Non-blocking warnings after deletion; `code=still_referenced_by` means the (force-)deleted file is still @ref-referenced by other files in the knowledge (`refs` lists the referrers). Absent when there are no warnings (omitempty).
 	Warnings []KnowledgeWarning `json:"warnings" toon:"warnings"`
 }
 
 // KnowledgeFileGetRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgeFileGetRequest struct {
-	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	// Knowledge ID; defaults to the caller's account-scope knowledge.
 	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
-	// Path of the file relative to the pack root.
+	// Path of the file relative to the knowledge root.
 	RelPath string `json:"rel_path" toon:"rel_path"`
 }
 
@@ -4682,9 +5836,9 @@ type KnowledgeFileItem struct {
 	ContentType string `json:"content_type" toon:"content_type"`
 	// File ID (`kfl_` prefix).
 	FileID string `json:"file_id" toon:"file_id"`
-	// ID of the knowledge pack that contains the file.
+	// ID of the knowledge that contains the file.
 	PackID string `json:"pack_id" toon:"pack_id"`
-	// Path relative to the pack root, e.g. `runbooks/restart.md`.
+	// Path relative to the knowledge root, e.g. `runbooks/restart.md`.
 	RelPath string `json:"rel_path" toon:"rel_path"`
 	// File size in bytes.
 	SizeBytes int64 `json:"size_bytes" toon:"size_bytes"`
@@ -4697,15 +5851,15 @@ type KnowledgeFileItem struct {
 // KnowledgeFileListRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgeFileListRequest struct {
 	ListOptions
-	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	// Knowledge ID; defaults to the caller's account-scope knowledge.
 	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
 }
 
 // KnowledgeFileListResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeFileListResponse struct {
-	// Array of files in the specified knowledge pack; empty array when the pack has no files.
+	// Array of files in the specified knowledge; empty array when it has no files.
 	Files []KnowledgeFileItem `json:"files" toon:"files"`
-	// Total number of files in the pack.
+	// Total number of files in the knowledge.
 	Total int64 `json:"total" toon:"total"`
 }
 
@@ -4715,16 +5869,16 @@ type KnowledgeFilePutRequest struct {
 	ContentB64 string `json:"content_b64,omitempty" toon:"content_b64,omitempty"`
 	// MIME type; inferred from the file extension when omitted.
 	ContentType string `json:"content_type,omitempty" toon:"content_type,omitempty"`
-	// Knowledge pack ID; defaults to the caller's account-scope pack.
+	// Knowledge ID; defaults to the caller's account-scope knowledge.
 	PackID string `json:"pack_id,omitempty" toon:"pack_id,omitempty"`
-	// Destination path relative to the pack root; existing files are overwritten.
+	// Destination path relative to the knowledge root; existing files are overwritten.
 	RelPath string `json:"rel_path" toon:"rel_path"`
 }
 
 // KnowledgeFilePutResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeFilePutResponse struct {
 	File KnowledgeFileItem `json:"file" toon:"file"`
-	// Non-blocking warnings after a successful write; `code=unresolved_reference` means an @ref in the file content points to a file that does not exist in the pack. Absent when there are no warnings (omitempty).
+	// Non-blocking warnings after a successful write; `code=unresolved_reference` means an @ref in the file content points to a file that does not exist in the knowledge. Absent when there are no warnings (omitempty).
 	Warnings []KnowledgeWarning `json:"warnings" toon:"warnings"`
 }
 
@@ -4733,26 +5887,26 @@ type KnowledgeGetRequest struct{}
 
 // KnowledgeGetResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgeGetResponse struct {
-	// Array of files in this knowledge pack; empty array when the pack has no files.
+	// Array of files in this knowledge; empty array when it has no files.
 	Files []KnowledgeFileItem `json:"files" toon:"files"`
 	Pack  KnowledgePackItem   `json:"pack" toon:"pack"`
 }
 
 // KnowledgePackDeleteRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgePackDeleteRequest struct {
-	// Knowledge pack ID to delete.
+	// Knowledge ID to delete.
 	PackID string `json:"pack_id" toon:"pack_id"`
 }
 
 // KnowledgePackDeleteResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgePackDeleteResponse struct {
-	// True when the pack was deleted.
+	// True when the knowledge was deleted.
 	OK bool `json:"ok" toon:"ok"`
 }
 
 // KnowledgePackEnsureRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgePackEnsureRequest struct {
-	// Scope of the pack to ensure. One of: `account` (account-level pack; scope_id is forced to the caller's account ID and only account admins may create it; first creation seeds a default DUTY.md), `team` (team-level pack; the `scope_id` team ID is required and the caller must belong to that team).
+	// Scope of the knowledge to ensure. One of: `account` (account-level knowledge; scope_id is forced to the caller's account ID and only account admins may create it; first creation seeds a default DUTY.md), `team` (team-level knowledge; the `scope_id` team ID is required and the caller must belong to that team).
 	Scope string `json:"scope" toon:"scope"`
 	// Team ID; required for `team` scope, ignored for `account` scope.
 	ScopeID int64 `json:"scope_id,omitempty" toon:"scope_id,omitempty"`
@@ -4760,21 +5914,21 @@ type KnowledgePackEnsureRequest struct {
 
 // KnowledgePackItem is generated from the Flashduty OpenAPI schema.
 type KnowledgePackItem struct {
-	// Account that owns the pack.
+	// Account that owns the knowledge.
 	AccountID int64 `json:"account_id" toon:"account_id"`
-	// Whether the caller can edit this pack.
+	// Whether the caller can edit this knowledge.
 	CanEdit bool `json:"can_edit" toon:"can_edit"`
-	// Unix timestamp in milliseconds when the pack was created.
+	// Unix timestamp in milliseconds when the knowledge was created.
 	CreatedAtMs TimestampMilli `json:"created_at_ms" toon:"created_at_ms"`
-	// Person ID of the member who created the pack.
+	// Person ID of the member who created the knowledge.
 	CreatedBy int64 `json:"created_by" toon:"created_by"`
-	// Pack version at which DUTY.md was last authored or re-affirmed. When `version` is greater, DUTY.md no longer reflects every file in the pack.
+	// Knowledge version at which DUTY.md was last authored or re-affirmed. When `version` is greater, DUTY.md no longer reflects every file in the knowledge.
 	DutyVersion int64 `json:"duty_version" toon:"duty_version"`
-	// Number of files in the pack.
+	// Number of files in the knowledge.
 	FileCount int64 `json:"file_count" toon:"file_count"`
-	// Knowledge pack ID (`kpk_` prefix).
+	// Knowledge ID (`kpk_` prefix).
 	PackID string `json:"pack_id" toon:"pack_id"`
-	// Pack scope. `channel` is a legacy scope; new packs are `account` or `team`.
+	// Knowledge scope. `channel` is a legacy scope; new knowledge is `account` or `team` scope.
 	Scope string `json:"scope" toon:"scope"`
 	// Scope owner: the account ID for `account` scope, the team ID for `team` scope.
 	ScopeID int64 `json:"scope_id" toon:"scope_id"`
@@ -4782,20 +5936,20 @@ type KnowledgePackItem struct {
 	TeamName string `json:"team_name" toon:"team_name"`
 	// Total size of all files in bytes.
 	TotalBytes int64 `json:"total_bytes" toon:"total_bytes"`
-	// Unix timestamp in milliseconds when the pack was last modified.
+	// Unix timestamp in milliseconds when the knowledge was last modified.
 	UpdatedAtMs TimestampMilli `json:"updated_at_ms" toon:"updated_at_ms"`
-	// Pack version, incremented on every file change.
+	// Knowledge version, incremented on every file change.
 	Version int64 `json:"version" toon:"version"`
 }
 
 // KnowledgePackListRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgePackListRequest struct {
 	ListOptions
-	// Include the account-scope pack; defaults to true.
+	// Include the account-scope knowledge; defaults to true.
 	IncludeAccount *bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
-	// Case-insensitive substring filter over pack ID, scope, scope ID/account ID, and team name.
+	// Case-insensitive substring filter over knowledge ID, scope, scope ID/account ID, and team name.
 	Query string `json:"query,omitempty" toon:"query,omitempty"`
-	// Restrict to one scope; `all` (default) overrides `include_account`. One of: `all` (account scope plus visible team scopes), `account` (account-level packs only), `team` (team-level packs only, can be combined with `team_ids`).
+	// Restrict to one scope; `all` (default) overrides `include_account`. One of: `all` (account scope plus visible team scopes), `account` (account-level knowledge only), `team` (team-level knowledge only, can be combined with `team_ids`).
 	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
 	// Restrict to these team IDs; for non-admins the list is intersected with their own teams.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
@@ -4803,17 +5957,17 @@ type KnowledgePackListRequest struct {
 
 // KnowledgePackListResponse is generated from the Flashduty OpenAPI schema.
 type KnowledgePackListResponse struct {
-	// Array of visible knowledge packs after filtering (current page), used with `total` for pagination.
+	// Array of visible knowledge after filtering (current page), used with `total` for pagination.
 	Packs []KnowledgePackItem `json:"packs" toon:"packs"`
-	// Total number of packs after filtering, before pagination.
+	// Total number of knowledge entries after filtering, before pagination.
 	Total int64 `json:"total" toon:"total"`
 }
 
 // KnowledgePackUpdateRequest is generated from the Flashduty OpenAPI schema.
 type KnowledgePackUpdateRequest struct {
-	// Knowledge pack ID to update.
+	// Knowledge ID to update.
 	PackID string `json:"pack_id" toon:"pack_id"`
-	// Destination scope; omit for a no-op that returns the current pack.
+	// Destination scope; omit for a no-op that returns the current knowledge.
 	Scope *string `json:"scope,omitempty" toon:"scope,omitempty"`
 	// Destination team ID; required when `scope` is `team`, set automatically for `account`.
 	ScopeID *int64 `json:"scope_id,omitempty" toon:"scope_id,omitempty"`
@@ -4821,7 +5975,7 @@ type KnowledgePackUpdateRequest struct {
 
 // KnowledgeWarning is generated from the Flashduty OpenAPI schema.
 type KnowledgeWarning struct {
-	// Warning code. One of: `unresolved_reference` (an @ref in the written file's content points to a file that does not exist in the pack; `ref` carries it), `still_referenced_by` (the deleted file is still @ref-referenced by other files in the pack; `refs` lists the referrers).
+	// Warning code. One of: `unresolved_reference` (an @ref in the written file's content points to a file that does not exist in the knowledge; `ref` carries it), `still_referenced_by` (the deleted file is still @ref-referenced by other files in the knowledge; `refs` lists the referrers).
 	Code string `json:"code" toon:"code"`
 	// Single reference related to the warning.
 	Ref string `json:"ref" toon:"ref"`
@@ -4909,7 +6063,7 @@ type ListChannelsRequest struct {
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
 	// Filter by explicit channel IDs.
 	ChannelIDs []int64 `json:"channel_ids,omitempty" toon:"channel_ids,omitempty"`
-	// Exact-match filter on channel name. Takes priority over `query` for name filtering.
+	// Exact-match filter on channel name. Takes priority over `query` for name filtering. Must be valid UTF-8 — invalid byte sequences are rejected with `InvalidParameter`.
 	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
 	// When true, return only `channel_id`, `channel_name`, `description` and `status`, and return all matches without pagination.
 	IsBrief bool `json:"is_brief,omitempty" toon:"is_brief,omitempty"`
@@ -4921,7 +6075,7 @@ type ListChannelsRequest struct {
 	IsMyTeam bool `json:"is_my_team,omitempty" toon:"is_my_team,omitempty"`
 	// Field used to order results. Defaults to `created_at`.
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
-	// Case-insensitive regular expression matched against channel name and description; invalid regex syntax falls back to a literal match.
+	// Case-insensitive regular expression matched against channel name and description; invalid regex syntax falls back to a literal match. Must be valid UTF-8 — invalid byte sequences are rejected with `InvalidParameter`.
 	Query string `json:"query,omitempty" toon:"query,omitempty"`
 	// Filter by team IDs.
 	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
@@ -5049,6 +6203,49 @@ type ListIncidentsRequest struct {
 type ListInhibitRulesResponse struct {
 	// All inhibit rules of the channel, excluding deleted ones, ordered by creation time ascending.
 	Items []InhibitRuleItem `json:"items" toon:"items"`
+}
+
+// ListIntegrationTypesResponse is generated from the Flashduty OpenAPI schema.
+type ListIntegrationTypesResponse struct {
+	ListOptions
+	// Integration types on the current page.
+	Items []IntegrationTypeItem `json:"items" toon:"items"`
+	// Total number of matching types.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// ListIntegrationsRequest is generated from the Flashduty OpenAPI schema.
+type ListIntegrationsRequest struct {
+	ListOptions
+	// Sort ascending when true, descending when false.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Filter by category. Accepts a comma-separated list.
+	Category string `json:"category,omitempty" toon:"category,omitempty"`
+	// Limit the result to integrations owned by your teams.
+	IsMyTeam bool `json:"is_my_team,omitempty" toon:"is_my_team,omitempty"`
+	// Filter by integration name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Sort field. Defaults to `created_at`; `plugin_type` is sorted by the underlying plugin.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+	// Filter by integration type. Accepts a comma-separated list.
+	PluginType string `json:"plugin_type,omitempty" toon:"plugin_type,omitempty"`
+	// Filter by source reference IDs. Each value must start with `c_` (channel), `a_` (account) or `w_`.
+	RefIDs []string `json:"ref_ids,omitempty" toon:"ref_ids,omitempty"`
+	// Filter by status. Accepts a comma-separated list.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+	// Filter by team IDs. With `is_my_team`, the values narrow that set further.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
+	// Deprecated. Merged into `plugin_type` when both are set.
+	Type string `json:"type,omitempty" toon:"type,omitempty"`
+}
+
+// ListIntegrationsResponse is generated from the Flashduty OpenAPI schema.
+type ListIntegrationsResponse struct {
+	ListOptions
+	// Integrations on the current page.
+	Items []IntegrationItem `json:"items" toon:"items"`
+	// Total number of matching integrations.
+	Total int64 `json:"total" toon:"total"`
 }
 
 // ListPastIncidentsRequest is generated from the Flashduty OpenAPI schema.
@@ -6699,6 +7896,10 @@ type RemoteConfigRule struct {
 type RemoteConfigValues struct {
 	// How Session Replay masks a page by default.
 	DefaultPrivacyLevel *string `json:"defaultPrivacyLevel,omitempty" toon:"defaultPrivacyLevel,omitempty"`
+	// Keep sessions the session sample rate did not draw when they report an error; applies only to sessions that rate missed, so it does nothing alongside a rate of 100.
+	SessionOnError *bool `json:"sessionOnError,omitempty" toon:"sessionOnError,omitempty"`
+	// The same switch for Session Replay: un-sampled sessions still record and upload their recording only when the session errors.
+	SessionReplayOnError *bool `json:"sessionReplayOnError,omitempty" toon:"sessionReplayOnError,omitempty"`
 	// Session Replay sampling rate (0-100).
 	SessionReplaySampleRate *int64 `json:"sessionReplaySampleRate,omitempty" toon:"sessionReplaySampleRate,omitempty"`
 	// Session sampling rate (0-100).
@@ -7008,6 +8209,12 @@ type RoleUpsertResponse struct {
 	RoleID uint64 `json:"role_id" toon:"role_id"`
 	// Role name echoed from the request.
 	RoleName string `json:"role_name" toon:"role_name"`
+}
+
+// RotateIntegrationKeyResponse is generated from the Flashduty OpenAPI schema.
+type RotateIntegrationKeyResponse struct {
+	// The new key. The previous key stops working immediately; this value cannot be read again later.
+	IntegrationKey string `json:"integration_key" toon:"integration_key"`
 }
 
 // RouteCase is generated from the Flashduty OpenAPI schema.
@@ -7917,7 +9124,7 @@ type RUMIssueItem struct {
 	Status string `json:"status" toon:"status"`
 	// Suspected root cause analysis, determined automatically (rules or AI) or set manually by a user.
 	SuspectedCause RUMIssueItemSuspectedCause `json:"suspected_cause" toon:"suspected_cause"`
-	// ID of the team owning this issue, copied from the owning application's `team_id` at issue creation.
+	// ID of the team owning this issue. For `POST /rum/issue/info` this is the owning application's current `team_id`; `POST /rum/issue/list` and `POST /rum/issue/export` report the team recorded when the issue was first seen, which differs once the application moves to another team.
 	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Time the issue was last updated, Unix timestamp in milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
@@ -8930,7 +10137,7 @@ type SessionGetResponse struct {
 	// Opaque keyset cursor; pass back as search_after_ctx to fetch the next older page. Omitted when has_more_older is false.
 	SearchAfterCtx string      `json:"search_after_ctx" toon:"search_after_ctx"`
 	Session        SessionItem `json:"session" toon:"session"`
-	// Account-wide onboarding flag: true when the account has zero knowledge packs in any scope; not specific to this session.
+	// Account-wide onboarding flag: true when the account has no knowledge in any scope; not specific to this session.
 	SuggestInit bool `json:"suggest_init" toon:"suggest_init"`
 }
 
@@ -8984,6 +10191,8 @@ type SessionItem struct {
 	// | `automation` | Created by an automation rule (unattended run) |
 	// | `subagent` | Child session spawned by a parent's agent_dispatch (audit label; at runtime it executes on the web tool surface) |
 	EntryKind string `json:"entry_kind" toon:"entry_kind"`
+	// Whether the session still has open tasks, used to tell a handed-off turn from a settled session. Best-effort: when the read fails the field is absent (`omitempty`), which callers must treat as "unknown", never as proof the session is idle.
+	HasOpenTasks bool `json:"has_open_tasks" toon:"has_open_tasks"`
 	// True when there is assistant output the caller has not yet viewed.
 	HasUnread bool `json:"has_unread" toon:"has_unread"`
 	// True for incognito (non-persisted-memory) sessions.
@@ -9053,6 +10262,8 @@ type SessionListRequest struct {
 	Keyword string `json:"keyword,omitempty" toon:"keyword,omitempty"`
 	// Sort field: `created_at` by creation time, `updated_at` by last update; defaults to `updated_at` when omitted.
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+	// Filter by who started the session: returns only sessions started by these members (a session is kept when `person_id` matches any of them). Intersects with `scope` and `team_ids`, so it never widens what the caller is allowed to see.
+	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
 	// Visibility scope: `all` (own personal + accessible team sessions), `personal`, or `team`; default `all`.
 	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
 	// Archive bucket: active (default) returns un-archived, archived returns archived, all returns both.
@@ -9065,7 +10276,7 @@ type SessionListRequest struct {
 type SessionListResponse struct {
 	// The page of sessions.
 	Sessions []SessionItem `json:"sessions" toon:"sessions"`
-	// Account-wide onboarding flag: true when the account has zero knowledge packs in any scope; not dependent on this call's filters.
+	// Account-wide onboarding flag: true when the account has no knowledge in any scope; not dependent on this call's filters.
 	SuggestInit bool `json:"suggest_init" toon:"suggest_init"`
 	// Total number of sessions matching the filter (ignoring pagination).
 	Total int64 `json:"total" toon:"total"`
@@ -9920,6 +11131,8 @@ type TemplateCreateRequest struct {
 	Dingtalk string `json:"dingtalk,omitempty" toon:"dingtalk,omitempty"`
 	// DingTalk app message template source.
 	DingtalkApp string `json:"dingtalk_app,omitempty" toon:"dingtalk_app,omitempty"`
+	// Show the Create War Room button on DingTalk app cards.
+	DingtalkAppWarRoomEnabled bool `json:"dingtalk_app_war_room_enabled,omitempty" toon:"dingtalk_app_war_room_enabled,omitempty"`
 	// Email body template source (Go `html/template` syntax).
 	Email string `json:"email,omitempty" toon:"email,omitempty"`
 	// Feishu robot message template source.
@@ -9940,6 +11153,8 @@ type TemplateCreateRequest struct {
 	Slack string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source.
 	SlackApp string `json:"slack_app,omitempty" toon:"slack_app,omitempty"`
+	// Show the Create War Room button on Slack app cards.
+	SlackAppWarRoomEnabled bool `json:"slack_app_war_room_enabled,omitempty" toon:"slack_app_war_room_enabled,omitempty"`
 	// SMS template source (Go `text/template` syntax).
 	SMS string `json:"sms,omitempty" toon:"sms,omitempty"`
 	// Team scope. 0 for account-wide.
@@ -9992,6 +11207,8 @@ type TemplateItem struct {
 	Dingtalk string `json:"dingtalk" toon:"dingtalk"`
 	// DingTalk app message template source.
 	DingtalkApp string `json:"dingtalk_app" toon:"dingtalk_app"`
+	// Whether DingTalk app cards show the Create War Room button. Hidden for closed incidents and when the incident has no responders.
+	DingtalkAppWarRoomEnabled bool `json:"dingtalk_app_war_room_enabled" toon:"dingtalk_app_war_room_enabled"`
 	// Email body template source (Go `html/template` syntax).
 	Email string `json:"email" toon:"email"`
 	// Feishu robot message template source.
@@ -10012,6 +11229,8 @@ type TemplateItem struct {
 	Slack string `json:"slack" toon:"slack"`
 	// Slack app message template source.
 	SlackApp string `json:"slack_app" toon:"slack_app"`
+	// Whether Slack app cards show the Create War Room button. Hidden for closed incidents and when the incident has no responders.
+	SlackAppWarRoomEnabled bool `json:"slack_app_war_room_enabled" toon:"slack_app_war_room_enabled"`
 	// SMS template source (Go `text/template` syntax).
 	SMS string `json:"sms" toon:"sms"`
 	// Template lifecycle status. `enabled` templates can be referenced by escalation policies for notifications; `disabled` templates are no longer used for new notifications; `deleted` templates are never returned by list endpoints.
@@ -10077,6 +11296,8 @@ type TemplateUpdateRequest struct {
 	Dingtalk *string `json:"dingtalk,omitempty" toon:"dingtalk,omitempty"`
 	// DingTalk app message template source. Omit to keep the current content; send an empty string to clear it.
 	DingtalkApp *string `json:"dingtalk_app,omitempty" toon:"dingtalk_app,omitempty"`
+	// When set, show or hide the Create War Room button on DingTalk app cards. Omit to keep the existing setting.
+	DingtalkAppWarRoomEnabled *bool `json:"dingtalk_app_war_room_enabled,omitempty" toon:"dingtalk_app_war_room_enabled,omitempty"`
 	// Email body template source (Go `html/template` syntax). Omit to keep the current content; send an empty string to clear it.
 	Email *string `json:"email,omitempty" toon:"email,omitempty"`
 	// Feishu robot message template source. Omit to keep the current content; send an empty string to clear it.
@@ -10097,6 +11318,8 @@ type TemplateUpdateRequest struct {
 	Slack *string `json:"slack,omitempty" toon:"slack,omitempty"`
 	// Slack app message template source. Omit to keep the current content; send an empty string to clear it.
 	SlackApp *string `json:"slack_app,omitempty" toon:"slack_app,omitempty"`
+	// When set, show or hide the Create War Room button on Slack app cards. Omit to keep the existing setting.
+	SlackAppWarRoomEnabled *bool `json:"slack_app_war_room_enabled,omitempty" toon:"slack_app_war_room_enabled,omitempty"`
 	// SMS template source (Go `text/template` syntax). Omit to keep the current content; send an empty string to clear it.
 	SMS *string `json:"sms,omitempty" toon:"sms,omitempty"`
 	// Team scope. 0 for account-wide. Omit to keep the template's current team.
@@ -10315,6 +11538,20 @@ type UpdateInhibitRuleRequest struct {
 	SourceFilters FilterGroup `json:"source_filters,omitempty" toon:"source_filters,omitempty"`
 	// Conditions the incoming target alert event must match to be suppressed; empty means every event is a target.
 	TargetFilters FilterGroup `json:"target_filters,omitempty" toon:"target_filters,omitempty"`
+}
+
+// UpdateIntegrationRequest is generated from the Flashduty OpenAPI schema.
+type UpdateIntegrationRequest struct {
+	// New description, at most 499 characters.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// Integration ID.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// New name, 2–49 characters.
+	Name *string `json:"name,omitempty" toon:"name,omitempty"`
+	// Replacement configuration for the integration type. Sensitive entries left out, or sent back as the masked `******`, keep their stored value.
+	Settings map[string]any `json:"settings,omitempty" toon:"settings,omitempty"`
+	// New owning team ID; `0` clears the team assignment.
+	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
 // UpdateRemoteConfigRequest is generated from the Flashduty OpenAPI schema.

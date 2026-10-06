@@ -21,6 +21,117 @@ func (s *IntegrationsService) DatasourceImPersonTryLink(ctx context.Context, req
 	return out, resp, nil
 }
 
+// Get integration detail.
+//
+// Return one integration, including its settings with sensitive values masked.
+//
+// API: POST /integration/info (integration-api-read-info).
+func (s *IntegrationsService) IntegrationAPIReadInfo(ctx context.Context, req *GetIntegrationRequest) (*IntegrationDetail, *Response, error) {
+	out := new(IntegrationDetail)
+	resp, err := s.client.do(ctx, "/integration/info", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// List integrations.
+//
+// List the account's alert-source and change-source integrations.
+//
+// API: POST /integration/list (integration-api-read-list).
+func (s *IntegrationsService) IntegrationAPIReadList(ctx context.Context, req *ListIntegrationsRequest) (*ListIntegrationsResponse, *Response, error) {
+	out := new(ListIntegrationsResponse)
+	resp, err := s.client.do(ctx, "/integration/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// List integration types.
+//
+// List the integration types the account can configure.
+//
+// API: POST /integration/type/list (integration-api-read-type-list).
+func (s *IntegrationsService) IntegrationAPIReadTypeList(ctx context.Context, req *IntegrationTypeListRequest) (*ListIntegrationTypesResponse, *Response, error) {
+	out := new(ListIntegrationTypesResponse)
+	resp, err := s.client.do(ctx, "/integration/type/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Create integration.
+//
+// Create an integration for an alert source or change source.
+//
+// API: POST /integration/create (integration-api-write-create).
+func (s *IntegrationsService) IntegrationAPIWriteCreate(ctx context.Context, req *CreateIntegrationRequest) (*CreateIntegrationResponse, *Response, error) {
+	out := new(CreateIntegrationResponse)
+	resp, err := s.client.do(ctx, "/integration/create", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Delete integration.
+//
+// Delete an integration that nothing else references.
+//
+// API: POST /integration/delete (integration-api-write-delete).
+func (s *IntegrationsService) IntegrationAPIWriteDelete(ctx context.Context, req *IntegrationLifecycleRequest) (*Response, error) {
+	return s.client.do(ctx, "/integration/delete", req, nil)
+}
+
+// Disable integration.
+//
+// Disable an integration without deleting its configuration.
+//
+// API: POST /integration/disable (integration-api-write-disable).
+func (s *IntegrationsService) IntegrationAPIWriteDisable(ctx context.Context, req *IntegrationLifecycleRequest) (*Response, error) {
+	return s.client.do(ctx, "/integration/disable", req, nil)
+}
+
+// Enable integration.
+//
+// Re-enable a disabled integration so it accepts events again.
+//
+// API: POST /integration/enable (integration-api-write-enable).
+func (s *IntegrationsService) IntegrationAPIWriteEnable(ctx context.Context, req *IntegrationLifecycleRequest) (*Response, error) {
+	return s.client.do(ctx, "/integration/enable", req, nil)
+}
+
+// Rotate integration key.
+//
+// Issue a new integration key and invalidate the previous one.
+//
+// API: POST /integration/key/rotate (integration-api-write-rotate-key).
+func (s *IntegrationsService) IntegrationAPIWriteRotateKey(ctx context.Context, req *IntegrationLifecycleRequest) (*RotateIntegrationKeyResponse, *Response, error) {
+	out := new(RotateIntegrationKeyResponse)
+	resp, err := s.client.do(ctx, "/integration/key/rotate", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Update integration.
+//
+// Update an integration's name, description, team, or settings.
+//
+// API: POST /integration/update (integration-api-write-update).
+func (s *IntegrationsService) IntegrationAPIWriteUpdate(ctx context.Context, req *UpdateIntegrationRequest) (*IntegrationDetail, *Response, error) {
+	out := new(IntegrationDetail)
+	resp, err := s.client.do(ctx, "/integration/update", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get webhook delivery detail.
 //
 // Retrieve the detailed payload and response for a specific webhook delivery attempt.
