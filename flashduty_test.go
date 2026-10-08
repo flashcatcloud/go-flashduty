@@ -97,6 +97,38 @@ func TestOptionalObjectRequestFieldOmitsWhenUnset(t *testing.T) {
 	}
 }
 
+// TestDashboardVariableOmitsUnsetVariableQuery guards the flattened-oneOf case
+// of the rule above: DashboardVariable is one struct for the datasource,
+// custom, and query arms, and only the query arm carries variable_query. The
+// backend rejects unknown fields per arm, so a datasource variable sent with
+// `"variable_query":{"kind":""}` fails the whole dashboard create, update, or
+// panel preview.
+func TestDashboardVariableOmitsUnsetVariableQuery(t *testing.T) {
+	body, err := json.Marshal(DashboardVariable{
+		Kind:           "datasource",
+		Name:           "metrics_ds",
+		DatasourceType: "prometheus",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(body), `"variable_query"`) {
+		t.Fatalf("unset VariableQuery must be omitted from the wire, got %s", body)
+	}
+
+	body, err = json.Marshal(DashboardVariable{
+		Kind:          "query",
+		Name:          "service",
+		VariableQuery: DashboardVariableQuery{Kind: "prometheus", Metric: "up", Label: "job"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), `"variable_query":{`) {
+		t.Fatalf("set VariableQuery must be present on the wire, got %s", body)
+	}
+}
+
 // TestResetPostMortemContentSendsZeroExpectedRevision guards a codegen
 // contract: expected_revision is a required field where 0 is a valid value
 // (first write to a never-saved document, per the spec's minimum: 0), so it

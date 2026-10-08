@@ -351,6 +351,51 @@ func TestEmitStructPreserveAbsenceRequestObjectPointerWraps(t *testing.T) {
 	}
 }
 
+// TestEmitStructOptionalFlattenedOneOfRequestFieldOmitsZero covers an optional
+// request field whose $ref target is a oneOf of object arms. emitModels
+// flattens that oneOf into one struct, so the field is a bare struct value and
+// needs `,omitzero`: `,omitempty` never drops a struct, and the unset field
+// would reach the wire as an object holding only an empty discriminator.
+func TestEmitStructOptionalFlattenedOneOfRequestFieldOmitsZero(t *testing.T) {
+	g := newTestGen(map[string]any{
+		"PromQuery": map[string]any{
+			"type":     "object",
+			"required": []any{"kind"},
+			"properties": map[string]any{
+				"kind":   map[string]any{"type": "string"},
+				"metric": map[string]any{"type": "string"},
+			},
+		},
+		"LogsQuery": map[string]any{
+			"type":     "object",
+			"required": []any{"kind"},
+			"properties": map[string]any{
+				"kind":  map[string]any{"type": "string"},
+				"field": map[string]any{"type": "string"},
+			},
+		},
+		"VariableQuery": map[string]any{
+			"oneOf": []any{
+				map[string]any{"$ref": "#/components/schemas/PromQuery"},
+				map[string]any{"$ref": "#/components/schemas/LogsQuery"},
+			},
+		},
+	})
+	g.reqGoNames["Variable"] = true
+
+	schema := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"variable_query": map[string]any{"$ref": "#/components/schemas/VariableQuery"},
+		},
+	}
+
+	src := g.emitStruct("Variable", schema)
+	if !strings.Contains(src, "VariableQuery VariableQuery `json:\"variable_query,omitzero\"") {
+		t.Fatalf("optional flattened-oneOf request field must use omitzero; got:\n%s", src)
+	}
+}
+
 // TestOpClassificationPredicates pins the three-way split of non-standard
 // operations: ndjson streams and non-JSON request bodies are hand-written,
 // while bounded binary downloads generate ordinary raw methods.

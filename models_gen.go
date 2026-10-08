@@ -3696,7 +3696,7 @@ type DashboardVariable struct {
 	// When the candidates are recomputed: `on_dashboard_load` = once when the dashboard loads; `on_time_range_change` = every time the time range changes.
 	Refresh       string                   `json:"refresh,omitempty" toon:"refresh,omitempty"`
 	Selection     DashboardSelectionConfig `json:"selection,omitzero" toon:"selection,omitempty"`
-	VariableQuery DashboardVariableQuery   `json:"variable_query,omitempty" toon:"variable_query,omitempty"`
+	VariableQuery DashboardVariableQuery   `json:"variable_query,omitzero" toon:"variable_query,omitempty"`
 }
 
 // DashboardVariableQuery is generated from the Flashduty OpenAPI schema.
