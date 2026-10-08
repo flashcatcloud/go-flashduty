@@ -57,7 +57,7 @@ func (c *Client) uploadFile(ctx context.Context, path string, query url.Values, 
 	}
 	u := c.BaseURL.ResolveReference(rel)
 	q := u.Query()
-	q.Set("app_key", c.appKey)
+	c.authQuery(q)
 	for k, vs := range query {
 		for _, v := range vs {
 			q.Set(k, v)
@@ -71,6 +71,7 @@ func (c *Client) uploadFile(ctx context.Context, path string, query url.Values, 
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("Accept", "application/json")
+	c.authHeader(req)
 	if c.UserAgent != "" {
 		req.Header.Set("User-Agent", c.UserAgent)
 	}

@@ -26,6 +26,7 @@ type Client struct {
 	UserAgent string
 
 	appKey         string
+	accessToken    string // when set, sent as a Bearer token instead of the app_key query parameter
 	logger         Logger
 	requestHeaders http.Header
 	requestHook    func(*http.Request)
@@ -59,6 +60,36 @@ func NewClient(appKey string, opts ...Option) (*Client, error) {
 	}
 	c.initServices()
 	return c, nil
+}
+
+// NewClientWithAccessToken returns a Flashduty client that authenticates every
+// request with an OAuth access token, sent as "Authorization: Bearer <token>"
+// instead of the app_key query parameter.
+func NewClientWithAccessToken(accessToken string, opts ...Option) (*Client, error) {
+	if accessToken == "" {
+		return nil, fmt.Errorf("flashduty: access token is required")
+	}
+	c, err := NewClient(accessToken, opts...)
+	if err != nil {
+		return nil, err
+	}
+	c.accessToken = accessToken
+	c.appKey = ""
+	return c, nil
+}
+
+// authQuery adds the app_key query parameter unless the client uses an access token.
+func (c *Client) authQuery(q url.Values) {
+	if c.accessToken == "" {
+		q.Set("app_key", c.appKey)
+	}
+}
+
+// authHeader adds the Bearer header when the client uses an access token.
+func (c *Client) authHeader(req *http.Request) {
+	if c.accessToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.accessToken)
+	}
 }
 
 // Response wraps http.Response and surfaces Flashduty envelope metadata: the
@@ -108,7 +139,7 @@ func (c *Client) newRequestWithAppKey(ctx context.Context, method, path string, 
 	u := c.BaseURL.ResolveReference(rel)
 	if withAppKey {
 		q := u.Query()
-		q.Set("app_key", c.appKey)
+		c.authQuery(q)
 		u.RawQuery = q.Encode()
 	}
 
@@ -130,6 +161,9 @@ func (c *Client) newRequestWithAppKey(ctx context.Context, method, path string, 
 		req.Header.Set("Content-Type", "application/json")
 	}
 	req.Header.Set("Accept", "application/json")
+	if withAppKey {
+		c.authHeader(req)
+	}
 	if c.UserAgent != "" {
 		req.Header.Set("User-Agent", c.UserAgent)
 	}
