@@ -1170,8 +1170,9 @@ func pointerizableScalar(gt string) bool {
 // isStructSchema reports whether property schema s is emitted as a Go struct
 // (as opposed to a scalar, enum, alias, slice, or map). It resolves s the same
 // way emitModels' top-level classification switch does (following $ref and
-// allOf). Callers use this both to emit `,omitzero` for request values and to
-// pointer-wrap nullable or absence-preserving fields.
+// allOf, and flattening a named oneOf of object arms into one struct). Callers
+// use this both to emit `,omitzero` for request values and to pointer-wrap
+// nullable or absence-preserving fields.
 func (g *Gen) isStructSchema(s map[string]any) bool {
 	if s == nil {
 		return false
@@ -1180,7 +1181,12 @@ func (g *Gen) isStructSchema(s map[string]any) bool {
 		if g.skip[ref] {
 			return false
 		}
-		return g.isStructSchema(asMap(g.schemas[ref]))
+		// emitModels queues a named schema as g.resolveObject(name), which
+		// flattens a oneOf of object arms into a single struct. Classify that
+		// emitted shape, not the raw oneOf, or an optional field of such a type
+		// gets `,omitempty` — a no-op on a struct value — and an unset field
+		// goes on the wire as an object holding only its zero discriminator.
+		return g.isStructSchema(g.resolveObject(ref))
 	}
 	if len(asSlice(s["allOf"])) > 0 {
 		s = g.mergeAllOf(s)
