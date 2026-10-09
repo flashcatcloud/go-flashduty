@@ -23,7 +23,7 @@ func (s *IntegrationsService) DatasourceImPersonTryLink(ctx context.Context, req
 
 // Get integration detail.
 //
-// Return one integration, including its settings with sensitive values masked.
+// Get a public integration with its stored settings and decrypted integration key.
 //
 // API: POST /integration/info (integration-api-read-info).
 func (s *IntegrationsService) IntegrationAPIReadInfo(ctx context.Context, req *GetIntegrationRequest) (*IntegrationDetail, *Response, error) {
@@ -37,7 +37,7 @@ func (s *IntegrationsService) IntegrationAPIReadInfo(ctx context.Context, req *G
 
 // List integrations.
 //
-// List the account's alert-source and change-source integrations.
+// List public integrations with their stored settings, decrypted keys, and edit permissions.
 //
 // API: POST /integration/list (integration-api-read-list).
 func (s *IntegrationsService) IntegrationAPIReadList(ctx context.Context, req *ListIntegrationsRequest) (*ListIntegrationsResponse, *Response, error) {
@@ -65,7 +65,7 @@ func (s *IntegrationsService) IntegrationAPIReadTypeList(ctx context.Context, re
 
 // Create integration.
 //
-// Create an integration for an alert source or change source.
+// Create a public integration for a supported alert, change, IM, or webhook type.
 //
 // API: POST /integration/create (integration-api-write-create).
 func (s *IntegrationsService) IntegrationAPIWriteCreate(ctx context.Context, req *CreateIntegrationRequest) (*CreateIntegrationResponse, *Response, error) {

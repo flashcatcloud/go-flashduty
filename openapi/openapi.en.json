@@ -32698,7 +32698,7 @@
       },
       "IntegrationItem": {
         "type": "object",
-        "description": "A configured integration. Timestamps are Unix epoch seconds.",
+        "description": "Public integration list item with full stored configuration. Timestamps are Unix epoch seconds.",
         "required": [
           "integration_id",
           "team_id",
@@ -32711,7 +32711,17 @@
           "ref_id",
           "created_at",
           "updated_at",
-          "last_time"
+          "last_time",
+          "editable",
+          "creator_id",
+          "updated_by",
+          "no_editable",
+          "plugin_id",
+          "integration_key",
+          "settings",
+          "data_source_id",
+          "account_id",
+          "exclusive_data_source_id"
         ],
         "properties": {
           "integration_id": {
@@ -32760,7 +32770,7 @@
           },
           "ref_id": {
             "type": "string",
-            "description": "Source reference ID: `a_`-prefixed for an account-scoped integration, `c_`-prefixed when it is shared into a channel, `w_`-prefixed on legacy workspace-scoped integrations."
+            "description": "Source reference ID, normally `a_<account_id>` for an account-level integration; legacy `w_` references may also exist. Channel-owned `c_` integrations are excluded."
           },
           "created_at": {
             "type": "integer",
@@ -32776,6 +32786,53 @@
             "type": "integer",
             "format": "int64",
             "description": "Unix timestamp in seconds of the most recent event received. `0` when no event has arrived yet."
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "Whether the current caller passes the integration object-permission check; write calls also require Integrations Manage."
+          },
+          "creator_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the member who created the integration."
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the member who last updated the integration."
+          },
+          "no_editable": {
+            "type": "boolean",
+            "description": "Read-only flag. When true, the public APIs do not allow changes to this integration."
+          },
+          "plugin_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Internal integration type ID; use `plugin_type`, not this ID, when creating an integration."
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "Decrypted integration key for inbound pushes. Empty when no key is stored; distinct from the account `app_key`."
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior."
+          },
+          "data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Legacy datasource ID, equal to `integration_id`."
+          },
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the account that owns the integration."
+          },
+          "exclusive_data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Legacy compatibility field; `0` for items returned by this public-integration list."
           }
         }
       },
@@ -32829,7 +32886,7 @@
       },
       "IntegrationDetail": {
         "type": "object",
-        "description": "A single integration with its full settings. Timestamps are Unix epoch seconds.",
+        "description": "Public integration detail with stored settings and its decrypted key. Timestamps are Unix epoch seconds.",
         "required": [
           "integration_id",
           "team_id",
@@ -32843,112 +32900,128 @@
           "created_at",
           "updated_at",
           "last_time",
+          "editable",
+          "creator_id",
+          "updated_by",
+          "no_editable",
+          "plugin_id",
+          "integration_key",
           "settings"
         ],
         "properties": {
-          "integration_id": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "Integration ID."
-            },
-            true
-          ],
-          "team_id": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "ID of the team that owns the integration. `0` when it is not assigned to a team."
-            },
-            true
-          ],
-          "plugin_type": [
-            {
-              "type": "string",
-              "description": "Integration type, for example `standard.alert` or `zabbix.alert`."
-            },
-            true
-          ],
-          "plugin_type_name": [
-            {
-              "type": "string",
-              "description": "Display name of the integration type, in the language of the request."
-            },
-            true
-          ],
-          "category": [
-            {
-              "type": "string",
-              "enum": [
-                "event.alert",
-                "event.change",
-                "im",
-                "webhook"
-              ],
-              "description": "Category the integration belongs to."
-            },
-            true
-          ],
-          "name": [
-            {
-              "type": "string",
-              "description": "Integration name."
-            },
-            true
-          ],
-          "description": [
-            {
-              "type": "string",
-              "description": "Free-form description."
-            },
-            true
-          ],
-          "status": [
-            {
-              "type": "string",
-              "enum": [
-                "enabled",
-                "disabled"
-              ],
-              "description": "Lifecycle status: `enabled` while the integration accepts events, `disabled` when it is paused."
-            },
-            true
-          ],
-          "ref_id": [
-            {
-              "type": "string",
-              "description": "Source reference ID: `a_`-prefixed for an account-scoped integration, `c_`-prefixed when it is shared into a channel."
-            },
-            true
-          ],
-          "created_at": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "Unix timestamp in seconds when the integration was created."
-            },
-            true
-          ],
-          "updated_at": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "Unix timestamp in seconds when the integration was last updated."
-            },
-            true
-          ],
-          "last_time": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "Unix timestamp in seconds of the most recent event received. `0` when no event has arrived yet."
-            },
-            true
-          ],
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Integration ID."
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the team that owns the integration. `0` when it is not assigned to a team."
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "Integration type, for example `standard.alert` or `zabbix.alert`."
+          },
+          "plugin_type_name": {
+            "type": "string",
+            "description": "Display name of the integration type, in the language of the request."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "event.alert",
+              "event.change",
+              "im",
+              "webhook"
+            ],
+            "description": "Category the integration belongs to: `event.alert` alert events, `event.change` change events, `im` IM bots, `webhook` custom webhooks."
+          },
+          "name": {
+            "type": "string",
+            "description": "Integration name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-form description."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "Lifecycle status: `enabled` while the integration accepts events, `disabled` when it is paused."
+          },
+          "ref_id": {
+            "type": "string",
+            "description": "Source reference ID, normally `a_<account_id>` for an account-level integration; legacy `w_` references may also exist. Channel-owned `c_` integrations are excluded."
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the integration was created."
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the integration was last updated."
+          },
+          "last_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds of the most recent event received. `0` when no event has arrived yet."
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "Whether the current caller passes the integration object-permission check; write calls also require Integrations Manage."
+          },
+          "creator_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the member who created the integration."
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the member who last updated the integration."
+          },
+          "no_editable": {
+            "type": "boolean",
+            "description": "Read-only flag. When true, the public APIs do not allow changes to this integration."
+          },
+          "plugin_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Internal integration type ID; use `plugin_type`, not this ID, when creating an integration."
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "Decrypted integration key for inbound pushes. Empty when no key is stored; distinct from the account `app_key`."
+          },
           "settings": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Type-specific configuration. Sensitive values (endpoint, headers, secrets, passwords) are returned masked as `******`."
+            "description": "Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior."
+          },
+          "test": {
+            "type": "object",
+            "description": "Plugin test result, returned only when a test is performed.",
+            "x-flashduty-preserve-absence": true,
+            "required": [
+              "success",
+              "message"
+            ],
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "description": "Whether the plugin test succeeded."
+              },
+              "message": {
+                "type": "string",
+                "description": "Test failure message; empty on success."
+              }
+            }
           }
         }
       },
@@ -32968,7 +33041,7 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 49,
-            "description": "Integration name. 2–49 characters.",
+            "description": "Integration name, 2–49 characters when nonempty; defaults to the integration type name when omitted or empty.",
             "example": "Prod metrics alerts"
           },
           "description": {
@@ -32979,14 +33052,24 @@
           "team_id": {
             "type": "integer",
             "format": "int64",
-            "minimum": 1,
-            "description": "Owning team ID.",
+            "minimum": 0,
+            "description": "Owning team ID; omit or use `0` for no team. A nonzero ID must belong to the current account.",
             "example": 1467226103121
           },
           "settings": {
             "type": "object",
             "description": "Type-specific configuration; the accepted keys depend on `plugin_type`.",
             "additionalProperties": true
+          },
+          "integration_key": {
+            "type": "string",
+            "minLength": 35,
+            "maxLength": 35,
+            "description": "Optional pre-generated key: 35 characters, ending with the account ID modulo 1000 padded to three digits; it must not already be in use. Omit to generate a key."
+          },
+          "is_test": {
+            "type": "boolean",
+            "description": "Run the plugin test during creation; false when omitted. Inspect the returned `test.success` for the test outcome."
           }
         }
       },
@@ -33006,8 +33089,27 @@
           },
           "integration_key": {
             "type": "string",
-            "description": "Key used to authenticate inbound pushes to this integration. Returned here only; fetch a new one with `POST /integration/key/rotate`.",
-            "example": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+            "description": "Integration key for inbound pushes; also readable from `/integration/list` and `/integration/info`.",
+            "example": "0123456789abcdef0123456789abcdef100"
+          },
+          "test": {
+            "type": "object",
+            "description": "Plugin test result, returned only when a test is performed.",
+            "x-flashduty-preserve-absence": true,
+            "required": [
+              "success",
+              "message"
+            ],
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "description": "Whether the plugin test succeeded."
+              },
+              "message": {
+                "type": "string",
+                "description": "Test failure message; empty on success."
+              }
+            }
           }
         }
       },
@@ -33052,12 +33154,13 @@
             "description": "New owning team ID; `0` clears the team assignment."
           },
           "settings": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "description": "Replacement configuration for the integration type. Sensitive entries left out, or sent back as the masked `******`, keep their stored value.",
+            "type": "object",
+            "description": "Replacement type-specific configuration. Known sensitive fields omitted or sent as `******` keep their stored value; an explicit empty headers object clears headers.",
             "additionalProperties": true
+          },
+          "is_test": {
+            "type": "boolean",
+            "description": "Run the plugin test when submitting `settings`; no test is performed for a metadata-only update."
           }
         }
       },
@@ -33086,8 +33189,8 @@
         "properties": {
           "integration_key": {
             "type": "string",
-            "description": "The new key. The previous key stops working immediately; this value cannot be read again later.",
-            "example": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+            "description": "New integration key; the previous key stops working immediately. Also readable from `/integration/list` and `/integration/info`.",
+            "example": "0123456789abcdef0123456789abcdef100"
           }
         }
       }
@@ -67100,12 +67203,12 @@
       "post": {
         "operationId": "integration-api-read-list",
         "summary": "List integrations",
-        "description": "List the account's alert-source and change-source integrations.",
+        "description": "List public integrations with their stored settings, decrypted keys, and edit permissions.",
         "tags": [
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- `orderby` defaults to `created_at`; `plugin_type` is sorted by the underlying plugin.\n- `plugin_type`, `status` and `category` accept comma-separated values; `ref_ids` values must start with `c_`, `a_` or `w_`.\n- With `is_my_team` set, results are limited to your teams and `team_ids` narrows that set further.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- `orderby` defaults to `created_at`; `plugin_type` is sorted by the underlying plugin.\n- `plugin_type`, `status` and `category` accept comma-separated values; `ref_ids` values must start with `c_`, `a_` or `w_`; a `c_` filter is syntactically accepted but does not return channel-owned integrations.\n- With `is_my_team` set, results are limited to your teams and `team_ids` narrows that set further.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Items include `settings`, `integration_key`, `plugin_id`, `account_id`, and the legacy `data_source_id` alias; credential values are not masked.",
           "href": "/en/api-reference/on-call/integrations/integration-api-read-list",
           "metadata": {
             "sidebarTitle": "List integrations"
@@ -67147,10 +67250,23 @@
                         "name": "Prod metrics alerts",
                         "description": "Alerts pushed by the production Prometheus stack",
                         "status": "enabled",
-                        "ref_id": "a_6612f0c9e1b7a4d3508f2c6b",
+                        "ref_id": "a_100",
                         "created_at": 1775116800,
                         "updated_at": 1775203200,
-                        "last_time": 1775298600
+                        "last_time": 1775298600,
+                        "editable": true,
+                        "creator_id": 1467226103999,
+                        "updated_by": 1467226103999,
+                        "no_editable": false,
+                        "plugin_id": 9,
+                        "integration_key": "0123456789abcdef0123456789abcdef100",
+                        "settings": {
+                          "field_mapping": {},
+                          "value_mapping": {}
+                        },
+                        "data_source_id": 6113996590131,
+                        "account_id": 100,
+                        "exclusive_data_source_id": 0
                       }
                     ]
                   }
@@ -67192,12 +67308,12 @@
       "post": {
         "operationId": "integration-api-read-info",
         "summary": "Get integration detail",
-        "description": "Return one integration, including its settings with sensitive values masked.",
+        "description": "Get a public integration with its stored settings and decrypted integration key.",
         "tags": [
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- Sensitive settings (endpoint, headers, secrets, passwords) come back masked as `******`.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Settings and the integration key are returned without masking, matching the legacy datasource detail response.",
           "href": "/en/api-reference/on-call/integrations/integration-api-read-info",
           "metadata": {
             "sidebarTitle": "Get integration detail"
@@ -67234,20 +67350,20 @@
                     "name": "Prod metrics alerts",
                     "description": "Alerts pushed by the production Prometheus stack",
                     "status": "enabled",
-                    "ref_id": "a_6612f0c9e1b7a4d3508f2c6b",
+                    "ref_id": "a_100",
                     "created_at": 1775116800,
                     "updated_at": 1775203200,
                     "last_time": 1775298600,
                     "settings": {
-                      "severity_mapping": [
-                        {
-                          "P1": "Critical"
-                        }
-                      ],
-                      "labels": {
-                        "source": "prometheus"
-                      }
-                    }
+                      "field_mapping": {},
+                      "value_mapping": {}
+                    },
+                    "editable": true,
+                    "creator_id": 1467226103999,
+                    "updated_by": 1467226103999,
+                    "no_editable": false,
+                    "plugin_id": 9,
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
                   }
                 }
               }
@@ -67285,12 +67401,12 @@
       "post": {
         "operationId": "integration-api-write-create",
         "summary": "Create integration",
-        "description": "Create an integration for an alert source or change source.",
+        "description": "Create a public integration for a supported alert, change, IM, or webhook type.",
         "tags": [
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- `plugin_type` must be one of the types listed by `POST /integration/type/list` with `supports_api_create: true`; anything else returns `InvalidParameter`.\n- `integration_key` is returned once. Store it at creation time — it is not part of `POST /integration/info`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- `plugin_type` must be one of the types listed by `POST /integration/type/list` with `supports_api_create: true`; anything else returns `InvalidParameter`.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- An omitted `integration_key` is generated automatically; a supplied key must satisfy the length, account suffix, and uniqueness checks.\n- With `is_test: true`, inspect `test.success`; an HTTP 200 response alone does not establish that the plugin test succeeded.\n- Every call is recorded in the account audit log.",
           "href": "/en/api-reference/on-call/integrations/integration-api-write-create",
           "metadata": {
             "sidebarTitle": "Create integration"
@@ -67320,7 +67436,11 @@
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
                     "integration_id": 6113996590131,
-                    "integration_key": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "test": {
+                      "success": true,
+                      "message": ""
+                    }
                   }
                 }
               }
@@ -67352,12 +67472,10 @@
                 "description": "Alerts pushed by the production Prometheus stack",
                 "team_id": 1467226103121,
                 "settings": {
-                  "severity_mapping": [
-                    {
-                      "P1": "Critical"
-                    }
-                  ]
-                }
+                  "field_mapping": {},
+                  "value_mapping": {}
+                },
+                "is_test": true
               }
             }
           }
@@ -67373,7 +67491,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Only the fields you send are changed; omitted fields keep their current value.\n- `settings` replaces the stored configuration. Sensitive entries left out, or sent back as the masked `******`, keep their stored value.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Only the fields you send are changed; omitted fields keep their current value.\n- Submitting `settings` replaces the configuration; known sensitive fields omitted or sent as `******` retain their value. Send `headers: {}` to clear headers; use the integration type’s explicit empty value to clear a body.\n- Submit `settings` together with `is_test: true` to receive a plugin test result; settings in the response are not masked.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Write access also requires object permission: the account owner, an administrator, the creator, or a member of the assigned team; with no team, members with Integrations Manage may operate. Read-only integrations cannot be changed.\n- Every call is recorded in the account audit log.",
           "href": "/en/api-reference/on-call/integrations/integration-api-write-update",
           "metadata": {
             "sidebarTitle": "Update integration"
@@ -67410,19 +67528,23 @@
                     "name": "Prod metrics alerts (primary)",
                     "description": "Alerts pushed by the production Prometheus stack",
                     "status": "enabled",
-                    "ref_id": "a_6612f0c9e1b7a4d3508f2c6b",
+                    "ref_id": "a_100",
                     "created_at": 1775116800,
                     "updated_at": 1775298600,
                     "last_time": 1775298600,
                     "settings": {
-                      "severity_mapping": [
-                        {
-                          "P1": "Critical"
-                        }
-                      ],
-                      "labels": {
-                        "source": "prometheus"
-                      }
+                      "field_mapping": {},
+                      "value_mapping": {}
+                    },
+                    "editable": true,
+                    "creator_id": 1467226103999,
+                    "updated_by": 1467226103999,
+                    "no_editable": false,
+                    "plugin_id": 9,
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "test": {
+                      "success": true,
+                      "message": ""
                     }
                   }
                 }
@@ -67452,7 +67574,12 @@
               "example": {
                 "integration_id": 6113996590131,
                 "name": "Prod metrics alerts (primary)",
-                "team_id": 1467226103121
+                "team_id": 1467226103121,
+                "settings": {
+                  "field_mapping": {},
+                  "value_mapping": {}
+                },
+                "is_test": true
               }
             }
           }
@@ -67468,7 +67595,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Deleting an integration that other objects still reference returns HTTP 400 with `error.code` = `ReferenceExist` and `data.refs` listing them.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Deleting an integration that other objects still reference returns HTTP 400 with `error.code` = `ReferenceExist` and `data.refs` listing them.\n- Every call is recorded in the account audit log.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Write access also requires object permission: the account owner, an administrator, the creator, or a member of the assigned team; with no team, members with Integrations Manage may operate. Read-only integrations cannot be changed.",
           "href": "/en/api-reference/on-call/integrations/integration-api-write-delete",
           "metadata": {
             "sidebarTitle": "Delete integration"
@@ -67538,7 +67665,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Enabling an integration resumes its scheduled pull task and heartbeat, and requires the integration type to be available on the current plan.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Enabling an integration resumes its scheduled pull task and heartbeat, and requires the integration type to be available on the current plan.\n- Every call is recorded in the account audit log.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Write access also requires object permission: the account owner, an administrator, the creator, or a member of the assigned team; with no team, members with Integrations Manage may operate. Read-only integrations cannot be changed.",
           "href": "/en/api-reference/on-call/integrations/integration-api-write-enable",
           "metadata": {
             "sidebarTitle": "Enable integration"
@@ -67608,7 +67735,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Disabling stops event ingestion and pauses the scheduled pull task; settings are kept so the integration can be enabled again.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Disabling stops event ingestion and pauses the scheduled pull task; settings are kept so the integration can be enabled again.\n- Every call is recorded in the account audit log.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Write access also requires object permission: the account owner, an administrator, the creator, or a member of the assigned team; with no team, members with Integrations Manage may operate. Read-only integrations cannot be changed.",
           "href": "/en/api-reference/on-call/integrations/integration-api-write-disable",
           "metadata": {
             "sidebarTitle": "Disable integration"
@@ -67678,7 +67805,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- The previous key stops working immediately, so update the pushing side before rotating.\n- The new key is returned once and cannot be read again later.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- The previous key stops working immediately; after rotation, update the pushing side with the new key.\n- The new key can also be read from `/integration/list` and `/integration/info`.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Write access also requires object permission: the account owner, an administrator, the creator, or a member of the assigned team; with no team, members with Integrations Manage may operate. Read-only integrations cannot be changed.\n- Every call is recorded in the account audit log.",
           "href": "/en/api-reference/on-call/integrations/integration-api-write-rotate-key",
           "metadata": {
             "sidebarTitle": "Rotate integration key"
@@ -67707,7 +67834,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "integration_key": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
                   }
                 }
               }
