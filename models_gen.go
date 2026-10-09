@@ -26,6 +26,9 @@ func (e AlertFeedType) String() string { return string(e) }
 // AlertRuleExportListResponse is a list response payload.
 type AlertRuleExportListResponse []AlertRuleExport
 
+// CustomFieldValues is a free-form JSON object.
+type CustomFieldValues map[string]any
+
 // DataSourceListResponse is a list response payload.
 type DataSourceListResponse []DataSourceItem
 
@@ -2419,9 +2422,6 @@ type CreateWorkItemRequest struct {
 	// Item title (max 512 characters).
 	Title string `json:"title" toon:"title"`
 }
-
-// CustomFieldValues is generated from the Flashduty OpenAPI schema.
-type CustomFieldValues struct{}
 
 // DsClickHouseConfig is generated from the Flashduty OpenAPI schema.
 type DsClickHouseConfig struct {

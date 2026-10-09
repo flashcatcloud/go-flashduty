@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -271,6 +272,42 @@ func TestIncidentNotificationOverrideOmitsUnsetPreference(t *testing.T) {
 	}
 	if strings.Contains(string(body), `"follow_preference"`) {
 		t.Fatalf("nil FollowPreference must be omitted from the wire, got body = %s", body)
+	}
+}
+
+func TestCustomFieldValuesReachTheWire(t *testing.T) {
+	c, _ := NewClient("KEY", WithBaseURL("https://api.flashcat.cloud"), WithLogger(noopLogger{}))
+	values := CustomFieldValues{"region": "cn-beijing", "impact_users": float64(42), "tags": []any{"db"}}
+
+	tests := []struct {
+		name  string
+		path  string
+		body  any
+		field string
+	}{
+		{"create incident", "/incident/create", &CreateIncidentRequest{IncidentSeverity: "Critical", Fields: values}, "fields"},
+		{"ack incident", "/incident/ack", &AckIncidentRequest{CustomFields: values}, "custom_fields"},
+		{"resolve incident", "/incident/resolve", &ResolveIncidentRequest{CustomFields: values}, "custom_fields"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := c.newRequest(context.Background(), http.MethodPost, tt.path, tt.body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var payload map[string]any
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Fatal(err)
+			}
+			got, _ := payload[tt.field].(map[string]any)
+			if !reflect.DeepEqual(got, map[string]any(values)) {
+				t.Fatalf("%s = %#v, want %#v (body = %s)", tt.field, payload[tt.field], values, body)
+			}
+		})
 	}
 }
 
