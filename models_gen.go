@@ -2246,13 +2246,17 @@ type CreateInhibitRuleRequest struct {
 type CreateIntegrationRequest struct {
 	// Free-form description, at most 499 characters.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// Integration name. 2–49 characters.
+	// Optional pre-generated key: 35 characters, ending with the account ID modulo 1000 padded to three digits; it must not already be in use. Omit to generate a key.
+	IntegrationKey string `json:"integration_key,omitempty" toon:"integration_key,omitempty"`
+	// Run the plugin test during creation; false when omitted. Inspect the returned `test.success` for the test outcome.
+	IsTest bool `json:"is_test,omitempty" toon:"is_test,omitempty"`
+	// Integration name, 2–49 characters when nonempty; defaults to the integration type name when omitted or empty.
 	Name string `json:"name,omitempty" toon:"name,omitempty"`
 	// Integration type. Must be one listed by `POST /integration/type/list` with `supports_api_create: true`.
 	PluginType string `json:"plugin_type" toon:"plugin_type"`
 	// Type-specific configuration; the accepted keys depend on `plugin_type`.
 	Settings map[string]any `json:"settings,omitempty" toon:"settings,omitempty"`
-	// Owning team ID.
+	// Owning team ID; omit or use `0` for no team. A nonzero ID must belong to the current account.
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
@@ -2260,8 +2264,10 @@ type CreateIntegrationRequest struct {
 type CreateIntegrationResponse struct {
 	// ID of the new integration.
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
-	// Key used to authenticate inbound pushes to this integration. Returned here only; fetch a new one with `POST /integration/key/rotate`.
+	// Integration key for inbound pushes; also readable from `/integration/list` and `/integration/info`.
 	IntegrationKey string `json:"integration_key" toon:"integration_key"`
+	// Plugin test result, returned only when a test is performed.
+	Test *CreateIntegrationResponseTest `json:"test,omitempty" toon:"test,omitempty"`
 }
 
 // CreateSilenceRuleRequest is generated from the Flashduty OpenAPI schema.
@@ -5680,48 +5686,94 @@ type InsightTopkAlertByLabelRequest struct {
 
 // IntegrationDetail is generated from the Flashduty OpenAPI schema.
 type IntegrationDetail struct {
-	Category       any `json:"category" toon:"category"`
-	CreatedAt      any `json:"created_at" toon:"created_at"`
-	Description    any `json:"description" toon:"description"`
-	IntegrationID  any `json:"integration_id" toon:"integration_id"`
-	LastTime       any `json:"last_time" toon:"last_time"`
-	Name           any `json:"name" toon:"name"`
-	PluginType     any `json:"plugin_type" toon:"plugin_type"`
-	PluginTypeName any `json:"plugin_type_name" toon:"plugin_type_name"`
-	RefID          any `json:"ref_id" toon:"ref_id"`
-	// Type-specific configuration. Sensitive values (endpoint, headers, secrets, passwords) are returned masked as `******`.
-	Settings  map[string]any `json:"settings" toon:"settings"`
-	Status    any            `json:"status" toon:"status"`
-	TeamID    any            `json:"team_id" toon:"team_id"`
-	UpdatedAt any            `json:"updated_at" toon:"updated_at"`
-}
-
-// IntegrationItem is generated from the Flashduty OpenAPI schema.
-type IntegrationItem struct {
 	// Category the integration belongs to: `event.alert` alert events, `event.change` change events, `im` IM bots, `webhook` custom webhooks.
 	Category string `json:"category" toon:"category"`
 	// Unix timestamp in seconds when the integration was created.
 	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// ID of the member who created the integration.
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
 	// Free-form description.
 	Description string `json:"description" toon:"description"`
+	// Whether the current caller passes the integration object-permission check; write calls also require Integrations Manage.
+	Editable bool `json:"editable" toon:"editable"`
 	// Integration ID.
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Decrypted integration key for inbound pushes. Empty when no key is stored; distinct from the account `app_key`.
+	IntegrationKey string `json:"integration_key" toon:"integration_key"`
 	// Unix timestamp in seconds of the most recent event received. `0` when no event has arrived yet.
 	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// Integration name.
 	Name string `json:"name" toon:"name"`
+	// Read-only flag. When true, the public APIs do not allow changes to this integration.
+	NoEditable bool `json:"no_editable" toon:"no_editable"`
+	// Internal integration type ID; use `plugin_type`, not this ID, when creating an integration.
+	PluginID int64 `json:"plugin_id" toon:"plugin_id"`
 	// Integration type, for example `standard.alert` or `zabbix.alert`.
 	PluginType string `json:"plugin_type" toon:"plugin_type"`
 	// Display name of the integration type, in the language of the request.
 	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
-	// Source reference ID: `a_`-prefixed for an account-scoped integration, `c_`-prefixed when it is shared into a channel, `w_`-prefixed on legacy workspace-scoped integrations.
+	// Source reference ID, normally `a_<account_id>` for an account-level integration; legacy `w_` references may also exist. Channel-owned `c_` integrations are excluded.
 	RefID string `json:"ref_id" toon:"ref_id"`
+	// Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior.
+	Settings map[string]any `json:"settings" toon:"settings"`
+	// Lifecycle status: `enabled` while the integration accepts events, `disabled` when it is paused.
+	Status string `json:"status" toon:"status"`
+	// ID of the team that owns the integration. `0` when it is not assigned to a team.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// Plugin test result, returned only when a test is performed.
+	Test *IntegrationDetailTest `json:"test,omitempty" toon:"test,omitempty"`
+	// Unix timestamp in seconds when the integration was last updated.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// ID of the member who last updated the integration.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// IntegrationItem is generated from the Flashduty OpenAPI schema.
+type IntegrationItem struct {
+	// ID of the account that owns the integration.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Category the integration belongs to: `event.alert` alert events, `event.change` change events, `im` IM bots, `webhook` custom webhooks.
+	Category string `json:"category" toon:"category"`
+	// Unix timestamp in seconds when the integration was created.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// ID of the member who created the integration.
+	CreatorID int64 `json:"creator_id" toon:"creator_id"`
+	// Legacy datasource ID, equal to `integration_id`.
+	DataSourceID int64 `json:"data_source_id" toon:"data_source_id"`
+	// Free-form description.
+	Description string `json:"description" toon:"description"`
+	// Whether the current caller passes the integration object-permission check; write calls also require Integrations Manage.
+	Editable bool `json:"editable" toon:"editable"`
+	// Legacy compatibility field; `0` for items returned by this public-integration list.
+	ExclusiveDataSourceID int64 `json:"exclusive_data_source_id" toon:"exclusive_data_source_id"`
+	// Integration ID.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Decrypted integration key for inbound pushes. Empty when no key is stored; distinct from the account `app_key`.
+	IntegrationKey string `json:"integration_key" toon:"integration_key"`
+	// Unix timestamp in seconds of the most recent event received. `0` when no event has arrived yet.
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
+	// Integration name.
+	Name string `json:"name" toon:"name"`
+	// Read-only flag. When true, the public APIs do not allow changes to this integration.
+	NoEditable bool `json:"no_editable" toon:"no_editable"`
+	// Internal integration type ID; use `plugin_type`, not this ID, when creating an integration.
+	PluginID int64 `json:"plugin_id" toon:"plugin_id"`
+	// Integration type, for example `standard.alert` or `zabbix.alert`.
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
+	// Display name of the integration type, in the language of the request.
+	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
+	// Source reference ID, normally `a_<account_id>` for an account-level integration; legacy `w_` references may also exist. Channel-owned `c_` integrations are excluded.
+	RefID string `json:"ref_id" toon:"ref_id"`
+	// Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior.
+	Settings map[string]any `json:"settings" toon:"settings"`
 	// Lifecycle status: `enabled` while the integration accepts events, `disabled` when it is paused.
 	Status string `json:"status" toon:"status"`
 	// ID of the team that owns the integration. `0` when it is not assigned to a team.
 	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Unix timestamp in seconds when the integration was last updated.
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// ID of the member who last updated the integration.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
 }
 
 // IntegrationLifecycleRequest is generated from the Flashduty OpenAPI schema.
@@ -8213,7 +8265,7 @@ type RoleUpsertResponse struct {
 
 // RotateIntegrationKeyResponse is generated from the Flashduty OpenAPI schema.
 type RotateIntegrationKeyResponse struct {
-	// The new key. The previous key stops working immediately; this value cannot be read again later.
+	// New integration key; the previous key stops working immediately. Also readable from `/integration/list` and `/integration/info`.
 	IntegrationKey string `json:"integration_key" toon:"integration_key"`
 }
 
@@ -11546,9 +11598,11 @@ type UpdateIntegrationRequest struct {
 	Description *string `json:"description,omitempty" toon:"description,omitempty"`
 	// Integration ID.
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Run the plugin test when submitting `settings`; no test is performed for a metadata-only update.
+	IsTest bool `json:"is_test,omitempty" toon:"is_test,omitempty"`
 	// New name, 2–49 characters.
 	Name *string `json:"name,omitempty" toon:"name,omitempty"`
-	// Replacement configuration for the integration type. Sensitive entries left out, or sent back as the masked `******`, keep their stored value.
+	// Replacement type-specific configuration. Known sensitive fields omitted or sent as `******` keep their stored value; an explicit empty headers object clears headers.
 	Settings map[string]any `json:"settings,omitempty" toon:"settings,omitempty"`
 	// New owning team ID; `0` clears the team assignment.
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
@@ -12241,6 +12295,14 @@ type CreateInhibitRuleRequestTargetFiltersItemItem struct {
 	Vals []string `json:"vals" toon:"vals"`
 }
 
+// CreateIntegrationResponseTest is generated from the Flashduty OpenAPI schema.
+type CreateIntegrationResponseTest struct {
+	// Test failure message; empty on success.
+	Message string `json:"message" toon:"message"`
+	// Whether the plugin test succeeded.
+	Success bool `json:"success" toon:"success"`
+}
+
 // CreateSilenceRuleRequestFiltersItemItem is generated from the Flashduty OpenAPI schema.
 type CreateSilenceRuleRequestFiltersItemItem struct {
 	// Field key (e.g. `alert_severity`, `labels.service`).
@@ -12386,6 +12448,14 @@ type IncidentRawItemRespondersItem struct {
 	PersonID int64 `json:"person_id" toon:"person_id"`
 	// Responder display name. Omitted when empty.
 	PersonName string `json:"person_name" toon:"person_name"`
+}
+
+// IntegrationDetailTest is generated from the Flashduty OpenAPI schema.
+type IntegrationDetailTest struct {
+	// Test failure message; empty on success.
+	Message string `json:"message" toon:"message"`
+	// Whether the plugin test succeeded.
+	Success bool `json:"success" toon:"success"`
 }
 
 // PostMortemItemBasics is generated from the Flashduty OpenAPI schema.
