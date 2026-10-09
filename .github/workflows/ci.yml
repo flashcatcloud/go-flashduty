@@ -49,12 +49,14 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version: 'stable'
+          # Lint at the module's own Go. golangci-lint is a prebuilt binary
+          # that can only load stdlib export data from the Go it was built
+          # with; following 'stable' turns every Go release into a red lint
+          # job on every PR, triggered by nothing in the repo.
+          go-version-file: go.mod
 
       # golangci-lint v2 subsumes gofmt, gci, staticcheck, govet and the rest;
       # config in .golangci.yml. Generated files are auto-excluded by header.
-      # The official action ships a golangci-lint binary whose type-checker
-      # matches the Go toolchain, avoiding stdlib version skew.
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
