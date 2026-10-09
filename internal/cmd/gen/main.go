@@ -646,6 +646,10 @@ func (g *Gen) emitModels() string {
 			// a map payload (e.g. name -> count), not a struct.
 			v := g.goTypeOf(asMap(s["additionalProperties"]), goName(name)+"Value")
 			fmt.Fprintf(&enumsAndAliases, "// %s is a map response payload.\ntype %s map[string]%s\n\n", goName(name), goName(name), v)
+		case typeStr(s) == "object" && len(asMap(s["properties"])) == 0 && s["additionalProperties"] == true:
+			// A bare object with additionalProperties: true carries arbitrary
+			// keys (e.g. custom field values); a struct would drop them all.
+			fmt.Fprintf(&enumsAndAliases, "// %s is a free-form JSON object.\ntype %s map[string]any\n\n", goName(name), goName(name))
 		case typeStr(s) == "string", typeStr(s) == "integer", typeStr(s) == "number", typeStr(s) == "boolean":
 			gt := g.goTypeOf(s, goName(name))
 			fmt.Fprintf(&enumsAndAliases, "type %s %s\n\n", goName(name), gt)
