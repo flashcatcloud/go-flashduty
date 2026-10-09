@@ -1,5 +1,7 @@
 # go-flashduty
 
+English | [中文](README_zh.md)
+
 [![Go Reference](https://pkg.go.dev/badge/github.com/flashcatcloud/go-flashduty.svg)](https://pkg.go.dev/github.com/flashcatcloud/go-flashduty)
 [![CI](https://img.shields.io/github/actions/workflow/status/flashcatcloud/go-flashduty/ci.yml?style=flat-square&branch=main&label=CI)](https://github.com/flashcatcloud/go-flashduty/actions)
 [![Release](https://img.shields.io/github/v/tag/flashcatcloud/go-flashduty?style=flat-square&color=24bfa5&label=release)](https://github.com/flashcatcloud/go-flashduty/tags)
