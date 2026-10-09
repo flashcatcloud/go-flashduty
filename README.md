@@ -1,8 +1,13 @@
 # go-flashduty
 
-The official Go client for the [Flashduty](https://www.flashduty.com) Open API — a thin, typed SDK covering every Flashduty REST endpoint.
+[![Go Reference](https://pkg.go.dev/badge/github.com/flashcatcloud/go-flashduty.svg)](https://pkg.go.dev/github.com/flashcatcloud/go-flashduty)
+[![CI](https://img.shields.io/github/actions/workflow/status/flashcatcloud/go-flashduty/ci.yml?style=flat-square&branch=main&label=CI)](https://github.com/flashcatcloud/go-flashduty/actions)
+[![Release](https://img.shields.io/github/v/tag/flashcatcloud/go-flashduty?style=flat-square&color=24bfa5&label=release)](https://github.com/flashcatcloud/go-flashduty/tags)
+[![License](https://img.shields.io/github/license/flashcatcloud/go-flashduty?style=flat-square&color=24bfa5)](LICENSE)
 
-📖 **API reference:** <https://docs.flashduty.com/en/openapi/introduction>
+**go-flashduty** is the official Go SDK for the [Flashduty](https://www.flashduty.com) Open API. Flashduty is an incident management and on-call platform; this client gives Go programs typed access to every public endpoint: incidents, alerts, channels, on-call schedules, status pages, monitors, RUM, and the AI SRE.
+
+[Website](https://www.flashduty.com) · [API reference](https://docs.flashduty.com/en/openapi/introduction) · [Go package docs](https://pkg.go.dev/github.com/flashcatcloud/go-flashduty) · [Console](https://console.flashcat.cloud) · [Flashduty CLI](https://github.com/flashcatcloud/flashduty-cli)
 
 > **Status:** Typed API operations are generated from the Flashduty OpenAPI specification, covered by unit tests, and validated end-to-end against the live API.
 
@@ -47,6 +52,16 @@ func main() {
 }
 ```
 
+## Authentication
+
+Create an APP key in the [console](https://console.flashcat.cloud) (My → APP Key); the [API reference](https://docs.flashduty.com/en/openapi/introduction) describes the steps. `NewClient` sends it as the `app_key` query parameter.
+
+To call the API with an OAuth access token instead, use `NewClientWithAccessToken`; it sends `Authorization: Bearer <token>` and accepts the same options:
+
+```go
+client, err := flashduty.NewClientWithAccessToken(accessToken)
+```
+
 ## Design
 
 - **Thin and typed.** Every method maps to exactly one HTTP call and returns `(*T, *Response, error)`. No hidden cross-endpoint enrichment.
@@ -68,6 +83,27 @@ client, err := flashduty.NewClient("YOUR_APP_KEY",
 	flashduty.WithRequestHook(func(req *http.Request) { /* e.g. inject traceparent */ }),
 )
 ```
+
+### Pagination
+
+List requests embed `ListOptions`. Zero values are omitted, so the server defaults apply (page 1, 20 items). `Response.Total` and `Response.HasNextPage` describe the result set:
+
+```go
+req := &flashduty.ListIncidentsRequest{ListOptions: flashduty.ListOptions{Page: 1, Limit: 100}}
+for {
+	list, resp, err := client.Incidents.List(ctx, req)
+	if err != nil {
+		return err
+	}
+	handle(list.Items)
+	if !resp.HasNextPage {
+		break
+	}
+	req.Page++
+}
+```
+
+Endpoints that support deep pagination return an opaque cursor in `Response.SearchAfterCtx`; pass it back in `ListOptions.SearchAfterCtx` to fetch the next page.
 
 ### Errors and rate limits
 
@@ -134,6 +170,19 @@ client, err := flashduty.NewClient("YOUR_APP_KEY",
 	)),
 )
 ```
+
+## Development
+
+The typed service layer (`services_gen.go`, `models_gen.go`) is generated from the OpenAPI spec vendored in `openapi/`. Don't edit the generated files; change the spec or the generator in `internal/cmd/gen`.
+
+```bash
+make sync-spec   # refresh openapi/ from flashduty-docs
+make generate    # regenerate the typed service layer
+make check       # fmt, lint, test, build
+make e2e         # live end-to-end tests; needs FLASHDUTY_E2E_APP_KEY (optional FLASHDUTY_E2E_BASE_URL)
+```
+
+End-to-end tests create resources with a `gofd-e2e-` prefix and delete them on cleanup; they never modify existing data.
 
 ## Related projects
 
