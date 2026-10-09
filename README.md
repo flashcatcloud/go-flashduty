@@ -1,8 +1,8 @@
 # go-flashduty
 
-The official Go client for the [Flashduty](https://flashcat.cloud) Open API — a thin, typed SDK covering every Flashduty REST endpoint.
+The official Go client for the [Flashduty](https://www.flashduty.com) Open API — a thin, typed SDK covering every Flashduty REST endpoint.
 
-📖 **API reference:** <https://docs.flashcat.cloud/en/openapi/introduction>
+📖 **API reference:** <https://docs.flashduty.com/en/openapi/introduction>
 
 > **Status:** Typed API operations are generated from the Flashduty OpenAPI specification, covered by unit tests, and validated end-to-end against the live API.
 
@@ -134,6 +134,12 @@ client, err := flashduty.NewClient("YOUR_APP_KEY",
 	)),
 )
 ```
+
+## Related projects
+
+- [Flashduty CLI](https://github.com/flashcatcloud/flashduty-cli) — the `flashduty` command-line tool, built on this SDK, for managing incidents, alerts, on-call and status pages from a terminal ([docs](https://docs.flashduty.com/en/developer/cli)).
+- [flashduty-mcp-server](https://github.com/flashcatcloud/flashduty-mcp-server) — MCP server exposing Flashduty to AI assistants.
+- [terraform-provider-flashduty](https://github.com/flashcatcloud/terraform-provider-flashduty) — manage Flashduty resources as code.
 
 ## License
 
