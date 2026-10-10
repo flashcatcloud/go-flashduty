@@ -5763,6 +5763,8 @@ type InvestigationTarget struct {
 	Dashboard DashboardInvestigationTarget `json:"dashboard,omitzero" toon:"dashboard,omitempty"`
 	// Entry kind: `dashboard` opens a dashboard panel, `query` opens an Explore query. It decides whether `dashboard` or `query` must be supplied; supplying the other one is rejected.
 	Kind string `json:"kind" toon:"kind"`
+	// One-sentence plain text explaining what this entry helps confirm during investigation. Literal text, not a template, and not part of the alert identity. At most 512 bytes; control characters are rejected.
+	Purpose string `json:"purpose,omitempty" toon:"purpose,omitempty"`
 	// Configuration for the `query` kind; required when `kind` is `query`, and rejected when `kind` is `dashboard`.
 	Query QueryInvestigationTarget `json:"query,omitzero" toon:"query,omitempty"`
 	// Window around the event time, required on every saved entry. A zero-length window is rejected; defaults belong to the editor.
@@ -7793,8 +7795,8 @@ type QueryFramesResult struct {
 
 // QueryInvestigationTarget is generated from the Flashduty OpenAPI schema.
 type QueryInvestigationTarget struct {
-	// Data source the query runs against.
-	DatasourceID int64 `json:"datasource_id" toon:"datasource_id"`
+	// Data source the query runs against. Omit (or set 0) to run on the alert event's own datasource.
+	DatasourceID int64 `json:"datasource_id,omitempty" toon:"datasource_id,omitempty"`
 	// Query payload.
 	Query DashboardQuery `json:"query" toon:"query"`
 }

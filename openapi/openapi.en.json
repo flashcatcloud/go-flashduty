@@ -29229,6 +29229,11 @@
             ],
             "description": "Entry kind: `dashboard` opens a dashboard panel, `query` opens an Explore query. It decides whether `dashboard` or `query` must be supplied; supplying the other one is rejected."
           },
+          "purpose": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "One-sentence plain text explaining what this entry helps confirm during investigation. Literal text, not a template, and not part of the alert identity. At most 512 bytes; control characters are rejected."
+          },
           "time_range": {
             "$ref": "#/components/schemas/InvestigationTimeRange",
             "description": "Window around the event time, required on every saved entry. A zero-length window is rejected; defaults belong to the editor."
@@ -29303,9 +29308,9 @@
           "datasource_id": {
             "type": "integer",
             "format": "int64",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 9007199254740991,
-            "description": "Data source the query runs against."
+            "description": "Data source the query runs against. Omit (or set 0) to run on the alert event's own datasource."
           },
           "query": {
             "$ref": "#/components/schemas/DashboardQuery",
@@ -29313,7 +29318,6 @@
           }
         },
         "required": [
-          "datasource_id",
           "query"
         ]
       },
