@@ -29229,6 +29229,11 @@
             ],
             "description": "入口类型：`dashboard` 打开仪表盘面板，`query` 打开 Explore 查询。它决定必须提供 `dashboard` 还是 `query`，提供另一个会被拒绝。"
           },
+          "purpose": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "一句话纯文本，说明该入口帮助确认什么排查意图。不是模板，也不参与告警身份计算。不超过 512 字节；不允许包含控制字符。"
+          },
           "time_range": {
             "$ref": "#/components/schemas/InvestigationTimeRange",
             "description": "事件时间前后的取数窗口，每个已保存的入口都必填。长度为 0 的窗口会被拒绝；默认值由前端编辑器提供。"
@@ -29303,9 +29308,9 @@
           "datasource_id": {
             "type": "integer",
             "format": "int64",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 9007199254740991,
-            "description": "查询所用的数据源。"
+            "description": "查询所用的数据源。省略（或填 0）表示使用告警事件自身的数据源。"
           },
           "query": {
             "$ref": "#/components/schemas/DashboardQuery",
@@ -29313,7 +29318,6 @@
           }
         },
         "required": [
-          "datasource_id",
           "query"
         ]
       },
