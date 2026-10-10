@@ -10231,6 +10231,13 @@
             },
             "type": "array"
           },
+          "added_assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "本次新增的负责人，按提交顺序。`added_assignee_ids` 是其中仅含 `person` 的子集。无新增时省略。"
+          },
           "assignee_ids": {
             "description": "变更后的负责人成员 ID 列表。",
             "items": {
@@ -10238,6 +10245,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "跟进事项的负责人。每项为 `{type, id?}`；`ai_sre` 不带 `id`。无负责人时省略。"
           },
           "item_type": {
             "description": "跟进事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。",
@@ -10254,6 +10268,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "removed_assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "本次移除的负责人。`removed_assignee_ids` 是其中仅含 `person` 的子集。无移除时省略。"
           },
           "title": {
             "description": "跟进事项标题。",
@@ -10378,6 +10399,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "跟进事项的负责人。每项为 `{type, id?}`；`ai_sre` 不带 `id`。无负责人时省略。"
           },
           "item_type": {
             "description": "跟进事项类型。`action`：挂在故障上的处置行动事项，可直接转换为 `follow_up`；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项，创建时要求故障已关联到该复盘。",
@@ -18385,7 +18413,7 @@
         "type": "object"
       },
       "ResponseEnvelope": {
-        "description": "Standard response envelope used by every Flashduty public API. On success `data` contains the endpoint-specific payload and `error` is absent. On failure `error` is present and `data` is absent. `request_id` is always present and is also mirrored in the `Flashcat-Request-Id` response header.",
+        "description": "所有 Flashduty 公开 API 共用的标准响应结构。成功时 `data` 为接口专属载荷且不含 `error`；失败时 `error` 存在而 `data` 缺失。`request_id` 始终存在，并会同步写入 `Flashcat-Request-Id` 响应头。",
         "properties": {
           "data": {
             "description": "端点专属数据负载，具体结构见各操作 200 响应中的 schema。"
@@ -29807,7 +29835,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。"
+            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。以 `__` 开头的名称保留给内置时间变量。"
           },
           "label": {
             "type": "string",
@@ -29855,7 +29883,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。"
+            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。以 `__` 开头的名称保留给内置时间变量。"
           },
           "label": {
             "type": "string",
@@ -29899,7 +29927,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。"
+            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。以 `__` 开头的名称保留给内置时间变量。"
           },
           "label": {
             "type": "string",
@@ -30145,19 +30173,19 @@
           },
           "expr": {
             "type": "string",
-            "description": "日志查询表达式；可通过 `{{ }}` 引用其他变量。"
+            "description": "日志查询表达式；可通过 `{{ }}` 引用其他变量。数据源为 Loki 时可为空，此时会列出该字段在所有流中的取值。"
           },
           "args": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "具名查询参数；默认为空对象。"
+            "description": "具名查询参数；默认为空对象。数据源为 Loki 时必须为空。"
           },
           "field": {
             "type": "string",
             "minLength": 1,
-            "description": "取值作为候选项的日志字段。"
+            "description": "取值作为候选项的日志字段。数据源为 Loki 时必须是不带修饰的流标签名（字母、数字和下划线）。"
           }
         },
         "required": [
@@ -32017,6 +32045,19 @@
               "$ref": "#/components/schemas/DashboardSelection"
             },
             "description": "按变量名索引的选择，最多 20 项。"
+          },
+          "max_data_points": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 2,
+            "maximum": 5000,
+            "description": "用于计算 step 并渲染内置时间变量的降采样目标，2～5000 个点；省略或传 null 时服务端默认 100。"
+          },
+          "preserve_builtin_variables": {
+            "type": "boolean",
+            "description": "在解析结果中逐字保留内置时间变量，供调用方按自己的执行窗口渲染；用户变量照常解析。"
           }
         },
         "required": [
@@ -32698,7 +32739,7 @@
       },
       "IntegrationItem": {
         "type": "object",
-        "description": "已配置的集成；时间字段为 Unix 时间戳（秒）。",
+        "description": "公共集成列表项，包含完整存储配置；时间字段为 Unix 时间戳（秒）。",
         "required": [
           "integration_id",
           "team_id",
@@ -32711,7 +32752,17 @@
           "ref_id",
           "created_at",
           "updated_at",
-          "last_time"
+          "last_time",
+          "editable",
+          "creator_id",
+          "updated_by",
+          "no_editable",
+          "plugin_id",
+          "integration_key",
+          "settings",
+          "data_source_id",
+          "account_id",
+          "exclusive_data_source_id"
         ],
         "properties": {
           "integration_id": {
@@ -32760,7 +32811,7 @@
           },
           "ref_id": {
             "type": "string",
-            "description": "来源引用 ID：`a_` 开头表示账户级集成，集成被共享到协作空间时为 `c_` 开头，旧版工作空间级集成为 `w_` 开头。"
+            "description": "来源引用 ID，账户级集成通常为 `a_<account_id>`，旧记录也可能使用 `w_`；本接口不返回 `c_` 开头的专属集成。"
           },
           "created_at": {
             "type": "integer",
@@ -32776,6 +32827,53 @@
             "type": "integer",
             "format": "int64",
             "description": "最近收到事件时间的 Unix 时间戳（秒），尚未收到事件时为 `0`。"
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "当前调用者是否通过集成对象权限校验；执行写操作还需集成中心管理权限。"
+          },
+          "creator_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建集成的成员 ID。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近更新集成的成员 ID。"
+          },
+          "no_editable": {
+            "type": "boolean",
+            "description": "只读标记；为 true 时公开接口不允许修改该集成。"
+          },
+          "plugin_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "集成类型的内部 ID；创建集成使用 `plugin_type`，不使用此 ID。"
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "解密后的集成 Key，用于事件推送；未存储 Key 时为空字符串，与账户 `app_key` 不同。"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "按存储值返回的类型专属配置，凭据不打码，与旧 `/datasource/*` 返回行为一致。"
+          },
+          "data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "旧 datasource ID，与 `integration_id` 相同。"
+          },
+          "account_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "集成所属账户 ID。"
+          },
+          "exclusive_data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "旧接口兼容字段；此公共集成列表返回的值为 `0`。"
           }
         }
       },
@@ -32829,7 +32927,7 @@
       },
       "IntegrationDetail": {
         "type": "object",
-        "description": "单个集成详情，含完整配置；时间字段为 Unix 时间戳（秒）。",
+        "description": "公共集成详情，包含存储配置与解密 Key；时间字段为 Unix 时间戳（秒）。",
         "required": [
           "integration_id",
           "team_id",
@@ -32843,112 +32941,128 @@
           "created_at",
           "updated_at",
           "last_time",
+          "editable",
+          "creator_id",
+          "updated_by",
+          "no_editable",
+          "plugin_id",
+          "integration_key",
           "settings"
         ],
         "properties": {
-          "integration_id": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "集成 ID。"
-            },
-            true
-          ],
-          "team_id": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "所属团队 ID；未归属团队时为 `0`。"
-            },
-            true
-          ],
-          "plugin_type": [
-            {
-              "type": "string",
-              "description": "集成类型，例如 `standard.alert`、`zabbix.alert`。"
-            },
-            true
-          ],
-          "plugin_type_name": [
-            {
-              "type": "string",
-              "description": "集成类型显示名，随请求语言变化。"
-            },
-            true
-          ],
-          "category": [
-            {
-              "type": "string",
-              "enum": [
-                "event.alert",
-                "event.change",
-                "im",
-                "webhook"
-              ],
-              "description": "集成所属分类。"
-            },
-            true
-          ],
-          "name": [
-            {
-              "type": "string",
-              "description": "集成名称。"
-            },
-            true
-          ],
-          "description": [
-            {
-              "type": "string",
-              "description": "集成描述。"
-            },
-            true
-          ],
-          "status": [
-            {
-              "type": "string",
-              "enum": [
-                "enabled",
-                "disabled"
-              ],
-              "description": "状态：`enabled` 正常接收事件，`disabled` 已暂停。"
-            },
-            true
-          ],
-          "ref_id": [
-            {
-              "type": "string",
-              "description": "来源引用 ID：`a_` 开头表示账户级集成，集成被共享到协作空间时为 `c_` 开头。"
-            },
-            true
-          ],
-          "created_at": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "创建时间的 Unix 时间戳（秒）。"
-            },
-            true
-          ],
-          "updated_at": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "最近更新时间的 Unix 时间戳（秒）。"
-            },
-            true
-          ],
-          "last_time": [
-            {
-              "type": "integer",
-              "format": "int64",
-              "description": "最近收到事件时间的 Unix 时间戳（秒），尚未收到事件时为 `0`。"
-            },
-            true
-          ],
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "集成 ID。"
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "所属团队 ID；未归属团队时为 `0`。"
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "集成类型，例如 `standard.alert`、`zabbix.alert`。"
+          },
+          "plugin_type_name": {
+            "type": "string",
+            "description": "集成类型显示名，随请求语言变化。"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "event.alert",
+              "event.change",
+              "im",
+              "webhook"
+            ],
+            "description": "集成所属分类：`event.alert` 告警事件，`event.change` 变更事件，`im` IM 机器人，`webhook` 自定义 Webhook。"
+          },
+          "name": {
+            "type": "string",
+            "description": "集成名称。"
+          },
+          "description": {
+            "type": "string",
+            "description": "集成描述。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "状态：`enabled` 正常接收事件，`disabled` 已暂停。"
+          },
+          "ref_id": {
+            "type": "string",
+            "description": "来源引用 ID，账户级集成通常为 `a_<account_id>`，旧记录也可能使用 `w_`；本接口不返回 `c_` 开头的专属集成。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间的 Unix 时间戳（秒）。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近更新时间的 Unix 时间戳（秒）。"
+          },
+          "last_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近收到事件时间的 Unix 时间戳（秒），尚未收到事件时为 `0`。"
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "当前调用者是否通过集成对象权限校验；执行写操作还需集成中心管理权限。"
+          },
+          "creator_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建集成的成员 ID。"
+          },
+          "updated_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近更新集成的成员 ID。"
+          },
+          "no_editable": {
+            "type": "boolean",
+            "description": "只读标记；为 true 时公开接口不允许修改该集成。"
+          },
+          "plugin_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "集成类型的内部 ID；创建集成使用 `plugin_type`，不使用此 ID。"
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "解密后的集成 Key，用于事件推送；未存储 Key 时为空字符串，与账户 `app_key` 不同。"
+          },
           "settings": {
             "type": "object",
             "additionalProperties": true,
-            "description": "集成类型专属配置；敏感字段（endpoint、headers、密钥、密码）以 `******` 打码返回。"
+            "description": "按存储值返回的类型专属配置，凭据不打码，与旧 `/datasource/*` 返回行为一致。"
+          },
+          "test": {
+            "type": "object",
+            "description": "执行插件测试时返回的测试结果。",
+            "x-flashduty-preserve-absence": true,
+            "required": [
+              "success",
+              "message"
+            ],
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "description": "插件测试是否成功。"
+              },
+              "message": {
+                "type": "string",
+                "description": "测试失败信息；成功时为空字符串。"
+              }
+            }
           }
         }
       },
@@ -32968,7 +33082,7 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 49,
-            "description": "集成名称，2–49 个字符。",
+            "description": "集成名称，非空时为 2–49 字符；不传或为空时使用集成类型名称。",
             "example": "Prod metrics alerts"
           },
           "description": {
@@ -32979,14 +33093,24 @@
           "team_id": {
             "type": "integer",
             "format": "int64",
-            "minimum": 1,
-            "description": "所属团队 ID。",
+            "minimum": 0,
+            "description": "所属团队 ID；不传或传 `0` 表示不设置团队，非零 ID 必须属于当前账户。",
             "example": 1467226103121
           },
           "settings": {
             "type": "object",
             "description": "集成类型专属配置，可传字段取决于 `plugin_type`。",
             "additionalProperties": true
+          },
+          "integration_key": {
+            "type": "string",
+            "minLength": 35,
+            "maxLength": 35,
+            "description": "可选预生成 Key，长度 35，末尾为账户 ID 对 1000 取余后补零至三位，且不能已被使用；不传时自动生成。"
+          },
+          "is_test": {
+            "type": "boolean",
+            "description": "创建时执行插件测试；不传时为 false，测试结果查看返回的 `test.success`。"
           }
         }
       },
@@ -33006,8 +33130,27 @@
           },
           "integration_key": {
             "type": "string",
-            "description": "该集成的推送鉴权 Key，仅在此处返回；需要新 Key 请调用 `POST /integration/key/rotate`。",
-            "example": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+            "description": "用于事件推送的集成 Key，也可通过 `/integration/list` 和 `/integration/info` 查询。",
+            "example": "0123456789abcdef0123456789abcdef100"
+          },
+          "test": {
+            "type": "object",
+            "description": "执行插件测试时返回的测试结果。",
+            "x-flashduty-preserve-absence": true,
+            "required": [
+              "success",
+              "message"
+            ],
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "description": "插件测试是否成功。"
+              },
+              "message": {
+                "type": "string",
+                "description": "测试失败信息；成功时为空字符串。"
+              }
+            }
           }
         }
       },
@@ -33052,12 +33195,13 @@
             "description": "新的所属团队 ID；传 `0` 表示清除团队归属。"
           },
           "settings": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "description": "替换该集成类型的配置；敏感字段不传、或原样回传 `******`，都会保留已存储的值。",
+            "type": "object",
+            "description": "替换类型专属配置；已识别的敏感字段不传或传 `******` 时保留原值，显式传空 headers 对象可清空 Headers。",
             "additionalProperties": true
+          },
+          "is_test": {
+            "type": "boolean",
+            "description": "提交 `settings` 时执行插件测试；仅更新名称、描述或团队时不执行测试。"
           }
         }
       },
@@ -33086,8 +33230,8 @@
         "properties": {
           "integration_key": {
             "type": "string",
-            "description": "新的集成 Key。旧 Key 立即失效，且该值之后无法再次读取。",
-            "example": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+            "description": "新的集成 Key，旧 Key 立即失效；新 Key 也可通过 `/integration/list` 和 `/integration/info` 查询。",
+            "example": "0123456789abcdef0123456789abcdef100"
           }
         }
       }
@@ -42088,7 +42232,7 @@
         "operationId": "incidentPostMortemInfo",
         "parameters": [
           {
-            "description": "Post-mortem ID. Deterministic hash derived from account ID and the set of linked incident IDs.",
+            "description": "故障复盘 ID。由账户 ID 与关联故障 ID 集合推导出的确定性哈希值。",
             "in": "query",
             "name": "post_mortem_id",
             "required": true,
@@ -52383,7 +52527,7 @@
               "text/csv": {
                 "example": "Issue ID,Error type,Error message,Status,Error count,Affected sessions,Last seen (Asia/Shanghai)\nNHEacQHi2DhXqobr9qPQz9,Error,Script error.,for_review,752,381,2026-04-12 10:43:59\nH8kZSmxiE7EgdyD4fCyyNa,Error,\"API ERROR: We encountered an internal error | POST /api/access/logout\",for_review,3,1,2026-04-03 12:41:24",
                 "schema": {
-                  "description": "CSV file content. The header row matches the exported columns in order; values are sanitized against spreadsheet formula injection.",
+                  "description": "CSV 文件内容。表头行按导出列的先后顺序排列；单元格取值已做电子表格公式注入防护。",
                   "type": "string"
                 }
               }
@@ -52391,14 +52535,14 @@
             "description": "成功。CSV 附件，非 JSON 信封。",
             "headers": {
               "X-Export-Total": {
-                "description": "Total number of issues matching the filters, before the row cap.",
+                "description": "符合筛选条件的异常总数，未受行数上限截断前。",
                 "schema": {
                   "format": "int64",
                   "type": "integer"
                 }
               },
               "X-Export-Truncated": {
-                "description": "`true` when more issues matched than the 100-row cap and the file was truncated.",
+                "description": "当匹配的异常超过 100 行上限、文件被截断时为 `true`。",
                 "schema": {
                   "type": "boolean"
                 }
@@ -53851,7 +53995,7 @@
               },
               "application/x-ndjson": {
                 "schema": {
-                  "description": "Newline-delimited JSON (NDJSON). Each line is one decompressed replay segment record (rrweb-format events), streamed directly and not wrapped in the standard envelope.",
+                  "description": "按行分隔的 JSON（NDJSON）。每一行是一条解压后的回放分片记录（rrweb 格式事件），直接流式返回，不使用标准响应结构包裹。",
                   "type": "string"
                 }
               }
@@ -54013,7 +54157,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54092,7 +54236,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54171,7 +54315,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54458,7 +54602,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54537,7 +54681,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -55080,7 +55224,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -60758,7 +60902,7 @@
         "operationId": "statusPageChangeInfo",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -60768,7 +60912,7 @@
             }
           },
           {
-            "description": "Event (change) ID.",
+            "description": "事件（变更）ID。",
             "in": "query",
             "name": "change_id",
             "required": true,
@@ -60885,7 +61029,7 @@
         "operationId": "statusPageChangeList",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -60895,7 +61039,7 @@
             }
           },
           {
-            "description": "Lower bound of the event activity window: only events still open at, or closed at or after, this Unix timestamp (seconds) are returned.",
+            "description": "事件活动时间窗的下界：仅返回在该 Unix 时间戳（秒）时仍未结束、或在该时刻之后结束的事件。",
             "in": "query",
             "name": "start_at_seconds",
             "required": false,
@@ -60905,7 +61049,7 @@
             }
           },
           {
-            "description": "Upper bound of the event activity window: only events started at or before this Unix timestamp (seconds) are returned.",
+            "description": "事件活动时间窗的上界：仅返回在该 Unix 时间戳（秒）或之前开始的事件。",
             "in": "query",
             "name": "end_at_seconds",
             "required": false,
@@ -60915,7 +61059,7 @@
             }
           },
           {
-            "description": "Event type filter. Required.",
+            "description": "事件类型筛选条件。必填。",
             "in": "query",
             "name": "type",
             "required": true,
@@ -60928,7 +61072,7 @@
             }
           },
           {
-            "description": "Event status filter. Required. Must be a status valid for the given `type` (`investigating`/`identified`/`monitoring`/`resolved` for `incident`; `scheduled`/`ongoing`/`completed` for `maintenance`).",
+            "description": "事件状态筛选条件。必填。必须是与所给 `type` 匹配的合法状态（`incident` 为 `investigating`/`identified`/`monitoring`/`resolved`；`maintenance` 为 `scheduled`/`ongoing`/`completed`）。",
             "in": "query",
             "name": "status",
             "required": true,
@@ -61746,7 +61890,7 @@
         "operationId": "statusPageInfo",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -62179,7 +62323,7 @@
         "operationId": "statusPageMigrationStatus",
         "parameters": [
           {
-            "description": "Migration job ID returned by `migrate-structure` or `migrate-email-subscribers`.",
+            "description": "由 `migrate-structure` 或 `migrate-email-subscribers` 返回的迁移任务 ID。",
             "in": "query",
             "name": "job_id",
             "required": true,
@@ -62562,7 +62706,7 @@
         "operationId": "statusPageSubscriberList",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -62572,7 +62716,7 @@
             }
           },
           {
-            "description": "Comma-separated component IDs to filter subscribers by.",
+            "description": "用于筛选订阅者的组件 ID，多个以英文逗号分隔。",
             "in": "query",
             "name": "component_ids",
             "required": false,
@@ -62581,7 +62725,7 @@
             }
           },
           {
-            "description": "Page number (1-based).",
+            "description": "页码（从 1 开始）。",
             "in": "query",
             "name": "p",
             "required": false,
@@ -62593,7 +62737,7 @@
             }
           },
           {
-            "description": "Page size (1-100).",
+            "description": "每页条数（1-100）。",
             "in": "query",
             "name": "limit",
             "required": false,
@@ -62756,7 +62900,7 @@
         "operationId": "statusPageTemplateList",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -62766,7 +62910,7 @@
             }
           },
           {
-            "description": "Template category. `pre_defined` returns predefined event templates; `message` returns message notification templates.",
+            "description": "模板类别。`pre_defined` 返回预定义事件模板；`message` 返回消息通知模板。",
             "in": "query",
             "name": "type",
             "required": true,
@@ -67100,12 +67244,12 @@
       "post": {
         "operationId": "integration-api-read-list",
         "summary": "查询集成列表",
-        "description": "查询当前账户的告警源与变更源集成列表。",
+        "description": "查询公共集成列表，返回存储配置、解密 Key 与当前调用者的编辑权限。",
         "tags": [
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- `orderby` 默认 `created_at`；`plugin_type` 按底层插件排序。\n- `plugin_type`、`status`、`category` 支持逗号分隔多值；`ref_ids` 每个值必须以 `c_`、`a_` 或 `w_` 开头。\n- 传入 `is_my_team` 时仅返回你所在团队的集成，`team_ids` 会在该范围内进一步收窄。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- `orderby` 默认 `created_at`；`plugin_type` 按底层插件排序。\n- `plugin_type`、`status`、`category` 支持逗号分隔多值；`ref_ids` 每个值必须以 `c_`、`a_` 或 `w_` 开头；`c_` 过滤值通过格式校验，但不会返回协作空间专属集成。\n- 传入 `is_my_team` 时仅返回你所在团队的集成，`team_ids` 会在该范围内进一步收窄。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 列表项包含 `settings`、`integration_key`、`plugin_id`、`account_id` 及旧 ID 别名 `data_source_id`，凭据按原值返回，不打码。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-read-list",
           "metadata": {
             "sidebarTitle": "查询集成列表"
@@ -67147,10 +67291,23 @@
                         "name": "Prod metrics alerts",
                         "description": "Alerts pushed by the production Prometheus stack",
                         "status": "enabled",
-                        "ref_id": "a_6612f0c9e1b7a4d3508f2c6b",
+                        "ref_id": "a_100",
                         "created_at": 1775116800,
                         "updated_at": 1775203200,
-                        "last_time": 1775298600
+                        "last_time": 1775298600,
+                        "editable": true,
+                        "creator_id": 1467226103999,
+                        "updated_by": 1467226103999,
+                        "no_editable": false,
+                        "plugin_id": 9,
+                        "integration_key": "0123456789abcdef0123456789abcdef100",
+                        "settings": {
+                          "field_mapping": {},
+                          "value_mapping": {}
+                        },
+                        "data_source_id": 6113996590131,
+                        "account_id": 100,
+                        "exclusive_data_source_id": 0
                       }
                     ]
                   }
@@ -67192,12 +67349,12 @@
       "post": {
         "operationId": "integration-api-read-info",
         "summary": "查询集成详情",
-        "description": "查询单个集成详情，敏感配置以打码形式返回。",
+        "description": "查询单个公共集成详情，返回存储配置及解密后的集成 Key。",
         "tags": [
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- 敏感配置（endpoint、headers、密钥、密码）均以 `******` 打码返回。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- settings 与集成 Key 按原值返回，不打码，与旧 datasource 详情接口行为一致。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-read-info",
           "metadata": {
             "sidebarTitle": "查询集成详情"
@@ -67234,20 +67391,20 @@
                     "name": "Prod metrics alerts",
                     "description": "Alerts pushed by the production Prometheus stack",
                     "status": "enabled",
-                    "ref_id": "a_6612f0c9e1b7a4d3508f2c6b",
+                    "ref_id": "a_100",
                     "created_at": 1775116800,
                     "updated_at": 1775203200,
                     "last_time": 1775298600,
                     "settings": {
-                      "severity_mapping": [
-                        {
-                          "P1": "Critical"
-                        }
-                      ],
-                      "labels": {
-                        "source": "prometheus"
-                      }
-                    }
+                      "field_mapping": {},
+                      "value_mapping": {}
+                    },
+                    "editable": true,
+                    "creator_id": 1467226103999,
+                    "updated_by": 1467226103999,
+                    "no_editable": false,
+                    "plugin_id": 9,
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
                   }
                 }
               }
@@ -67285,12 +67442,12 @@
       "post": {
         "operationId": "integration-api-write-create",
         "summary": "创建集成",
-        "description": "为某个告警源或变更源创建集成。",
+        "description": "创建支持的告警源、变更源、IM 或 Webhook 类型公共集成。",
         "tags": [
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- `plugin_type` 必须是 `POST /integration/type/list` 中 `supports_api_create: true` 的类型，否则返回 `InvalidParameter`。\n- `integration_key` 仅在创建时返回一次，请及时保存；`POST /integration/info` 不会返回该字段。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- `plugin_type` 必须是 `POST /integration/type/list` 中 `supports_api_create: true` 的类型，否则返回 `InvalidParameter`。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 不传 `integration_key` 时自动生成；传入时须满足长度、账户后缀与唯一性校验。\n- 传 `is_test: true` 时请检查 `test.success`，不能只根据 HTTP 200 判断插件测试成功。\n- 每次调用都会记录到账户审计日志。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-write-create",
           "metadata": {
             "sidebarTitle": "创建集成"
@@ -67320,7 +67477,11 @@
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
                     "integration_id": 6113996590131,
-                    "integration_key": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "test": {
+                      "success": true,
+                      "message": ""
+                    }
                   }
                 }
               }
@@ -67352,12 +67513,10 @@
                 "description": "Alerts pushed by the production Prometheus stack",
                 "team_id": 1467226103121,
                 "settings": {
-                  "severity_mapping": [
-                    {
-                      "P1": "Critical"
-                    }
-                  ]
-                }
+                  "field_mapping": {},
+                  "value_mapping": {}
+                },
+                "is_test": true
               }
             }
           }
@@ -67373,7 +67532,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 仅发送的字段会被修改，未发送的字段保持原值。\n- `settings` 会整体替换已存储的配置；敏感字段不传、或原样回传打码值 `******`，都会保留已存储的值。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 仅发送的字段会被修改，未发送的字段保持原值。\n- 提交 `settings` 会替换配置；已识别的敏感字段不传或传 `******` 时保留原值。清空 Headers 请传 `headers: {}`；清空 Body 请使用该集成类型的显式空值。\n- 同时提交 `settings` 与 `is_test: true` 可获得插件测试结果，返回的 settings 不打码。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 写操作还需对象权限：主体账户、管理员、创建者或所属团队成员可操作；未设置团队时，拥有集成中心管理权限的成员可操作，只读集成不可修改。\n- 每次调用都会记录到账户审计日志。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-write-update",
           "metadata": {
             "sidebarTitle": "更新集成"
@@ -67410,19 +67569,23 @@
                     "name": "Prod metrics alerts (primary)",
                     "description": "Alerts pushed by the production Prometheus stack",
                     "status": "enabled",
-                    "ref_id": "a_6612f0c9e1b7a4d3508f2c6b",
+                    "ref_id": "a_100",
                     "created_at": 1775116800,
                     "updated_at": 1775298600,
                     "last_time": 1775298600,
                     "settings": {
-                      "severity_mapping": [
-                        {
-                          "P1": "Critical"
-                        }
-                      ],
-                      "labels": {
-                        "source": "prometheus"
-                      }
+                      "field_mapping": {},
+                      "value_mapping": {}
+                    },
+                    "editable": true,
+                    "creator_id": 1467226103999,
+                    "updated_by": 1467226103999,
+                    "no_editable": false,
+                    "plugin_id": 9,
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "test": {
+                      "success": true,
+                      "message": ""
                     }
                   }
                 }
@@ -67452,7 +67615,12 @@
               "example": {
                 "integration_id": 6113996590131,
                 "name": "Prod metrics alerts (primary)",
-                "team_id": 1467226103121
+                "team_id": 1467226103121,
+                "settings": {
+                  "field_mapping": {},
+                  "value_mapping": {}
+                },
+                "is_test": true
               }
             }
           }
@@ -67468,7 +67636,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 若该集成仍被其他对象引用，删除会返回 HTTP 400，`error.code` 为 `ReferenceExist`，`data.refs` 列出引用方。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 若该集成仍被其他对象引用，删除会返回 HTTP 400，`error.code` 为 `ReferenceExist`，`data.refs` 列出引用方。\n- 每次调用都会记录到账户审计日志。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 写操作还需对象权限：主体账户、管理员、创建者或所属团队成员可操作；未设置团队时，拥有集成中心管理权限的成员可操作，只读集成不可修改。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-write-delete",
           "metadata": {
             "sidebarTitle": "删除集成"
@@ -67538,7 +67706,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 启用会恢复该集成的拉取任务与心跳，并要求当前套餐包含该集成类型。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 启用会恢复该集成的拉取任务与心跳，并要求当前套餐包含该集成类型。\n- 每次调用都会记录到账户审计日志。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 写操作还需对象权限：主体账户、管理员、创建者或所属团队成员可操作；未设置团队时，拥有集成中心管理权限的成员可操作，只读集成不可修改。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-write-enable",
           "metadata": {
             "sidebarTitle": "启用集成"
@@ -67608,7 +67776,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 禁用后停止接收事件并暂停定时拉取任务，配置保留，可再次启用。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 禁用后停止接收事件并暂停定时拉取任务，配置保留，可再次启用。\n- 每次调用都会记录到账户审计日志。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 写操作还需对象权限：主体账户、管理员、创建者或所属团队成员可操作；未设置团队时，拥有集成中心管理权限的成员可操作，只读集成不可修改。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-write-disable",
           "metadata": {
             "sidebarTitle": "禁用集成"
@@ -67678,7 +67846,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 旧 Key 会立即失效，请先更新推送侧再轮换。\n- 新 Key 只返回一次，之后无法再次读取。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 旧 Key 会立即失效；轮换后请将推送端配置更新为新 Key。\n- 新 Key 也可通过 `/integration/list` 和 `/integration/info` 查询。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 写操作还需对象权限：主体账户、管理员、创建者或所属团队成员可操作；未设置团队时，拥有集成中心管理权限的成员可操作，只读集成不可修改。\n- 每次调用都会记录到账户审计日志。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-write-rotate-key",
           "metadata": {
             "sidebarTitle": "轮换集成 Key"
@@ -67707,7 +67875,7 @@
                 "example": {
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
                   "data": {
-                    "integration_key": "9f2c7d1b45a86e30f7b1c9d4a2e65738123"
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
                   }
                 }
               }
