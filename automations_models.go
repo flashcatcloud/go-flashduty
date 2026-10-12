@@ -14,6 +14,11 @@ type AutomationRuleUpdateRequest struct {
 	Enabled *bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	// Run cadence. Supports 4 fields (`hour day month weekday`, minute defaults to 0) and 5 fields (`minute hour day month weekday`).
 	CronExpr *string `json:"cron_expr,omitempty" toon:"cron_expr,omitempty"`
+	// IANA timezone `cron_expr` is evaluated in. The server must be able to load
+	// the name; an invalid value is rejected. Nil leaves the stored timezone
+	// unchanged, including a legacy empty string. An explicit empty string is
+	// stored as UTC, not reset to the account default.
+	Timezone *string `json:"timezone,omitempty" toon:"timezone,omitempty"`
 	// Whether the schedule trigger is enabled.
 	ScheduleTriggerEnabled *bool `json:"schedule_trigger_enabled,omitempty" toon:"schedule_trigger_enabled,omitempty"`
 	// New task prompt.
