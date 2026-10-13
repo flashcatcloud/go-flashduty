@@ -850,7 +850,7 @@
         "type": "object"
       },
       "AlertEventGlobalListRequest": {
-        "description": "Filter and pagination criteria for the global raw event list.",
+        "description": "Filter and pagination criteria for the global raw event list. Time range is required.",
         "properties": {
           "asc": {
             "description": "Sort ascending when `true`.",
@@ -866,12 +866,9 @@
             "type": "array"
           },
           "end_time": {
-            "description": "End of the search window, Unix epoch seconds. Must be greater than `start_time` when provided.",
+            "description": "End of the search window, Unix epoch seconds. Must be greater than `start_time`; the span must not exceed 31 days.",
             "format": "int64",
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "integration_ids": {
             "description": "Filter by integration IDs.",
@@ -926,15 +923,16 @@
             "type": "string"
           },
           "start_time": {
-            "description": "Start of the search window, Unix epoch seconds. Must be greater than 0 when provided.",
+            "description": "Start of the search window, Unix epoch seconds. Must be greater than 0.",
             "exclusiveMinimum": 0,
             "format": "int64",
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
         "type": "object"
       },
       "AlertEventGlobalListResponse": {
@@ -10231,6 +10229,13 @@
             },
             "type": "array"
           },
+          "added_assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "Assignees added by this change, in submitted order. `added_assignee_ids` is the person-only subset. Omitted when nothing was added."
+          },
           "assignee_ids": {
             "description": "Assignee member IDs after the change.",
             "items": {
@@ -10238,6 +10243,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "Assignees of the work item. Each entry is `{type, id?}`; an `ai_sre` entry omits `id`. Omitted when there is no assignee."
           },
           "item_type": {
             "description": "Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem.",
@@ -10254,6 +10266,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "removed_assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "Assignees removed by this change. `removed_assignee_ids` is the person-only subset. Omitted when nothing was removed."
           },
           "title": {
             "description": "Work item title.",
@@ -10378,6 +10397,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "Assignees of the work item. Each entry is `{type, id?}`; an `ai_sre` entry omits `id`. Omitted when there is no assignee."
           },
           "item_type": {
             "description": "Work item type. `action`: an action item anchored to the incident itself, convertible to `follow_up` later; `follow_up`: an improvement item anchored to a post-mortem, requiring the incident to be linked to that post-mortem at creation.",
@@ -11387,7 +11413,7 @@
             "type": "integer"
           },
           "deleted_at": {
-            "description": "Soft-delete timestamp (ms). Zero if not deleted.",
+            "description": "Soft-delete timestamp in milliseconds. Zero if not deleted.",
             "format": "int64",
             "type": "integer"
           },
@@ -29229,6 +29255,11 @@
             ],
             "description": "Entry kind: `dashboard` opens a dashboard panel, `query` opens an Explore query. It decides whether `dashboard` or `query` must be supplied; supplying the other one is rejected."
           },
+          "purpose": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "One-sentence plain text explaining what this entry helps confirm during investigation. Literal text, not a template, and not part of the alert identity. At most 512 bytes; control characters are rejected."
+          },
           "time_range": {
             "$ref": "#/components/schemas/InvestigationTimeRange",
             "description": "Window around the event time, required on every saved entry. A zero-length window is rejected; defaults belong to the editor."
@@ -29303,9 +29334,9 @@
           "datasource_id": {
             "type": "integer",
             "format": "int64",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 9007199254740991,
-            "description": "Data source the query runs against."
+            "description": "Data source the query runs against. Omit (or set 0) to run on the alert event's own datasource."
           },
           "query": {
             "$ref": "#/components/schemas/DashboardQuery",
@@ -29313,7 +29344,6 @@
           }
         },
         "required": [
-          "datasource_id",
           "query"
         ]
       },
@@ -29807,7 +29837,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "Variable name used in `{{ }}` templates, at most 64 characters."
+            "description": "Variable name used in `{{ }}` templates, at most 64 characters. Names starting with `__` are reserved for built-in time variables."
           },
           "label": {
             "type": "string",
@@ -29855,7 +29885,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "Variable name used in `{{ }}` templates, at most 64 characters."
+            "description": "Variable name used in `{{ }}` templates, at most 64 characters. Names starting with `__` are reserved for built-in time variables."
           },
           "label": {
             "type": "string",
@@ -29899,7 +29929,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "Variable name used in `{{ }}` templates, at most 64 characters."
+            "description": "Variable name used in `{{ }}` templates, at most 64 characters. Names starting with `__` are reserved for built-in time variables."
           },
           "label": {
             "type": "string",
@@ -30145,19 +30175,19 @@
           },
           "expr": {
             "type": "string",
-            "description": "Logs query expression; may reference other variables through `{{ }}`."
+            "description": "Logs query expression; may reference other variables through `{{ }}`. May be empty for a Loki datasource, which then lists the field's values across all streams."
           },
           "args": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Named query arguments; defaults to an empty object."
+            "description": "Named query arguments; defaults to an empty object. Must be empty for a Loki datasource."
           },
           "field": {
             "type": "string",
             "minLength": 1,
-            "description": "Log field whose values become candidates."
+            "description": "Log field whose values become candidates. For a Loki datasource it must be a bare stream label name (letters, digits and underscores)."
           }
         },
         "required": [
@@ -32017,6 +32047,19 @@
               "$ref": "#/components/schemas/DashboardSelection"
             },
             "description": "Selections keyed by variable name, at most 20 entries."
+          },
+          "max_data_points": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 2,
+            "maximum": 5000,
+            "description": "Downsampling target used to compute the step and render the built-in time variables, 2–5000 points; omit or send null for the server default of 100."
+          },
+          "preserve_builtin_variables": {
+            "type": "boolean",
+            "description": "Keep built-in time variables verbatim in the resolved expressions so a caller with its own execution window can render them; user variables are still resolved."
           }
         },
         "required": [
@@ -33388,7 +33431,7 @@
           "On-call/Alerts"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Channels Read** (`on-call`) |\n\n## Usage\n\n- Results are filtered by the caller's channel data-access permissions.\n- `severities` is a comma-separated string, e.g. `\"Critical,Warning\"`.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Channels Read** (`on-call`) |\n\n## Usage\n\n- Both `start_time` and `end_time` are required Unix epoch seconds. `start_time` must be less than `end_time`; the span must not exceed 31 days.\n- Results are filtered by the caller's channel data-access permissions.\n- `severities` is a comma-separated string, e.g. `\"Critical,Warning\"`.",
           "href": "/en/api-reference/on-call/alerts/alert-event-read-list",
           "metadata": {
             "sidebarTitle": "List raw alert events"

@@ -850,7 +850,7 @@
         "type": "object"
       },
       "AlertEventGlobalListRequest": {
-        "description": "全局原始事件列表的过滤和分页条件。",
+        "description": "全局原始事件列表的过滤和分页条件，时间范围必填。",
         "properties": {
           "asc": {
             "description": "为 true 时升序排序。",
@@ -866,12 +866,9 @@
             "type": "array"
           },
           "end_time": {
-            "description": "查询窗口终点，Unix 时间戳（秒）。提供时必须大于 `start_time`。",
+            "description": "查询窗口终点，Unix 时间戳（秒）。必须大于 `start_time`；跨度不超过 31 天。",
             "format": "int64",
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "integration_ids": {
             "description": "按集成 ID 过滤。",
@@ -926,15 +923,16 @@
             "type": "string"
           },
           "start_time": {
-            "description": "查询窗口起点，Unix 时间戳（秒）。提供时必须大于 0。",
+            "description": "查询窗口起点，Unix 时间戳（秒）。必须大于 0。",
             "exclusiveMinimum": 0,
             "format": "int64",
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
+        "required": [
+          "start_time",
+          "end_time"
+        ],
         "type": "object"
       },
       "AlertEventGlobalListResponse": {
@@ -10231,6 +10229,13 @@
             },
             "type": "array"
           },
+          "added_assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "本次新增的负责人，按提交顺序。`added_assignee_ids` 是其中仅含 `person` 的子集。无新增时省略。"
+          },
           "assignee_ids": {
             "description": "变更后的负责人成员 ID 列表。",
             "items": {
@@ -10238,6 +10243,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "跟进事项的负责人。每项为 `{type, id?}`；`ai_sre` 不带 `id`。无负责人时省略。"
           },
           "item_type": {
             "description": "跟进事项类型。`action`：挂在故障上的处置行动事项；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项。",
@@ -10254,6 +10266,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "removed_assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "本次移除的负责人。`removed_assignee_ids` 是其中仅含 `person` 的子集。无移除时省略。"
           },
           "title": {
             "description": "跟进事项标题。",
@@ -10378,6 +10397,13 @@
               "type": "integer"
             },
             "type": "array"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemAssignee"
+            },
+            "description": "跟进事项的负责人。每项为 `{type, id?}`；`ai_sre` 不带 `id`。无负责人时省略。"
           },
           "item_type": {
             "description": "跟进事项类型。`action`：挂在故障上的处置行动事项，可直接转换为 `follow_up`；`follow_up`：挂在故障复盘（Post-mortem）上的改进事项，创建时要求故障已关联到该复盘。",
@@ -18385,7 +18411,7 @@
         "type": "object"
       },
       "ResponseEnvelope": {
-        "description": "Standard response envelope used by every Flashduty public API. On success `data` contains the endpoint-specific payload and `error` is absent. On failure `error` is present and `data` is absent. `request_id` is always present and is also mirrored in the `Flashcat-Request-Id` response header.",
+        "description": "所有 Flashduty 公开 API 共用的标准响应结构。成功时 `data` 为接口专属载荷且不含 `error`；失败时 `error` 存在而 `data` 缺失。`request_id` 始终存在，并会同步写入 `Flashcat-Request-Id` 响应头。",
         "properties": {
           "data": {
             "description": "端点专属数据负载，具体结构见各操作 200 响应中的 schema。"
@@ -29229,6 +29255,11 @@
             ],
             "description": "入口类型：`dashboard` 打开仪表盘面板，`query` 打开 Explore 查询。它决定必须提供 `dashboard` 还是 `query`，提供另一个会被拒绝。"
           },
+          "purpose": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "一句话纯文本，说明该入口帮助确认什么排查意图。不是模板，也不参与告警身份计算。不超过 512 字节；不允许包含控制字符。"
+          },
           "time_range": {
             "$ref": "#/components/schemas/InvestigationTimeRange",
             "description": "事件时间前后的取数窗口，每个已保存的入口都必填。长度为 0 的窗口会被拒绝；默认值由前端编辑器提供。"
@@ -29303,9 +29334,9 @@
           "datasource_id": {
             "type": "integer",
             "format": "int64",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 9007199254740991,
-            "description": "查询所用的数据源。"
+            "description": "查询所用的数据源。省略（或填 0）表示使用告警事件自身的数据源。"
           },
           "query": {
             "$ref": "#/components/schemas/DashboardQuery",
@@ -29313,7 +29344,6 @@
           }
         },
         "required": [
-          "datasource_id",
           "query"
         ]
       },
@@ -29807,7 +29837,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。"
+            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。以 `__` 开头的名称保留给内置时间变量。"
           },
           "label": {
             "type": "string",
@@ -29855,7 +29885,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。"
+            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。以 `__` 开头的名称保留给内置时间变量。"
           },
           "label": {
             "type": "string",
@@ -29899,7 +29929,7 @@
           "name": {
             "type": "string",
             "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。"
+            "description": "在 `{{ }}` 模板中引用的变量名，最多 64 个字符。以 `__` 开头的名称保留给内置时间变量。"
           },
           "label": {
             "type": "string",
@@ -30145,19 +30175,19 @@
           },
           "expr": {
             "type": "string",
-            "description": "日志查询表达式；可通过 `{{ }}` 引用其他变量。"
+            "description": "日志查询表达式；可通过 `{{ }}` 引用其他变量。数据源为 Loki 时可为空，此时会列出该字段在所有流中的取值。"
           },
           "args": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "具名查询参数；默认为空对象。"
+            "description": "具名查询参数；默认为空对象。数据源为 Loki 时必须为空。"
           },
           "field": {
             "type": "string",
             "minLength": 1,
-            "description": "取值作为候选项的日志字段。"
+            "description": "取值作为候选项的日志字段。数据源为 Loki 时必须是不带修饰的流标签名（字母、数字和下划线）。"
           }
         },
         "required": [
@@ -32017,6 +32047,19 @@
               "$ref": "#/components/schemas/DashboardSelection"
             },
             "description": "按变量名索引的选择，最多 20 项。"
+          },
+          "max_data_points": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 2,
+            "maximum": 5000,
+            "description": "用于计算 step 并渲染内置时间变量的降采样目标，2～5000 个点；省略或传 null 时服务端默认 100。"
+          },
+          "preserve_builtin_variables": {
+            "type": "boolean",
+            "description": "在解析结果中逐字保留内置时间变量，供调用方按自己的执行窗口渲染；用户变量照常解析。"
           }
         },
         "required": [
@@ -33388,7 +33431,7 @@
           "On-call/告警管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **协作空间查看**（`on-call`） |\n\n## 使用说明\n\n- 结果会根据调用方的协作空间数据访问权限进行过滤。\n- `severities` 为逗号分隔的字符串，如 `\"Critical,Warning\"`。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **协作空间查看**（`on-call`） |\n\n## 使用说明\n\n- `start_time` 和 `end_time` 均为必填的 Unix 时间戳（秒）。`start_time` 必须小于 `end_time`，跨度不超过 31 天。\n- 结果会根据调用方的协作空间数据访问权限进行过滤。\n- `severities` 为逗号分隔的字符串，如 `\"Critical,Warning\"`。",
           "href": "/zh/api-reference/on-call/alerts/alert-event-read-list",
           "metadata": {
             "sidebarTitle": "查询原始告警事件列表"
@@ -42191,7 +42234,7 @@
         "operationId": "incidentPostMortemInfo",
         "parameters": [
           {
-            "description": "Post-mortem ID. Deterministic hash derived from account ID and the set of linked incident IDs.",
+            "description": "故障复盘 ID。由账户 ID 与关联故障 ID 集合推导出的确定性哈希值。",
             "in": "query",
             "name": "post_mortem_id",
             "required": true,
@@ -52486,7 +52529,7 @@
               "text/csv": {
                 "example": "Issue ID,Error type,Error message,Status,Error count,Affected sessions,Last seen (Asia/Shanghai)\nNHEacQHi2DhXqobr9qPQz9,Error,Script error.,for_review,752,381,2026-04-12 10:43:59\nH8kZSmxiE7EgdyD4fCyyNa,Error,\"API ERROR: We encountered an internal error | POST /api/access/logout\",for_review,3,1,2026-04-03 12:41:24",
                 "schema": {
-                  "description": "CSV file content. The header row matches the exported columns in order; values are sanitized against spreadsheet formula injection.",
+                  "description": "CSV 文件内容。表头行按导出列的先后顺序排列；单元格取值已做电子表格公式注入防护。",
                   "type": "string"
                 }
               }
@@ -52494,14 +52537,14 @@
             "description": "成功。CSV 附件，非 JSON 信封。",
             "headers": {
               "X-Export-Total": {
-                "description": "Total number of issues matching the filters, before the row cap.",
+                "description": "符合筛选条件的异常总数，未受行数上限截断前。",
                 "schema": {
                   "format": "int64",
                   "type": "integer"
                 }
               },
               "X-Export-Truncated": {
-                "description": "`true` when more issues matched than the 100-row cap and the file was truncated.",
+                "description": "当匹配的异常超过 100 行上限、文件被截断时为 `true`。",
                 "schema": {
                   "type": "boolean"
                 }
@@ -53954,7 +53997,7 @@
               },
               "application/x-ndjson": {
                 "schema": {
-                  "description": "Newline-delimited JSON (NDJSON). Each line is one decompressed replay segment record (rrweb-format events), streamed directly and not wrapped in the standard envelope.",
+                  "description": "按行分隔的 JSON（NDJSON）。每一行是一条解压后的回放分片记录（rrweb 格式事件），直接流式返回，不使用标准响应结构包裹。",
                   "type": "string"
                 }
               }
@@ -54116,7 +54159,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54195,7 +54238,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54274,7 +54317,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54561,7 +54604,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -54640,7 +54683,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -55183,7 +55226,7 @@
                     {
                       "properties": {
                         "data": {
-                          "description": "Always null on success.",
+                          "description": "成功时恒为 null。",
                           "type": "null"
                         }
                       },
@@ -60861,7 +60904,7 @@
         "operationId": "statusPageChangeInfo",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -60871,7 +60914,7 @@
             }
           },
           {
-            "description": "Event (change) ID.",
+            "description": "事件（变更）ID。",
             "in": "query",
             "name": "change_id",
             "required": true,
@@ -60988,7 +61031,7 @@
         "operationId": "statusPageChangeList",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -60998,7 +61041,7 @@
             }
           },
           {
-            "description": "Lower bound of the event activity window: only events still open at, or closed at or after, this Unix timestamp (seconds) are returned.",
+            "description": "事件活动时间窗的下界：仅返回在该 Unix 时间戳（秒）时仍未结束、或在该时刻之后结束的事件。",
             "in": "query",
             "name": "start_at_seconds",
             "required": false,
@@ -61008,7 +61051,7 @@
             }
           },
           {
-            "description": "Upper bound of the event activity window: only events started at or before this Unix timestamp (seconds) are returned.",
+            "description": "事件活动时间窗的上界：仅返回在该 Unix 时间戳（秒）或之前开始的事件。",
             "in": "query",
             "name": "end_at_seconds",
             "required": false,
@@ -61018,7 +61061,7 @@
             }
           },
           {
-            "description": "Event type filter. Required.",
+            "description": "事件类型筛选条件。必填。",
             "in": "query",
             "name": "type",
             "required": true,
@@ -61031,7 +61074,7 @@
             }
           },
           {
-            "description": "Event status filter. Required. Must be a status valid for the given `type` (`investigating`/`identified`/`monitoring`/`resolved` for `incident`; `scheduled`/`ongoing`/`completed` for `maintenance`).",
+            "description": "事件状态筛选条件。必填。必须是与所给 `type` 匹配的合法状态（`incident` 为 `investigating`/`identified`/`monitoring`/`resolved`；`maintenance` 为 `scheduled`/`ongoing`/`completed`）。",
             "in": "query",
             "name": "status",
             "required": true,
@@ -61849,7 +61892,7 @@
         "operationId": "statusPageInfo",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -62282,7 +62325,7 @@
         "operationId": "statusPageMigrationStatus",
         "parameters": [
           {
-            "description": "Migration job ID returned by `migrate-structure` or `migrate-email-subscribers`.",
+            "description": "由 `migrate-structure` 或 `migrate-email-subscribers` 返回的迁移任务 ID。",
             "in": "query",
             "name": "job_id",
             "required": true,
@@ -62665,7 +62708,7 @@
         "operationId": "statusPageSubscriberList",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -62675,7 +62718,7 @@
             }
           },
           {
-            "description": "Comma-separated component IDs to filter subscribers by.",
+            "description": "用于筛选订阅者的组件 ID，多个以英文逗号分隔。",
             "in": "query",
             "name": "component_ids",
             "required": false,
@@ -62684,7 +62727,7 @@
             }
           },
           {
-            "description": "Page number (1-based).",
+            "description": "页码（从 1 开始）。",
             "in": "query",
             "name": "p",
             "required": false,
@@ -62696,7 +62739,7 @@
             }
           },
           {
-            "description": "Page size (1-100).",
+            "description": "每页条数（1-100）。",
             "in": "query",
             "name": "limit",
             "required": false,
@@ -62859,7 +62902,7 @@
         "operationId": "statusPageTemplateList",
         "parameters": [
           {
-            "description": "Status page ID.",
+            "description": "状态页 ID。",
             "in": "query",
             "name": "page_id",
             "required": true,
@@ -62869,7 +62912,7 @@
             }
           },
           {
-            "description": "Template category. `pre_defined` returns predefined event templates; `message` returns message notification templates.",
+            "description": "模板类别。`pre_defined` 返回预定义事件模板；`message` 返回消息通知模板。",
             "in": "query",
             "name": "type",
             "required": true,

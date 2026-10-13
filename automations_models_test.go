@@ -15,7 +15,10 @@ func TestAutomationRuleUpdateRequestTimezone(t *testing.T) {
 		t.Fatalf("nil timezone must be omitted, got %s", omitted)
 	}
 
-	empty, err := json.Marshal(&AutomationRuleUpdateRequest{RuleID: "arule_1", Timezone: String("")})
+	empty, err := json.Marshal(&AutomationRuleUpdateRequest{
+		RuleID:   "arule_1",
+		Timezone: String(""),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +26,10 @@ func TestAutomationRuleUpdateRequestTimezone(t *testing.T) {
 		t.Fatalf("empty timezone must be sent, got %s", empty)
 	}
 
-	named, err := json.Marshal(&AutomationRuleUpdateRequest{RuleID: "arule_1", Timezone: String("Asia/Shanghai")})
+	named, err := json.Marshal(&AutomationRuleUpdateRequest{
+		RuleID:   "arule_1",
+		Timezone: String("Asia/Shanghai"),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -417,8 +417,8 @@ type AlertEventGlobalListRequest struct {
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
 	// Filter by channel IDs. At most 100 entries.
 	ChannelIDs []int64 `json:"channel_ids,omitempty" toon:"channel_ids,omitempty"`
-	// End of the search window, Unix epoch seconds. Must be greater than `start_time` when provided.
-	EndTime *int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// End of the search window, Unix epoch seconds. Must be greater than `start_time`; the span must not exceed 31 days.
+	EndTime int64 `json:"end_time" toon:"end_time"`
 	// Filter by integration IDs.
 	IntegrationIDs []int64 `json:"integration_ids,omitempty" toon:"integration_ids,omitempty"`
 	// Filter by integration types (plugin keys).
@@ -427,8 +427,8 @@ type AlertEventGlobalListRequest struct {
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
 	// Comma-separated severity filter, e.g. `Critical,Warning`. Accepted values: `Critical`, `Warning`, `Info`, `Ok`.
 	Severities string `json:"severities,omitempty" toon:"severities,omitempty"`
-	// Start of the search window, Unix epoch seconds. Must be greater than 0 when provided.
-	StartTime *int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	// Start of the search window, Unix epoch seconds. Must be greater than 0.
+	StartTime int64 `json:"start_time" toon:"start_time"`
 }
 
 // AlertEventGlobalListResponse is generated from the Flashduty OpenAPI schema.
@@ -2837,7 +2837,7 @@ type DashboardCustomVariable struct {
 	Kind string `json:"kind" toon:"kind"`
 	// Optional display label; falls back to `name`.
 	Label string `json:"label,omitempty" toon:"label,omitempty"`
-	// Variable name used in `{{ }}` templates, at most 64 characters.
+	// Variable name used in `{{ }}` templates, at most 64 characters. Names starting with `__` are reserved for built-in time variables.
 	Name string `json:"name" toon:"name"`
 	// Candidate list, 1–1000 entries. Values must be non-empty, unique and must not be `$__all`.
 	Options   []DashboardCandidate     `json:"options" toon:"options"`
@@ -2878,7 +2878,7 @@ type DashboardDatasourceVariable struct {
 	Kind string `json:"kind" toon:"kind"`
 	// Optional display label; falls back to `name`.
 	Label string `json:"label,omitempty" toon:"label,omitempty"`
-	// Variable name used in `{{ }}` templates, at most 64 characters.
+	// Variable name used in `{{ }}` templates, at most 64 characters. Names starting with `__` are reserved for built-in time variables.
 	Name string `json:"name" toon:"name"`
 	// Wildcard patterns narrowing the candidates; empty means every datasource of the type.
 	NamePatterns []string `json:"name_patterns,omitempty" toon:"name_patterns,omitempty"`
@@ -3042,11 +3042,11 @@ type DashboardListRequest struct {
 
 // DashboardLogsVariableQuery is generated from the Flashduty OpenAPI schema.
 type DashboardLogsVariableQuery struct {
-	// Named query arguments; defaults to an empty object.
+	// Named query arguments; defaults to an empty object. Must be empty for a Loki datasource.
 	Args map[string]string `json:"args" toon:"args"`
-	// Logs query expression; may reference other variables through `{{ }}`.
+	// Logs query expression; may reference other variables through `{{ }}`. May be empty for a Loki datasource, which then lists the field's values across all streams.
 	Expr string `json:"expr" toon:"expr"`
-	// Log field whose values become candidates.
+	// Log field whose values become candidates. For a Loki datasource it must be a bare stream label name (letters, digits and underscores).
 	Field string `json:"field" toon:"field"`
 	// Query kind discriminator; always `logs`, a logs query returning one field's values as candidates.
 	Kind string `json:"kind" toon:"kind"`
@@ -3297,9 +3297,13 @@ type DashboardPrometheusVariableQuery struct {
 type DashboardQueriesResolveRequest struct {
 	// Canonical UUIDv7 of the dashboard.
 	DashboardID string `json:"dashboard_id" toon:"dashboard_id"`
+	// Downsampling target used to compute the step and render the built-in time variables, 2–5000 points; omit or send null for the server default of 100.
+	MaxDataPoints *int64 `json:"max_data_points,omitempty" toon:"max_data_points,omitempty"`
 	// Panels to resolve, 1–100 unique IDs. A panel that does not exist yields an `error` arm rather than failing the call.
-	PanelIDs []string                   `json:"panel_ids" toon:"panel_ids"`
-	Time     DashboardAbsoluteTimeRange `json:"time" toon:"time"`
+	PanelIDs []string `json:"panel_ids" toon:"panel_ids"`
+	// Keep built-in time variables verbatim in the resolved expressions so a caller with its own execution window can render them; user variables are still resolved.
+	PreserveBuiltinVariables bool                       `json:"preserve_builtin_variables,omitempty" toon:"preserve_builtin_variables,omitempty"`
+	Time                     DashboardAbsoluteTimeRange `json:"time" toon:"time"`
 	// Selections keyed by variable name, at most 20 entries.
 	Variables map[string]DashboardSelection `json:"variables" toon:"variables"`
 }
@@ -3337,7 +3341,7 @@ type DashboardQueryVariable struct {
 	Kind string `json:"kind" toon:"kind"`
 	// Optional display label; falls back to `name`.
 	Label string `json:"label,omitempty" toon:"label,omitempty"`
-	// Variable name used in `{{ }}` templates, at most 64 characters.
+	// Variable name used in `{{ }}` templates, at most 64 characters. Names starting with `__` are reserved for built-in time variables.
 	Name string `json:"name" toon:"name"`
 	// When the candidates are recomputed: `on_dashboard_load` = once when the dashboard loads; `on_time_range_change` = every time the time range changes.
 	Refresh       string                   `json:"refresh" toon:"refresh"`
@@ -3693,7 +3697,7 @@ type DashboardVariable struct {
 	Kind string `json:"kind" toon:"kind"`
 	// Optional display label; falls back to `name`.
 	Label string `json:"label,omitempty" toon:"label,omitempty"`
-	// Variable name used in `{{ }}` templates, at most 64 characters.
+	// Variable name used in `{{ }}` templates, at most 64 characters. Names starting with `__` are reserved for built-in time variables.
 	Name string `json:"name" toon:"name"`
 	// Wildcard patterns narrowing the candidates; empty means every datasource of the type.
 	NamePatterns []string `json:"name_patterns,omitempty" toon:"name_patterns,omitempty"`
@@ -3707,11 +3711,11 @@ type DashboardVariable struct {
 
 // DashboardVariableQuery is generated from the Flashduty OpenAPI schema.
 type DashboardVariableQuery struct {
-	// Named query arguments; defaults to an empty object.
+	// Named query arguments; defaults to an empty object. Must be empty for a Loki datasource.
 	Args map[string]string `json:"args,omitempty" toon:"args,omitempty"`
-	// Logs query expression; may reference other variables through `{{ }}`.
+	// Logs query expression; may reference other variables through `{{ }}`. May be empty for a Loki datasource, which then lists the field's values across all streams.
 	Expr string `json:"expr,omitempty" toon:"expr,omitempty"`
-	// Log field whose values become candidates.
+	// Log field whose values become candidates. For a Loki datasource it must be a bare stream label name (letters, digits and underscores).
 	Field string `json:"field,omitempty" toon:"field,omitempty"`
 	// Query kind discriminator; always `logs`, a logs query returning one field's values as candidates.
 	Kind string `json:"kind" toon:"kind"`
@@ -4729,12 +4733,18 @@ type FeedDetailIncidentWarRoomDelete struct {
 type FeedDetailWorkItemAssigneesChanged struct {
 	// Member IDs added as assignees.
 	AddedAssigneeIDs []int64 `json:"added_assignee_ids" toon:"added_assignee_ids"`
+	// Assignees added by this change, in submitted order. `added_assignee_ids` is the person-only subset. Omitted when nothing was added.
+	AddedAssignees []WorkItemAssignee `json:"added_assignees" toon:"added_assignees"`
 	// Assignee member IDs after the change.
 	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
+	// Assignees of the work item. Each entry is `{type, id?}`; an `ai_sre` entry omits `id`. Omitted when there is no assignee.
+	Assignees []WorkItemAssignee `json:"assignees" toon:"assignees"`
 	// Work item type. `action`: an action item anchored to the incident itself; `follow_up`: an improvement item anchored to a post-mortem.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// Member IDs removed from assignees.
 	RemovedAssigneeIDs []int64 `json:"removed_assignee_ids" toon:"removed_assignee_ids"`
+	// Assignees removed by this change. `removed_assignee_ids` is the person-only subset. Omitted when nothing was removed.
+	RemovedAssignees []WorkItemAssignee `json:"removed_assignees" toon:"removed_assignees"`
 	// Work item title.
 	Title string `json:"title" toon:"title"`
 	// Work item ID.
@@ -4789,6 +4799,8 @@ type FeedDetailWorkItemConverted struct {
 type FeedDetailWorkItemCreated struct {
 	// Assignee member IDs.
 	AssigneeIDs []int64 `json:"assignee_ids" toon:"assignee_ids"`
+	// Assignees of the work item. Each entry is `{type, id?}`; an `ai_sre` entry omits `id`. Omitted when there is no assignee.
+	Assignees []WorkItemAssignee `json:"assignees" toon:"assignees"`
 	// Work item type. `action`: an action item anchored to the incident itself, convertible to `follow_up` later; `follow_up`: an improvement item anchored to a post-mortem, requiring the incident to be linked to that post-mortem at creation.
 	ItemType string `json:"item_type" toon:"item_type"`
 	// ID of the post-mortem the work item is bound to.
@@ -5166,8 +5178,8 @@ type IncidentFeedItem struct {
 	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// User ID of the actor. `0` means system-generated.
 	CreatorID int64 `json:"creator_id" toon:"creator_id"`
-	// Soft-delete timestamp (ms). Zero if not deleted.
-	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
+	// Soft-delete timestamp in milliseconds. Zero if not deleted.
+	DeletedAt TimestampMilli `json:"deleted_at" toon:"deleted_at"`
 	// Type-specific payload. The concrete shape is determined by `type`; `null` when the entry has no structured detail.
 	Detail any `json:"detail" toon:"detail"`
 	// ObjectID of the source alert or incident this entry references.
@@ -5815,6 +5827,8 @@ type InvestigationTarget struct {
 	Dashboard DashboardInvestigationTarget `json:"dashboard,omitzero" toon:"dashboard,omitempty"`
 	// Entry kind: `dashboard` opens a dashboard panel, `query` opens an Explore query. It decides whether `dashboard` or `query` must be supplied; supplying the other one is rejected.
 	Kind string `json:"kind" toon:"kind"`
+	// One-sentence plain text explaining what this entry helps confirm during investigation. Literal text, not a template, and not part of the alert identity. At most 512 bytes; control characters are rejected.
+	Purpose string `json:"purpose,omitempty" toon:"purpose,omitempty"`
 	// Configuration for the `query` kind; required when `kind` is `query`, and rejected when `kind` is `dashboard`.
 	Query QueryInvestigationTarget `json:"query,omitzero" toon:"query,omitempty"`
 	// Window around the event time, required on every saved entry. A zero-length window is rejected; defaults belong to the editor.
@@ -7845,8 +7859,8 @@ type QueryFramesResult struct {
 
 // QueryInvestigationTarget is generated from the Flashduty OpenAPI schema.
 type QueryInvestigationTarget struct {
-	// Data source the query runs against.
-	DatasourceID int64 `json:"datasource_id" toon:"datasource_id"`
+	// Data source the query runs against. Omit (or set 0) to run on the alert event's own datasource.
+	DatasourceID int64 `json:"datasource_id,omitempty" toon:"datasource_id,omitempty"`
 	// Query payload.
 	Query DashboardQuery `json:"query" toon:"query"`
 }

@@ -1,5 +1,5 @@
 // Package flashduty is the official Go client for the Flashduty Open API
-// (https://flashcat.cloud). It is a thin, typed wrapper: every method maps to
+// (https://www.flashduty.com). It is a thin, typed wrapper: every method maps to
 // exactly one HTTP call, returns (*T, *Response, error), and performs no hidden
 // cross-endpoint enrichment.
 //
@@ -11,7 +11,7 @@
 //	}
 //
 // Endpoints are grouped into services on the client, e.g.
-// client.Incidents.List(ctx, &flashduty.IncidentListRequest{...}). Most are POST
+// client.Incidents.List(ctx, &flashduty.ListIncidentsRequest{...}). Most are POST
 // actions; a few read endpoints are GET with query parameters. Services are
 // added by the code generator; see internal/cmd/gen.
 //
