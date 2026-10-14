@@ -3991,20 +3991,27 @@
         "type": "object"
       },
       "CalEventIDRequest": {
-        "description": "Calendar event delete request.",
+        "description": "Calendar event delete request. Provide event_id, or both start_at and end_at.",
         "properties": {
           "cal_id": {
             "description": "Calendar ID; obtain it from `POST /calendar/list`.",
             "type": "string"
           },
           "event_id": {
-            "description": "Event ID.",
+            "description": "ID of the event to delete. Omit when clearing a date range.",
+            "type": "string"
+          },
+          "start_at": {
+            "description": "Start date of the range to clear, in YYYY-MM-DD. Pass together with end_at instead of event_id.",
+            "type": "string"
+          },
+          "end_at": {
+            "description": "End date of the range to clear, in YYYY-MM-DD (exclusive). Must be later than start_at.",
             "type": "string"
           }
         },
         "required": [
-          "cal_id",
-          "event_id"
+          "cal_id"
         ],
         "type": "object"
       },
@@ -4117,11 +4124,45 @@
             "description": "Total number of events returned.",
             "format": "int64",
             "type": "integer"
+          },
+          "days": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CalDay"
+            },
+            "description": "Resolved state of every day in the requested scope, keyed by date (YYYY-MM-DD). The highest layer holding any event decides a day: the calendar's own events (custom), then the linked holiday calendars (holiday), then the weekly workdays (weekly). Inside one layer a working-day event beats a day off, so a make-up workday from a holiday calendar wins over holiday rest days. A day no event covers is a working day.",
+            "type": "object"
           }
         },
         "required": [
           "items",
-          "total"
+          "total",
+          "days"
+        ],
+        "type": "object"
+      },
+      "CalDay": {
+        "description": "Resolved state of one calendar day.",
+        "properties": {
+          "event_id": {
+            "description": "ID of the event that decided the day. Absent when no event covers the day.",
+            "type": "string"
+          },
+          "is_off": {
+            "description": "Whether the day is a day off.",
+            "type": "boolean"
+          },
+          "layer": {
+            "description": "Layer that decided the day: custom = the calendar's own events, holiday = a linked holiday calendar, weekly = the weekly workdays. Absent when no event covers the day.",
+            "enum": [
+              "custom",
+              "holiday",
+              "weekly"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "is_off"
         ],
         "type": "object"
       },
@@ -4155,15 +4196,13 @@
             "type": "string"
           },
           "summary": {
-            "description": "Event summary.",
+            "description": "Event summary. Optional.",
             "maxLength": 39,
-            "minLength": 1,
             "type": "string"
           }
         },
         "required": [
           "cal_id",
-          "summary",
           "start_at",
           "end_at",
           "is_off"
@@ -4991,7 +5030,10 @@
             "type": "string"
           },
           "target_status": {
-            "description": "Client-defined status to set (max 64 characters). There is no fixed state machine.",
+            "description": "Target status. Must be `done`; any other value is rejected.",
+            "enum": [
+              "done"
+            ],
             "maxLength": 64,
             "type": "string"
           },
@@ -5057,7 +5099,13 @@
             "type": "string"
           },
           "target_status": {
-            "description": "Optional client-defined status to set on the converted follow-up (max 64 characters).",
+            "description": "Optional status to set on the converted follow-up. One of `open`, `in_progress`, `done`, `cancelled`.",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": [
               "string",
@@ -6649,7 +6697,13 @@
             "type": "string"
           },
           "status": {
-            "description": "Optional client-defined initial status (max 64 characters).",
+            "description": "Initial status. One of `open`, `in_progress`, `done`, `cancelled`; defaults to `open` when omitted or blank.",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": "string"
           },
@@ -13348,6 +13402,10 @@
             },
             "type": "array"
           },
+          "release_limited": {
+            "description": "Whether the account has used up its license release quota for the current 30-day window. While `true`, releasing a seat fails with error code `NoLicense`.",
+            "type": "boolean"
+          },
           "total": {
             "description": "Number of people holding an active license.",
             "format": "int64",
@@ -13356,7 +13414,8 @@
         },
         "required": [
           "total",
-          "items"
+          "items",
+          "release_limited"
         ],
         "type": "object"
       },
@@ -22640,11 +22699,21 @@
         "description": "Fixed-time notification config.",
         "properties": {
           "cycle": {
-            "description": "Notification cycle; only `day` is supported.",
+            "description": "Notification cycle: `day` sends every day; `week` sends on the weekdays listed in `days`; `month` sends on the day-of-month values listed in `days`.",
             "enum": [
-              "day"
+              "day",
+              "week",
+              "month"
             ],
             "type": "string"
+          },
+          "days": {
+            "description": "Days the notification fires on, read in the schedule's timezone. For `week`, weekday numbers 0-6 (0 = Sunday); for `month`, day-of-month numbers 1-31, and a month without that date is skipped. Required when `cycle` is `week` or `month`; ignored when `cycle` is `day`.",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
           },
           "start": {
             "description": "Time of day to send, format `HH:MM` (24-hour).",
@@ -27760,7 +27829,13 @@
             ]
           },
           "status": {
-            "description": "New client-defined status (max 64 characters).",
+            "description": "New status. One of `open`, `in_progress`, `done`, `cancelled`.",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": [
               "string",
@@ -34585,7 +34660,7 @@
     },
     "/calendar/event/delete": {
       "post": {
-        "description": "Delete a calendar event by calendar ID and event ID.",
+        "description": "Delete one event of a personal calendar by event_id, or clear the calendar's own events off the days [start_at, end_at). Pass either event_id or both start_at and end_at. Cleared days fall back to the linked holiday calendars and the weekly workdays.",
         "operationId": "calEventDelete",
         "requestBody": {
           "content": {
@@ -34656,7 +34731,7 @@
     },
     "/calendar/event/list": {
       "post": {
-        "description": "Return events for a personal calendar within a year/month/day scope. When month and day are both omitted the whole year is returned.",
+        "description": "Return events for a personal calendar within a year/month/day scope. When month and day are both omitted the whole year is returned. The response also carries days, the resolved state of every day in the scope.",
         "operationId": "calEventList",
         "requestBody": {
           "content": {
@@ -34707,7 +34782,27 @@
                         "updated_at": 0
                       }
                     ],
-                    "total": 11
+                    "total": 11,
+                    "days": {
+                      "2026-05-01": {
+                        "is_off": true,
+                        "event_id": "cale.KyG9XWTCU5CucbwukEVBQ4",
+                        "layer": "custom"
+                      },
+                      "2026-05-02": {
+                        "is_off": true,
+                        "event_id": "non_work.20260502",
+                        "layer": "weekly"
+                      },
+                      "2026-05-09": {
+                        "is_off": false,
+                        "event_id": "zh-cn.china.official.c234057c-fd90-380e-889c-3e3254dd5b01",
+                        "layer": "holiday"
+                      },
+                      "2026-05-11": {
+                        "is_off": false
+                      }
+                    }
                   },
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
                 },
@@ -34758,7 +34853,7 @@
     },
     "/calendar/event/upsert": {
       "post": {
-        "description": "Create or update a calendar event (holiday or workday override). Omit event_id to create a new event.",
+        "description": "Create or update an event the calendar owns (a day off or a working-day override) over the days [start_at, end_at). Omit event_id to create a new event; a given event_id must be an existing event of this calendar. The write clears the calendar's other own events off the same days: an event fully inside the range is deleted, one partly inside is shortened, and one spanning the range is split in two, so the latest write decides those days. end_at must be later than start_at.",
         "operationId": "calEventUpsert",
         "requestBody": {
           "content": {
@@ -48975,6 +49070,7 @@
                         "updated_by": 0
                       }
                     ],
+                    "release_limited": false,
                     "total": 2
                   },
                   "request_id": "01J0D5Y31GY2TWAHRP3Q8K4M6N"
