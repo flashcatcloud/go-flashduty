@@ -3991,20 +3991,27 @@
         "type": "object"
       },
       "CalEventIDRequest": {
-        "description": "日历事件删除请求。",
+        "description": "日历事件删除请求。传入 event_id，或同时传入 start_at 和 end_at。",
         "properties": {
           "cal_id": {
             "description": "日历 ID，可通过 `POST /calendar/list` 获取。",
             "type": "string"
           },
           "event_id": {
-            "description": "事件 ID。",
+            "description": "要删除的事件 ID。按日期范围清除时不传。",
+            "type": "string"
+          },
+          "start_at": {
+            "description": "要清除的日期范围的开始日期，格式 YYYY-MM-DD。与 end_at 一起传入，代替 event_id。",
+            "type": "string"
+          },
+          "end_at": {
+            "description": "要清除的日期范围的结束日期（不含），格式 YYYY-MM-DD。必须晚于 start_at。",
             "type": "string"
           }
         },
         "required": [
-          "cal_id",
-          "event_id"
+          "cal_id"
         ],
         "type": "object"
       },
@@ -4117,11 +4124,45 @@
             "description": "返回的事件总数。",
             "format": "int64",
             "type": "integer"
+          },
+          "days": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CalDay"
+            },
+            "description": "请求范围内每一天的判定结果，键为日期（YYYY-MM-DD）。每天由有事件的最高一层决定：日历自己的事件（custom）优先，其次是关联的节假日日历（holiday），最后是每周工作日设置（weekly）。同一层内工作日事件优先于休息日事件，因此节假日日历中的调休补班日会覆盖节假日休息日。没有任何事件覆盖的日期为工作日。",
+            "type": "object"
           }
         },
         "required": [
           "items",
-          "total"
+          "total",
+          "days"
+        ],
+        "type": "object"
+      },
+      "CalDay": {
+        "description": "单个日期的判定结果。",
+        "properties": {
+          "event_id": {
+            "description": "决定该日期的事件 ID。没有事件覆盖该日期时不返回。",
+            "type": "string"
+          },
+          "is_off": {
+            "description": "该日期是否为休息日。",
+            "type": "boolean"
+          },
+          "layer": {
+            "description": "决定该日期的层：custom = 日历自己的事件，holiday = 关联的节假日日历，weekly = 每周工作日设置。没有事件覆盖该日期时不返回。",
+            "enum": [
+              "custom",
+              "holiday",
+              "weekly"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "is_off"
         ],
         "type": "object"
       },
@@ -4155,15 +4196,13 @@
             "type": "string"
           },
           "summary": {
-            "description": "事件摘要。",
+            "description": "事件摘要，选填。",
             "maxLength": 39,
-            "minLength": 1,
             "type": "string"
           }
         },
         "required": [
           "cal_id",
-          "summary",
           "start_at",
           "end_at",
           "is_off"
@@ -4991,7 +5030,10 @@
             "type": "string"
           },
           "target_status": {
-            "description": "要设置的客户端自定义状态（最长 64 字符），没有固定状态机。",
+            "description": "要设置的目标状态，必须为 `done`，其他取值一律拒绝。",
+            "enum": [
+              "done"
+            ],
             "maxLength": 64,
             "type": "string"
           },
@@ -5057,7 +5099,13 @@
             "type": "string"
           },
           "target_status": {
-            "description": "可选，设置在转化后后续行动上的客户端自定义状态（最长 64 字符）。",
+            "description": "可选，设置在转化后后续行动上的状态，取 `open`、`in_progress`、`done`、`cancelled` 之一。",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": [
               "string",
@@ -6649,7 +6697,13 @@
             "type": "string"
           },
           "status": {
-            "description": "可选的客户端自定义初始状态（最长 64 字符）。",
+            "description": "可选，客户端自定义的初始状态，取 `open`、`in_progress`、`done`、`cancelled` 之一；省略或为空时默认为 `open`。",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": "string"
           },
@@ -13348,6 +13402,10 @@
             },
             "type": "array"
           },
+          "release_limited": {
+            "description": "当前 30 天窗口内的许可释放配额是否已用尽。为 `true` 时释放席位会返回错误码 `NoLicense`。",
+            "type": "boolean"
+          },
           "total": {
             "description": "持有有效许可的人员数量。",
             "format": "int64",
@@ -13356,7 +13414,8 @@
         },
         "required": [
           "total",
-          "items"
+          "items",
+          "release_limited"
         ],
         "type": "object"
       },
@@ -22640,11 +22699,21 @@
         "description": "固定时间通知配置。",
         "properties": {
           "cycle": {
-            "description": "通知周期，仅支持 `day`（按天）。",
+            "description": "通知周期：`day` 每天发送；`week` 在 `days` 列出的星期发送；`month` 在 `days` 列出的每月日期发送。",
             "enum": [
-              "day"
+              "day",
+              "week",
+              "month"
             ],
             "type": "string"
+          },
+          "days": {
+            "description": "通知发送日，按值班表时区的墙钟计算。`week` 为星期几（0-6，0 表示周日）；`month` 为每月第几日（1-31，当月没有该日则跳过）。`cycle` 为 `week` 或 `month` 时必填，为 `day` 时忽略。",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
           },
           "start": {
             "description": "发送时间，格式 `HH:MM`（24 小时制）。",
@@ -27760,7 +27829,13 @@
             ]
           },
           "status": {
-            "description": "新的客户端自定义状态（最长 64 字符）。",
+            "description": "新的客户端自定义状态，取 `open`、`in_progress`、`done`、`cancelled` 之一。",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": [
               "string",
@@ -34585,7 +34660,7 @@
     },
     "/calendar/event/delete": {
       "post": {
-        "description": "根据日历 ID 与事件 ID 删除日历事件。",
+        "description": "按 event_id 删除个人日历的一个事件，或清除该日历自己在 [start_at, end_at) 这些日期上的事件。event_id 与 start_at/end_at 二选一，start_at 和 end_at 须同时传入。清除后这些日期回到关联节假日日历和每周工作日设置的判定。",
         "operationId": "calEventDelete",
         "requestBody": {
           "content": {
@@ -34656,7 +34731,7 @@
     },
     "/calendar/event/list": {
       "post": {
-        "description": "返回个人日历在指定年/月/日范围内的事件列表。未同时传入 month 和 day 时返回整年数据。",
+        "description": "返回个人日历在指定年/月/日范围内的事件列表。未同时传入 month 和 day 时返回整年数据。响应中的 days 给出范围内每一天的判定结果。",
         "operationId": "calEventList",
         "requestBody": {
           "content": {
@@ -34707,7 +34782,27 @@
                         "updated_at": 0
                       }
                     ],
-                    "total": 11
+                    "total": 11,
+                    "days": {
+                      "2026-05-01": {
+                        "is_off": true,
+                        "event_id": "cale.KyG9XWTCU5CucbwukEVBQ4",
+                        "layer": "custom"
+                      },
+                      "2026-05-02": {
+                        "is_off": true,
+                        "event_id": "non_work.20260502",
+                        "layer": "weekly"
+                      },
+                      "2026-05-09": {
+                        "is_off": false,
+                        "event_id": "zh-cn.china.official.c234057c-fd90-380e-889c-3e3254dd5b01",
+                        "layer": "holiday"
+                      },
+                      "2026-05-11": {
+                        "is_off": false
+                      }
+                    }
                   },
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
                 },
@@ -34758,7 +34853,7 @@
     },
     "/calendar/event/upsert": {
       "post": {
-        "description": "创建或更新日历事件（节假日或工作日覆盖）。不传 event_id 时会创建新事件。",
+        "description": "创建或更新日历自己的事件（休息日或工作日覆盖），作用于 [start_at, end_at) 这些日期。不传 event_id 时创建新事件；传入的 event_id 必须是该日历已有的事件。写入时会把该日历自己的其他事件从这些日期上移除：完全落在范围内的事件被删除，部分重叠的被截短，跨越整个范围的被拆成两段，因此这些日期以最后一次写入为准。end_at 必须晚于 start_at。",
         "operationId": "calEventUpsert",
         "requestBody": {
           "content": {
@@ -48975,6 +49070,7 @@
                         "updated_by": 0
                       }
                     ],
+                    "release_limited": false,
                     "total": 2
                   },
                   "request_id": "01J0D5Y31GY2TWAHRP3Q8K4M6N"
@@ -64386,7 +64482,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -64664,7 +64760,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -64851,7 +64947,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65133,7 +65229,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65322,7 +65418,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65399,7 +65495,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65585,7 +65681,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65690,7 +65786,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65794,7 +65890,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65894,7 +65990,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65984,7 +66080,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66164,7 +66260,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66307,7 +66403,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66428,7 +66524,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66577,7 +66673,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66703,7 +66799,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66864,7 +66960,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -67089,7 +67185,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
