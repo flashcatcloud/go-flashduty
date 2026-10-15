@@ -33311,6 +33311,140 @@
             "example": "0123456789abcdef0123456789abcdef100"
           }
         }
+      },
+      "FolderCreateRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "目录名称；不能包含句点、斜杠或逗号。",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "备注；更新时省略或传空字符串会清空备注。"
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "父目录 ID；0 或省略时创建顶层目录。",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "team_id": {
+            "type": "integer",
+            "description": "团队 ID；0 表示账户范围。更新时省略会重置为 0。",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "FolderUpdateRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "目录名称；不能包含句点、斜杠或逗号。",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "备注；更新时省略或传空字符串会清空备注。"
+          },
+          "team_id": {
+            "type": "integer",
+            "description": "团队 ID；0 表示账户范围。更新时省略会重置为 0。",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "FolderMoveRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 1
+          },
+          "dest_parent_id": {
+            "type": "integer",
+            "description": "目标父目录 ID；移至顶层时必须显式传 0。",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "dest_parent_id"
+        ]
+      },
+      "FolderDeleteRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "FolderHealthItem": {
+        "type": "object",
+        "description": "目录健康摘要。",
+        "properties": {
+          "folder_id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "has_issue": {
+            "type": "boolean",
+            "description": "本目录或可见后代目录是否存在活跃告警或规则运行问题。"
+          }
+        },
+        "required": [
+          "folder_id",
+          "has_issue"
+        ]
+      },
+      "FolderHealthOutput": {
+        "type": "object",
+        "description": "可见目录的健康摘要。",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "目录摘要列表。",
+            "items": {
+              "$ref": "#/components/schemas/FolderHealthItem"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
       }
     },
     "securitySchemes": {
@@ -67177,7 +67311,7 @@
           "Monitors/规则分组"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | **1,000 requests/minute**; **50 requests/second** per account |\n| 权限要求 | **告警规则查看** 或 **节点权限查看**（`monit`） |\n\n## 使用说明\n\n- 响应是可读目录的扁平列表而非树：请用 `parent_id` 与 `parent_path` 重建层级，并在客户端自行搜索。\n- 仪表盘与告警规则共用这棵目录树，因此同一批 ID 会作为仪表盘载荷中的 `folder_id` 出现。\n- 目录写操作（`create`、`update`、`move`、`delete`）仍仅支持 JWT，不在公开 API 范围内。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | **1,000 requests/minute**; **50 requests/second** per account |\n| 权限要求 | **告警规则查看** 或 **节点权限查看**（`monit`） |\n\n## 使用说明\n\n- 响应是可读目录的扁平列表而非树：请用 `parent_id` 与 `parent_path` 重建层级，并在客户端自行搜索。\n- 仪表盘与告警规则共用这棵目录树，因此同一批 ID 会作为仪表盘载荷中的 `folder_id` 出现。",
           "href": "/zh/api-reference/monitors/rule-folders/monit-folder-read-list",
           "metadata": {
             "sidebarTitle": "查询监控节点列表"
@@ -68001,6 +68135,435 @@
               },
               "example": {
                 "integration_id": 6113996590131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/health": {
+      "post": {
+        "operationId": "monit-folder-read-health",
+        "summary": "获取监控目录健康摘要",
+        "description": "获取可见目录的健康摘要，包含后代目录中的问题。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **30 次/分钟**；**2 次/秒** |\n| 权限 | **告警规则查看**、**告警规则管理**、**节点权限查看**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 问题包括活跃告警和告警规则运行问题，并向可见祖先目录汇总。\n- 此操作扫描目录规则和运行状态，请避免频繁轮询。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-read-health",
+          "metadata": {
+            "sidebarTitle": "获取监控目录健康摘要"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderHealthOutput"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "folder_id": 12,
+                        "has_issue": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/monit/folder/create": {
+      "post": {
+        "operationId": "monit-folder-write-create",
+        "summary": "创建监控目录",
+        "description": "在顶层或有权访问的父目录下创建监控目录。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 传入 `parent_id: 0` 或省略该字段以创建顶层目录。您必须有权访问父目录。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-create",
+          "metadata": {
+            "sidebarTitle": "创建监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "id": 12,
+                    "account_id": 10023,
+                    "parent_id": 10,
+                    "parent_path": "10",
+                    "team_id": 0,
+                    "name": "Checkout",
+                    "note": "Checkout service folders",
+                    "creator_id": 10023,
+                    "creator_name": "Ada Lovelace",
+                    "updater_id": 10088,
+                    "updater_name": "Grace Hopper",
+                    "created_at": 1791000000,
+                    "updated_at": 1791100800
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderCreateRequest"
+              },
+              "example": {
+                "name": "Checkout",
+                "note": "Checkout service folders",
+                "parent_id": 10,
+                "team_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/update": {
+      "post": {
+        "operationId": "monit-folder-write-update",
+        "summary": "更新监控目录",
+        "description": "替换有权访问的监控目录的名称、备注和团队归属。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 必须传入 `id` 和 `name`。此操作替换可编辑字段：省略 `note` 会清空备注，省略 `team_id` 会重置为 0。\n- 请使用移动接口更改父目录。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-update",
+          "metadata": {
+            "sidebarTitle": "更新监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "id": 12,
+                    "account_id": 10023,
+                    "parent_id": 10,
+                    "parent_path": "10",
+                    "team_id": 0,
+                    "name": "Checkout production",
+                    "note": "Production services",
+                    "creator_id": 10023,
+                    "creator_name": "Ada Lovelace",
+                    "updater_id": 10088,
+                    "updater_name": "Grace Hopper",
+                    "created_at": 1791000000,
+                    "updated_at": 1791100800
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderUpdateRequest"
+              },
+              "example": {
+                "id": 12,
+                "name": "Checkout production",
+                "note": "Production services",
+                "team_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/move": {
+      "post": {
+        "operationId": "monit-folder-write-move",
+        "summary": "移动监控目录",
+        "description": "将监控目录及其后代移至其他目录下或顶层。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 您必须有权访问源目录和目标目录。\n- 必须传入 `dest_parent_id`；移至顶层时显式传 0。不能移至自身或后代目录下。\n- 后代目录路径在同一事务中更新。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-move",
+          "metadata": {
+            "sidebarTitle": "移动监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "空对象。"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderMoveRequest"
+              },
+              "example": {
+                "id": 12,
+                "dest_parent_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/delete": {
+      "post": {
+        "operationId": "monit-folder-write-delete",
+        "summary": "删除监控目录",
+        "description": "移除子目录、规则和仪表盘后，删除有权访问的监控目录。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 只能删除空目录。存在子目录、告警规则或仪表盘时，返回 HTTP 409，错误码为 `FolderNotEmpty`。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-delete",
+          "metadata": {
+            "sidebarTitle": "删除监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "空对象。"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "409": {
+            "description": "目录非空。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string",
+                      "description": "请求 ID。"
+                    },
+                    "error": {
+                      "type": "object",
+                      "description": "错误详情。",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "FolderNotEmpty：请移除目录内容后重试。",
+                          "enum": [
+                            "FolderNotEmpty"
+                          ]
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "错误消息。"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "request_id",
+                    "error"
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "FolderNotEmpty",
+                    "message": "Folder contains dashboards"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderDeleteRequest"
+              },
+              "example": {
+                "id": 12
               }
             }
           }
