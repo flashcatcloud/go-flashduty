@@ -7,14 +7,74 @@ import "context"
 // RuleFoldersService handles the "Monitors/Rule folders" API resource.
 type RuleFoldersService service
 
+// Get monitor folder health.
+//
+// Get health summaries for visible folders, including issues in their descendants.
+//
+// API: POST /monit/folder/health (monit-folder-read-health).
+func (s *RuleFoldersService) ReadHealth(ctx context.Context) (*FolderHealthOutput, *Response, error) {
+	out := new(FolderHealthOutput)
+	resp, err := s.client.do(ctx, "/monit/folder/health", nil, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // List monitor folders.
 //
 // List every monitor folder the caller can read.
 //
 // API: POST /monit/folder/list (monit-folder-read-list).
-func (s *RuleFoldersService) List(ctx context.Context) (*[]FolderItem, *Response, error) {
+func (s *RuleFoldersService) ReadList(ctx context.Context) (*[]FolderItem, *Response, error) {
 	out := new([]FolderItem)
 	resp, err := s.client.do(ctx, "/monit/folder/list", nil, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Create monitor folder.
+//
+// Create a monitor folder at the root or under an accessible parent folder.
+//
+// API: POST /monit/folder/create (monit-folder-write-create).
+func (s *RuleFoldersService) WriteCreate(ctx context.Context, req *FolderCreateRequest) (*FolderItem, *Response, error) {
+	out := new(FolderItem)
+	resp, err := s.client.do(ctx, "/monit/folder/create", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Delete monitor folder.
+//
+// Delete an accessible monitor folder after removing its children, rules, and dashboards.
+//
+// API: POST /monit/folder/delete (monit-folder-write-delete).
+func (s *RuleFoldersService) WriteDelete(ctx context.Context, req *FolderDeleteRequest) (*Response, error) {
+	return s.client.do(ctx, "/monit/folder/delete", req, nil)
+}
+
+// Move monitor folder.
+//
+// Move a monitor folder and its descendants under another folder or to the root.
+//
+// API: POST /monit/folder/move (monit-folder-write-move).
+func (s *RuleFoldersService) WriteMove(ctx context.Context, req *FolderMoveRequest) (*Response, error) {
+	return s.client.do(ctx, "/monit/folder/move", req, nil)
+}
+
+// Update monitor folder.
+//
+// Replace the name, note, and team assignment of an accessible monitor folder.
+//
+// API: POST /monit/folder/update (monit-folder-write-update).
+func (s *RuleFoldersService) WriteUpdate(ctx context.Context, req *FolderUpdateRequest) (*FolderItem, *Response, error) {
+	out := new(FolderItem)
+	resp, err := s.client.do(ctx, "/monit/folder/update", req, out)
 	if err != nil {
 		return nil, resp, err
 	}

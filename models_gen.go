@@ -4993,6 +4993,38 @@ type Flapping struct {
 	MuteMins int64 `json:"mute_mins,omitempty" toon:"mute_mins,omitempty"`
 }
 
+// FolderCreateRequest is generated from the Flashduty OpenAPI schema.
+type FolderCreateRequest struct {
+	// Folder name; cannot contain a period, slash, or comma.
+	Name string `json:"name" toon:"name"`
+	// Free-form note; omitted or empty clears the note on update.
+	Note string `json:"note,omitempty" toon:"note,omitempty"`
+	// Parent folder ID; 0 or omitted creates a root folder.
+	ParentID uint64 `json:"parent_id,omitempty" toon:"parent_id,omitempty"`
+	// Team ID; 0 means account-wide. Omitted on update resets to 0.
+	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// FolderDeleteRequest is generated from the Flashduty OpenAPI schema.
+type FolderDeleteRequest struct {
+	// Folder ID.
+	ID uint64 `json:"id" toon:"id"`
+}
+
+// FolderHealthItem is generated from the Flashduty OpenAPI schema.
+type FolderHealthItem struct {
+	// Folder ID.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Whether this folder or a visible descendant has active alerts or rule runtime issues.
+	HasIssue bool `json:"has_issue" toon:"has_issue"`
+}
+
+// FolderHealthOutput is generated from the Flashduty OpenAPI schema.
+type FolderHealthOutput struct {
+	// Folder health summaries.
+	Items []FolderHealthItem `json:"items" toon:"items"`
+}
+
 // FolderItem is generated from the Flashduty OpenAPI schema.
 type FolderItem struct {
 	// Owning account ID.
@@ -5021,6 +5053,26 @@ type FolderItem struct {
 	UpdaterID uint64 `json:"updater_id" toon:"updater_id"`
 	// Name of the last updater.
 	UpdaterName string `json:"updater_name" toon:"updater_name"`
+}
+
+// FolderMoveRequest is generated from the Flashduty OpenAPI schema.
+type FolderMoveRequest struct {
+	// Destination parent folder ID; required even when 0 to move to the root.
+	DestParentID uint64 `json:"dest_parent_id" toon:"dest_parent_id"`
+	// Folder ID.
+	ID uint64 `json:"id" toon:"id"`
+}
+
+// FolderUpdateRequest is generated from the Flashduty OpenAPI schema.
+type FolderUpdateRequest struct {
+	// Folder ID.
+	ID uint64 `json:"id" toon:"id"`
+	// Folder name; cannot contain a period, slash, or comma.
+	Name string `json:"name" toon:"name"`
+	// Free-form note; omitted or empty clears the note on update.
+	Note string `json:"note,omitempty" toon:"note,omitempty"`
+	// Team ID; 0 means account-wide. Omitted on update resets to 0.
+	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
 // GetIntegrationRequest is generated from the Flashduty OpenAPI schema.

@@ -33311,6 +33311,140 @@
             "example": "0123456789abcdef0123456789abcdef100"
           }
         }
+      },
+      "FolderCreateRequest": {
+        "type": "object",
+        "description": "Monitor folder request.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Folder name; cannot contain a period, slash, or comma.",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "Free-form note; omitted or empty clears the note on update."
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "Parent folder ID; 0 or omitted creates a root folder.",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "team_id": {
+            "type": "integer",
+            "description": "Team ID; 0 means account-wide. Omitted on update resets to 0.",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "FolderUpdateRequest": {
+        "type": "object",
+        "description": "Monitor folder request.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Folder ID.",
+            "format": "uint64",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Folder name; cannot contain a period, slash, or comma.",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "Free-form note; omitted or empty clears the note on update."
+          },
+          "team_id": {
+            "type": "integer",
+            "description": "Team ID; 0 means account-wide. Omitted on update resets to 0.",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "FolderMoveRequest": {
+        "type": "object",
+        "description": "Monitor folder request.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Folder ID.",
+            "format": "uint64",
+            "minimum": 1
+          },
+          "dest_parent_id": {
+            "type": "integer",
+            "description": "Destination parent folder ID; required even when 0 to move to the root.",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "dest_parent_id"
+        ]
+      },
+      "FolderDeleteRequest": {
+        "type": "object",
+        "description": "Monitor folder request.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Folder ID.",
+            "format": "uint64",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "FolderHealthItem": {
+        "type": "object",
+        "description": "Health summary for a visible folder.",
+        "properties": {
+          "folder_id": {
+            "type": "integer",
+            "description": "Folder ID.",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "has_issue": {
+            "type": "boolean",
+            "description": "Whether this folder or a visible descendant has active alerts or rule runtime issues."
+          }
+        },
+        "required": [
+          "folder_id",
+          "has_issue"
+        ]
+      },
+      "FolderHealthOutput": {
+        "type": "object",
+        "description": "Health summaries for visible folders.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "Folder health summaries.",
+            "items": {
+              "$ref": "#/components/schemas/FolderHealthItem"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
       }
     },
     "securitySchemes": {
@@ -67177,7 +67311,7 @@
           "Monitors/Rule folders"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Alerting Rules Read** or **Node Permissions Read** (`monit`) |\n\n## Usage\n\n- The response is a flat list of every readable folder, not a tree: rebuild the hierarchy from `parent_id` and `parent_path`, and search client-side.\n- Dashboards and alert rules both live in this folder tree, so the same IDs appear as `folder_id` on dashboard payloads.\n- Folder writes (`create`, `update`, `move`, `delete`) are still JWT-only and are not part of the public API.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Alerting Rules Read** or **Node Permissions Read** (`monit`) |\n\n## Usage\n\n- The response is a flat list of every readable folder, not a tree: rebuild the hierarchy from `parent_id` and `parent_path`, and search client-side.\n- Dashboards and alert rules both live in this folder tree, so the same IDs appear as `folder_id` on dashboard payloads.",
           "href": "/en/api-reference/monitors/rule-folders/monit-folder-read-list",
           "metadata": {
             "sidebarTitle": "List monitor folders"
@@ -68001,6 +68135,435 @@
               },
               "example": {
                 "integration_id": 6113996590131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/health": {
+      "post": {
+        "operationId": "monit-folder-read-health",
+        "summary": "Get monitor folder health",
+        "description": "Get health summaries for visible folders, including issues in their descendants.",
+        "tags": [
+          "Monitors/Rule folders"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **30 requests/minute**; **2 requests/second** per account |\n| Permissions | **Alerting Rules Read**, **Alerting Rules Manage**, **Node Permissions Read**, or **Node Permissions Manage** (`monit`) |\n\n## Usage\n\n- Issues include active alerts and alert-rule runtime problems; issues propagate to visible ancestors.\n- This operation scans folder rules and runtime state. Avoid frequent polling.",
+          "href": "/en/api-reference/monitors/rule-folders/monit-folder-read-health",
+          "metadata": {
+            "sidebarTitle": "Get monitor folder health"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderHealthOutput"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "folder_id": 12,
+                        "has_issue": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/monit/folder/create": {
+      "post": {
+        "operationId": "monit-folder-write-create",
+        "summary": "Create monitor folder",
+        "description": "Create a monitor folder at the root or under an accessible parent folder.",
+        "tags": [
+          "Monitors/Rule folders"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Alerting Rules Manage** or **Node Permissions Manage** (`monit`) |\n\n## Usage\n\n- Use `parent_id: 0` or omit it to create a root folder. The parent must be accessible.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/monitors/rule-folders/monit-folder-write-create",
+          "metadata": {
+            "sidebarTitle": "Create monitor folder"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "id": 12,
+                    "account_id": 10023,
+                    "parent_id": 10,
+                    "parent_path": "10",
+                    "team_id": 0,
+                    "name": "Checkout",
+                    "note": "Checkout service folders",
+                    "creator_id": 10023,
+                    "creator_name": "Ada Lovelace",
+                    "updater_id": 10088,
+                    "updater_name": "Grace Hopper",
+                    "created_at": 1791000000,
+                    "updated_at": 1791100800
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderCreateRequest"
+              },
+              "example": {
+                "name": "Checkout",
+                "note": "Checkout service folders",
+                "parent_id": 10,
+                "team_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/update": {
+      "post": {
+        "operationId": "monit-folder-write-update",
+        "summary": "Update monitor folder",
+        "description": "Replace the name, note, and team assignment of an accessible monitor folder.",
+        "tags": [
+          "Monitors/Rule folders"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Alerting Rules Manage** or **Node Permissions Manage** (`monit`) |\n\n## Usage\n\n- Send both `id` and `name`. This is a replacement of editable fields: omitting `note` clears it, and omitting `team_id` resets it to 0.\n- Use the move operation to change the parent folder.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/monitors/rule-folders/monit-folder-write-update",
+          "metadata": {
+            "sidebarTitle": "Update monitor folder"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "id": 12,
+                    "account_id": 10023,
+                    "parent_id": 10,
+                    "parent_path": "10",
+                    "team_id": 0,
+                    "name": "Checkout production",
+                    "note": "Production services",
+                    "creator_id": 10023,
+                    "creator_name": "Ada Lovelace",
+                    "updater_id": 10088,
+                    "updater_name": "Grace Hopper",
+                    "created_at": 1791000000,
+                    "updated_at": 1791100800
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderUpdateRequest"
+              },
+              "example": {
+                "id": 12,
+                "name": "Checkout production",
+                "note": "Production services",
+                "team_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/move": {
+      "post": {
+        "operationId": "monit-folder-write-move",
+        "summary": "Move monitor folder",
+        "description": "Move a monitor folder and its descendants under another folder or to the root.",
+        "tags": [
+          "Monitors/Rule folders"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Alerting Rules Manage** or **Node Permissions Manage** (`monit`) |\n\n## Usage\n\n- You must have access to both the source and destination folders.\n- `dest_parent_id` is required; send 0 explicitly to move to the root. Moving under the folder itself or a descendant is rejected.\n- Descendant paths are updated in the same transaction.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/monitors/rule-folders/monit-folder-write-move",
+          "metadata": {
+            "sidebarTitle": "Move monitor folder"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "Empty object."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderMoveRequest"
+              },
+              "example": {
+                "id": 12,
+                "dest_parent_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/delete": {
+      "post": {
+        "operationId": "monit-folder-write-delete",
+        "summary": "Delete monitor folder",
+        "description": "Delete an accessible monitor folder after removing its children, rules, and dashboards.",
+        "tags": [
+          "Monitors/Rule folders"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Alerting Rules Manage** or **Node Permissions Manage** (`monit`) |\n\n## Usage\n\n- Only empty folders can be deleted. Child folders, alert rules, and dashboards block deletion with HTTP 409 and error code `FolderNotEmpty`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "href": "/en/api-reference/monitors/rule-folders/monit-folder-write-delete",
+          "metadata": {
+            "sidebarTitle": "Delete monitor folder"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "Empty object."
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "409": {
+            "description": "Folder is not empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string",
+                      "description": "Request ID."
+                    },
+                    "error": {
+                      "type": "object",
+                      "description": "Error details.",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "FolderNotEmpty: remove the folder contents before retrying.",
+                          "enum": [
+                            "FolderNotEmpty"
+                          ]
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message."
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "request_id",
+                    "error"
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "FolderNotEmpty",
+                    "message": "Folder contains dashboards"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderDeleteRequest"
+              },
+              "example": {
+                "id": 12
               }
             }
           }
