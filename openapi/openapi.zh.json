@@ -4067,20 +4067,27 @@
         "type": "object"
       },
       "CalEventIDRequest": {
-        "description": "日历事件删除请求。",
+        "description": "日历事件删除请求。传入 event_id，或同时传入 start_at 和 end_at。",
         "properties": {
           "cal_id": {
             "description": "日历 ID，可通过 `POST /calendar/list` 获取。",
             "type": "string"
           },
           "event_id": {
-            "description": "事件 ID。",
+            "description": "要删除的事件 ID。按日期范围清除时不传。",
+            "type": "string"
+          },
+          "start_at": {
+            "description": "要清除的日期范围的开始日期，格式 YYYY-MM-DD。与 end_at 一起传入，代替 event_id。",
+            "type": "string"
+          },
+          "end_at": {
+            "description": "要清除的日期范围的结束日期（不含），格式 YYYY-MM-DD。必须晚于 start_at。",
             "type": "string"
           }
         },
         "required": [
-          "cal_id",
-          "event_id"
+          "cal_id"
         ],
         "type": "object"
       },
@@ -4193,11 +4200,45 @@
             "description": "返回的事件总数。",
             "format": "int64",
             "type": "integer"
+          },
+          "days": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CalDay"
+            },
+            "description": "请求范围内每一天的判定结果，键为日期（YYYY-MM-DD）。每天由有事件的最高一层决定：日历自己的事件（custom）优先，其次是关联的节假日日历（holiday），最后是每周工作日设置（weekly）。同一层内工作日事件优先于休息日事件，因此节假日日历中的调休补班日会覆盖节假日休息日。没有任何事件覆盖的日期为工作日。",
+            "type": "object"
           }
         },
         "required": [
           "items",
-          "total"
+          "total",
+          "days"
+        ],
+        "type": "object"
+      },
+      "CalDay": {
+        "description": "单个日期的判定结果。",
+        "properties": {
+          "event_id": {
+            "description": "决定该日期的事件 ID。没有事件覆盖该日期时不返回。",
+            "type": "string"
+          },
+          "is_off": {
+            "description": "该日期是否为休息日。",
+            "type": "boolean"
+          },
+          "layer": {
+            "description": "决定该日期的层：custom = 日历自己的事件，holiday = 关联的节假日日历，weekly = 每周工作日设置。没有事件覆盖该日期时不返回。",
+            "enum": [
+              "custom",
+              "holiday",
+              "weekly"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "is_off"
         ],
         "type": "object"
       },
@@ -4231,15 +4272,13 @@
             "type": "string"
           },
           "summary": {
-            "description": "事件摘要。",
+            "description": "事件摘要，选填。",
             "maxLength": 39,
-            "minLength": 1,
             "type": "string"
           }
         },
         "required": [
           "cal_id",
-          "summary",
           "start_at",
           "end_at",
           "is_off"
@@ -5067,7 +5106,10 @@
             "type": "string"
           },
           "target_status": {
-            "description": "要设置的客户端自定义状态（最长 64 字符），没有固定状态机。",
+            "description": "要设置的目标状态，必须为 `done`，其他取值一律拒绝。",
+            "enum": [
+              "done"
+            ],
             "maxLength": 64,
             "type": "string"
           },
@@ -5133,7 +5175,13 @@
             "type": "string"
           },
           "target_status": {
-            "description": "可选，设置在转化后后续行动上的客户端自定义状态（最长 64 字符）。",
+            "description": "可选，设置在转化后后续行动上的状态，取 `open`、`in_progress`、`done`、`cancelled` 之一。",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": [
               "string",
@@ -6725,7 +6773,13 @@
             "type": "string"
           },
           "status": {
-            "description": "可选的客户端自定义初始状态（最长 64 字符）。",
+            "description": "可选，客户端自定义的初始状态，取 `open`、`in_progress`、`done`、`cancelled` 之一；省略或为空时默认为 `open`。",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": "string"
           },
@@ -13424,6 +13478,10 @@
             },
             "type": "array"
           },
+          "release_limited": {
+            "description": "当前 30 天窗口内的许可释放配额是否已用尽。为 `true` 时释放席位会返回错误码 `NoLicense`。",
+            "type": "boolean"
+          },
           "total": {
             "description": "持有有效许可的人员数量。",
             "format": "int64",
@@ -13432,7 +13490,8 @@
         },
         "required": [
           "total",
-          "items"
+          "items",
+          "release_limited"
         ],
         "type": "object"
       },
@@ -22716,11 +22775,21 @@
         "description": "固定时间通知配置。",
         "properties": {
           "cycle": {
-            "description": "通知周期，仅支持 `day`（按天）。",
+            "description": "通知周期：`day` 每天发送；`week` 在 `days` 列出的星期发送；`month` 在 `days` 列出的每月日期发送。",
             "enum": [
-              "day"
+              "day",
+              "week",
+              "month"
             ],
             "type": "string"
+          },
+          "days": {
+            "description": "通知发送日，按值班表时区的墙钟计算。`week` 为星期几（0-6，0 表示周日）；`month` 为每月第几日（1-31，当月没有该日则跳过）。`cycle` 为 `week` 或 `month` 时必填，为 `day` 时忽略。",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
           },
           "start": {
             "description": "发送时间，格式 `HH:MM`（24 小时制）。",
@@ -27836,7 +27905,13 @@
             ]
           },
           "status": {
-            "description": "新的客户端自定义状态（最长 64 字符）。",
+            "description": "新的客户端自定义状态，取 `open`、`in_progress`、`done`、`cancelled` 之一。",
+            "enum": [
+              "open",
+              "in_progress",
+              "done",
+              "cancelled"
+            ],
             "maxLength": 64,
             "type": [
               "string",
@@ -33312,6 +33387,140 @@
             "example": "0123456789abcdef0123456789abcdef100"
           }
         }
+      },
+      "FolderCreateRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "目录名称；不能包含句点、斜杠或逗号。",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "备注；更新时省略或传空字符串会清空备注。"
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "父目录 ID；0 或省略时创建顶层目录。",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "team_id": {
+            "type": "integer",
+            "description": "团队 ID；0 表示账户范围。更新时省略会重置为 0。",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "FolderUpdateRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "目录名称；不能包含句点、斜杠或逗号。",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "备注；更新时省略或传空字符串会清空备注。"
+          },
+          "team_id": {
+            "type": "integer",
+            "description": "团队 ID；0 表示账户范围。更新时省略会重置为 0。",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "FolderMoveRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 1
+          },
+          "dest_parent_id": {
+            "type": "integer",
+            "description": "目标父目录 ID；移至顶层时必须显式传 0。",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "dest_parent_id"
+        ]
+      },
+      "FolderDeleteRequest": {
+        "type": "object",
+        "description": "监控目录请求。",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "FolderHealthItem": {
+        "type": "object",
+        "description": "目录健康摘要。",
+        "properties": {
+          "folder_id": {
+            "type": "integer",
+            "description": "目录 ID。",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "has_issue": {
+            "type": "boolean",
+            "description": "本目录或可见后代目录是否存在活跃告警或规则运行问题。"
+          }
+        },
+        "required": [
+          "folder_id",
+          "has_issue"
+        ]
+      },
+      "FolderHealthOutput": {
+        "type": "object",
+        "description": "可见目录的健康摘要。",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "目录摘要列表。",
+            "items": {
+              "$ref": "#/components/schemas/FolderHealthItem"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
       }
     },
     "securitySchemes": {
@@ -34661,7 +34870,7 @@
     },
     "/calendar/event/delete": {
       "post": {
-        "description": "根据日历 ID 与事件 ID 删除日历事件。",
+        "description": "按 event_id 删除个人日历的一个事件，或清除该日历自己在 [start_at, end_at) 这些日期上的事件。event_id 与 start_at/end_at 二选一，start_at 和 end_at 须同时传入。清除后这些日期回到关联节假日日历和每周工作日设置的判定。",
         "operationId": "calEventDelete",
         "requestBody": {
           "content": {
@@ -34732,7 +34941,7 @@
     },
     "/calendar/event/list": {
       "post": {
-        "description": "返回个人日历在指定年/月/日范围内的事件列表。未同时传入 month 和 day 时返回整年数据。",
+        "description": "返回个人日历在指定年/月/日范围内的事件列表。未同时传入 month 和 day 时返回整年数据。响应中的 days 给出范围内每一天的判定结果。",
         "operationId": "calEventList",
         "requestBody": {
           "content": {
@@ -34783,7 +34992,27 @@
                         "updated_at": 0
                       }
                     ],
-                    "total": 11
+                    "total": 11,
+                    "days": {
+                      "2026-05-01": {
+                        "is_off": true,
+                        "event_id": "cale.KyG9XWTCU5CucbwukEVBQ4",
+                        "layer": "custom"
+                      },
+                      "2026-05-02": {
+                        "is_off": true,
+                        "event_id": "non_work.20260502",
+                        "layer": "weekly"
+                      },
+                      "2026-05-09": {
+                        "is_off": false,
+                        "event_id": "zh-cn.china.official.c234057c-fd90-380e-889c-3e3254dd5b01",
+                        "layer": "holiday"
+                      },
+                      "2026-05-11": {
+                        "is_off": false
+                      }
+                    }
                   },
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
                 },
@@ -34834,7 +35063,7 @@
     },
     "/calendar/event/upsert": {
       "post": {
-        "description": "创建或更新日历事件（节假日或工作日覆盖）。不传 event_id 时会创建新事件。",
+        "description": "创建或更新日历自己的事件（休息日或工作日覆盖），作用于 [start_at, end_at) 这些日期。不传 event_id 时创建新事件；传入的 event_id 必须是该日历已有的事件。写入时会把该日历自己的其他事件从这些日期上移除：完全落在范围内的事件被删除，部分重叠的被截短，跨越整个范围的被拆成两段，因此这些日期以最后一次写入为准。end_at 必须晚于 start_at。",
         "operationId": "calEventUpsert",
         "requestBody": {
           "content": {
@@ -49051,6 +49280,7 @@
                         "updated_by": 0
                       }
                     ],
+                    "release_limited": false,
                     "total": 2
                   },
                   "request_id": "01J0D5Y31GY2TWAHRP3Q8K4M6N"
@@ -64462,7 +64692,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -64740,7 +64970,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -64927,7 +65157,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65209,7 +65439,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65398,7 +65628,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65475,7 +65705,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65661,7 +65891,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65766,7 +65996,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65870,7 +66100,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -65970,7 +66200,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66060,7 +66290,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66240,7 +66470,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66383,7 +66613,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66504,7 +66734,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66653,7 +66883,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66779,7 +67009,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -66940,7 +67170,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -67157,7 +67387,7 @@
           "Monitors/规则分组"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | **1,000 requests/minute**; **50 requests/second** per account |\n| 权限要求 | **告警规则查看** 或 **节点权限查看**（`monit`） |\n\n## 使用说明\n\n- 响应是可读目录的扁平列表而非树：请用 `parent_id` 与 `parent_path` 重建层级，并在客户端自行搜索。\n- 仪表盘与告警规则共用这棵目录树，因此同一批 ID 会作为仪表盘载荷中的 `folder_id` 出现。\n- 目录写操作（`create`、`update`、`move`、`delete`）仍仅支持 JWT，不在公开 API 范围内。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | **1,000 requests/minute**; **50 requests/second** per account |\n| 权限要求 | **告警规则查看** 或 **节点权限查看**（`monit`） |\n\n## 使用说明\n\n- 响应是可读目录的扁平列表而非树：请用 `parent_id` 与 `parent_path` 重建层级，并在客户端自行搜索。\n- 仪表盘与告警规则共用这棵目录树，因此同一批 ID 会作为仪表盘载荷中的 `folder_id` 出现。",
           "href": "/zh/api-reference/monitors/rule-folders/monit-folder-read-list",
           "metadata": {
             "sidebarTitle": "查询监控节点列表"
@@ -67165,7 +67395,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "成功",
             "content": {
               "application/json": {
                 "schema": {
@@ -67981,6 +68211,435 @@
               },
               "example": {
                 "integration_id": 6113996590131
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/health": {
+      "post": {
+        "operationId": "monit-folder-read-health",
+        "summary": "获取监控目录健康摘要",
+        "description": "获取可见目录的健康摘要，包含后代目录中的问题。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **30 次/分钟**；**2 次/秒** |\n| 权限 | **告警规则查看**、**告警规则管理**、**节点权限查看**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 问题包括活跃告警和告警规则运行问题，并向可见祖先目录汇总。\n- 此操作扫描目录规则和运行状态，请避免频繁轮询。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-read-health",
+          "metadata": {
+            "sidebarTitle": "获取监控目录健康摘要"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderHealthOutput"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "items": [
+                      {
+                        "folder_id": 12,
+                        "has_issue": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/monit/folder/create": {
+      "post": {
+        "operationId": "monit-folder-write-create",
+        "summary": "创建监控目录",
+        "description": "在顶层或有权访问的父目录下创建监控目录。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 传入 `parent_id: 0` 或省略该字段以创建顶层目录。您必须有权访问父目录。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-create",
+          "metadata": {
+            "sidebarTitle": "创建监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "id": 12,
+                    "account_id": 10023,
+                    "parent_id": 10,
+                    "parent_path": "10",
+                    "team_id": 0,
+                    "name": "Checkout",
+                    "note": "Checkout service folders",
+                    "creator_id": 10023,
+                    "creator_name": "Ada Lovelace",
+                    "updater_id": 10088,
+                    "updater_name": "Grace Hopper",
+                    "created_at": 1791000000,
+                    "updated_at": 1791100800
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderCreateRequest"
+              },
+              "example": {
+                "name": "Checkout",
+                "note": "Checkout service folders",
+                "parent_id": 10,
+                "team_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/update": {
+      "post": {
+        "operationId": "monit-folder-write-update",
+        "summary": "更新监控目录",
+        "description": "替换有权访问的监控目录的名称、备注和团队归属。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 必须传入 `id` 和 `name`。此操作替换可编辑字段：省略 `note` 会清空备注，省略 `team_id` 会重置为 0。\n- 请使用移动接口更改父目录。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-update",
+          "metadata": {
+            "sidebarTitle": "更新监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FolderItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "id": 12,
+                    "account_id": 10023,
+                    "parent_id": 10,
+                    "parent_path": "10",
+                    "team_id": 0,
+                    "name": "Checkout production",
+                    "note": "Production services",
+                    "creator_id": 10023,
+                    "creator_name": "Ada Lovelace",
+                    "updater_id": 10088,
+                    "updater_name": "Grace Hopper",
+                    "created_at": 1791000000,
+                    "updated_at": 1791100800
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderUpdateRequest"
+              },
+              "example": {
+                "id": 12,
+                "name": "Checkout production",
+                "note": "Production services",
+                "team_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/move": {
+      "post": {
+        "operationId": "monit-folder-write-move",
+        "summary": "移动监控目录",
+        "description": "将监控目录及其后代移至其他目录下或顶层。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 您必须有权访问源目录和目标目录。\n- 必须传入 `dest_parent_id`；移至顶层时显式传 0。不能移至自身或后代目录下。\n- 后代目录路径在同一事务中更新。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-move",
+          "metadata": {
+            "sidebarTitle": "移动监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "空对象。"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderMoveRequest"
+              },
+              "example": {
+                "id": 12,
+                "dest_parent_id": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monit/folder/delete": {
+      "post": {
+        "operationId": "monit-folder-write-delete",
+        "summary": "删除监控目录",
+        "description": "移除子目录、规则和仪表盘后，删除有权访问的监控目录。",
+        "tags": [
+          "Monitors/规则分组"
+        ],
+        "x-mint": {
+          "content": "## 限制\n\n| 项目 | 值 |\n| ------ | ----- |\n| 频率限制 | 每账户 **300 次/分钟**；**20 次/秒** |\n| 权限 | **告警规则管理**或**节点权限管理**（`monit`） |\n\n## 使用说明\n\n- 只能删除空目录。存在子目录、告警规则或仪表盘时，返回 HTTP 409，错误码为 `FolderNotEmpty`。\n- 每次调用均记录账户审计日志。请勿在请求字段中传入密钥。",
+          "href": "/zh/api-reference/monitors/rule-folders/monit-folder-write-delete",
+          "metadata": {
+            "sidebarTitle": "删除监控目录"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "空对象。"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "409": {
+            "description": "目录非空。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string",
+                      "description": "请求 ID。"
+                    },
+                    "error": {
+                      "type": "object",
+                      "description": "错误详情。",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "FolderNotEmpty：请移除目录内容后重试。",
+                          "enum": [
+                            "FolderNotEmpty"
+                          ]
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "错误消息。"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "request_id",
+                    "error"
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "FolderNotEmpty",
+                    "message": "Folder contains dashboards"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderDeleteRequest"
+              },
+              "example": {
+                "id": 12
               }
             }
           }

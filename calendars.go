@@ -9,7 +9,7 @@ type CalendarsService service
 
 // Delete calendar event.
 //
-// Delete a calendar event by calendar ID and event ID.
+// Delete one event of a personal calendar by event_id, or clear the calendar's own events off the days [start_at, end_at). Pass either event_id or both start_at and end_at. Cleared days fall back to the linked holiday calendars and the weekly workdays.
 //
 // API: POST /calendar/event/delete (calEventDelete).
 func (s *CalendarsService) CalEventDelete(ctx context.Context, req *CalEventIDRequest) (*Response, error) {
@@ -18,7 +18,7 @@ func (s *CalendarsService) CalEventDelete(ctx context.Context, req *CalEventIDRe
 
 // List calendar events.
 //
-// Return events for a personal calendar within a year/month/day scope. When month and day are both omitted the whole year is returned.
+// Return events for a personal calendar within a year/month/day scope. When month and day are both omitted the whole year is returned. The response also carries days, the resolved state of every day in the scope.
 //
 // API: POST /calendar/event/list (calEventList).
 func (s *CalendarsService) CalEventList(ctx context.Context, req *CalEventListRequest) (*CalEventListResponse, *Response, error) {
@@ -32,7 +32,7 @@ func (s *CalendarsService) CalEventList(ctx context.Context, req *CalEventListRe
 
 // Upsert calendar event.
 //
-// Create or update a calendar event (holiday or workday override). Omit event_id to create a new event.
+// Create or update an event the calendar owns (a day off or a working-day override) over the days [start_at, end_at). Omit event_id to create a new event; a given event_id must be an existing event of this calendar. The write clears the calendar's other own events off the same days: an event fully inside the range is deleted, one partly inside is shortened, and one spanning the range is split in two, so the latest write decides those days. end_at must be later than start_at.
 //
 // API: POST /calendar/event/upsert (calEventUpsert).
 func (s *CalendarsService) CalEventUpsert(ctx context.Context, req *CalEventUpsertRequest) (*CalEventUpsertResponse, *Response, error) {

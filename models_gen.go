@@ -1671,12 +1671,26 @@ type BindWorkItemPostMortemRequest struct {
 	PostMortemID string `json:"post_mortem_id" toon:"post_mortem_id"`
 }
 
+// CalDay is generated from the Flashduty OpenAPI schema.
+type CalDay struct {
+	// ID of the event that decided the day. Absent when no event covers the day.
+	EventID string `json:"event_id" toon:"event_id"`
+	// Whether the day is a day off.
+	IsOff bool `json:"is_off" toon:"is_off"`
+	// Layer that decided the day: custom = the calendar's own events, holiday = a linked holiday calendar, weekly = the weekly workdays. Absent when no event covers the day.
+	Layer string `json:"layer" toon:"layer"`
+}
+
 // CalEventIDRequest is generated from the Flashduty OpenAPI schema.
 type CalEventIDRequest struct {
 	// Calendar ID; obtain it from `POST /calendar/list`.
 	CalID string `json:"cal_id" toon:"cal_id"`
-	// Event ID.
-	EventID string `json:"event_id" toon:"event_id"`
+	// End date of the range to clear, in YYYY-MM-DD (exclusive). Must be later than start_at.
+	EndAt string `json:"end_at,omitempty" toon:"end_at,omitempty"`
+	// ID of the event to delete. Omit when clearing a date range.
+	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	// Start date of the range to clear, in YYYY-MM-DD. Pass together with end_at instead of event_id.
+	StartAt string `json:"start_at,omitempty" toon:"start_at,omitempty"`
 }
 
 // CalEventItem is generated from the Flashduty OpenAPI schema.
@@ -1719,6 +1733,8 @@ type CalEventListRequest struct {
 
 // CalEventListResponse is generated from the Flashduty OpenAPI schema.
 type CalEventListResponse struct {
+	// Resolved state of every day in the requested scope, keyed by date (YYYY-MM-DD). The highest layer holding any event decides a day: the calendar's own events (custom), then the linked holiday calendars (holiday), then the weekly workdays (weekly). Inside one layer a working-day event beats a day off, so a make-up workday from a holiday calendar wins over holiday rest days. A day no event covers is a working day.
+	Days map[string]CalDay `json:"days" toon:"days"`
 	// Calendar events sorted by start_at.
 	Items []CalEventItem `json:"items" toon:"items"`
 	// Total number of events returned.
@@ -1739,8 +1755,8 @@ type CalEventUpsertRequest struct {
 	IsOff bool `json:"is_off" toon:"is_off"`
 	// Event start date in YYYY-MM-DD.
 	StartAt string `json:"start_at" toon:"start_at"`
-	// Event summary.
-	Summary string `json:"summary" toon:"summary"`
+	// Event summary. Optional.
+	Summary string `json:"summary,omitempty" toon:"summary,omitempty"`
 }
 
 // CalEventUpsertResponse is generated from the Flashduty OpenAPI schema.
@@ -2076,7 +2092,7 @@ type CommentIncidentRequest struct {
 type CompleteWorkItemRequest struct {
 	// Client-generated idempotency key (max 128 characters; letters, digits, `_`, `-`, `.`, `:` only).
 	IdempotencyKey string `json:"idempotency_key" toon:"idempotency_key"`
-	// Client-defined status to set (max 64 characters). There is no fixed state machine.
+	// Target status. Must be `done`; any other value is rejected.
 	TargetStatus string `json:"target_status" toon:"target_status"`
 	// Current item version for optimistic locking. Must match the stored version.
 	Version int64 `json:"version" toon:"version"`
@@ -2102,7 +2118,7 @@ type ContextResolvedItem struct {
 type ConvertWorkItemRequest struct {
 	// Client-generated idempotency key (max 128 characters; letters, digits, `_`, `-`, `.`, `:` only).
 	IdempotencyKey string `json:"idempotency_key" toon:"idempotency_key"`
-	// Optional client-defined status to set on the converted follow-up (max 64 characters).
+	// Optional status to set on the converted follow-up. One of `open`, `in_progress`, `done`, `cancelled`.
 	TargetStatus *string `json:"target_status,omitempty" toon:"target_status,omitempty"`
 	// Current item version for optimistic locking. Must match the stored version.
 	Version int64 `json:"version" toon:"version"`
@@ -2448,7 +2464,7 @@ type CreateWorkItemRequest struct {
 	PostMortemID string `json:"post_mortem_id,omitempty" toon:"post_mortem_id,omitempty"`
 	// Optional client-defined priority (max 64 characters).
 	Priority string `json:"priority,omitempty" toon:"priority,omitempty"`
-	// Optional client-defined initial status (max 64 characters).
+	// Initial status. One of `open`, `in_progress`, `done`, `cancelled`; defaults to `open` when omitted or blank.
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
 	// Item title (max 512 characters).
 	Title string `json:"title" toon:"title"`
@@ -5002,6 +5018,38 @@ type Flapping struct {
 	MuteMins int64 `json:"mute_mins,omitempty" toon:"mute_mins,omitempty"`
 }
 
+// FolderCreateRequest is generated from the Flashduty OpenAPI schema.
+type FolderCreateRequest struct {
+	// Folder name; cannot contain a period, slash, or comma.
+	Name string `json:"name" toon:"name"`
+	// Free-form note; omitted or empty clears the note on update.
+	Note string `json:"note,omitempty" toon:"note,omitempty"`
+	// Parent folder ID; 0 or omitted creates a root folder.
+	ParentID uint64 `json:"parent_id,omitempty" toon:"parent_id,omitempty"`
+	// Team ID; 0 means account-wide. Omitted on update resets to 0.
+	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+}
+
+// FolderDeleteRequest is generated from the Flashduty OpenAPI schema.
+type FolderDeleteRequest struct {
+	// Folder ID.
+	ID uint64 `json:"id" toon:"id"`
+}
+
+// FolderHealthItem is generated from the Flashduty OpenAPI schema.
+type FolderHealthItem struct {
+	// Folder ID.
+	FolderID uint64 `json:"folder_id" toon:"folder_id"`
+	// Whether this folder or a visible descendant has active alerts or rule runtime issues.
+	HasIssue bool `json:"has_issue" toon:"has_issue"`
+}
+
+// FolderHealthOutput is generated from the Flashduty OpenAPI schema.
+type FolderHealthOutput struct {
+	// Folder health summaries.
+	Items []FolderHealthItem `json:"items" toon:"items"`
+}
+
 // FolderItem is generated from the Flashduty OpenAPI schema.
 type FolderItem struct {
 	// Owning account ID.
@@ -5030,6 +5078,26 @@ type FolderItem struct {
 	UpdaterID uint64 `json:"updater_id" toon:"updater_id"`
 	// Name of the last updater.
 	UpdaterName string `json:"updater_name" toon:"updater_name"`
+}
+
+// FolderMoveRequest is generated from the Flashduty OpenAPI schema.
+type FolderMoveRequest struct {
+	// Destination parent folder ID; required even when 0 to move to the root.
+	DestParentID uint64 `json:"dest_parent_id" toon:"dest_parent_id"`
+	// Folder ID.
+	ID uint64 `json:"id" toon:"id"`
+}
+
+// FolderUpdateRequest is generated from the Flashduty OpenAPI schema.
+type FolderUpdateRequest struct {
+	// Folder ID.
+	ID uint64 `json:"id" toon:"id"`
+	// Folder name; cannot contain a period, slash, or comma.
+	Name string `json:"name" toon:"name"`
+	// Free-form note; omitted or empty clears the note on update.
+	Note string `json:"note,omitempty" toon:"note,omitempty"`
+	// Team ID; 0 means account-wide. Omitted on update resets to 0.
+	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 }
 
 // GetIntegrationRequest is generated from the Flashduty OpenAPI schema.
@@ -6078,6 +6146,8 @@ type KnowledgeWarning struct {
 type LicenseListResponse struct {
 	// People holding an active license.
 	Items []LicensePersonItem `json:"items" toon:"items"`
+	// Whether the account has used up its license release quota for the current 30-day window. While `true`, releasing a seat fails with error code `NoLicense`.
+	ReleaseLimited bool `json:"release_limited" toon:"release_limited"`
 	// Number of people holding an active license.
 	Total int64 `json:"total" toon:"total"`
 }
@@ -9827,8 +9897,10 @@ type ScheduleEmptyObject struct{}
 
 // ScheduleFixedTimeNotifyInfo is generated from the Flashduty OpenAPI schema.
 type ScheduleFixedTimeNotifyInfo struct {
-	// Notification cycle; only `day` is supported.
+	// Notification cycle: `day` sends every day; `week` sends on the weekdays listed in `days`; `month` sends on the day-of-month values listed in `days`.
 	Cycle string `json:"cycle" toon:"cycle"`
+	// Days the notification fires on, read in the schedule's timezone. For `week`, weekday numbers 0-6 (0 = Sunday); for `month`, day-of-month numbers 1-31, and a month without that date is skipped. Required when `cycle` is `week` or `month`; ignored when `cycle` is `day`.
+	Days []int64 `json:"days,omitempty" toon:"days,omitempty"`
 	// Time of day to send, format `HH:MM` (24-hour).
 	Start string `json:"start" toon:"start"`
 }
@@ -11756,7 +11828,7 @@ type UpdateWorkItemRequest struct {
 	Description *string `json:"description,omitempty" toon:"description,omitempty"`
 	// New client-defined priority (max 64 characters).
 	Priority *string `json:"priority,omitempty" toon:"priority,omitempty"`
-	// New client-defined status (max 64 characters).
+	// New status. One of `open`, `in_progress`, `done`, `cancelled`.
 	Status *string `json:"status,omitempty" toon:"status,omitempty"`
 	// New title (max 512 characters).
 	Title *string `json:"title,omitempty" toon:"title,omitempty"`
