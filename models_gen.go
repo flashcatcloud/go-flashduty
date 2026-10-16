@@ -5819,7 +5819,7 @@ type IntegrationDetail struct {
 	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
 	// Source reference ID, normally `a_<account_id>` for an account-level integration; legacy `w_` references may also exist. Channel-owned `c_` integrations are excluded.
 	RefID string `json:"ref_id" toon:"ref_id"`
-	// Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior.
+	// Stored type-specific configuration. Each saved secret (passwords, app secrets, tokens, encryption keys, webhook endpoints, HTTP pull URL and body, headers, custom bodies) is returned as `******`; unset values stay empty.
 	Settings map[string]any `json:"settings" toon:"settings"`
 	// Lifecycle status: `enabled` while the integration accepts events, `disabled` when it is paused.
 	Status string `json:"status" toon:"status"`
@@ -5869,7 +5869,7 @@ type IntegrationItem struct {
 	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
 	// Source reference ID, normally `a_<account_id>` for an account-level integration; legacy `w_` references may also exist. Channel-owned `c_` integrations are excluded.
 	RefID string `json:"ref_id" toon:"ref_id"`
-	// Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior.
+	// Stored type-specific configuration. Each saved secret (passwords, app secrets, tokens, encryption keys, webhook endpoints, HTTP pull URL and body, headers, custom bodies) is returned as `******`; unset values stay empty.
 	Settings map[string]any `json:"settings" toon:"settings"`
 	// Lifecycle status: `enabled` while the integration accepts events, `disabled` when it is paused.
 	Status string `json:"status" toon:"status"`
@@ -11713,7 +11713,7 @@ type UpdateIntegrationRequest struct {
 	IsTest bool `json:"is_test,omitempty" toon:"is_test,omitempty"`
 	// New name, 2–49 characters.
 	Name *string `json:"name,omitempty" toon:"name,omitempty"`
-	// Replacement type-specific configuration. Known sensitive fields omitted or sent as `******` keep their stored value; an explicit empty headers object clears headers.
+	// Replacement type-specific configuration. Known sensitive fields omitted or sent as `******` keep their stored value; an explicit empty headers object clears headers. A stored secret cannot be kept while its destination (such as `endpoint`, `url`, or a database host or port) changes.
 	Settings map[string]any `json:"settings,omitempty" toon:"settings,omitempty"`
 	// New owning team ID; `0` clears the team assignment.
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
