@@ -8,8 +8,6 @@ type AutomationRuleUpdateRequest struct {
 	RuleID string `json:"rule_id,omitempty" toon:"rule_id,omitempty"`
 	// New rule name.
 	Name *string `json:"name,omitempty" toon:"name,omitempty"`
-	// Only the current value is accepted; personal/team scope is immutable after creation.
-	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	// Whether the rule is enabled.
 	Enabled *bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	// Run cadence. Supports 4 fields (`hour day month weekday`, minute defaults to 0) and 5 fields (`minute hour day month weekday`).
