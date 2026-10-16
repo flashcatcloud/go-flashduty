@@ -33011,7 +33011,7 @@
           "settings": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior."
+            "description": "Stored type-specific configuration. Each saved secret (passwords, app secrets, tokens, encryption keys, webhook endpoints, HTTP pull URL and body, headers, custom bodies) is returned as `******`; unset values stay empty."
           },
           "data_source_id": {
             "type": "integer",
@@ -33196,7 +33196,7 @@
           "settings": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Stored type-specific configuration, including credential values without masking; matches the legacy `/datasource/*` response behavior."
+            "description": "Stored type-specific configuration. Each saved secret (passwords, app secrets, tokens, encryption keys, webhook endpoints, HTTP pull URL and body, headers, custom bodies) is returned as `******`; unset values stay empty."
           },
           "test": {
             "type": "object",
@@ -33349,7 +33349,7 @@
           },
           "settings": {
             "type": "object",
-            "description": "Replacement type-specific configuration. Known sensitive fields omitted or sent as `******` keep their stored value; an explicit empty headers object clears headers.",
+            "description": "Replacement type-specific configuration. Known sensitive fields omitted or sent as `******` keep their stored value; an explicit empty headers object clears headers. A stored secret cannot be kept while its destination (such as `endpoint`, `url`, or a database host or port) changes.",
             "additionalProperties": true
           },
           "is_test": {
@@ -67557,7 +67557,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- `orderby` defaults to `created_at`; `plugin_type` is sorted by the underlying plugin.\n- `plugin_type`, `status` and `category` accept comma-separated values; `ref_ids` values must start with `c_`, `a_` or `w_`; a `c_` filter is syntactically accepted but does not return channel-owned integrations.\n- With `is_my_team` set, results are limited to your teams and `team_ids` narrows that set further.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Items include `settings`, `integration_key`, `plugin_id`, `account_id`, and the legacy `data_source_id` alias; credential values are not masked.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- `orderby` defaults to `created_at`; `plugin_type` is sorted by the underlying plugin.\n- `plugin_type`, `status` and `category` accept comma-separated values; `ref_ids` values must start with `c_`, `a_` or `w_`; a `c_` filter is syntactically accepted but does not return channel-owned integrations.\n- With `is_my_team` set, results are limited to your teams and `team_ids` narrows that set further.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Items include `settings`, `integration_key`, `plugin_id`, `account_id`, and the legacy `data_source_id` alias. Saved secret values in `settings` are returned as `******`; `integration_key` is returned as is.",
           "href": "/en/api-reference/on-call/integrations/integration-api-read-list",
           "metadata": {
             "sidebarTitle": "List integrations"
@@ -67662,7 +67662,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Settings and the integration key are returned without masking, matching the legacy datasource detail response.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations Read** (`on-call`) |\n\n## Usage\n\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Saved secret values in `settings` are returned as `******`, and unset ones stay empty. The integration key is returned as is.",
           "href": "/en/api-reference/on-call/integrations/integration-api-read-info",
           "metadata": {
             "sidebarTitle": "Get integration detail"
@@ -67840,7 +67840,7 @@
           "On-call/Integrations"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Only the fields you send are changed; omitted fields keep their current value.\n- Submitting `settings` replaces the configuration; known sensitive fields omitted or sent as `******` retain their value. Send `headers: {}` to clear headers; use the integration type’s explicit empty value to clear a body.\n- Submit `settings` together with `is_test: true` to receive a plugin test result; settings in the response are not masked.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Write access also requires object permission: the account owner, an administrator, the creator, or a member of the assigned team; with no team, members with Integrations Manage may operate. Read-only integrations cannot be changed.\n- Every call is recorded in the account audit log.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Integrations Manage** (`on-call`) |\n\n## Usage\n\n- Only the fields you send are changed; omitted fields keep their current value.\n- Submitting `settings` replaces the configuration; known sensitive fields omitted or sent as `******` retain their value. Keeping a stored secret while changing where it is sent (such as `endpoint`, `url`, a database host or port, or an IM API base URL) is rejected, so send the secrets again with the new destination; `******` on a field with no stored value is rejected too. Send `headers: {}` to clear headers; use the integration type’s explicit empty value to clear a body.\n- Submit `settings` together with `is_test: true` to receive a plugin test result; secrets in the returned settings are masked the same way.\n- These APIs manage public (account-level) integrations only, not channel-owned dedicated integrations.\n- Write access also requires object permission: the account owner, an administrator, the creator, or a member of the assigned team; with no team, members with Integrations Manage may operate. Read-only integrations cannot be changed.\n- Every call is recorded in the account audit log.",
           "href": "/en/api-reference/on-call/integrations/integration-api-write-update",
           "metadata": {
             "sidebarTitle": "Update integration"

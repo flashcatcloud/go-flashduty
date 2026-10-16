@@ -33011,7 +33011,7 @@
           "settings": {
             "type": "object",
             "additionalProperties": true,
-            "description": "按存储值返回的类型专属配置，凭据不打码，与旧 `/datasource/*` 返回行为一致。"
+            "description": "存储的类型专属配置。已保存的密钥类值（密码、App Secret、Token、加密密钥、Webhook 地址、HTTP 拉取的 URL 与 Body、Headers、自定义 Body）返回 `******`，未设置的保持为空。"
           },
           "data_source_id": {
             "type": "integer",
@@ -33196,7 +33196,7 @@
           "settings": {
             "type": "object",
             "additionalProperties": true,
-            "description": "按存储值返回的类型专属配置，凭据不打码，与旧 `/datasource/*` 返回行为一致。"
+            "description": "存储的类型专属配置。已保存的密钥类值（密码、App Secret、Token、加密密钥、Webhook 地址、HTTP 拉取的 URL 与 Body、Headers、自定义 Body）返回 `******`，未设置的保持为空。"
           },
           "test": {
             "type": "object",
@@ -33349,7 +33349,7 @@
           },
           "settings": {
             "type": "object",
-            "description": "替换类型专属配置；已识别的敏感字段不传或传 `******` 时保留原值，显式传空 headers 对象可清空 Headers。",
+            "description": "替换类型专属配置；已识别的敏感字段不传或传 `******` 时保留原值，显式传空 headers 对象可清空 Headers。保留已存密钥时不能同时修改它的发送目标（如 `endpoint`、`url`、数据库主机或端口）。",
             "additionalProperties": true
           },
           "is_test": {
@@ -67557,7 +67557,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- `orderby` 默认 `created_at`；`plugin_type` 按底层插件排序。\n- `plugin_type`、`status`、`category` 支持逗号分隔多值；`ref_ids` 每个值必须以 `c_`、`a_` 或 `w_` 开头；`c_` 过滤值通过格式校验，但不会返回协作空间专属集成。\n- 传入 `is_my_team` 时仅返回你所在团队的集成，`team_ids` 会在该范围内进一步收窄。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 列表项包含 `settings`、`integration_key`、`plugin_id`、`account_id` 及旧 ID 别名 `data_source_id`，凭据按原值返回，不打码。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- `orderby` 默认 `created_at`；`plugin_type` 按底层插件排序。\n- `plugin_type`、`status`、`category` 支持逗号分隔多值；`ref_ids` 每个值必须以 `c_`、`a_` 或 `w_` 开头；`c_` 过滤值通过格式校验，但不会返回协作空间专属集成。\n- 传入 `is_my_team` 时仅返回你所在团队的集成，`team_ids` 会在该范围内进一步收窄。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 列表项包含 `settings`、`integration_key`、`plugin_id`、`account_id` 及旧 ID 别名 `data_source_id`。`settings` 中已保存的密钥类值返回 `******`，`integration_key` 按原值返回。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-read-list",
           "metadata": {
             "sidebarTitle": "查询集成列表"
@@ -67662,7 +67662,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- settings 与集成 Key 按原值返回，不打码，与旧 datasource 详情接口行为一致。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- `settings` 中已保存的密钥类值返回 `******`，未设置的保持为空；集成 Key 按原值返回。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-read-info",
           "metadata": {
             "sidebarTitle": "查询集成详情"
@@ -67840,7 +67840,7 @@
           "On-call/集成中心"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 仅发送的字段会被修改，未发送的字段保持原值。\n- 提交 `settings` 会替换配置；已识别的敏感字段不传或传 `******` 时保留原值。清空 Headers 请传 `headers: {}`；清空 Body 请使用该集成类型的显式空值。\n- 同时提交 `settings` 与 `is_test: true` 可获得插件测试结果，返回的 settings 不打码。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 写操作还需对象权限：主体账户、管理员、创建者或所属团队成员可操作；未设置团队时，拥有集成中心管理权限的成员可操作，只读集成不可修改。\n- 每次调用都会记录到账户审计日志。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **集成中心管理**（`on-call`） |\n\n## 使用说明\n\n- 仅发送的字段会被修改，未发送的字段保持原值。\n- 提交 `settings` 会替换配置；已识别的敏感字段不传或传 `******` 时保留原值。保留已存密钥的同时修改它的发送目标（如 `endpoint`、`url`、数据库主机或端口、IM 接口地址）会被拒绝，需要随新目标重新填写密钥；没有已存值的字段传 `******` 也会被拒绝。清空 Headers 请传 `headers: {}`；清空 Body 请使用该集成类型的显式空值。\n- 同时提交 `settings` 与 `is_test: true` 可获得插件测试结果，返回的 settings 中密钥同样返回 `******`。\n- 这些接口仅管理公共（账户级）集成，不管理协作空间专属集成。\n- 写操作还需对象权限：主体账户、管理员、创建者或所属团队成员可操作；未设置团队时，拥有集成中心管理权限的成员可操作，只读集成不可修改。\n- 每次调用都会记录到账户审计日志。",
           "href": "/zh/api-reference/on-call/integrations/integration-api-write-update",
           "metadata": {
             "sidebarTitle": "更新集成"
