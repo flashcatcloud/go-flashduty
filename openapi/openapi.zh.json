@@ -3280,18 +3280,6 @@
             "minLength": 1,
             "type": "string"
           },
-          "run_in": {
-            "description": "执行位置。`current-chat` 会绑定到已认证的当前 IM 会话；`web` 在 Web 控制台执行。省略时，由服务端在已认证的 IM 调用中选择 `current-chat`，其他调用中选择 `web`。服务端会拒绝不在实时 IM 会话中的 `current-chat`。",
-            "enum": [
-              "current-chat",
-              "web",
-              null
-            ],
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "schedule_trigger_enabled": {
             "description": "是否启用 schedule trigger。省略时为 true；HTTP-POST-only 规则应传 false。",
             "type": [
@@ -3300,13 +3288,10 @@
             ]
           },
           "team_id": {
-            "description": "作用域团队 ID。明确传 0 表示个人作用域；>0 表示当前账户内的团队。省略时，若存在已认证的 IM 会话则继承其作用域，否则由服务端选择常规默认值。current-chat 规则必须与该会话作用域一致。",
+            "description": "作用域团队 ID。0 或省略表示个人规则；>0 表示账户下某团队。之后可通过 update 改派（团队规则转个人仅规则 owner 可操作；转入团队要求调用者属于该团队）。",
             "format": "int64",
             "minimum": 0,
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "timezone": {
             "description": "`cron_expr` 计算所用的 IANA 时区，例如 `Asia/Shanghai`。必须是服务端可加载的合法时区名，非法值会被拒绝。省略时依次回退到调用者的成员时区、账户时区，最后是服务端默认时区（Asia/Shanghai）。",
@@ -3329,55 +3314,6 @@
         },
         "required": [
           "rule_id"
-        ],
-        "type": "object"
-      },
-      "AutomationExecutionLocation": {
-        "description": "只读的自动化执行位置。不包含会话、集成或 session 标识符。",
-        "properties": {
-          "chat_name": {
-            "description": "可用时，已绑定 IM 会话的显示名称。",
-            "type": "string"
-          },
-          "conversation_mode": {
-            "description": "执行位置为 `im` 时已绑定的 IM 会话模式。",
-            "type": "string"
-          },
-          "description": {
-            "description": "供人阅读的目标位置描述。",
-            "type": "string"
-          },
-          "place": {
-            "description": "执行位置：`im` 或 `web_console`。",
-            "enum": [
-              "im",
-              "web_console"
-            ],
-            "type": "string"
-          },
-          "platform": {
-            "description": "执行位置为 `im` 时的 IM 平台。",
-            "type": "string"
-          },
-          "run_scope": {
-            "description": "固定执行作用域：`person` 或 `team`。",
-            "enum": [
-              "person",
-              "team"
-            ],
-            "type": "string"
-          },
-          "team_id": {
-            "description": "固定作用域团队 ID。0 表示个人作用域。",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "place",
-          "run_scope",
-          "team_id",
-          "description"
         ],
         "type": "object"
       },
@@ -3416,17 +3352,6 @@
               "",
               "cloud",
               "byoc"
-            ],
-            "type": "string"
-          },
-          "execution_location": {
-            "$ref": "#/components/schemas/AutomationExecutionLocation"
-          },
-          "execution_place": {
-            "description": "普通触发器配置的执行位置。战情室触发器会在执行时解析为对应事件的战情室。",
-            "enum": [
-              "im",
-              "web_console"
             ],
             "type": "string"
           },
@@ -3541,7 +3466,6 @@
           "prompt",
           "environment_kind",
           "environment_id",
-          "execution_place",
           "schedule_trigger_enabled",
           "http_post_trigger_enabled",
           "can_edit",
@@ -3728,6 +3652,15 @@
               "null"
             ]
           },
+          "team_id": {
+            "description": "改派规则作用域：0 表示转为个人规则（团队规则仅规则 owner 可转）；>0 表示转入调用者所属的团队。省略则保持不变。",
+            "format": "int64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "timezone": {
             "description": "更新 `cron_expr` 所用的 IANA 时区。省略或传 null 表示保持当前时区不变。",
             "type": [
@@ -3766,14 +3699,6 @@
             "description": "运行耗时，毫秒。",
             "format": "int64",
             "type": "integer"
-          },
-          "execution_place": {
-            "description": "实际执行位置：`im` 或 `web_console`。IM 运行不会返回 session 详情或深链。",
-            "enum": [
-              "im",
-              "web_console"
-            ],
-            "type": "string"
           },
           "error_code": {
             "description": "错误码；运行未失败时为空字符串。",
@@ -3875,7 +3800,6 @@
           "started_at",
           "completed_at",
           "duration_ms",
-          "execution_place",
           "created_at",
           "updated_at",
           "error_code",

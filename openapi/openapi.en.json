@@ -3280,18 +3280,6 @@
             "minLength": 1,
             "type": "string"
           },
-          "run_in": {
-            "description": "Execution destination. `current-chat` binds the rule to the authenticated live IM conversation; `web` runs in the web console. Omit it so the server selects `current-chat` for an authenticated IM invocation and `web` otherwise. The server rejects `current-chat` outside a live IM conversation.",
-            "enum": [
-              "current-chat",
-              "web",
-              null
-            ],
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "schedule_trigger_enabled": {
             "description": "Whether the schedule trigger is enabled. Defaults to true when omitted; HTTP-POST-only rules should send false.",
             "type": [
@@ -3300,13 +3288,10 @@
             ]
           },
           "team_id": {
-            "description": "Scope team ID. Explicit 0 means personal scope; >0 means a team in the account. Omit it to inherit the authenticated IM conversation scope when one is available, otherwise let the server select the normal default. A current-chat rule must match that conversation's scope.",
+            "description": "Scope team ID. 0 or omitted means a personal rule; >0 means a team in the account. Can be reassigned later via update (converting a team rule to personal is owner-only; moving into a team requires the caller to belong to it).",
             "format": "int64",
             "minimum": 0,
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "timezone": {
             "description": "IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then the server default (Asia/Shanghai) when omitted.",
@@ -3329,55 +3314,6 @@
         },
         "required": [
           "rule_id"
-        ],
-        "type": "object"
-      },
-      "AutomationExecutionLocation": {
-        "description": "Read-only Automation execution destination. It never includes a chat, integration, or session identifier.",
-        "properties": {
-          "chat_name": {
-            "description": "Display name of the bound IM conversation when available.",
-            "type": "string"
-          },
-          "conversation_mode": {
-            "description": "Bound IM conversation mode when execution place is `im`.",
-            "type": "string"
-          },
-          "description": {
-            "description": "Human-readable destination description.",
-            "type": "string"
-          },
-          "place": {
-            "description": "Execution destination: `im` or `web_console`.",
-            "enum": [
-              "im",
-              "web_console"
-            ],
-            "type": "string"
-          },
-          "platform": {
-            "description": "IM platform when execution place is `im`.",
-            "type": "string"
-          },
-          "run_scope": {
-            "description": "Pinned execution scope: `person` or `team`.",
-            "enum": [
-              "person",
-              "team"
-            ],
-            "type": "string"
-          },
-          "team_id": {
-            "description": "Pinned scope team ID. 0 means personal scope.",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "place",
-          "run_scope",
-          "team_id",
-          "description"
         ],
         "type": "object"
       },
@@ -3416,17 +3352,6 @@
               "",
               "cloud",
               "byoc"
-            ],
-            "type": "string"
-          },
-          "execution_location": {
-            "$ref": "#/components/schemas/AutomationExecutionLocation"
-          },
-          "execution_place": {
-            "description": "Configured execution destination for ordinary triggers. War-room triggers resolve their event war room at execution time.",
-            "enum": [
-              "im",
-              "web_console"
             ],
             "type": "string"
           },
@@ -3541,7 +3466,6 @@
           "prompt",
           "environment_kind",
           "environment_id",
-          "execution_place",
           "schedule_trigger_enabled",
           "http_post_trigger_enabled",
           "can_edit",
@@ -3728,6 +3652,15 @@
               "null"
             ]
           },
+          "team_id": {
+            "description": "Reassign the rule's scope: 0 converts to a personal rule (only the rule owner may convert a team rule); >0 moves it into a team the caller belongs to. Omit to leave unchanged.",
+            "format": "int64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "timezone": {
             "description": "New IANA timezone for evaluating `cron_expr`. Omit or send null to leave the current timezone unchanged.",
             "type": [
@@ -3766,14 +3699,6 @@
             "description": "Duration in milliseconds.",
             "format": "int64",
             "type": "integer"
-          },
-          "execution_place": {
-            "description": "Actual execution destination: `im` or `web_console`. IM runs omit session details and deep links.",
-            "enum": [
-              "im",
-              "web_console"
-            ],
-            "type": "string"
           },
           "error_code": {
             "description": "Error code; empty when the run did not fail.",
@@ -3875,7 +3800,6 @@
           "started_at",
           "completed_at",
           "duration_ms",
-          "execution_place",
           "created_at",
           "updated_at",
           "error_code",
