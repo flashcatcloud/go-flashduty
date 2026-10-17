@@ -1404,24 +1404,6 @@ type AuditSearchResponse struct {
 	Total int64 `json:"total" toon:"total"`
 }
 
-// AutomationExecutionLocation is generated from the Flashduty OpenAPI schema.
-type AutomationExecutionLocation struct {
-	// Display name of the bound IM conversation when available.
-	ChatName string `json:"chat_name" toon:"chat_name"`
-	// Bound IM conversation mode when execution place is `im`.
-	ConversationMode string `json:"conversation_mode" toon:"conversation_mode"`
-	// Human-readable destination description.
-	Description string `json:"description" toon:"description"`
-	// Execution destination: `im` or `web_console`.
-	Place string `json:"place" toon:"place"`
-	// IM platform when execution place is `im`.
-	Platform string `json:"platform" toon:"platform"`
-	// Pinned execution scope: `person` or `team`.
-	RunScope string `json:"run_scope" toon:"run_scope"`
-	// Pinned scope team ID. 0 means personal scope.
-	TeamID int64 `json:"team_id" toon:"team_id"`
-}
-
 // AutomationRuleCreateRequest is generated from the Flashduty OpenAPI schema.
 type AutomationRuleCreateRequest struct {
 	// Run cadence. Supports 4 fields (`hour day month weekday`, minute defaults to 0) and 5 fields (`minute hour day month weekday`). The minute must be one fixed integer; 6-field seconds are not supported. A cron that sets both day-of-month and day-of-week is rejected. The create API currently requires this field even for HTTP-POST-only rules; send a valid cron and set `schedule_trigger_enabled=false`.
@@ -1444,12 +1426,10 @@ type AutomationRuleCreateRequest struct {
 	OncallIncidentTriggerEnabled bool `json:"oncall_incident_trigger_enabled,omitempty" toon:"oncall_incident_trigger_enabled,omitempty"`
 	// Task prompt sent to the AI SRE agent on each run.
 	Prompt string `json:"prompt" toon:"prompt"`
-	// Execution destination. `current-chat` binds the rule to the authenticated live IM conversation; `web` runs in the web console. Omit it so the server selects `current-chat` for an authenticated IM invocation and `web` otherwise. The server rejects `current-chat` outside a live IM conversation.
-	RunIn *string `json:"run_in,omitempty" toon:"run_in,omitempty"`
 	// Whether the schedule trigger is enabled. Defaults to true when omitted; HTTP-POST-only rules should send false.
 	ScheduleTriggerEnabled *bool `json:"schedule_trigger_enabled,omitempty" toon:"schedule_trigger_enabled,omitempty"`
-	// Scope team ID. Explicit 0 means personal scope; >0 means a team in the account. Omit it to inherit the authenticated IM conversation scope when one is available, otherwise let the server select the normal default. A current-chat rule must match that conversation's scope.
-	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
+	// Scope team ID. 0 or omitted means a personal rule; >0 means a team in the account. Can be reassigned later via update (converting a team rule to personal is owner-only; moving into a team requires the caller to belong to it).
+	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	// IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then the server default (Asia/Shanghai) when omitted.
 	Timezone string `json:"timezone,omitempty" toon:"timezone,omitempty"`
 }
@@ -1475,10 +1455,7 @@ type AutomationRuleItem struct {
 	// BYOC Runner ID.
 	EnvironmentID string `json:"environment_id" toon:"environment_id"`
 	// Runtime environment kind. Omit or send an empty value for automatic selection. One of: `cloud` (platform-hosted cloud sandbox), `byoc` (self-hosted BYOC runner in the account); an empty value means automatic selection (prefers an online BYOC runner, falls back to the cloud sandbox).
-	EnvironmentKind   string                      `json:"environment_kind" toon:"environment_kind"`
-	ExecutionLocation AutomationExecutionLocation `json:"execution_location" toon:"execution_location"`
-	// Configured execution destination for ordinary triggers. War-room triggers resolve their event war room at execution time.
-	ExecutionPlace string `json:"execution_place" toon:"execution_place"`
+	EnvironmentKind string `json:"environment_kind" toon:"environment_kind"`
 	// HTTP POST trigger token. Returned only on create or token rotation; save it immediately.
 	HTTPPostToken string `json:"http_post_token" toon:"http_post_token"`
 	// Whether the HTTP POST trigger is enabled.
@@ -1558,8 +1535,6 @@ type AutomationRunItem struct {
 	ErrorCode string `json:"error_code" toon:"error_code"`
 	// Error message; empty when the run did not fail.
 	ErrorMessage string `json:"error_message" toon:"error_message"`
-	// Actual execution destination: `im` or `web_console`. IM runs omit session details and deep links.
-	ExecutionPlace string `json:"execution_place" toon:"execution_place"`
 	// Run kind; runs listed for a rule are always `automation_rule`.
 	Kind string `json:"kind" toon:"kind"`
 	// Idempotency key for this occurrence.
