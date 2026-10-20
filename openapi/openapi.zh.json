@@ -34718,7 +34718,7 @@
     },
     "/calendar/create": {
       "post": {
-        "description": "创建个人服务日历。每个账户默认最多 5 个日历，可通过 Flashcat-Break-Cal-Limit 请求头突破限制。",
+        "description": "创建个人服务日历。每个账户最多 5 个日历。",
         "operationId": "calendarCreate",
         "requestBody": {
           "content": {

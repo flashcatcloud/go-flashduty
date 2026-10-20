@@ -46,7 +46,7 @@ func (s *CalendarsService) CalEventUpsert(ctx context.Context, req *CalEventUpse
 
 // Create calendar.
 //
-// Create a personal service calendar. Each account is limited to 5 calendars unless the Flashcat-Break-Cal-Limit header is set.
+// Create a personal service calendar. Each account is limited to 5 calendars.
 //
 // API: POST /calendar/create (calendarCreate).
 func (s *CalendarsService) CalendarCreate(ctx context.Context, req *CalendarCreateRequest) (*CalendarCreateResponse, *Response, error) {
