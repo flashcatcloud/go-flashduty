@@ -34718,7 +34718,7 @@
     },
     "/calendar/create": {
       "post": {
-        "description": "Create a personal service calendar. Each account is limited to 5 calendars unless the Flashcat-Break-Cal-Limit header is set.",
+        "description": "Create a personal service calendar. Each account is limited to 5 calendars.",
         "operationId": "calendarCreate",
         "requestBody": {
           "content": {
