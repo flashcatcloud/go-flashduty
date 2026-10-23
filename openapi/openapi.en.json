@@ -3311,6 +3311,31 @@
           "timezone": {
             "description": "IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then the server default (Asia/Shanghai) when omitted.",
             "type": "string"
+          },
+          "war_room_trigger_enabled": {
+            "type": "boolean",
+            "description": "Whether the war room trigger is enabled. It fires when a war room (IM group chat) is created for an incident in one of `war_room_channel_ids` with a severity in `war_room_severities`; the agent then runs inside that group chat. When the trigger is created (this is `true`, or `war_room_channel_ids` is sent), both lists must be non-empty."
+          },
+          "war_room_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "description": "Channel IDs whose war rooms start a run. Each ID must be positive."
+          },
+          "war_room_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "Incident severities that start a run when their war room is created: `Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels."
           }
         },
         "required": [
@@ -3526,6 +3551,35 @@
             "description": "Last update time, Unix milliseconds.",
             "format": "int64",
             "type": "integer"
+          },
+          "war_room_trigger_id": {
+            "type": "string",
+            "description": "War room trigger ID. Omitted when the rule has no war room trigger."
+          },
+          "war_room_trigger_enabled": {
+            "type": "boolean",
+            "description": "Whether the war room trigger is enabled."
+          },
+          "war_room_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "description": "Channel IDs whose war rooms start a run. Omitted when the rule has no war room trigger."
+          },
+          "war_room_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "Incident severities whose war rooms start a run: `Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels. Omitted when the rule has no war room trigger."
           }
         },
         "required": [

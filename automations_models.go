@@ -35,4 +35,10 @@ type AutomationRuleUpdateRequest struct {
 	OncallIncidentChannelIDs *[]int64 `json:"oncall_incident_channel_ids,omitempty" toon:"oncall_incident_channel_ids,omitempty"`
 	// Incident severities that can trigger this rule.
 	OncallIncidentSeverities *[]string `json:"oncall_incident_severities,omitempty" toon:"oncall_incident_severities,omitempty"`
+	// Whether the AI SRE war room trigger is enabled. Sending true creates it when missing and channel/severity filters are provided.
+	WarRoomTriggerEnabled *bool `json:"war_room_trigger_enabled,omitempty" toon:"war_room_trigger_enabled,omitempty"`
+	// Channel (collaboration space) IDs whose new AI SRE war rooms can trigger this rule.
+	WarRoomChannelIDs *[]int64 `json:"war_room_channel_ids,omitempty" toon:"war_room_channel_ids,omitempty"`
+	// War room severities that can trigger this rule.
+	WarRoomSeverities *[]string `json:"war_room_severities,omitempty" toon:"war_room_severities,omitempty"`
 }
