@@ -117,6 +117,15 @@ func (s *ChannelsService) ChannelEscalateRuleList(ctx context.Context, req *Chan
 	return out, resp, nil
 }
 
+// Reorder escalation rules.
+//
+// Change the evaluation order of a channel's escalation rules by moving one rule into another rule's slot.
+//
+// API: POST /channel/escalate/rule/reorder (channelEscalateRuleReorder).
+func (s *ChannelsService) ChannelEscalateRuleReorder(ctx context.Context, req *ReorderEscalationRulesRequest) (*Response, error) {
+	return s.client.do(ctx, "/channel/escalate/rule/reorder", req, nil)
+}
+
 // Update escalation rule.
 //
 // Update an existing escalation rule configuration.

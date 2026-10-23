@@ -7902,6 +7902,31 @@
         },
         "description": "loki.query 参数。`expr` 为 LogQL。`execution.kind` 取 `instant` 或 `range`；`instant` 保留完整时间上下文以便 `$__auto` 范围解析。`limit` 和 `direction` 只作用于原始日志结果。"
       },
+      "ReorderEscalationRulesRequest": {
+        "type": "object",
+        "required": [
+          "channel_id",
+          "drag_rule_id",
+          "target_rule_id"
+        ],
+        "properties": {
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "所属协作空间 ID，可通过 `POST /channel/list` 获取。"
+          },
+          "drag_rule_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "被拖拽移动的策略 ID（24 位十六进制），即策略创建或列表接口返回的 `rule_id`。"
+          },
+          "target_rule_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "目标位置的策略 ID（24 位十六进制），被拖拽的策略移动到该策略所在的位置。"
+          }
+        }
+      },
       "VictoriaLogsQueryParams": {
         "type": "object",
         "additionalProperties": true,
@@ -36332,6 +36357,76 @@
           "href": "/zh/api-reference/on-call/channels/channel-escalate-rule-list",
           "metadata": {
             "sidebarTitle": "查询分派策略列表"
+          }
+        }
+      }
+    },
+    "/channel/escalate/rule/reorder": {
+      "post": {
+        "operationId": "channelEscalateRuleReorder",
+        "summary": "调整分派策略顺序",
+        "description": "通过将一条策略移动到另一条策略的位置，改变协作空间内分派策略的评估顺序。",
+        "tags": [
+          "On-call/Channels"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 策略按 `priority` 升序评估：新故障由第一条满足 `time_filters` 和 `filters` 的启用中策略承接，后面的策略跳过。本接口将 `drag_rule_id` 移动到 `target_rule_id` 所在位置，并将协作空间内的策略从 0 开始重新编号，从而改变评估顺序。\n- `drag_rule_id` 和 `target_rule_id` 必须都属于 `channel_id`，否则返回 `InvalidParameter`。\n- `channel_id` 不存在时返回 `InvalidParameter`。\n- 同一协作空间的并发排序请求会被拒绝，返回 `TooManyRequests`。\n- 调用者还必须拥有该协作空间的编辑权：账户所有者或管理员、协作空间创建者，或其管理团队成员（`managing_team_ids` 为空时为所属团队成员），否则返回 `AccessDenied`。\n- 每次调用都会记录到账户审计日志。",
+          "href": "/zh/api-reference/on-call/channels/channel-escalate-rule-reorder",
+          "metadata": {
+            "sidebarTitle": "调整分派策略顺序"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderEscalationRulesRequest"
+              }
+            }
           }
         }
       }
