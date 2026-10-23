@@ -8083,6 +8083,16 @@ type ReopenIncidentRequest struct {
 	Reason string `json:"reason,omitempty" toon:"reason,omitempty"`
 }
 
+// ReorderEscalationRulesRequest is generated from the Flashduty OpenAPI schema.
+type ReorderEscalationRulesRequest struct {
+	// Owning channel ID; obtain it from `POST /channel/list`.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// ID of the rule being dragged (24-character hex), as returned in `rule_id` by the create or list endpoint.
+	DragRuleID string `json:"drag_rule_id" toon:"drag_rule_id"`
+	// ID of the rule whose slot the dragged rule moves into (24-character hex).
+	TargetRuleID string `json:"target_rule_id" toon:"target_rule_id"`
+}
+
 // ReorderIncidentCommentTypesRequest is generated from the Flashduty OpenAPI schema.
 type ReorderIncidentCommentTypesRequest struct {
 	// IDs of every comment type of the account in the desired order (24-character hex ObjectIDs).

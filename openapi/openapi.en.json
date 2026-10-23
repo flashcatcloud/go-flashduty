@@ -7902,6 +7902,31 @@
         },
         "description": "loki.query parameters. `expr` is LogQL. `execution.kind` must be `instant` or `range`; `instant` keeps the full time context so `$__auto` ranges resolve. `limit` and `direction` only apply to raw-log results."
       },
+      "ReorderEscalationRulesRequest": {
+        "type": "object",
+        "required": [
+          "channel_id",
+          "drag_rule_id",
+          "target_rule_id"
+        ],
+        "properties": {
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Owning channel ID; obtain it from `POST /channel/list`."
+          },
+          "drag_rule_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "ID of the rule being dragged (24-character hex), as returned in `rule_id` by the create or list endpoint."
+          },
+          "target_rule_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "ID of the rule whose slot the dragged rule moves into (24-character hex)."
+          }
+        }
+      },
       "VictoriaLogsQueryParams": {
         "type": "object",
         "additionalProperties": true,
@@ -36332,6 +36357,76 @@
           "href": "/en/api-reference/on-call/channels/channel-escalate-rule-list",
           "metadata": {
             "sidebarTitle": "List escalation rules"
+          }
+        }
+      }
+    },
+    "/channel/escalate/rule/reorder": {
+      "post": {
+        "operationId": "channelEscalateRuleReorder",
+        "summary": "Reorder escalation rules",
+        "description": "Change the evaluation order of a channel's escalation rules by moving one rule into another rule's slot.",
+        "tags": [
+          "On-call/Channels"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Channels Manage** (`on-call`) |\n\n## Usage\n\n- Rules are evaluated in ascending `priority`: the first enabled rule whose `time_filters` and `filters` match a new incident takes it, and later rules are skipped. This endpoint moves `drag_rule_id` into `target_rule_id`'s slot and renumbers the channel's rules from priority 0, changing that evaluation order.\n- Both `drag_rule_id` and `target_rule_id` must be rules of `channel_id`; otherwise `InvalidParameter`.\n- An unknown `channel_id` returns `InvalidParameter`.\n- Concurrent reorders of the same channel are rejected with `TooManyRequests`.\n- The caller must also be able to edit the channel: the account owner or an admin, the channel creator, or a member of its managing teams (of its owning team when `managing_team_ids` is empty). Otherwise the call returns `AccessDenied`.\n- Every call is recorded in the account audit log.",
+          "href": "/en/api-reference/on-call/channels/channel-escalate-rule-reorder",
+          "metadata": {
+            "sidebarTitle": "Reorder escalation rules"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderEscalationRulesRequest"
+              }
+            }
           }
         }
       }
