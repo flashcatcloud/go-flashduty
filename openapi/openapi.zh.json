@@ -3311,6 +3311,31 @@
           "timezone": {
             "description": "`cron_expr` 计算所用的 IANA 时区，例如 `Asia/Shanghai`。必须是服务端可加载的合法时区名，非法值会被拒绝。省略时依次回退到调用者的成员时区、账户时区，最后是服务端默认时区（Asia/Shanghai）。",
             "type": "string"
+          },
+          "war_room_trigger_enabled": {
+            "type": "boolean",
+            "description": "是否启用作战室触发器。当 `war_room_channel_ids` 中某个协作空间的故障（严重程度在 `war_room_severities` 中）创建作战室（IM 群聊）时触发，Agent 会直接在该群聊中运行。创建该触发器时（本字段为 `true`，或传了 `war_room_channel_ids`），两个列表都必须非空。"
+          },
+          "war_room_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "description": "创建作战室时会发起运行的协作空间 ID。每个 ID 必须为正数。"
+          },
+          "war_room_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "故障创建作战室时会发起运行的严重程度：`Critical`（最严重）、`Warning` 或 `Info`（最轻）——即 On-call 故障的严重程度。"
           }
         },
         "required": [
@@ -3526,6 +3551,35 @@
             "description": "更新时间，Unix 毫秒。",
             "format": "int64",
             "type": "integer"
+          },
+          "war_room_trigger_id": {
+            "type": "string",
+            "description": "作战室触发器 ID。规则没有作战室触发器时省略。"
+          },
+          "war_room_trigger_enabled": {
+            "type": "boolean",
+            "description": "作战室触发器是否启用。"
+          },
+          "war_room_channel_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            },
+            "description": "创建作战室时会发起运行的协作空间 ID。规则没有作战室触发器时省略。"
+          },
+          "war_room_severities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "Warning",
+                "Info"
+              ]
+            },
+            "description": "创建作战室时会发起运行的严重程度：`Critical`（最严重）、`Warning` 或 `Info`（最轻）——即 On-call 故障的严重程度。规则没有作战室触发器时省略。"
           }
         },
         "required": [

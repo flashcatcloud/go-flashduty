@@ -1452,6 +1452,12 @@ type AutomationRuleCreateRequest struct {
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	// IANA timezone `cron_expr` is evaluated in, e.g. `Asia/Shanghai`. Must be a timezone name loadable by the server; an invalid value is rejected. Defaults to the caller's member timezone, then the account timezone, then the server default (Asia/Shanghai) when omitted.
 	Timezone string `json:"timezone,omitempty" toon:"timezone,omitempty"`
+	// Channel IDs whose war rooms start a run. Each ID must be positive.
+	WarRoomChannelIDs []int64 `json:"war_room_channel_ids,omitempty" toon:"war_room_channel_ids,omitempty"`
+	// Incident severities that start a run when their war room is created: `Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels.
+	WarRoomSeverities []string `json:"war_room_severities,omitempty" toon:"war_room_severities,omitempty"`
+	// Whether the war room trigger is enabled. It fires when a war room (IM group chat) is created for an incident in one of `war_room_channel_ids` with a severity in `war_room_severities`; the agent then runs inside that group chat. When the trigger is created (this is `true`, or `war_room_channel_ids` is sent), both lists must be non-empty.
+	WarRoomTriggerEnabled bool `json:"war_room_trigger_enabled,omitempty" toon:"war_room_trigger_enabled,omitempty"`
 }
 
 // AutomationRuleIDRequest is generated from the Flashduty OpenAPI schema.
@@ -1517,6 +1523,14 @@ type AutomationRuleItem struct {
 	Timezone string `json:"timezone" toon:"timezone"`
 	// Last update time, Unix milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Channel IDs whose war rooms start a run. Omitted when the rule has no war room trigger.
+	WarRoomChannelIDs []int64 `json:"war_room_channel_ids" toon:"war_room_channel_ids"`
+	// Incident severities whose war rooms start a run: `Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels. Omitted when the rule has no war room trigger.
+	WarRoomSeverities []string `json:"war_room_severities" toon:"war_room_severities"`
+	// Whether the war room trigger is enabled.
+	WarRoomTriggerEnabled bool `json:"war_room_trigger_enabled" toon:"war_room_trigger_enabled"`
+	// War room trigger ID. Omitted when the rule has no war room trigger.
+	WarRoomTriggerID string `json:"war_room_trigger_id" toon:"war_room_trigger_id"`
 }
 
 // AutomationRuleListRequest is generated from the Flashduty OpenAPI schema.
