@@ -51,7 +51,7 @@ func (s *TeamsService) ReadList(ctx context.Context, req *TeamListRequest) (*Tea
 
 // Delete a team.
 //
-// Permanently delete a team by ID, name, or external reference ID.
+// Delete a team by ID, name, or external reference ID and remove all of its members.
 //
 // API: POST /team/delete (team-write-delete).
 func (s *TeamsService) WriteDelete(ctx context.Context, req *TeamDeleteRequest) (*Response, error) {
