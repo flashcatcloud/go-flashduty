@@ -23,7 +23,7 @@ func (s *SessionsService) ReadInfo(ctx context.Context, req *SessionGetRequest) 
 
 // List sessions.
 //
-// List agent sessions visible to the caller, filtered by app, surface, archive status, and team.
+// List agent sessions visible to the caller, filtered by app, entry surface, archive status, and team.
 //
 // API: POST /safari/session/list (session-read-list).
 func (s *SessionsService) ReadList(ctx context.Context, req *SessionListRequest) (*SessionListResponse, *Response, error) {
@@ -37,7 +37,7 @@ func (s *SessionsService) ReadList(ctx context.Context, req *SessionListRequest)
 
 // Delete session.
 //
-// Delete a session by ID.
+// Soft-delete a session together with its subagent sessions and the files it presented.
 //
 // API: POST /safari/session/delete (session-write-delete).
 func (s *SessionsService) WriteDelete(ctx context.Context, req *SessionDeleteRequest) (*any, *Response, error) {

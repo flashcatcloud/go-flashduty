@@ -35,9 +35,37 @@ func (s *AlertEnrichmentService) EnrichmentReadList(ctx context.Context, req *En
 	return out, resp, nil
 }
 
+// Preview enrichment rule results.
+//
+// Run unsaved enrichment rules over one event, the way ingestion would.
+//
+// API: POST /enrichment/preview (enrichment-read-preview).
+func (s *AlertEnrichmentService) EnrichmentReadPreview(ctx context.Context, req *EnrichmentPreviewRequest) (*EnrichmentPreviewResponse, *Response, error) {
+	out := new(EnrichmentPreviewResponse)
+	resp, err := s.client.do(ctx, "/enrichment/preview", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// List recent event samples.
+//
+// List the raw events an integration received most recently, newest first.
+//
+// API: POST /enrichment/sample/list (enrichment-sample-read-list).
+func (s *AlertEnrichmentService) EnrichmentSampleReadList(ctx context.Context, req *EnrichmentSampleListRequest) (*EnrichmentSampleListResponse, *Response, error) {
+	out := new(EnrichmentSampleListResponse)
+	resp, err := s.client.do(ctx, "/enrichment/sample/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Upsert enrichment rules.
 //
-// Create or fully replace the enrichment rule set for an integration. The entire `rules` array is replaced atomically.
+// Create or replace the whole enrichment rule set of an integration.
 //
 // API: POST /enrichment/upsert (enrichment-write-upsert).
 func (s *AlertEnrichmentService) EnrichmentWriteUpsert(ctx context.Context, req *EnrichmentUpsertRequest) (*Response, error) {
@@ -120,7 +148,7 @@ func (s *AlertEnrichmentService) MappingAPIReadInfo(ctx context.Context, req *Ma
 
 // List mapping APIs.
 //
-// Return all mapping APIs configured for the account.
+// Return all mapping APIs of the account, newest first.
 //
 // API: POST /enrichment/mapping/api/list (mapping-api-read-list).
 func (s *AlertEnrichmentService) MappingAPIReadList(ctx context.Context) (*MappingAPIListResponse, *Response, error) {
@@ -134,7 +162,7 @@ func (s *AlertEnrichmentService) MappingAPIReadList(ctx context.Context) (*Mappi
 
 // Create mapping API.
 //
-// Create a new external HTTP API endpoint used to enrich alerts via HTTP lookup.
+// Register an external HTTP API that enrichment rules call to look up alert labels.
 //
 // API: POST /enrichment/mapping/api/create (mapping-api-write-create).
 func (s *AlertEnrichmentService) MappingAPIWriteCreate(ctx context.Context, req *MappingAPICreateRequest) (*MappingAPICreateResponse, *Response, error) {
@@ -148,7 +176,7 @@ func (s *AlertEnrichmentService) MappingAPIWriteCreate(ctx context.Context, req 
 
 // Delete mapping API.
 //
-// Delete a mapping API. Deletion is blocked if the API is referenced by any enrichment rule.
+// Soft-delete a mapping API; refused while an enrichment rule uses it.
 //
 // API: POST /enrichment/mapping/api/delete (mapping-api-write-delete).
 func (s *AlertEnrichmentService) MappingAPIWriteDelete(ctx context.Context, req *MappingApiidRequest) (*Response, error) {
@@ -237,7 +265,7 @@ func (s *AlertEnrichmentService) MappingSchemaReadInfo(ctx context.Context, req 
 
 // List mapping schemas.
 //
-// Return all mapping schemas for the account, sorted by creation time ascending.
+// Return all mapping schemas of the account, newest first.
 //
 // API: POST /enrichment/mapping/schema/list (mapping-schema-read-list).
 func (s *AlertEnrichmentService) MappingSchemaReadList(ctx context.Context) (*MappingSchemaListResponse, *Response, error) {
@@ -251,7 +279,7 @@ func (s *AlertEnrichmentService) MappingSchemaReadList(ctx context.Context) (*Ma
 
 // Create mapping schema.
 //
-// Create a new mapping schema defining source lookup labels and the result labels to populate. Requires a Pro plan.
+// Create a mapping schema that defines the lookup labels and the result labels to fill.
 //
 // API: POST /enrichment/mapping/schema/create (mapping-schema-write-create).
 func (s *AlertEnrichmentService) MappingSchemaWriteCreate(ctx context.Context, req *MappingSchemaCreateRequest) (*MappingSchemaCreateResponse, *Response, error) {
@@ -265,7 +293,7 @@ func (s *AlertEnrichmentService) MappingSchemaWriteCreate(ctx context.Context, r
 
 // Delete mapping schema.
 //
-// Delete a mapping schema and all its associated data. Deletion is blocked if the schema is referenced by any enrichment rule or webhook.
+// Delete a mapping schema and all of its data rows; refused while an enrichment rule or robot webhook uses it.
 //
 // API: POST /enrichment/mapping/schema/delete (mapping-schema-write-delete).
 func (s *AlertEnrichmentService) MappingSchemaWriteDelete(ctx context.Context, req *MappingSchemaIDRequest) (*Response, error) {

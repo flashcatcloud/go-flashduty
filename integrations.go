@@ -7,6 +7,20 @@ import "context"
 // IntegrationsService handles the "On-call/Integrations" API resource.
 type IntegrationsService service
 
+// Preview email-to-alert conversion.
+//
+// Run unsaved email integration settings over one email, the way ingestion would.
+//
+// API: POST /alert/email/preview (alert-read-email-preview).
+func (s *IntegrationsService) AlertReadEmailPreview(ctx context.Context, req *AlertEmailPreviewRequest) (*AlertEmailPreviewResponse, *Response, error) {
+	out := new(AlertEmailPreviewResponse)
+	resp, err := s.client.do(ctx, "/alert/email/preview", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Attempt IM person linking.
 //
 // Try to automatically link unbound members to their IM accounts for one integration.

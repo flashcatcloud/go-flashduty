@@ -9,7 +9,7 @@ type RuleFoldersService service
 
 // Get monitor folder health.
 //
-// Get health summaries for visible folders, including issues in their descendants.
+// Get issue flags for the visible monitor folders, including issues in their descendants.
 //
 // API: POST /monit/folder/health (monit-folder-read-health).
 func (s *RuleFoldersService) ReadHealth(ctx context.Context) (*FolderHealthOutput, *Response, error) {
@@ -37,7 +37,7 @@ func (s *RuleFoldersService) ReadList(ctx context.Context) (*[]FolderItem, *Resp
 
 // Create monitor folder.
 //
-// Create a monitor folder at the root or under an accessible parent folder.
+// Create a monitor folder at the root or under a parent folder the caller may modify.
 //
 // API: POST /monit/folder/create (monit-folder-write-create).
 func (s *RuleFoldersService) WriteCreate(ctx context.Context, req *FolderCreateRequest) (*FolderItem, *Response, error) {
@@ -51,7 +51,7 @@ func (s *RuleFoldersService) WriteCreate(ctx context.Context, req *FolderCreateR
 
 // Delete monitor folder.
 //
-// Delete an accessible monitor folder after removing its children, rules, and dashboards.
+// Delete an empty monitor folder that the caller may modify.
 //
 // API: POST /monit/folder/delete (monit-folder-write-delete).
 func (s *RuleFoldersService) WriteDelete(ctx context.Context, req *FolderDeleteRequest) (*Response, error) {
@@ -69,7 +69,7 @@ func (s *RuleFoldersService) WriteMove(ctx context.Context, req *FolderMoveReque
 
 // Update monitor folder.
 //
-// Replace the name, note, and team assignment of an accessible monitor folder.
+// Replace the name, note, and team assignment of a monitor folder the caller may modify.
 //
 // API: POST /monit/folder/update (monit-folder-write-update).
 func (s *RuleFoldersService) WriteUpdate(ctx context.Context, req *FolderUpdateRequest) (*FolderItem, *Response, error) {

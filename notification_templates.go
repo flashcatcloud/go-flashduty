@@ -37,7 +37,7 @@ func (s *NotificationTemplatesService) ReadList(ctx context.Context, req *Templa
 
 // Preview template.
 //
-// Render a notification template against incident data or mock data and return the output.
+// Render a template source against an incident or mock data and return what the channel would send.
 //
 // API: POST /template/preview (template-read-preview).
 func (s *NotificationTemplatesService) ReadPreview(ctx context.Context, req *PreviewTemplateRequest) (*PreviewTemplateResponse, *Response, error) {
@@ -51,7 +51,7 @@ func (s *NotificationTemplatesService) ReadPreview(ctx context.Context, req *Pre
 
 // Create a template.
 //
-// Create a new notification template.
+// Create a notification template with per-channel message sources.
 //
 // API: POST /template/create (template-write-create).
 func (s *NotificationTemplatesService) WriteCreate(ctx context.Context, req *TemplateCreateRequest) (*TemplateCreateResponse, *Response, error) {
@@ -65,7 +65,7 @@ func (s *NotificationTemplatesService) WriteCreate(ctx context.Context, req *Tem
 
 // Delete a template.
 //
-// Soft-delete a template by ID.
+// Soft-delete a notification template by ID.
 //
 // API: POST /template/delete (template-write-delete).
 func (s *NotificationTemplatesService) WriteDelete(ctx context.Context, req *TemplateIDRequest) (*Response, error) {
@@ -74,7 +74,7 @@ func (s *NotificationTemplatesService) WriteDelete(ctx context.Context, req *Tem
 
 // Update a template.
 //
-// Update an existing template. Only the fields present in the request are written: a channel you omit keeps its current content, and an explicit empty string clears it.
+// Update a notification template; only the fields present in the request are written.
 //
 // API: POST /template/update (template-write-update).
 func (s *NotificationTemplatesService) WriteUpdate(ctx context.Context, req *TemplateUpdateRequest) (*Response, error) {

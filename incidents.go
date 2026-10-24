@@ -23,7 +23,7 @@ func (s *IncidentsService) PostMortemWriteResetContent(ctx context.Context, req 
 
 // Get war-room default observers.
 //
-// Return historical responders suggested as default observers when opening a war room.
+// Return people assigned to an incident earlier who are no longer responders, as suggested war-room observers.
 //
 // API: POST /incident/war-room/default-observers (incident-read-get-war-room-default-observers).
 func (s *IncidentsService) ReadGetWarRoomDefaultObservers(ctx context.Context, req *GetWarRoomDefaultObserversRequest) (*GetWarRoomDefaultObserversResponse, *Response, error) {
@@ -51,7 +51,7 @@ func (s *IncidentsService) ServiceDeskPlusRequestReadList(ctx context.Context, r
 
 // Add war-room member.
 //
-// Add one or more members to the IM war room bound to an incident integration.
+// Add members to an existing incident war room on Feishu (Lark), DingTalk, WeCom, or Slack.
 //
 // API: POST /incident/war-room/add-member (incident-write-add-war-room-member).
 func (s *IncidentsService) WriteAddWarRoomMember(ctx context.Context, req *AddWarRoomMemberRequest) (*string, *Response, error) {
@@ -88,7 +88,7 @@ func (s *IncidentsService) AlertList(ctx context.Context, req *ListIncidentAlert
 
 // Assign incident.
 //
-// Dispatch an incident to a specific escalation level or responder.
+// Reassign incidents to members or an escalation rule, replacing the current responders.
 //
 // API: POST /incident/assign (incidentAssign).
 func (s *IncidentsService) Assign(ctx context.Context, req *AssignIncidentRequest) (*Response, error) {
@@ -120,7 +120,7 @@ func (s *IncidentsService) CommentTypeCreate(ctx context.Context, req *CreateInc
 
 // Delete a comment type.
 //
-// Delete a comment type. Comments that used it keep their text but lose the type label.
+// Permanently delete a comment type; comments that used it keep their text but lose the label.
 //
 // API: POST /incident/comment-type/delete (incidentCommentTypeDelete).
 func (s *IncidentsService) CommentTypeDelete(ctx context.Context, req *DeleteIncidentCommentTypeRequest) (*Response, error) {
@@ -189,7 +189,7 @@ func (s *IncidentsService) CustomActionDo(ctx context.Context, req *DoIncidentCu
 
 // Disable incident merge.
 //
-// Disable automatic merging for a specific incident.
+// Stop new alerts and events from being merged into the given incidents.
 //
 // API: POST /incident/disable-merge (incidentDisableMerge).
 func (s *IncidentsService) DisableMerge(ctx context.Context, req *DisableIncidentMergeRequest) (*Response, error) {
@@ -198,7 +198,7 @@ func (s *IncidentsService) DisableMerge(ctx context.Context, req *DisableInciden
 
 // Get incident timeline.
 //
-// Retrieve the timeline feed for a specific incident, including state changes, comments and system events.
+// List an incident's timeline entries, such as state changes, assignments, notifications, comments, and work item events.
 //
 // API: POST /incident/feed (incidentFeed).
 func (s *IncidentsService) Feed(ctx context.Context, req *ListIncidentFeedRequest) (*ListIncidentFeedResponse, *Response, error) {
@@ -221,7 +221,7 @@ func (s *IncidentsService) FieldReset(ctx context.Context, req *ResetIncidentFie
 
 // Get incident detail.
 //
-// Retrieve detailed information for a single incident including timeline, alerts, responders and custom fields.
+// Get one incident by ID or short number, with responders, assignment, custom fields, and alert counts.
 //
 // API: POST /incident/info (incidentInfo).
 func (s *IncidentsService) Info(ctx context.Context, req *IncidentInfoRequest) (*IncidentInfo, *Response, error) {
@@ -272,7 +272,7 @@ func (s *IncidentsService) Merge(ctx context.Context, req *MergeIncidentsRequest
 
 // List past incidents.
 //
-// List historical incidents related to the current incident for reference during triage.
+// List closed incidents in the same channel that resemble a given incident, to reuse past root causes and resolutions.
 //
 // API: POST /incident/past/list (incidentPastList).
 func (s *IncidentsService) PastList(ctx context.Context, req *ListPastIncidentsRequest) (*ListPastIncidentsResponse, *Response, error) {
@@ -286,7 +286,7 @@ func (s *IncidentsService) PastList(ctx context.Context, req *ListPastIncidentsR
 
 // Delete post-mortem.
 //
-// Delete a post-mortem report.
+// Permanently delete a post-mortem report together with its uploaded media.
 //
 // API: POST /incident/post-mortem/delete (incidentPostMortemDelete).
 func (s *IncidentsService) PostMortemDelete(ctx context.Context, req *DeletePostMortemRequest) (*Response, error) {
@@ -295,7 +295,7 @@ func (s *IncidentsService) PostMortemDelete(ctx context.Context, req *DeletePost
 
 // Get post-mortem.
 //
-// Retrieve a post-mortem report by its `post_mortem_id`. List reports via `/incident/post-mortem/list` first — each row carries the incident it covers — then fetch the full report here by that id.
+// Get the full content and auto-aggregated basics of a post-mortem report by its ID.
 //
 // API: GET /incident/post-mortem/info (incidentPostMortemInfo).
 func (s *IncidentsService) PostMortemInfo(ctx context.Context, req *IncidentsPostMortemInfoRequest) (*PostMortemItem, *Response, error) {
@@ -309,7 +309,7 @@ func (s *IncidentsService) PostMortemInfo(ctx context.Context, req *IncidentsPos
 
 // List post-mortems.
 //
-// List post-mortem reports with optional filters.
+// List post-mortem reports, optionally filtered by status, team, channel, and creation time.
 //
 // API: POST /incident/post-mortem/list (incidentPostMortemList).
 func (s *IncidentsService) PostMortemList(ctx context.Context, req *ListPostMortemsRequest) (*ListPostMortemsResponse, *Response, error) {
@@ -323,7 +323,7 @@ func (s *IncidentsService) PostMortemList(ctx context.Context, req *ListPostMort
 
 // Delete an incident.
 //
-// Permanently delete an incident and all associated data.
+// Permanently delete incidents together with their alerts, raw events, and timelines.
 //
 // API: POST /incident/remove (incidentRemove).
 func (s *IncidentsService) Remove(ctx context.Context, req *RemoveIncidentRequest) (*Response, error) {
@@ -332,7 +332,7 @@ func (s *IncidentsService) Remove(ctx context.Context, req *RemoveIncidentReques
 
 // Reopen incident.
 //
-// Reopen a previously resolved incident.
+// Reopen closed incidents and dispatch them again from the first escalation level.
 //
 // API: POST /incident/reopen (incidentReopen).
 func (s *IncidentsService) Reopen(ctx context.Context, req *ReopenIncidentRequest) (*Response, error) {
@@ -341,7 +341,7 @@ func (s *IncidentsService) Reopen(ctx context.Context, req *ReopenIncidentReques
 
 // Update incident fields.
 //
-// Update one or more editable fields of an incident in a single call, including title, description, impact, root cause, resolution, and severity. At least one field must be provided.
+// Update an incident's title, description, impact, root cause, resolution, or severity in one call.
 //
 // API: POST /incident/reset (incidentReset).
 func (s *IncidentsService) Reset(ctx context.Context, req *UpdateIncidentFieldsRequest) (*Response, error) {
@@ -350,7 +350,7 @@ func (s *IncidentsService) Reset(ctx context.Context, req *UpdateIncidentFieldsR
 
 // Resolve incident.
 //
-// Mark an incident as resolved.
+// Close one or more incidents, optionally recording root cause, resolution, and resolution form values.
 //
 // API: POST /incident/resolve (incidentResolve).
 func (s *IncidentsService) Resolve(ctx context.Context, req *ResolveIncidentRequest) (*Response, error) {
@@ -359,7 +359,7 @@ func (s *IncidentsService) Resolve(ctx context.Context, req *ResolveIncidentRequ
 
 // Add incident responder.
 //
-// Add a responder to an existing incident.
+// Add members as responders to an open incident and notify them.
 //
 // API: POST /incident/responder/add (incidentResponderAdd).
 func (s *IncidentsService) ResponderAdd(ctx context.Context, req *AddIncidentResponderRequest) (*Response, error) {
@@ -368,7 +368,7 @@ func (s *IncidentsService) ResponderAdd(ctx context.Context, req *AddIncidentRes
 
 // Snooze incident.
 //
-// Temporarily snooze notifications for an incident until a specified time.
+// Pause notifications for acknowledged incidents for a given number of minutes.
 //
 // API: POST /incident/snooze (incidentSnooze).
 func (s *IncidentsService) Snooze(ctx context.Context, req *SnoozeIncidentRequest) (*Response, error) {
@@ -377,7 +377,7 @@ func (s *IncidentsService) Snooze(ctx context.Context, req *SnoozeIncidentReques
 
 // Unacknowledge incident.
 //
-// Remove the acknowledge status from an incident.
+// Withdraw the calling member's acknowledgement of one or more incidents.
 //
 // API: POST /incident/unack (incidentUnack).
 func (s *IncidentsService) Unack(ctx context.Context, req *UnackIncidentRequest) (*Response, error) {
@@ -386,7 +386,7 @@ func (s *IncidentsService) Unack(ctx context.Context, req *UnackIncidentRequest)
 
 // Wake incident.
 //
-// Cancel the snooze on an incident and resume notifications.
+// End the snooze on incidents so that their notifications resume immediately.
 //
 // API: POST /incident/wake (incidentWake).
 func (s *IncidentsService) Wake(ctx context.Context, req *WakeIncidentRequest) (*Response, error) {
@@ -395,7 +395,7 @@ func (s *IncidentsService) Wake(ctx context.Context, req *WakeIncidentRequest) (
 
 // Create war room.
 //
-// Create a war room channel for collaborative incident response.
+// Create an IM group chat as the war room for an incident and invite members into it.
 //
 // API: POST /incident/war-room/create (incidentWarRoomCreate).
 func (s *IncidentsService) WarRoomCreate(ctx context.Context, req *CreateWarRoomRequest) (*WarRoom, *Response, error) {
@@ -409,7 +409,7 @@ func (s *IncidentsService) WarRoomCreate(ctx context.Context, req *CreateWarRoom
 
 // Delete war room.
 //
-// Delete an incident war room.
+// Dissolve an incident's war room group on the IM platform and unlink it from the incident.
 //
 // API: POST /incident/war-room/delete (incidentWarRoomDelete).
 func (s *IncidentsService) WarRoomDelete(ctx context.Context, req *DeleteWarRoomRequest) (*Response, error) {
@@ -418,7 +418,7 @@ func (s *IncidentsService) WarRoomDelete(ctx context.Context, req *DeleteWarRoom
 
 // Get war room detail.
 //
-// Retrieve the war room configuration and members for an incident.
+// Fetch the current name and join link of a war room group from the IM platform.
 //
 // API: POST /incident/war-room/detail (incidentWarRoomDetail).
 func (s *IncidentsService) WarRoomDetail(ctx context.Context, req *GetWarRoomDetailRequest) (*WarRoom, *Response, error) {
@@ -432,7 +432,7 @@ func (s *IncidentsService) WarRoomDetail(ctx context.Context, req *GetWarRoomDet
 
 // List war rooms.
 //
-// List all war rooms associated with an incident.
+// List the IM war room groups linked to an incident.
 //
 // API: POST /incident/war-room/list (incidentWarRoomList).
 func (s *IncidentsService) WarRoomList(ctx context.Context, req *ListWarRoomsRequest) (*ListWarRoomsResponse, *Response, error) {
@@ -460,7 +460,7 @@ func (s *IncidentsService) WorkItemBindPostMortem(ctx context.Context, req *Bind
 
 // Complete a work item.
 //
-// Mark a work item as completed by setting a client-defined target status.
+// Mark a work item as done; only its current assignees can do this.
 //
 // API: POST /incident/work-item/complete (incidentWorkItemComplete).
 func (s *IncidentsService) WorkItemComplete(ctx context.Context, req *CompleteWorkItemRequest) (*WorkItemMutationResult, *Response, error) {
@@ -488,7 +488,7 @@ func (s *IncidentsService) WorkItemConvert(ctx context.Context, req *ConvertWork
 
 // Create a work item.
 //
-// Create an action on an active incident or a follow-up on one of its post-mortems.
+// Create an action on an open incident, or a follow-up on a closed incident.
 //
 // API: POST /incident/work-item/create (incidentWorkItemCreate).
 func (s *IncidentsService) WorkItemCreate(ctx context.Context, req *CreateWorkItemRequest) (*WorkItemCreateResult, *Response, error) {
@@ -502,7 +502,7 @@ func (s *IncidentsService) WorkItemCreate(ctx context.Context, req *CreateWorkIt
 
 // Delete a work item.
 //
-// Soft-delete a work item.
+// Soft-delete a work item so it no longer appears in work item lists.
 //
 // API: POST /incident/work-item/delete (incidentWorkItemDelete).
 func (s *IncidentsService) WorkItemDelete(ctx context.Context, req *DeleteWorkItemRequest) (*WorkItemMutationResult, *Response, error) {
@@ -558,7 +558,7 @@ func (s *IncidentsService) WorkItemUpdate(ctx context.Context, req *UpdateWorkIt
 
 // List post-mortem templates.
 //
-// Return built-in and custom post-mortem templates for the account.
+// Return the built-in post-mortem template followed by the account's custom templates.
 //
 // API: POST /incident/post-mortem/template/list (postmortem-read-list-templates).
 func (s *IncidentsService) PostmortemReadListTemplates(ctx context.Context, req *ListPostMortemTemplatesRequest) (*ListPostMortemTemplatesResponse, *Response, error) {
@@ -609,7 +609,7 @@ func (s *IncidentsService) PostmortemWriteInit(ctx context.Context, req *InitPos
 
 // Update post-mortem basics.
 //
-// Replace the incident facts stored in a post-mortem report.
+// Overwrite the incident facts (severity, times, responders) stored on a post-mortem report.
 //
 // API: POST /incident/post-mortem/basics/reset (postmortem-write-reset-basics).
 func (s *IncidentsService) PostmortemWriteResetBasics(ctx context.Context, req *ResetPostMortemBasicsRequest) (*Response, error) {
@@ -618,7 +618,7 @@ func (s *IncidentsService) PostmortemWriteResetBasics(ctx context.Context, req *
 
 // Update post-mortem follow-ups.
 //
-// Replace the follow-up action items on a post-mortem report.
+// Replace the free-text follow-ups string stored on a post-mortem report.
 //
 // API: POST /incident/post-mortem/follow-ups/reset (postmortem-write-reset-follow-ups).
 func (s *IncidentsService) PostmortemWriteResetFollowUps(ctx context.Context, req *ResetPostMortemFollowUpsRequest) (*Response, error) {
@@ -645,7 +645,7 @@ func (s *IncidentsService) PostmortemWriteResetTitle(ctx context.Context, req *R
 
 // Create or update post-mortem template.
 //
-// Create a custom post-mortem template or update an existing one.
+// Create a custom post-mortem template, or replace an existing one identified by `template_id`.
 //
 // API: POST /incident/post-mortem/template/upsert (postmortem-write-upsert-template).
 func (s *IncidentsService) PostmortemWriteUpsertTemplate(ctx context.Context, req *UpsertPostMortemTemplateRequest) (*PostMortemTemplate, *Response, error) {
