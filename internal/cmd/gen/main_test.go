@@ -5,6 +5,21 @@ import (
 	"testing"
 )
 
+func TestGoTypeOfStringWithLengthAlternatives(t *testing.T) {
+	g := newTestGen(nil)
+	schema := map[string]any{
+		"type": "string",
+		"anyOf": []any{
+			map[string]any{"maxLength": 0},
+			map[string]any{"minLength": 2},
+		},
+	}
+	got := g.goTypeOf(schema, "Name")
+	if got != "string" {
+		t.Fatalf("type = %s, want string", got)
+	}
+}
+
 // newTestGen returns a Gen with every map field initialized, mirroring run()'s
 // construction, so g.queue (invoked while resolving inline nullable objects)
 // and g.isStructSchema (which walks g.schemas for $ref targets) don't panic
