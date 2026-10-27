@@ -27,14 +27,22 @@ import (
 //
 // API: POST /safari/session/export (session-read-export).
 func (s *SessionsService) Export(ctx context.Context, req *SessionExportRequest) (io.ReadCloser, *Response, error) {
-	httpReq, err := s.client.newRequest(ctx, http.MethodPost, "/safari/session/export", req)
+	// The success body is a stream, not a JSON envelope; ask for NDJSON.
+	return s.client.openStream(ctx, s.client.client, "/safari/session/export", "application/x-ndjson", req)
+}
+
+// openStream POSTs req and returns the live success body for the caller to
+// close. Error responses are JSON envelopes even on a streaming endpoint: the
+// (bounded) body is drained and closed and surfaced as a typed error. hc is the
+// http.Client to send with, so a long-lived stream can drop the overall timeout.
+func (c *Client) openStream(ctx context.Context, hc *http.Client, path, accept string, req any) (io.ReadCloser, *Response, error) {
+	httpReq, err := c.newRequest(ctx, http.MethodPost, path, req)
 	if err != nil {
 		return nil, nil, err
 	}
-	// The success body is a stream, not a JSON envelope; ask for NDJSON.
-	httpReq.Header.Set("Accept", "application/x-ndjson")
+	httpReq.Header.Set("Accept", accept)
 
-	httpResp, err := s.client.client.Do(httpReq)
+	httpResp, err := hc.Do(httpReq)
 	if err != nil {
 		return nil, nil, fmt.Errorf("flashduty: request to %s failed: %v", sanitizeURL(httpReq.URL), sanitizeError(err))
 	}
@@ -43,8 +51,6 @@ func (s *SessionsService) Export(ctx context.Context, req *SessionExportRequest)
 	resp.RateLimit = parseRateLimit(httpResp.Header)
 
 	if httpResp.StatusCode < 200 || httpResp.StatusCode >= 300 {
-		// Error responses are JSON envelopes, even on a streaming endpoint. Drain
-		// (bounded) and close the body, then surface a typed error.
 		defer func() { _ = httpResp.Body.Close() }()
 		raw, _ := io.ReadAll(io.LimitReader(httpResp.Body, maxResponseBodySize))
 		var env envelope
