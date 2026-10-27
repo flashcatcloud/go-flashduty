@@ -69304,7 +69304,7 @@
           "On-call/专属集成"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 目标空间必须已启用；集成类型须已启用、属于 `event.alert`，且您的订阅支持该类型。\n- 通过 `POST /integration/type/list` 查询类型；为专属集成选择支持的告警类型。\n- 省略 `name` 时使用集成类型的默认名称；省略 `integration_key` 时自动生成。自带 Key 须为 35 个字符、匹配账户后缀，且未被其他集成使用。\n- 成功后返回 `integration_id` 和 `integration_key`；后续操作使用返回的 `integration_id`。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 目标空间必须已启用；集成类型须已启用、属于 `event.alert`，且您的订阅支持该类型。\n- 已知 `plugin_type` 时可直接创建，无需先查询类型。拥有**集成中心查看**权限时，可选用 `POST /integration/type/list` 查询支持的告警类型。\n- 省略 `name` 时使用集成类型的默认名称；省略 `integration_key` 时自动生成。自带 Key 须为 35 个字符、匹配账户后缀，且未被其他集成使用。\n- 成功后返回 `integration_id` 和 `integration_key`；后续操作使用返回的 `integration_id`。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
           "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-write-create",
           "metadata": {
             "sidebarTitle": "创建专属集成"
