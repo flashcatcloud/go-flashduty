@@ -66,7 +66,7 @@ client, err := flashduty.NewClientWithAccessToken(accessToken)
 
 ## Public and dedicated integrations
 
-Use `client.Integrations` for public integrations managed in the integration center. They can be connected to channels through subscriptions or routing and require integration permissions. Use `client.DedicatedIntegrations` for integrations owned by one channel; they require channel permissions, including access to that specific channel, rather than integration-center permissions.
+Use `client.Integrations` for public integrations managed in the integration center. They can be connected to channels through subscriptions or routing and require integration permissions. Use `client.DedicatedIntegrations` for integrations owned by one channel; reads accept Channels Read, Channels Manage, or Integrations Read and require visibility of the owning channel; writes require Channels Manage and management access to that channel. The shared type catalog accepts these three read permissions; scoped App Keys must allow `integration.api:read:typeList` to query it.
 
 ```go
 req := &flashduty.ChannelIntegrationListRequest{ChannelID: 20001}
