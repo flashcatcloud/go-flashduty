@@ -875,8 +875,8 @@ func (g *Gen) emitStruct(name string, s map[string]any) string {
 		case inReq && needsPointer && (isNullable(pv) || preserveAbsence):
 			jsonTag = k + ",omitempty"
 			toonTag = k + ",omitempty"
-		case inReq && !required[k] && preserveAbsence && strings.HasPrefix(gt, "[]"):
-			// Preserve nil (omitted) versus an explicit empty slice (clear).
+		case inReq && !required[k] && ((preserveAbsence && strings.HasPrefix(gt, "[]")) || (isNullable(pv) && strings.HasPrefix(gt, "map["))):
+			// Preserve nil (omitted) versus an explicit empty container (clear).
 			// omitempty would drop both and silently keep the stored value.
 			jsonTag = k + ",omitzero"
 			toonTag = k + ",omitempty"
@@ -925,11 +925,14 @@ func (g *Gen) goTypeOf(s map[string]any, hint string) string {
 		}
 		return goName(ref)
 	}
-	// A oneOf/anyOf is a polymorphic value (e.g. bool | string | string[]); its
-	// only safe Go type is any. Returning map[string]any here would be wrong for
-	// non-object members.
+	// Scalar alternatives can refine an explicit type (e.g. empty or a minimum
+	// string length). Other unions remain polymorphic, so their safe type is any.
 	if len(asSlice(s["oneOf"])) > 0 || len(asSlice(s["anyOf"])) > 0 {
-		return "any"
+		switch typeStr(s) {
+		case "string", "integer", "number", "boolean":
+		default:
+			return "any"
+		}
 	}
 	if len(asSlice(s["allOf"])) > 0 {
 		return g.queue(hint, g.mergeAllOf(s))

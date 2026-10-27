@@ -2008,6 +2008,106 @@ type ChannelInfosResponse struct {
 	Items []ChannelShort `json:"items" toon:"items"`
 }
 
+// ChannelIntegrationCreateRequest is generated from the Flashduty OpenAPI schema.
+type ChannelIntegrationCreateRequest struct {
+	// Target channel ID; the channel must be enabled.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Description, at most 499 characters.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Optional supplied integration key. A non-empty value must have 35 characters, match the account suffix, and be unique.
+	IntegrationKey string `json:"integration_key,omitempty" toon:"integration_key,omitempty"`
+	// Integration name, 2–49 characters when supplied; omitted or empty uses the integration type default.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Enabled alert integration type identifier, such as `standard.alert`.
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
+	// Integration-type-specific configuration; saved secret values in responses are masked as `******`.
+	Settings map[string]any `json:"settings,omitempty" toon:"settings,omitempty"`
+}
+
+// ChannelIntegrationCreateResponse is generated from the Flashduty OpenAPI schema.
+type ChannelIntegrationCreateResponse struct {
+	// Created dedicated integration ID.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Integration key for alert ingestion.
+	IntegrationKey string `json:"integration_key" toon:"integration_key"`
+}
+
+// ChannelIntegrationIDRequest is generated from the Flashduty OpenAPI schema.
+type ChannelIntegrationIDRequest struct {
+	// Dedicated integration ID returned by create, list, or info. Public integration IDs are not accepted.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+}
+
+// ChannelIntegrationItem is generated from the Flashduty OpenAPI schema.
+type ChannelIntegrationItem struct {
+	// Integration category; dedicated integration creation accepts `event.alert` alert integrations.
+	Category string `json:"category" toon:"category"`
+	// ID of the channel that owns the dedicated integration.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Creation time as a Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Integration description; empty when unset.
+	Description string `json:"description" toon:"description"`
+	// Compatibility identifier for earlier integrations; `0` when absent. Use `integration_id` for this API group.
+	ExclusiveDataSourceID int64 `json:"exclusive_data_source_id" toon:"exclusive_data_source_id"`
+	// Dedicated integration ID; use this ID for subsequent API calls.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Complete integration key for alert ingestion; separate from the management App Key.
+	IntegrationKey string `json:"integration_key" toon:"integration_key"`
+	// Source time of the most recent event as a Unix timestamp in seconds; `0` when unavailable.
+	LastSourceTime Timestamp `json:"last_source_time" toon:"last_source_time"`
+	// Most recent received-event time as a Unix timestamp in seconds; `0` when no event has arrived.
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
+	// Integration name.
+	Name string `json:"name" toon:"name"`
+	// Numeric integration type ID. Create uses the string `plugin_type` instead.
+	PluginID int64 `json:"plugin_id" toon:"plugin_id"`
+	// Integration type identifier, such as `standard.alert`.
+	PluginType string `json:"plugin_type" toon:"plugin_type"`
+	// Integration type display name, localized to the request language.
+	PluginTypeName string `json:"plugin_type_name" toon:"plugin_type_name"`
+	// Integration-type-specific configuration; saved secret values in responses are masked as `******`.
+	Settings map[string]any `json:"settings" toon:"settings"`
+	// Lifecycle status: `enabled` accepts alerts; `disabled` pauses ingestion.
+	Status string `json:"status" toon:"status"`
+	// Last update time as a Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+}
+
+// ChannelIntegrationListRequest is generated from the Flashduty OpenAPI schema.
+type ChannelIntegrationListRequest struct {
+	ListOptions
+	// Channel ID to list dedicated integrations for.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Filter by integration name.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Filter by one integration type.
+	PluginType string `json:"plugin_type,omitempty" toon:"plugin_type,omitempty"`
+	// Filter by `enabled` integrations that accept alerts or `disabled` integrations that pause ingestion.
+	Status string `json:"status,omitempty" toon:"status,omitempty"`
+}
+
+// ChannelIntegrationListResponse is generated from the Flashduty OpenAPI schema.
+type ChannelIntegrationListResponse struct {
+	ListOptions
+	// Dedicated integrations on this page.
+	Items []ChannelIntegrationItem `json:"items" toon:"items"`
+	// Total number of matching dedicated integrations.
+	Total int64 `json:"total" toon:"total"`
+}
+
+// ChannelIntegrationUpdateRequest is generated from the Flashduty OpenAPI schema.
+type ChannelIntegrationUpdateRequest struct {
+	// New description, at most 499 characters; empty clears it, omitted or null keeps it.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// Dedicated integration ID returned by create, list, or info. Public integration IDs are not accepted.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// New name, 2–49 characters; omitted or null keeps the stored name.
+	Name *string `json:"name,omitempty" toon:"name,omitempty"`
+	// Replacement type-specific configuration. Omitted or null keeps it; masked or omitted secret fields retain their stored value.
+	Settings map[string]any `json:"settings,omitzero" toon:"settings,omitempty"`
+}
+
 // ChannelItem is generated from the Flashduty OpenAPI schema.
 type ChannelItem struct {
 	// Owning account ID.
@@ -8398,7 +8498,7 @@ type RoleUpsertResponse struct {
 
 // RotateIntegrationKeyResponse is generated from the Flashduty OpenAPI schema.
 type RotateIntegrationKeyResponse struct {
-	// New integration key; the previous key stops working immediately. Also readable from `/integration/list` and `/integration/info`.
+	// New integration key; the previous key stops working immediately.
 	IntegrationKey string `json:"integration_key" toon:"integration_key"`
 }
 

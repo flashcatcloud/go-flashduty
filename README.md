@@ -64,6 +64,19 @@ To call the API with an OAuth access token instead, use `NewClientWithAccessToke
 client, err := flashduty.NewClientWithAccessToken(accessToken)
 ```
 
+## Public and dedicated integrations
+
+Use `client.Integrations` for public integrations managed in the integration center. They can be connected to channels through subscriptions or routing and require integration permissions. Use `client.DedicatedIntegrations` for integrations owned by one channel; they require channel permissions, including access to that specific channel, rather than integration-center permissions.
+
+```go
+req := &flashduty.ChannelIntegrationListRequest{ChannelID: 20001}
+integrations, _, err := client.DedicatedIntegrations.ReadList(ctx, req)
+```
+
+Choose the API from the integration's ownership. An integration ID alone does not identify its scope. The SDK does not switch API groups on a permission error. Both groups authenticate with the management App Key; the returned `integration_key` authenticates inbound events. List/info include that key and masked settings, so avoid logging complete responses.
+
+Dedicated updates preserve omitted fields. Set `Description` to a pointer to `""` to clear it; nil keeps it. A nil `Settings` map preserves configuration; a non-nil empty map submits `{}` as a replacement, subject to the type's validation and secret-preservation rules.
+
 ## Design
 
 - **Thin and typed.** Every method maps to exactly one HTTP call and returns `(*T, *Response, error)`. No hidden cross-endpoint enrichment.

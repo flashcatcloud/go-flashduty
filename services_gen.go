@@ -26,6 +26,7 @@ type genServices struct {
 	Calendars                *CalendarsService
 	Changes                  *ChangesService
 	Channels                 *ChannelsService
+	DedicatedIntegrations    *DedicatedIntegrationsService
 	ImIntegrations           *ImIntegrationsService
 	Incidents                *IncidentsService
 	Integrations             *IntegrationsService
@@ -70,6 +71,7 @@ func (c *Client) initServices() {
 	c.Calendars = (*CalendarsService)(&c.common)
 	c.Changes = (*ChangesService)(&c.common)
 	c.Channels = (*ChannelsService)(&c.common)
+	c.DedicatedIntegrations = (*DedicatedIntegrationsService)(&c.common)
 	c.ImIntegrations = (*ImIntegrationsService)(&c.common)
 	c.Incidents = (*IncidentsService)(&c.common)
 	c.Integrations = (*IntegrationsService)(&c.common)

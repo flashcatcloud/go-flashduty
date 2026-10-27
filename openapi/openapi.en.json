@@ -33462,7 +33462,7 @@
         "properties": {
           "integration_key": {
             "type": "string",
-            "description": "New integration key; the previous key stops working immediately. Also readable from `/integration/list` and `/integration/info`.",
+            "description": "New integration key; the previous key stops working immediately.",
             "example": "0123456789abcdef0123456789abcdef100"
           }
         }
@@ -33600,6 +33600,317 @@
         "required": [
           "items"
         ]
+      },
+      "ChannelIntegrationItem": {
+        "type": "object",
+        "description": "A channel-owned dedicated integration, with its complete key and masked settings.",
+        "required": [
+          "integration_id",
+          "channel_id",
+          "integration_key",
+          "exclusive_data_source_id",
+          "plugin_id",
+          "plugin_type",
+          "plugin_type_name",
+          "category",
+          "name",
+          "description",
+          "status",
+          "created_at",
+          "updated_at",
+          "last_time",
+          "last_source_time",
+          "settings"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Dedicated integration ID; use this ID for subsequent API calls."
+          },
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the channel that owns the dedicated integration."
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "Complete integration key for alert ingestion; separate from the management App Key."
+          },
+          "exclusive_data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Compatibility identifier for earlier integrations; `0` when absent. Use `integration_id` for this API group."
+          },
+          "plugin_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Numeric integration type ID. Create uses the string `plugin_type` instead."
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "Integration type identifier, such as `standard.alert`."
+          },
+          "plugin_type_name": {
+            "type": "string",
+            "description": "Integration type display name, localized to the request language."
+          },
+          "category": {
+            "type": "string",
+            "description": "Integration category; dedicated integration creation accepts `event.alert` alert integrations."
+          },
+          "name": {
+            "type": "string",
+            "description": "Integration name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Integration description; empty when unset."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "Lifecycle status: `enabled` accepts alerts; `disabled` pauses ingestion."
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Creation time as a Unix timestamp in seconds."
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Last update time as a Unix timestamp in seconds."
+          },
+          "last_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Most recent received-event time as a Unix timestamp in seconds; `0` when no event has arrived."
+          },
+          "last_source_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Source time of the most recent event as a Unix timestamp in seconds; `0` when unavailable."
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Integration-type-specific configuration; saved secret values in responses are masked as `******`."
+          }
+        }
+      },
+      "ChannelIntegrationIDRequest": {
+        "type": "object",
+        "description": "Identifies one dedicated integration.",
+        "required": [
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 10001,
+            "description": "Dedicated integration ID returned by create, list, or info. Public integration IDs are not accepted."
+          }
+        }
+      },
+      "ChannelIntegrationListRequest": {
+        "type": "object",
+        "description": "Filters and pagination for one channel's dedicated integrations.",
+        "required": [
+          "channel_id"
+        ],
+        "properties": {
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 20001,
+            "description": "Channel ID to list dedicated integrations for."
+          },
+          "p": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "description": "Page number, starting at 1."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100,
+            "description": "Number of items per page, at most 100."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 49,
+            "description": "Filter by integration name."
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "Filter by one integration type."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "Filter by `enabled` integrations that accept alerts or `disabled` integrations that pause ingestion."
+          }
+        }
+      },
+      "ChannelIntegrationListResponse": {
+        "type": "object",
+        "description": "One page of dedicated integrations.",
+        "required": [
+          "p",
+          "limit",
+          "total",
+          "items"
+        ],
+        "properties": {
+          "p": {
+            "type": "integer",
+            "description": "Returned page number."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Returned page size."
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of matching dedicated integrations."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelIntegrationItem"
+            },
+            "description": "Dedicated integrations on this page."
+          }
+        }
+      },
+      "ChannelIntegrationCreateRequest": {
+        "type": "object",
+        "description": "Creates a dedicated integration in an enabled channel.",
+        "required": [
+          "channel_id",
+          "plugin_type"
+        ],
+        "properties": {
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 20001,
+            "description": "Target channel ID; the channel must be enabled."
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "Enabled alert integration type identifier, such as `standard.alert`."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 49,
+            "description": "Integration name, 2–49 characters when supplied; omitted or empty uses the integration type default.",
+            "anyOf": [
+              {
+                "maxLength": 0
+              },
+              {
+                "minLength": 2
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 499,
+            "description": "Description, at most 499 characters."
+          },
+          "integration_key": {
+            "type": "string",
+            "maxLength": 35,
+            "description": "Optional supplied integration key. A non-empty value must have 35 characters, match the account suffix, and be unique.",
+            "anyOf": [
+              {
+                "maxLength": 0
+              },
+              {
+                "minLength": 35
+              }
+            ]
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Integration-type-specific configuration; saved secret values in responses are masked as `******`."
+          }
+        }
+      },
+      "ChannelIntegrationCreateResponse": {
+        "type": "object",
+        "description": "The created dedicated integration and its ingestion key.",
+        "required": [
+          "integration_id",
+          "integration_key"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Created dedicated integration ID."
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "Integration key for alert ingestion."
+          }
+        }
+      },
+      "ChannelIntegrationUpdateRequest": {
+        "type": "object",
+        "description": "Partial update of a dedicated integration; omitted or null fields keep their value.",
+        "required": [
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 10001,
+            "description": "Dedicated integration ID returned by create, list, or info. Public integration IDs are not accepted."
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 2,
+            "maxLength": 49,
+            "description": "New name, 2–49 characters; omitted or null keeps the stored name."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 499,
+            "description": "New description, at most 499 characters; empty clears it, omitted or null keeps it."
+          },
+          "settings": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": true,
+            "description": "Replacement type-specific configuration. Omitted or null keeps it; masked or omitted secret fields retain their stored value."
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -67700,7 +68011,7 @@
     "/integration/list": {
       "post": {
         "operationId": "integration-api-read-list",
-        "summary": "List integrations",
+        "summary": "List public integrations",
         "description": "List public integrations with their stored settings, decrypted keys, and edit permissions.",
         "tags": [
           "On-call/Integrations"
@@ -67805,7 +68116,7 @@
     "/integration/info": {
       "post": {
         "operationId": "integration-api-read-info",
-        "summary": "Get integration detail",
+        "summary": "Get public integration detail",
         "description": "Get a public integration with its stored settings and decrypted integration key.",
         "tags": [
           "On-call/Integrations"
@@ -67898,7 +68209,7 @@
     "/integration/create": {
       "post": {
         "operationId": "integration-api-write-create",
-        "summary": "Create integration",
+        "summary": "Create public integration",
         "description": "Create a public integration for a supported alert, change, IM, or webhook type.",
         "tags": [
           "On-call/Integrations"
@@ -67983,7 +68294,7 @@
     "/integration/update": {
       "post": {
         "operationId": "integration-api-write-update",
-        "summary": "Update integration",
+        "summary": "Update public integration",
         "description": "Update an integration's name, description, team, or settings.",
         "tags": [
           "On-call/Integrations"
@@ -68087,7 +68398,7 @@
     "/integration/delete": {
       "post": {
         "operationId": "integration-api-write-delete",
-        "summary": "Delete integration",
+        "summary": "Delete public integration",
         "description": "Delete an integration that nothing else references.",
         "tags": [
           "On-call/Integrations"
@@ -68157,7 +68468,7 @@
     "/integration/enable": {
       "post": {
         "operationId": "integration-api-write-enable",
-        "summary": "Enable integration",
+        "summary": "Enable public integration",
         "description": "Re-enable a disabled integration so it accepts events again.",
         "tags": [
           "On-call/Integrations"
@@ -68227,7 +68538,7 @@
     "/integration/disable": {
       "post": {
         "operationId": "integration-api-write-disable",
-        "summary": "Disable integration",
+        "summary": "Disable public integration",
         "description": "Disable an integration without deleting its configuration.",
         "tags": [
           "On-call/Integrations"
@@ -68297,7 +68608,7 @@
     "/integration/key/rotate": {
       "post": {
         "operationId": "integration-api-write-rotate-key",
-        "summary": "Rotate integration key",
+        "summary": "Rotate public integration key",
         "description": "Issue a new integration key and invalidate the previous one.",
         "tags": [
           "On-call/Integrations"
@@ -68794,6 +69105,833 @@
           }
         }
       }
+    },
+    "/channel/integration/list": {
+      "post": {
+        "operationId": "channel-integration-read-list",
+        "summary": "List dedicated integrations",
+        "description": "List the dedicated integrations owned by one channel.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Channels Read** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- Private channels also require the account owner, an Admin, the channel creator, or membership in its owning or managing teams; public channels still require the API permission above.\n- `channel_id` is required; `p` defaults to `1` and `limit` defaults to `100`, with a maximum of `100`.\n- `plugin_type` and `status` each accept one value.\n- The complete `integration_key` is returned; saved secret values in `settings` are returned as `******`. The integration key authenticates alert ingestion and is separate from the management App Key.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-read-list",
+          "metadata": {
+            "sidebarTitle": "List dedicated integrations"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "p": 1,
+                    "limit": 20,
+                    "total": 1,
+                    "items": [
+                      {
+                        "integration_id": 10001,
+                        "channel_id": 20001,
+                        "integration_key": "0123456789abcdef0123456789abcdef100",
+                        "exclusive_data_source_id": 0,
+                        "plugin_id": 9,
+                        "plugin_type": "standard.alert",
+                        "plugin_type_name": "Standard alert",
+                        "category": "event.alert",
+                        "name": "Payments alerts",
+                        "description": "Alerts for the payments channel",
+                        "status": "enabled",
+                        "created_at": 1767225600,
+                        "updated_at": 1767225600,
+                        "last_time": 0,
+                        "last_source_time": 0,
+                        "settings": {}
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationListRequest"
+              },
+              "example": {
+                "channel_id": 20001,
+                "p": 1,
+                "limit": 20
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/info": {
+      "post": {
+        "operationId": "channel-integration-read-info",
+        "summary": "Get dedicated integration detail",
+        "description": "Get one channel-owned integration, including its integration key and masked settings.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Channels Read** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- Private channels also require the account owner, an Admin, the channel creator, or membership in its owning or managing teams; public channels still require the API permission above.\n- The complete `integration_key` is returned; saved secret values in `settings` are returned as `******`. The integration key authenticates alert ingestion and is separate from the management App Key.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-read-info",
+          "metadata": {
+            "sidebarTitle": "Get dedicated integration detail"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_id": 10001,
+                    "channel_id": 20001,
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "exclusive_data_source_id": 0,
+                    "plugin_id": 9,
+                    "plugin_type": "standard.alert",
+                    "plugin_type_name": "Standard alert",
+                    "category": "event.alert",
+                    "name": "Payments alerts",
+                    "description": "Alerts for the payments channel",
+                    "status": "enabled",
+                    "created_at": 1767225600,
+                    "updated_at": 1767225600,
+                    "last_time": 0,
+                    "last_source_time": 0,
+                    "settings": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/create": {
+      "post": {
+        "operationId": "channel-integration-write-create",
+        "summary": "Create dedicated integration",
+        "description": "Create a dedicated alert integration for an enabled channel.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- You also need management access to the target channel: the account owner, an Admin, the channel creator, or a managing-team member. The owning team applies when no managing team is set.\n- Creating the integration does not independently grant channel management access; Integrations Manage does not grant access to this endpoint.\n- The channel must be enabled; the integration type must be enabled, belong to `event.alert`, and be supported by your subscription.\n- Query `POST /integration/type/list` and select a supported alert type for the dedicated integration.\n- An omitted `name` uses the integration type default; an omitted `integration_key` is generated. A supplied key must have 35 characters, match the account suffix, and not be used by another integration.\n- Success returns `integration_id` and `integration_key`; use that `integration_id` for subsequent operations.\n- Every call is recorded in the account audit log.\n- Concurrent changes to integrations in the same channel return `RequestLocked`; retry after the current change completes.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-write-create",
+          "metadata": {
+            "sidebarTitle": "Create dedicated integration"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationCreateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_id": 10001,
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "Another request is changing this channel's integrations. Retry after it completes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationCreateRequest"
+              },
+              "example": {
+                "channel_id": 20001,
+                "plugin_type": "standard.alert",
+                "name": "Payments alerts",
+                "description": "Alerts for the payments channel",
+                "settings": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/update": {
+      "post": {
+        "operationId": "channel-integration-write-update",
+        "summary": "Update dedicated integration",
+        "description": "Update the name, description, or settings of a dedicated integration.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- You also need management access to the target channel: the account owner, an Admin, the channel creator, or a managing-team member. The owning team applies when no managing team is set.\n- Creating the integration does not independently grant channel management access; Integrations Manage does not grant access to this endpoint.\n- The complete `integration_key` is returned; saved secret values in `settings` are returned as `******`. The integration key authenticates alert ingestion and is separate from the management App Key.\n- Only supplied fields change; omitted or `null` fields retain their value. Send `description: \"\"` to clear the description.\n- Supplied `settings` follow the integration type configuration rules; masked or omitted secret fields retain their stored value. Retaining a secret does not allow changing its corresponding destination.\n- This endpoint does not change the channel, integration type, or integration key.\n- Every call is recorded in the account audit log.\n- Concurrent changes to integrations in the same channel return `RequestLocked`; retry after the current change completes.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-write-update",
+          "metadata": {
+            "sidebarTitle": "Update dedicated integration"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_id": 10001,
+                    "channel_id": 20001,
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "exclusive_data_source_id": 0,
+                    "plugin_id": 9,
+                    "plugin_type": "standard.alert",
+                    "plugin_type_name": "Standard alert",
+                    "category": "event.alert",
+                    "name": "Payments production alerts",
+                    "description": "",
+                    "status": "enabled",
+                    "created_at": 1767225600,
+                    "updated_at": 1767225600,
+                    "last_time": 0,
+                    "last_source_time": 0,
+                    "settings": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "Another request is changing this channel's integrations. Retry after it completes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationUpdateRequest"
+              },
+              "example": {
+                "integration_id": 10001,
+                "name": "Payments production alerts",
+                "description": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/delete": {
+      "post": {
+        "operationId": "channel-integration-write-delete",
+        "summary": "Delete dedicated integration",
+        "description": "Delete a dedicated integration after its references have been removed.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- You also need management access to the target channel: the account owner, an Admin, the channel creator, or a managing-team member. The owning team applies when no managing team is set.\n- Creating the integration does not independently grant channel management access; Integrations Manage does not grant access to this endpoint.\n- Existing references return HTTP 400 with `ReferenceExist` and `data.refs` listing them; remove those references before deleting.\n- Every call is recorded in the account audit log.\n- Concurrent changes to integrations in the same channel return `RequestLocked`; retry after the current change completes.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-write-delete",
+          "metadata": {
+            "sidebarTitle": "Delete dedicated integration"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyObject"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters or an existing reference; ReferenceExist includes data.refs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "Resources that prevent deletion.",
+                          "properties": {
+                            "refs": {
+                              "type": "array",
+                              "description": "Referencing resources; remove their references before retrying.",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "description": "Referencing resource kind."
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Referencing resource name."
+                                  },
+                                  "href": {
+                                    "type": "string",
+                                    "description": "Console link to the referencing resource."
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "missingParameter": {
+                    "value": {
+                      "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                      "error": {
+                        "code": "InvalidParameter",
+                        "message": "The specified parameter is not valid."
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "ReferenceExist",
+                    "message": "There still are associated resources, deletion is blocked."
+                  },
+                  "data": {
+                    "refs": [
+                      {
+                        "kind": "channel",
+                        "name": "Payments",
+                        "href": "https://console.flashcat.cloud/channel/20001"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "Another request is changing this channel's integrations. Retry after it completes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/enable": {
+      "post": {
+        "operationId": "channel-integration-write-enable",
+        "summary": "Enable dedicated integration",
+        "description": "Enable a dedicated integration so it can receive alerts.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- You also need management access to the target channel: the account owner, an Admin, the channel creator, or a managing-team member. The owning team applies when no managing team is set.\n- Creating the integration does not independently grant channel management access; Integrations Manage does not grant access to this endpoint.\n- After permission and subscription checks pass, repeating an operation when the target state is already set succeeds.\n- Every call is recorded in the account audit log.\n- Concurrent changes to integrations in the same channel return `RequestLocked`; retry after the current change completes.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-write-enable",
+          "metadata": {
+            "sidebarTitle": "Enable dedicated integration"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyObject"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "Another request is changing this channel's integrations. Retry after it completes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/disable": {
+      "post": {
+        "operationId": "channel-integration-write-disable",
+        "summary": "Disable dedicated integration",
+        "description": "Disable a dedicated integration to pause alert ingestion.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- You also need management access to the target channel: the account owner, an Admin, the channel creator, or a managing-team member. The owning team applies when no managing team is set.\n- Creating the integration does not independently grant channel management access; Integrations Manage does not grant access to this endpoint.\n- After permission checks pass, repeating this operation when the integration is already disabled succeeds.\n- Every call is recorded in the account audit log.\n- Concurrent changes to integrations in the same channel return `RequestLocked`; retry after the current change completes.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-write-disable",
+          "metadata": {
+            "sidebarTitle": "Disable dedicated integration"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyObject"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "Another request is changing this channel's integrations. Retry after it completes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/key/rotate": {
+      "post": {
+        "operationId": "channel-integration-write-rotate-key",
+        "summary": "Rotate dedicated integration key",
+        "description": "Issue a new dedicated integration key and invalidate the previous key.",
+        "tags": [
+          "On-call/Dedicated integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Channels Manage** (`on-call`) |\n\n## Usage\n\n- These APIs manage channel-owned dedicated integrations; use `/integration/*` for public integrations.\n- The App Key's `api_scopes` must allow the operation; permissions follow the user who owns the key.\n- You also need management access to the target channel: the account owner, an Admin, the channel creator, or a managing-team member. The owning team applies when no managing team is set.\n- Creating the integration does not independently grant channel management access; Integrations Manage does not grant access to this endpoint.\n- After the previous key is invalidated, senders using it can no longer ingest alerts; configure the returned key in the corresponding monitoring system.\n- Every call is recorded in the account audit log.\n- Concurrent changes to integrations in the same channel return `RequestLocked`; retry after the current change completes.",
+          "href": "/en/api-reference/on-call/dedicated-integrations/channel-integration-write-rotate-key",
+          "metadata": {
+            "sidebarTitle": "Rotate dedicated integration key"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RotateIntegrationKeyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "Another request is changing this channel's integrations. Retry after it completes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
     }
   },
   "security": [
@@ -68965,6 +70103,10 @@
     {
       "name": "Monitors/Rule folders",
       "description": "List the monitor folder tree that dashboards and alert rules are organised in."
+    },
+    {
+      "name": "On-call/Dedicated integrations",
+      "description": "Manage alert integrations owned by individual channels."
     }
   ]
 }
