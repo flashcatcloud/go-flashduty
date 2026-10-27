@@ -64,6 +64,19 @@ func main() {
 client, err := flashduty.NewClientWithAccessToken(accessToken)
 ```
 
+## 公共集成与专属集成
+
+集成中心管理的公共集成使用 `client.Integrations`，可通过订阅或路由接入协作空间，需要集成中心权限。属于某个协作空间的专属集成使用 `client.DedicatedIntegrations`，需要协作空间权限以及对目标空间的访问或管理权限，不需要集成中心权限。
+
+```go
+req := &flashduty.ChannelIntegrationListRequest{ChannelID: 20001}
+integrations, _, err := client.DedicatedIntegrations.ReadList(ctx, req)
+```
+
+按集成的实际归属选择接口，不能仅凭集成 ID 判断类型。权限不足时 SDK 不会自动切换接口。两类接口均使用管理用的 App Key 认证；响应里的 `integration_key` 用于事件上报。列表和详情包含完整的集成 Key 及脱敏配置，避免记录完整响应。
+
+专属集成更新时，省略字段会保留原值。`Description` 为 nil 时保留原值，指向空字符串时清空描述；`Settings` 为 nil 时保留配置，非 nil 的空 map 会提交 `{}` 作为替换配置，仍受该集成类型的校验和敏感字段保留规则约束。
+
 ## 设计
 
 - **薄且强类型。** 每个方法只对应一次 HTTP 调用，返回 `(*T, *Response, error)`，不会在背后跨接口补数据。

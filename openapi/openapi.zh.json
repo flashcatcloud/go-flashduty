@@ -33462,7 +33462,7 @@
         "properties": {
           "integration_key": {
             "type": "string",
-            "description": "新的集成 Key，旧 Key 立即失效；新 Key 也可通过 `/integration/list` 和 `/integration/info` 查询。",
+            "description": "新的集成 Key；原 Key 立即失效。",
             "example": "0123456789abcdef0123456789abcdef100"
           }
         }
@@ -33600,6 +33600,317 @@
         "required": [
           "items"
         ]
+      },
+      "ChannelIntegrationItem": {
+        "type": "object",
+        "description": "协作空间专属集成，包含完整集成 Key 和脱敏配置。",
+        "required": [
+          "integration_id",
+          "channel_id",
+          "integration_key",
+          "exclusive_data_source_id",
+          "plugin_id",
+          "plugin_type",
+          "plugin_type_name",
+          "category",
+          "name",
+          "description",
+          "status",
+          "created_at",
+          "updated_at",
+          "last_time",
+          "last_source_time",
+          "settings"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "专属集成 ID，后续接口调用使用此 ID。"
+          },
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "专属集成所属的协作空间 ID。"
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "用于告警接入的完整集成 Key，与管理接口的 App Key 不同。"
+          },
+          "exclusive_data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "早期集成的兼容标识，无关联值时为 `0`；本组接口统一使用 `integration_id`。"
+          },
+          "plugin_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "集成类型的数字 ID；创建时使用字符串 `plugin_type`。"
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "集成类型标识，例如 `standard.alert`。"
+          },
+          "plugin_type_name": {
+            "type": "string",
+            "description": "按请求语言返回的集成类型显示名称。"
+          },
+          "category": {
+            "type": "string",
+            "description": "集成分类；专属集成创建接口接受 `event.alert` 告警集成。"
+          },
+          "name": {
+            "type": "string",
+            "description": "集成名称。"
+          },
+          "description": {
+            "type": "string",
+            "description": "集成描述；未设置时为空字符串。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "集成状态：`enabled` 表示接收告警，`disabled` 表示暂停接入。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间，Unix 时间戳，单位为秒。"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近更新时间，Unix 时间戳，单位为秒。"
+          },
+          "last_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近接收事件的时间，Unix 时间戳，单位为秒；未接收事件时为 `0`。"
+          },
+          "last_source_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "最近事件的来源时间，Unix 时间戳，单位为秒；无可用值时为 `0`。"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "集成类型对应的配置；响应中已保存的密钥类值以 `******` 返回。"
+          }
+        }
+      },
+      "ChannelIntegrationIDRequest": {
+        "type": "object",
+        "description": "标识一条专属集成。",
+        "required": [
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 10001,
+            "description": "创建、列表或详情接口返回的专属集成 ID；不接受公共集成 ID。"
+          }
+        }
+      },
+      "ChannelIntegrationListRequest": {
+        "type": "object",
+        "description": "指定协作空间的专属集成查询条件。",
+        "required": [
+          "channel_id"
+        ],
+        "properties": {
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 20001,
+            "description": "要查询专属集成的协作空间 ID。"
+          },
+          "p": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "description": "页码，从 1 开始。"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100,
+            "description": "每页条数，最多 100 条。"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 49,
+            "description": "按集成名称过滤。"
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "按单个集成类型过滤。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "description": "按状态过滤：`enabled` 表示接收告警，`disabled` 表示暂停接入。"
+          }
+        }
+      },
+      "ChannelIntegrationListResponse": {
+        "type": "object",
+        "description": "一页专属集成结果。",
+        "required": [
+          "p",
+          "limit",
+          "total",
+          "items"
+        ],
+        "properties": {
+          "p": {
+            "type": "integer",
+            "description": "当前页码。"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "当前每页条数。"
+          },
+          "total": {
+            "type": "integer",
+            "description": "符合条件的专属集成总数。"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelIntegrationItem"
+            },
+            "description": "当前页的专属集成。"
+          }
+        }
+      },
+      "ChannelIntegrationCreateRequest": {
+        "type": "object",
+        "description": "在已启用的协作空间创建专属集成。",
+        "required": [
+          "channel_id",
+          "plugin_type"
+        ],
+        "properties": {
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 20001,
+            "description": "目标协作空间 ID，空间须已启用。"
+          },
+          "plugin_type": {
+            "type": "string",
+            "description": "已启用的告警集成类型标识，例如 `standard.alert`。"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 49,
+            "description": "集成名称，提供时为 2–49 个字符；省略或为空时使用集成类型的默认名称。",
+            "anyOf": [
+              {
+                "maxLength": 0
+              },
+              {
+                "minLength": 2
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 499,
+            "description": "集成描述，最多 499 个字符。"
+          },
+          "integration_key": {
+            "type": "string",
+            "maxLength": 35,
+            "description": "可选的自带集成 Key；非空时须为 35 个字符、匹配账户后缀，且未被其他集成使用。",
+            "anyOf": [
+              {
+                "maxLength": 0
+              },
+              {
+                "minLength": 35
+              }
+            ]
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "集成类型对应的配置；响应中已保存的密钥类值以 `******` 返回。"
+          }
+        }
+      },
+      "ChannelIntegrationCreateResponse": {
+        "type": "object",
+        "description": "创建完成的专属集成及其接入 Key。",
+        "required": [
+          "integration_id",
+          "integration_key"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建完成的专属集成 ID。"
+          },
+          "integration_key": {
+            "type": "string",
+            "description": "用于告警接入的集成 Key。"
+          }
+        }
+      },
+      "ChannelIntegrationUpdateRequest": {
+        "type": "object",
+        "description": "专属集成的部分更新；省略或为 null 的字段保留原值。",
+        "required": [
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "example": 10001,
+            "description": "创建、列表或详情接口返回的专属集成 ID；不接受公共集成 ID。"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 2,
+            "maxLength": 49,
+            "description": "新名称，2–49 个字符；省略或为 null 时保留原名称。"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 499,
+            "description": "新描述，最多 499 个字符；空字符串清空，省略或为 null 时保留。"
+          },
+          "settings": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": true,
+            "description": "按集成类型替换配置；省略或为 null 时保留，已脱敏或省略的密钥类字段保留原值。"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -67700,7 +68011,7 @@
     "/integration/list": {
       "post": {
         "operationId": "integration-api-read-list",
-        "summary": "查询集成列表",
+        "summary": "查询公共集成列表",
         "description": "查询公共集成列表，返回存储配置、解密 Key 与当前调用者的编辑权限。",
         "tags": [
           "On-call/集成中心"
@@ -67805,7 +68116,7 @@
     "/integration/info": {
       "post": {
         "operationId": "integration-api-read-info",
-        "summary": "查询集成详情",
+        "summary": "查看公共集成详情",
         "description": "查询单个公共集成详情，返回存储配置及解密后的集成 Key。",
         "tags": [
           "On-call/集成中心"
@@ -67898,7 +68209,7 @@
     "/integration/create": {
       "post": {
         "operationId": "integration-api-write-create",
-        "summary": "创建集成",
+        "summary": "创建公共集成",
         "description": "创建支持的告警源、变更源、IM 或 Webhook 类型公共集成。",
         "tags": [
           "On-call/集成中心"
@@ -67983,7 +68294,7 @@
     "/integration/update": {
       "post": {
         "operationId": "integration-api-write-update",
-        "summary": "更新集成",
+        "summary": "更新公共集成",
         "description": "更新集成的名称、描述、所属团队或配置。",
         "tags": [
           "On-call/集成中心"
@@ -68087,7 +68398,7 @@
     "/integration/delete": {
       "post": {
         "operationId": "integration-api-write-delete",
-        "summary": "删除集成",
+        "summary": "删除公共集成",
         "description": "删除指定的集成。",
         "tags": [
           "On-call/集成中心"
@@ -68157,7 +68468,7 @@
     "/integration/enable": {
       "post": {
         "operationId": "integration-api-write-enable",
-        "summary": "启用集成",
+        "summary": "启用公共集成",
         "description": "重新启用已禁用的集成，恢复接收事件。",
         "tags": [
           "On-call/集成中心"
@@ -68227,7 +68538,7 @@
     "/integration/disable": {
       "post": {
         "operationId": "integration-api-write-disable",
-        "summary": "禁用集成",
+        "summary": "禁用公共集成",
         "description": "禁用集成，但保留其配置。",
         "tags": [
           "On-call/集成中心"
@@ -68297,7 +68608,7 @@
     "/integration/key/rotate": {
       "post": {
         "operationId": "integration-api-write-rotate-key",
-        "summary": "轮换集成 Key",
+        "summary": "轮换公共集成 Key",
         "description": "生成新的集成 Key，并使旧 Key 立即失效。",
         "tags": [
           "On-call/集成中心"
@@ -68794,6 +69105,833 @@
           }
         }
       }
+    },
+    "/channel/integration/list": {
+      "post": {
+        "operationId": "channel-integration-read-list",
+        "summary": "查询专属集成列表",
+        "description": "查询指定协作空间的专属集成。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **协作空间查看**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 查看私有空间还要求您是账户所有者、Admin、空间创建者，或所属团队、管理团队的成员；公开空间仍需上述接口权限。\n- `channel_id` 必填；`p` 默认 `1`，`limit` 默认 `100`，最多 `100`。\n- `plugin_type` 和 `status` 各接受单个值。\n- 返回完整 `integration_key`；`settings` 中已保存的密钥类值返回 `******`。集成 Key 用于告警接入，与管理接口的 App Key 不同。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-read-list",
+          "metadata": {
+            "sidebarTitle": "查询专属集成列表"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "p": 1,
+                    "limit": 20,
+                    "total": 1,
+                    "items": [
+                      {
+                        "integration_id": 10001,
+                        "channel_id": 20001,
+                        "integration_key": "0123456789abcdef0123456789abcdef100",
+                        "exclusive_data_source_id": 0,
+                        "plugin_id": 9,
+                        "plugin_type": "standard.alert",
+                        "plugin_type_name": "Standard alert",
+                        "category": "event.alert",
+                        "name": "Payments alerts",
+                        "description": "Alerts for the payments channel",
+                        "status": "enabled",
+                        "created_at": 1767225600,
+                        "updated_at": 1767225600,
+                        "last_time": 0,
+                        "last_source_time": 0,
+                        "settings": {}
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationListRequest"
+              },
+              "example": {
+                "channel_id": 20001,
+                "p": 1,
+                "limit": 20
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/info": {
+      "post": {
+        "operationId": "channel-integration-read-info",
+        "summary": "查看专属集成详情",
+        "description": "查看专属集成详情、集成 Key 和脱敏配置。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **协作空间查看**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 查看私有空间还要求您是账户所有者、Admin、空间创建者，或所属团队、管理团队的成员；公开空间仍需上述接口权限。\n- 返回完整 `integration_key`；`settings` 中已保存的密钥类值返回 `******`。集成 Key 用于告警接入，与管理接口的 App Key 不同。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-read-info",
+          "metadata": {
+            "sidebarTitle": "查看专属集成详情"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_id": 10001,
+                    "channel_id": 20001,
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "exclusive_data_source_id": 0,
+                    "plugin_id": 9,
+                    "plugin_type": "standard.alert",
+                    "plugin_type_name": "Standard alert",
+                    "category": "event.alert",
+                    "name": "Payments alerts",
+                    "description": "Alerts for the payments channel",
+                    "status": "enabled",
+                    "created_at": 1767225600,
+                    "updated_at": 1767225600,
+                    "last_time": 0,
+                    "last_source_time": 0,
+                    "settings": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/create": {
+      "post": {
+        "operationId": "channel-integration-write-create",
+        "summary": "创建专属集成",
+        "description": "为已启用的协作空间创建专属告警集成。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 目标空间必须已启用；集成类型须已启用、属于 `event.alert`，且您的订阅支持该类型。\n- 已知 `plugin_type` 时可直接创建，无需先查询类型。拥有**集成中心查看**权限时，可选用 `POST /integration/type/list` 查询支持的告警类型。\n- 省略 `name` 时使用集成类型的默认名称；省略 `integration_key` 时自动生成。自带 Key 须为 35 个字符、匹配账户后缀，且未被其他集成使用。\n- 成功后返回 `integration_id` 和 `integration_key`；后续操作使用返回的 `integration_id`。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-write-create",
+          "metadata": {
+            "sidebarTitle": "创建专属集成"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationCreateResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_id": 10001,
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "同一空间的集成正在变更，请稍后重试。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationCreateRequest"
+              },
+              "example": {
+                "channel_id": 20001,
+                "plugin_type": "standard.alert",
+                "name": "Payments alerts",
+                "description": "Alerts for the payments channel",
+                "settings": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/update": {
+      "post": {
+        "operationId": "channel-integration-write-update",
+        "summary": "更新专属集成",
+        "description": "更新专属集成的名称、描述或配置。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 返回完整 `integration_key`；`settings` 中已保存的密钥类值返回 `******`。集成 Key 用于告警接入，与管理接口的 App Key 不同。\n- 仅更新传入的字段；省略或设为 `null` 时保留原值。`description: \"\"` 清空描述。\n- 传入 `settings` 时按该类型的配置规则保存；已脱敏或省略的密钥类字段保留原值。保留原密钥时，不能同时更改对应的目标地址。\n- 此接口不更改所属空间、集成类型或集成 Key。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-write-update",
+          "metadata": {
+            "sidebarTitle": "更新专属集成"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChannelIntegrationItem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_id": 10001,
+                    "channel_id": 20001,
+                    "integration_key": "0123456789abcdef0123456789abcdef100",
+                    "exclusive_data_source_id": 0,
+                    "plugin_id": 9,
+                    "plugin_type": "standard.alert",
+                    "plugin_type_name": "Standard alert",
+                    "category": "event.alert",
+                    "name": "Payments production alerts",
+                    "description": "",
+                    "status": "enabled",
+                    "created_at": 1767225600,
+                    "updated_at": 1767225600,
+                    "last_time": 0,
+                    "last_source_time": 0,
+                    "settings": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "同一空间的集成正在变更，请稍后重试。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationUpdateRequest"
+              },
+              "example": {
+                "integration_id": 10001,
+                "name": "Payments production alerts",
+                "description": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/delete": {
+      "post": {
+        "operationId": "channel-integration-write-delete",
+        "summary": "删除专属集成",
+        "description": "删除已解除资源引用的专属集成。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 存在其他资源引用时，返回 HTTP 400、`ReferenceExist`，并在 `data.refs` 中列出引用；解除引用后再删除。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-write-delete",
+          "metadata": {
+            "sidebarTitle": "删除专属集成"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyObject"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数无效或存在资源引用；ReferenceExist 错误包含 data.refs。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "description": "阻止删除的引用资源。",
+                          "properties": {
+                            "refs": {
+                              "type": "array",
+                              "description": "引用当前集成的资源；解除引用后再重试。",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "description": "引用资源的类型。"
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "description": "引用资源的名称。"
+                                  },
+                                  "href": {
+                                    "type": "string",
+                                    "description": "引用资源的控制台链接。"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "missingParameter": {
+                    "value": {
+                      "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                      "error": {
+                        "code": "InvalidParameter",
+                        "message": "The specified parameter is not valid."
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "ReferenceExist",
+                    "message": "There still are associated resources, deletion is blocked."
+                  },
+                  "data": {
+                    "refs": [
+                      {
+                        "kind": "channel",
+                        "name": "Payments",
+                        "href": "https://console.flashcat.cloud/channel/20001"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "同一空间的集成正在变更，请稍后重试。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/enable": {
+      "post": {
+        "operationId": "channel-integration-write-enable",
+        "summary": "启用专属集成",
+        "description": "启用专属集成，使其接收告警。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 权限及订阅校验通过后，已处于目标状态时重复调用成功返回。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-write-enable",
+          "metadata": {
+            "sidebarTitle": "启用专属集成"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyObject"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "同一空间的集成正在变更，请稍后重试。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/disable": {
+      "post": {
+        "operationId": "channel-integration-write-disable",
+        "summary": "禁用专属集成",
+        "description": "禁用专属集成，暂停接收告警。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 权限校验通过后，已处于禁用状态时重复调用成功返回。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-write-disable",
+          "metadata": {
+            "sidebarTitle": "禁用专属集成"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/EmptyObject"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "同一空间的集成正在变更，请稍后重试。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/integration/key/rotate": {
+      "post": {
+        "operationId": "channel-integration-write-rotate-key",
+        "summary": "轮换专属集成 Key",
+        "description": "生成新的专属集成 Key，并使原 Key 失效。",
+        "tags": [
+          "On-call/专属集成"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 这些接口管理协作空间专属集成；公共集成使用 `/integration/*`。\n- App Key 的接口授权范围（`api_scopes`）须允许本次操作；权限按 App Key 所属用户判断。\n- 您还须拥有目标空间的管理权限：账户所有者、Admin、空间创建者，或管理团队成员。未设置管理团队时，按所属团队判断。\n- 创建过这条集成不单独授予空间管理权限；集成中心管理权限也不授予本接口访问权。\n- 原 Key 失效后，仍使用原 Key 的推送端将无法接入；请将返回的新 Key 配置到对应监控系统。\n- 每次调用均记录到账户审计日志。\n- 同一空间的集成正在变更时返回 `RequestLocked`，请稍后重试。",
+          "href": "/zh/api-reference/on-call/dedicated-integrations/channel-integration-write-rotate-key",
+          "metadata": {
+            "sidebarTitle": "轮换专属集成 Key"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RotateIntegrationKeyResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "integration_key": "0123456789abcdef0123456789abcdef100"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "423": {
+            "description": "同一空间的集成正在变更，请稍后重试。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "error": {
+                    "code": "RequestLocked",
+                    "message": "Channel integration is being changed, please try again"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelIntegrationIDRequest"
+              },
+              "example": {
+                "integration_id": 10001
+              }
+            }
+          }
+        }
+      }
     }
   },
   "security": [
@@ -68965,6 +70103,10 @@
     {
       "name": "Monitors/规则分组",
       "description": "列出仪表盘与告警规则所在的监控节点树。"
+    },
+    {
+      "name": "On-call/专属集成",
+      "description": "管理各协作空间的专属告警集成。"
     }
   ]
 }

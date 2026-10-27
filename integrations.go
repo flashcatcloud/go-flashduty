@@ -21,7 +21,7 @@ func (s *IntegrationsService) DatasourceImPersonTryLink(ctx context.Context, req
 	return out, resp, nil
 }
 
-// Get integration detail.
+// Get public integration detail.
 //
 // Get a public integration with its stored settings and decrypted integration key.
 //
@@ -35,7 +35,7 @@ func (s *IntegrationsService) IntegrationAPIReadInfo(ctx context.Context, req *G
 	return out, resp, nil
 }
 
-// List integrations.
+// List public integrations.
 //
 // List public integrations with their stored settings, decrypted keys, and edit permissions.
 //
@@ -63,7 +63,7 @@ func (s *IntegrationsService) IntegrationAPIReadTypeList(ctx context.Context, re
 	return out, resp, nil
 }
 
-// Create integration.
+// Create public integration.
 //
 // Create a public integration for a supported alert, change, IM, or webhook type.
 //
@@ -77,7 +77,7 @@ func (s *IntegrationsService) IntegrationAPIWriteCreate(ctx context.Context, req
 	return out, resp, nil
 }
 
-// Delete integration.
+// Delete public integration.
 //
 // Delete an integration that nothing else references.
 //
@@ -86,7 +86,7 @@ func (s *IntegrationsService) IntegrationAPIWriteDelete(ctx context.Context, req
 	return s.client.do(ctx, "/integration/delete", req, nil)
 }
 
-// Disable integration.
+// Disable public integration.
 //
 // Disable an integration without deleting its configuration.
 //
@@ -95,7 +95,7 @@ func (s *IntegrationsService) IntegrationAPIWriteDisable(ctx context.Context, re
 	return s.client.do(ctx, "/integration/disable", req, nil)
 }
 
-// Enable integration.
+// Enable public integration.
 //
 // Re-enable a disabled integration so it accepts events again.
 //
@@ -104,7 +104,7 @@ func (s *IntegrationsService) IntegrationAPIWriteEnable(ctx context.Context, req
 	return s.client.do(ctx, "/integration/enable", req, nil)
 }
 
-// Rotate integration key.
+// Rotate public integration key.
 //
 // Issue a new integration key and invalidate the previous one.
 //
@@ -118,7 +118,7 @@ func (s *IntegrationsService) IntegrationAPIWriteRotateKey(ctx context.Context, 
 	return out, resp, nil
 }
 
-// Update integration.
+// Update public integration.
 //
 // Update an integration's name, description, team, or settings.
 //
