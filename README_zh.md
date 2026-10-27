@@ -66,7 +66,7 @@ client, err := flashduty.NewClientWithAccessToken(accessToken)
 
 ## 公共集成与专属集成
 
-集成中心管理的公共集成使用 `client.Integrations`，可通过订阅或路由接入协作空间，需要集成中心权限。属于某个协作空间的专属集成使用 `client.DedicatedIntegrations`，需要协作空间权限以及对目标空间的访问或管理权限，不需要集成中心权限。
+集成中心管理的公共集成使用 `client.Integrations`，可通过订阅或路由接入协作空间，需要集成中心权限。属于某个协作空间的专属集成使用 `client.DedicatedIntegrations`，读取允许协作空间查看、协作空间管理或集成中心查看权限，同时要求目标空间可见；写入须有协作空间管理权限以及目标空间的管理资格。共用的类型目录也允许这三项读取权限；限制了接口范围的 App Key 须允许 `integration.api:read:typeList` 才能查询。
 
 ```go
 req := &flashduty.ChannelIntegrationListRequest{ChannelID: 20001}
