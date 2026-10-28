@@ -9,7 +9,7 @@ type ChannelsService service
 
 // Create channel.
 //
-// Create a new channel for incident management.
+// Create a channel, optionally with a default escalation rule and channel-exclusive integrations.
 //
 // API: POST /channel/create (channelCreate).
 func (s *ChannelsService) ChannelCreate(ctx context.Context, req *CreateChannelRequest) (*ChannelCreateResponse, *Response, error) {
@@ -23,7 +23,7 @@ func (s *ChannelsService) ChannelCreate(ctx context.Context, req *CreateChannelR
 
 // Delete channel.
 //
-// Delete a channel. Only a `disabled` channel can be deleted; all of its escalation, silence, drop and inhibit rules are deleted with it. The call fails when an integration route still references the channel.
+// Delete a disabled channel together with its rules and channel-exclusive integrations.
 //
 // API: POST /channel/delete (channelDelete).
 func (s *ChannelsService) ChannelDelete(ctx context.Context, req *ChannelIDRequest) (*Response, error) {
@@ -32,7 +32,7 @@ func (s *ChannelsService) ChannelDelete(ctx context.Context, req *ChannelIDReque
 
 // Disable channel.
 //
-// Disable a channel to stop incident routing without deleting it; a disabled channel discards incoming events. Only an `enabled` channel can be disabled.
+// Disable a channel; while disabled it discards all incoming alert events.
 //
 // API: POST /channel/disable (channelDisable).
 func (s *ChannelsService) ChannelDisable(ctx context.Context, req *ChannelIDRequest) (*Response, error) {
@@ -41,7 +41,7 @@ func (s *ChannelsService) ChannelDisable(ctx context.Context, req *ChannelIDRequ
 
 // Enable channel.
 //
-// Enable a channel to resume incident routing. Only a `disabled` channel can be enabled.
+// Enable a disabled channel so it processes incoming alert events again.
 //
 // API: POST /channel/enable (channelEnable).
 func (s *ChannelsService) ChannelEnable(ctx context.Context, req *ChannelIDRequest) (*Response, error) {
@@ -50,7 +50,7 @@ func (s *ChannelsService) ChannelEnable(ctx context.Context, req *ChannelIDReque
 
 // Create escalation rule.
 //
-// Create an escalation rule defining who gets notified and when during an incident.
+// Create an escalation rule that decides who is notified about a channel's incidents, and how.
 //
 // API: POST /channel/escalate/rule/create (channelEscalateRuleCreate).
 func (s *ChannelsService) ChannelEscalateRuleCreate(ctx context.Context, req *CreateEscalationRuleRequest) (*RuleCreateResponse, *Response, error) {
@@ -64,7 +64,7 @@ func (s *ChannelsService) ChannelEscalateRuleCreate(ctx context.Context, req *Cr
 
 // Delete escalation rule.
 //
-// Delete an escalation rule. Only a `disabled` rule can be deleted.
+// Delete a disabled escalation rule so it no longer appears in the channel's rule list.
 //
 // API: POST /channel/escalate/rule/delete (channelEscalateRuleDelete).
 func (s *ChannelsService) ChannelEscalateRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -73,7 +73,7 @@ func (s *ChannelsService) ChannelEscalateRuleDelete(ctx context.Context, req *Ch
 
 // Disable escalation rule.
 //
-// Disable an escalation rule without deleting it. Only an `enabled` rule can be disabled.
+// Disable an escalation rule without deleting it.
 //
 // API: POST /channel/escalate/rule/disable (channelEscalateRuleDisable).
 func (s *ChannelsService) ChannelEscalateRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -82,7 +82,7 @@ func (s *ChannelsService) ChannelEscalateRuleDisable(ctx context.Context, req *C
 
 // Enable escalation rule.
 //
-// Enable a disabled escalation rule. Only a `disabled` rule can be enabled.
+// Enable a disabled escalation rule so it can take new incidents again.
 //
 // API: POST /channel/escalate/rule/enable (channelEscalateRuleEnable).
 func (s *ChannelsService) ChannelEscalateRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -91,7 +91,7 @@ func (s *ChannelsService) ChannelEscalateRuleEnable(ctx context.Context, req *Ch
 
 // Get escalation rule detail.
 //
-// Retrieve detailed information for a specific escalation rule.
+// Return one escalation rule of a channel, including its levels, time windows and filters.
 //
 // API: POST /channel/escalate/rule/info (channelEscalateRuleInfo).
 func (s *ChannelsService) ChannelEscalateRuleInfo(ctx context.Context, req *ChannelRuleIDRequest) (*EscalateRuleItem, *Response, error) {
@@ -105,7 +105,7 @@ func (s *ChannelsService) ChannelEscalateRuleInfo(ctx context.Context, req *Chan
 
 // List escalation rules.
 //
-// List all escalation rules for a channel.
+// List a channel's escalation rules in the order they are evaluated.
 //
 // API: POST /channel/escalate/rule/list (channelEscalateRuleList).
 func (s *ChannelsService) ChannelEscalateRuleList(ctx context.Context, req *ChannelScopedListRequest) (*ListEscalationRulesResponse, *Response, error) {
@@ -128,7 +128,7 @@ func (s *ChannelsService) ChannelEscalateRuleReorder(ctx context.Context, req *R
 
 // Update escalation rule.
 //
-// Update an existing escalation rule configuration.
+// Replace the configuration of an existing escalation rule.
 //
 // API: POST /channel/escalate/rule/update (channelEscalateRuleUpdate).
 func (s *ChannelsService) ChannelEscalateRuleUpdate(ctx context.Context, req *UpdateEscalationRuleRequest) (*Response, error) {
@@ -137,7 +137,7 @@ func (s *ChannelsService) ChannelEscalateRuleUpdate(ctx context.Context, req *Up
 
 // Get channel detail.
 //
-// Retrieve detailed information for a specific channel.
+// Return one channel's full configuration with counts of its active incidents from the last 30 days.
 //
 // API: POST /channel/info (channelInfo).
 func (s *ChannelsService) ChannelInfo(ctx context.Context, req *ChannelInfoRequest) (*ChannelItem, *Response, error) {
@@ -151,7 +151,7 @@ func (s *ChannelsService) ChannelInfo(ctx context.Context, req *ChannelInfoReque
 
 // Batch get channels.
 //
-// Retrieve multiple channels by their IDs.
+// Return the ID, name and status of up to 1,000 channels in one call.
 //
 // API: POST /channel/infos (channelInfos).
 func (s *ChannelsService) ChannelInfos(ctx context.Context, req *ChannelInfosRequest) (*ChannelInfosResponse, *Response, error) {
@@ -165,7 +165,7 @@ func (s *ChannelsService) ChannelInfos(ctx context.Context, req *ChannelInfosReq
 
 // Create inhibit rule.
 //
-// Create an inhibit rule to suppress lower-priority alerts when higher-priority ones are firing.
+// Create an inhibit rule that mutes alert events while a related source alert is still active.
 //
 // API: POST /channel/inhibit/rule/create (channelInhibitRuleCreate).
 func (s *ChannelsService) ChannelInhibitRuleCreate(ctx context.Context, req *CreateInhibitRuleRequest) (*RuleCreateResponse, *Response, error) {
@@ -179,7 +179,7 @@ func (s *ChannelsService) ChannelInhibitRuleCreate(ctx context.Context, req *Cre
 
 // Delete inhibit rule.
 //
-// Delete an inhibit rule. Only a `disabled` rule can be deleted.
+// Delete a disabled inhibit rule so it no longer appears in the channel's rule list.
 //
 // API: POST /channel/inhibit/rule/delete (channelInhibitRuleDelete).
 func (s *ChannelsService) ChannelInhibitRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -188,7 +188,7 @@ func (s *ChannelsService) ChannelInhibitRuleDelete(ctx context.Context, req *Cha
 
 // Disable inhibit rule.
 //
-// Disable an inhibit rule without deleting it. Only an `enabled` rule can be disabled.
+// Disable an inhibit rule without deleting it.
 //
 // API: POST /channel/inhibit/rule/disable (channelInhibitRuleDisable).
 func (s *ChannelsService) ChannelInhibitRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -197,7 +197,7 @@ func (s *ChannelsService) ChannelInhibitRuleDisable(ctx context.Context, req *Ch
 
 // Enable inhibit rule.
 //
-// Enable a disabled inhibit rule. Only a `disabled` rule can be enabled.
+// Enable a disabled inhibit rule so it mutes matching alert events again.
 //
 // API: POST /channel/inhibit/rule/enable (channelInhibitRuleEnable).
 func (s *ChannelsService) ChannelInhibitRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -206,7 +206,7 @@ func (s *ChannelsService) ChannelInhibitRuleEnable(ctx context.Context, req *Cha
 
 // List inhibit rules.
 //
-// List all inhibit rules configured for a channel.
+// List a channel's inhibit rules, oldest first.
 //
 // API: POST /channel/inhibit/rule/list (channelInhibitRuleList).
 func (s *ChannelsService) ChannelInhibitRuleList(ctx context.Context, req *ChannelScopedListRequest) (*ListInhibitRulesResponse, *Response, error) {
@@ -220,7 +220,7 @@ func (s *ChannelsService) ChannelInhibitRuleList(ctx context.Context, req *Chann
 
 // Update inhibit rule.
 //
-// Update an existing inhibit rule configuration.
+// Replace the configuration of an existing inhibit rule.
 //
 // API: POST /channel/inhibit/rule/update (channelInhibitRuleUpdate).
 func (s *ChannelsService) ChannelInhibitRuleUpdate(ctx context.Context, req *UpdateInhibitRuleRequest) (*Response, error) {
@@ -229,7 +229,7 @@ func (s *ChannelsService) ChannelInhibitRuleUpdate(ctx context.Context, req *Upd
 
 // List channels.
 //
-// List channels accessible to the current user with optional filters.
+// List the channels visible to the caller, with filters, sorting and pagination.
 //
 // API: POST /channel/list (channelList).
 func (s *ChannelsService) ChannelList(ctx context.Context, req *ListChannelsRequest) (*ListChannelsResponse, *Response, error) {
@@ -243,7 +243,7 @@ func (s *ChannelsService) ChannelList(ctx context.Context, req *ListChannelsRequ
 
 // Create silence rule.
 //
-// Create a silence rule to suppress notifications matching specified conditions.
+// Create a silence rule that mutes or drops matching alert events during a time window.
 //
 // API: POST /channel/silence/rule/create (channelSilenceRuleCreate).
 func (s *ChannelsService) ChannelSilenceRuleCreate(ctx context.Context, req *CreateSilenceRuleRequest) (*RuleCreateResponse, *Response, error) {
@@ -257,7 +257,7 @@ func (s *ChannelsService) ChannelSilenceRuleCreate(ctx context.Context, req *Cre
 
 // Delete silence rule.
 //
-// Delete a silence rule. Only a `disabled` rule can be deleted.
+// Delete a disabled silence rule so it no longer appears in the channel's rule list.
 //
 // API: POST /channel/silence/rule/delete (channelSilenceRuleDelete).
 func (s *ChannelsService) ChannelSilenceRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -266,7 +266,7 @@ func (s *ChannelsService) ChannelSilenceRuleDelete(ctx context.Context, req *Cha
 
 // Disable silence rule.
 //
-// Disable a silence rule without deleting it. Only an `enabled` rule can be disabled.
+// Disable a silence rule without deleting it.
 //
 // API: POST /channel/silence/rule/disable (channelSilenceRuleDisable).
 func (s *ChannelsService) ChannelSilenceRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -275,7 +275,7 @@ func (s *ChannelsService) ChannelSilenceRuleDisable(ctx context.Context, req *Ch
 
 // Enable silence rule.
 //
-// Enable a disabled silence rule. Only a `disabled` rule can be enabled.
+// Enable a disabled silence rule so it silences matching alert events again.
 //
 // API: POST /channel/silence/rule/enable (channelSilenceRuleEnable).
 func (s *ChannelsService) ChannelSilenceRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -284,7 +284,7 @@ func (s *ChannelsService) ChannelSilenceRuleEnable(ctx context.Context, req *Cha
 
 // List silence rules.
 //
-// List all silence rules configured for a channel.
+// List a channel's silence rules and whether each one is in effect right now.
 //
 // API: POST /channel/silence/rule/list (channelSilenceRuleList).
 func (s *ChannelsService) ChannelSilenceRuleList(ctx context.Context, req *ChannelScopedListRequest) (*ListSilenceRulesResponse, *Response, error) {
@@ -298,7 +298,7 @@ func (s *ChannelsService) ChannelSilenceRuleList(ctx context.Context, req *Chann
 
 // Update silence rule.
 //
-// Update an existing silence rule configuration.
+// Replace the configuration of an existing silence rule.
 //
 // API: POST /channel/silence/rule/update (channelSilenceRuleUpdate).
 func (s *ChannelsService) ChannelSilenceRuleUpdate(ctx context.Context, req *UpdateSilenceRuleRequest) (*Response, error) {
@@ -307,7 +307,7 @@ func (s *ChannelsService) ChannelSilenceRuleUpdate(ctx context.Context, req *Upd
 
 // Create drop rule.
 //
-// Create a drop rule to filter out unwanted alerts before they become incidents.
+// Create a drop rule that discards matching alert events before any alert or incident is created.
 //
 // API: POST /channel/unsubscribe/rule/create (channelUnsubscribeRuleCreate).
 func (s *ChannelsService) ChannelUnsubscribeRuleCreate(ctx context.Context, req *CreateDropRuleRequest) (*RuleCreateResponse, *Response, error) {
@@ -321,7 +321,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleCreate(ctx context.Context, req 
 
 // Delete drop rule.
 //
-// Delete a drop rule. Only a `disabled` rule can be deleted.
+// Delete a disabled drop rule so it no longer appears in the channel's rule list.
 //
 // API: POST /channel/unsubscribe/rule/delete (channelUnsubscribeRuleDelete).
 func (s *ChannelsService) ChannelUnsubscribeRuleDelete(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -330,7 +330,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleDelete(ctx context.Context, req 
 
 // Disable drop rule.
 //
-// Disable a drop rule without deleting it. Only an `enabled` rule can be disabled.
+// Disable a drop rule without deleting it.
 //
 // API: POST /channel/unsubscribe/rule/disable (channelUnsubscribeRuleDisable).
 func (s *ChannelsService) ChannelUnsubscribeRuleDisable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -339,7 +339,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleDisable(ctx context.Context, req
 
 // Enable drop rule.
 //
-// Enable a disabled drop rule. Only a `disabled` rule can be enabled.
+// Enable a disabled drop rule so it discards matching alert events again.
 //
 // API: POST /channel/unsubscribe/rule/enable (channelUnsubscribeRuleEnable).
 func (s *ChannelsService) ChannelUnsubscribeRuleEnable(ctx context.Context, req *ChannelRuleIDRequest) (*Response, error) {
@@ -348,7 +348,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleEnable(ctx context.Context, req 
 
 // List drop rules.
 //
-// List drop rules for a channel.
+// List a channel's drop rules, oldest first.
 //
 // API: POST /channel/unsubscribe/rule/list (channelUnsubscribeRuleList).
 func (s *ChannelsService) ChannelUnsubscribeRuleList(ctx context.Context, req *ChannelScopedListRequest) (*ListDropRulesResponse, *Response, error) {
@@ -362,7 +362,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleList(ctx context.Context, req *C
 
 // Update drop rule.
 //
-// Update an existing drop rule configuration.
+// Replace the name, description and conditions of an existing drop rule.
 //
 // API: POST /channel/unsubscribe/rule/update (channelUnsubscribeRuleUpdate).
 func (s *ChannelsService) ChannelUnsubscribeRuleUpdate(ctx context.Context, req *UpdateDropRuleRequest) (*Response, error) {
@@ -371,7 +371,7 @@ func (s *ChannelsService) ChannelUnsubscribeRuleUpdate(ctx context.Context, req 
 
 // Update channel.
 //
-// Update an existing channel's configuration and settings.
+// Update a channel's settings; only the fields present in the request are changed.
 //
 // API: POST /channel/update (channelUpdate).
 func (s *ChannelsService) ChannelUpdate(ctx context.Context, req *UpdateChannelRequest) (*UpdateChannelResponse, *Response, error) {
@@ -385,7 +385,7 @@ func (s *ChannelsService) ChannelUpdate(ctx context.Context, req *UpdateChannelR
 
 // Get routing rule detail.
 //
-// Retrieve the routing rule configuration for a specific integration. Returns null when the integration has no routing rule configured.
+// Return the routing rule of one shared integration.
 //
 // API: POST /route/info (routeInfo).
 func (s *ChannelsService) RouteInfo(ctx context.Context, req *RouteInfoRequest) (*RouteItem, *Response, error) {
@@ -399,7 +399,7 @@ func (s *ChannelsService) RouteInfo(ctx context.Context, req *RouteInfoRequest) 
 
 // List routing rules.
 //
-// Return routing rules for the specified integrations. Integrations without a configured rule are omitted from the response.
+// Return the routing rules of several shared integrations in one call.
 //
 // API: POST /route/list (routeList).
 func (s *ChannelsService) RouteList(ctx context.Context, req *ListRoutesRequest) (*ListRoutesResponse, *Response, error) {
@@ -413,7 +413,7 @@ func (s *ChannelsService) RouteList(ctx context.Context, req *ListRoutesRequest)
 
 // Upsert routing rule.
 //
-// Create or update routing rules for an integration to direct alerts to specific channels. At least one of `cases` or `default` must be provided.
+// Create or replace the routing rule that sends a shared integration's alerts to channels.
 //
 // API: POST /route/upsert (routeUpsert).
 func (s *ChannelsService) RouteUpsert(ctx context.Context, req *UpsertRouteRequest) (*Response, error) {

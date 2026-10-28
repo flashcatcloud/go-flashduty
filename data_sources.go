@@ -9,7 +9,7 @@ type DataSourcesService service
 
 // Get datasource detail.
 //
-// Retrieve full details of a single data source by its ID, including the `payload` configuration with its configured connection and authentication settings; treat the response as sensitive and avoid logging or forwarding it. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
+// Return one datasource by ID, including its full `payload` configuration.
 //
 // API: POST /monit/datasource/info (monit-datasource-read-info).
 func (s *DataSourcesService) ReadInfo(ctx context.Context, req *IDRequest) (*DataSourceItem, *Response, error) {
@@ -23,7 +23,7 @@ func (s *DataSourcesService) ReadInfo(ctx context.Context, req *IDRequest) (*Dat
 
 // List datasources.
 //
-// Return all data sources for the current account. Optionally filter by `type_ident`. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
+// List the account's datasources that the caller can query, optionally filtered by type or exact name.
 //
 // API: POST /monit/datasource/list (monit-datasource-read-list).
 func (s *DataSourcesService) ReadList(ctx context.Context, req *DataSourceListRequest) (*DataSourceListResponse, *Response, error) {
@@ -79,7 +79,7 @@ func (s *DataSourcesService) ToolsInvoke(ctx context.Context, req *DatasourceToo
 
 // Create datasource.
 //
-// Create a new monitoring data source. The `payload` must include the type-specific configuration block. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
+// Create a monitoring datasource of one of 15 supported types and bind it to a Monitors edge cluster.
 //
 // API: POST /monit/datasource/create (monit-datasource-write-create).
 func (s *DataSourcesService) WriteCreate(ctx context.Context, req *DataSourceUpsertRequest) (*DataSourceItem, *Response, error) {
@@ -93,7 +93,7 @@ func (s *DataSourcesService) WriteCreate(ctx context.Context, req *DataSourceUps
 
 // Delete datasource.
 //
-// Delete a data source by ID. Alert rules referencing this datasource are not blocked: the datasource is removed from their monitoring scope and their open alerts on it are closed automatically.
+// Delete a datasource by ID; alert rules that reference it are not blocked.
 //
 // API: POST /monit/datasource/delete (monit-datasource-write-delete).
 func (s *DataSourcesService) WriteDelete(ctx context.Context, req *IDRequest) (*Response, error) {
@@ -102,7 +102,7 @@ func (s *DataSourcesService) WriteDelete(ctx context.Context, req *IDRequest) (*
 
 // Update datasource.
 //
-// Update an existing data source. Supply `id` plus the fields to change. Supports diagnostic types redis_node, redis_sentinel, mongodb_mongod, mongodb_mongos and kafka; enabled and alerting_enabled are independent.
+// Update a datasource by ID, replacing its name, note, address, payload and edge cluster.
 //
 // API: POST /monit/datasource/update (monit-datasource-write-update).
 func (s *DataSourcesService) WriteUpdate(ctx context.Context, req *DataSourceUpsertRequest) (*DataSourceItem, *Response, error) {

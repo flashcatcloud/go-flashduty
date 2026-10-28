@@ -9,7 +9,7 @@ type IssuesService service
 
 // Export issues as CSV.
 //
-// Export the filtered RUM error tracking issues as a CSV file. The response is a `text/csv` stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope; non-console callers can read the `X-Export-Total` and `X-Export-Truncated` response headers.
+// Export the issues matching the `POST /rum/issue/list` filters as a CSV file of at most 100 rows.
 //
 // The success body is a file, not a JSON envelope: it is returned on Response.Raw.
 //
