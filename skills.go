@@ -51,7 +51,7 @@ func (s *SkillsService) ReadList(ctx context.Context, req *SkillListRequest) (*S
 
 // Delete skill.
 //
-// Delete a skill by ID.
+// Soft-delete a skill so agents stop loading it and its name can be reused.
 //
 // API: POST /safari/skill/delete (skill-write-delete).
 func (s *SkillsService) WriteDelete(ctx context.Context, req *SkillDeleteRequest) (*any, *Response, error) {

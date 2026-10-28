@@ -4,59 +4,17 @@ package flashduty
 
 import "context"
 
-// DashboardsService handles the "Monitors/Dashboards" API resource.
+// DashboardsService handles the "RUM/Dashboards" API resource.
 type DashboardsService service
-
-// Preview draft panel.
-//
-// Execute a draft panel inline without saving a dashboard revision.
-//
-// API: POST /monit/dashboard/panel/preview (monit-dashboard-panel-read-preview).
-func (s *DashboardsService) PanelReadPreview(ctx context.Context, req *DashboardPanelPreviewRequest) (*DashboardPanelPreviewResponse, *Response, error) {
-	out := new(DashboardPanelPreviewResponse)
-	resp, err := s.client.do(ctx, "/monit/dashboard/panel/preview", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Run dashboard panel.
-//
-// Execute one panel of a stored dashboard and return the datasource results.
-//
-// API: POST /monit/dashboard/panel/run (monit-dashboard-panel-read-run).
-func (s *DashboardsService) PanelReadRun(ctx context.Context, req *DashboardPanelRunRequest) (*DashboardPanelRunResponse, *Response, error) {
-	out := new(DashboardPanelRunResponse)
-	resp, err := s.client.do(ctx, "/monit/dashboard/panel/run", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Resolve panel queries.
-//
-// Bind panel queries to datasources and substitute variables without executing them.
-//
-// API: POST /monit/dashboard/runtime/queries/resolve (monit-dashboard-query-read-resolve).
-func (s *DashboardsService) QueryReadResolve(ctx context.Context, req *DashboardQueriesResolveRequest) (*DashboardQueriesResolveResponse, *Response, error) {
-	out := new(DashboardQueriesResolveResponse)
-	resp, err := s.client.do(ctx, "/monit/dashboard/runtime/queries/resolve", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
 
 // Get dashboard detail.
 //
-// Fetch one dashboard with its full definition.
+// Get one dashboard with its current definition and revision.
 //
-// API: POST /monit/dashboard/get (monit-dashboard-read-get).
-func (s *DashboardsService) ReadGet(ctx context.Context, req *DashboardIDRequest) (*DashboardResource, *Response, error) {
-	out := new(DashboardResource)
-	resp, err := s.client.do(ctx, "/monit/dashboard/get", req, out)
+// API: POST /rum/dashboard/get (rum-dashboard-read-get).
+func (s *DashboardsService) ReadGet(ctx context.Context, req *RUMDashboardIDRequest) (*RUMDashboardResource, *Response, error) {
+	out := new(RUMDashboardResource)
+	resp, err := s.client.do(ctx, "/rum/dashboard/get", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -65,40 +23,12 @@ func (s *DashboardsService) ReadGet(ctx context.Context, req *DashboardIDRequest
 
 // List dashboards.
 //
-// List the dashboards in one folder.
+// List the account's dashboards, newest change first by default.
 //
-// API: POST /monit/dashboard/list (monit-dashboard-read-list).
-func (s *DashboardsService) ReadList(ctx context.Context, req *DashboardListRequest) (*DashboardListOutput, *Response, error) {
-	out := new(DashboardListOutput)
-	resp, err := s.client.do(ctx, "/monit/dashboard/list", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Get dashboard outline.
-//
-// Get a dashboard's structure without queries or definitions.
-//
-// API: POST /monit/dashboard/outline (monit-dashboard-read-outline).
-func (s *DashboardsService) ReadOutline(ctx context.Context, req *DashboardOutlineRequest) (*DashboardOutline, *Response, error) {
-	out := new(DashboardOutline)
-	resp, err := s.client.do(ctx, "/monit/dashboard/outline", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Search dashboards.
-//
-// Search dashboards across every readable folder.
-//
-// API: POST /monit/dashboard/search (monit-dashboard-read-search).
-func (s *DashboardsService) ReadSearch(ctx context.Context, req *DashboardSearchRequest) (*DashboardListOutput, *Response, error) {
-	out := new(DashboardListOutput)
-	resp, err := s.client.do(ctx, "/monit/dashboard/search", req, out)
+// API: POST /rum/dashboard/list (rum-dashboard-read-list).
+func (s *DashboardsService) ReadList(ctx context.Context, req *RUMDashboardListRequest) (*RUMDashboardListResponse, *Response, error) {
+	out := new(RUMDashboardListResponse)
+	resp, err := s.client.do(ctx, "/rum/dashboard/list", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -107,12 +37,12 @@ func (s *DashboardsService) ReadSearch(ctx context.Context, req *DashboardSearch
 
 // Get dashboard revision.
 //
-// Fetch one historical revision with its full definition.
+// Get one revision of a dashboard with its full definition.
 //
-// API: POST /monit/dashboard/revisions/get (monit-dashboard-revision-read-get).
-func (s *DashboardsService) RevisionReadGet(ctx context.Context, req *DashboardRevisionGetRequest) (*DashboardRevisionResource, *Response, error) {
-	out := new(DashboardRevisionResource)
-	resp, err := s.client.do(ctx, "/monit/dashboard/revisions/get", req, out)
+// API: POST /rum/dashboard/revisions/get (rum-dashboard-read-revision-get).
+func (s *DashboardsService) ReadRevisionGet(ctx context.Context, req *RUMDashboardRevisionGetRequest) (*RUMDashboardRevisionResource, *Response, error) {
+	out := new(RUMDashboardRevisionResource)
+	resp, err := s.client.do(ctx, "/rum/dashboard/revisions/get", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -123,52 +53,24 @@ func (s *DashboardsService) RevisionReadGet(ctx context.Context, req *DashboardR
 //
 // List a dashboard's revision history, newest first.
 //
-// API: POST /monit/dashboard/revisions/list (monit-dashboard-revision-read-list).
-func (s *DashboardsService) RevisionReadList(ctx context.Context, req *DashboardIDRequest) (*DashboardRevisionListOutput, *Response, error) {
-	out := new(DashboardRevisionListOutput)
-	resp, err := s.client.do(ctx, "/monit/dashboard/revisions/list", req, out)
+// API: POST /rum/dashboard/revisions/list (rum-dashboard-read-revision-list).
+func (s *DashboardsService) ReadRevisionList(ctx context.Context, req *RUMDashboardIDRequest) (*RUMDashboardRevisionListResponse, *Response, error) {
+	out := new(RUMDashboardRevisionListResponse)
+	resp, err := s.client.do(ctx, "/rum/dashboard/revisions/list", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
 	return out, resp, nil
 }
 
-// List trashed dashboards.
+// List deleted dashboards.
 //
-// List deleted dashboards still inside the 30-day retention window.
+// List the deleted dashboards, newest deletion first by default.
 //
-// API: POST /monit/dashboard/trash/list (monit-dashboard-trash-read-list).
-func (s *DashboardsService) TrashReadList(ctx context.Context, req *DashboardTrashListRequest) (*DashboardTrashListOutput, *Response, error) {
-	out := new(DashboardTrashListOutput)
-	resp, err := s.client.do(ctx, "/monit/dashboard/trash/list", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Preview draft variables.
-//
-// Resolve a draft variable set that is not stored in any dashboard.
-//
-// API: POST /monit/dashboard/runtime/variables/preview (monit-dashboard-variable-read-preview).
-func (s *DashboardsService) VariableReadPreview(ctx context.Context, req *DashboardVariablesPreviewRequest) (*DashboardVariablesPreviewResponse, *Response, error) {
-	out := new(DashboardVariablesPreviewResponse)
-	resp, err := s.client.do(ctx, "/monit/dashboard/runtime/variables/preview", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Resolve dashboard variables.
-//
-// Resolve every variable of a stored dashboard for a time range.
-//
-// API: POST /monit/dashboard/runtime/variables/resolve (monit-dashboard-variable-read-resolve).
-func (s *DashboardsService) VariableReadResolve(ctx context.Context, req *DashboardVariablesResolveRequest) (*DashboardVariablesResolveResponse, *Response, error) {
-	out := new(DashboardVariablesResolveResponse)
-	resp, err := s.client.do(ctx, "/monit/dashboard/runtime/variables/resolve", req, out)
+// API: POST /rum/dashboard/trash/list (rum-dashboard-read-trash-list).
+func (s *DashboardsService) ReadTrashList(ctx context.Context, req *RUMDashboardTrashListRequest) (*RUMDashboardTrashListResponse, *Response, error) {
+	out := new(RUMDashboardTrashListResponse)
+	resp, err := s.client.do(ctx, "/rum/dashboard/trash/list", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -177,12 +79,12 @@ func (s *DashboardsService) VariableReadResolve(ctx context.Context, req *Dashbo
 
 // Create dashboard.
 //
-// Create a dashboard from a full definition.
+// Create a RUM custom dashboard from a full definition.
 //
-// API: POST /monit/dashboard/create (monit-dashboard-write-create).
-func (s *DashboardsService) WriteCreate(ctx context.Context, req *DashboardCreateRequest) (*DashboardResource, *Response, error) {
-	out := new(DashboardResource)
-	resp, err := s.client.do(ctx, "/monit/dashboard/create", req, out)
+// API: POST /rum/dashboard/create (rum-dashboard-write-create).
+func (s *DashboardsService) WriteCreate(ctx context.Context, req *RUMDashboardCreateRequest) (*RUMDashboardResource, *Response, error) {
+	out := new(RUMDashboardResource)
+	resp, err := s.client.do(ctx, "/rum/dashboard/create", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -191,26 +93,12 @@ func (s *DashboardsService) WriteCreate(ctx context.Context, req *DashboardCreat
 
 // Delete dashboard.
 //
-// Move a dashboard to the trash.
+// Move a dashboard to the trash under an expected-revision check.
 //
-// API: POST /monit/dashboard/delete (monit-dashboard-write-delete).
-func (s *DashboardsService) WriteDelete(ctx context.Context, req *DashboardDeleteRequest) (*DashboardDeleteOutput, *Response, error) {
-	out := new(DashboardDeleteOutput)
-	resp, err := s.client.do(ctx, "/monit/dashboard/delete", req, out)
-	if err != nil {
-		return nil, resp, err
-	}
-	return out, resp, nil
-}
-
-// Move dashboard.
-//
-// Move a dashboard to another folder without changing its definition.
-//
-// API: POST /monit/dashboard/move (monit-dashboard-write-move).
-func (s *DashboardsService) WriteMove(ctx context.Context, req *DashboardMoveRequest) (*DashboardUpdateOutput, *Response, error) {
-	out := new(DashboardUpdateOutput)
-	resp, err := s.client.do(ctx, "/monit/dashboard/move", req, out)
+// API: POST /rum/dashboard/delete (rum-dashboard-write-delete).
+func (s *DashboardsService) WriteDelete(ctx context.Context, req *RUMDashboardMutationRequest) (*RUMDashboardDeleteResponse, *Response, error) {
+	out := new(RUMDashboardDeleteResponse)
+	resp, err := s.client.do(ctx, "/rum/dashboard/delete", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -219,12 +107,12 @@ func (s *DashboardsService) WriteMove(ctx context.Context, req *DashboardMoveReq
 
 // Restore dashboard.
 //
-// Bring a trashed dashboard back, optionally into a different folder.
+// Restore a dashboard from the trash as a new revision.
 //
-// API: POST /monit/dashboard/restore (monit-dashboard-write-restore).
-func (s *DashboardsService) WriteRestore(ctx context.Context, req *DashboardRestoreRequest) (*DashboardResource, *Response, error) {
-	out := new(DashboardResource)
-	resp, err := s.client.do(ctx, "/monit/dashboard/restore", req, out)
+// API: POST /rum/dashboard/restore (rum-dashboard-write-restore).
+func (s *DashboardsService) WriteRestore(ctx context.Context, req *RUMDashboardMutationRequest) (*RUMDashboardResource, *Response, error) {
+	out := new(RUMDashboardResource)
+	resp, err := s.client.do(ctx, "/rum/dashboard/restore", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -233,12 +121,12 @@ func (s *DashboardsService) WriteRestore(ctx context.Context, req *DashboardRest
 
 // Update dashboard.
 //
-// Replace a dashboard definition with compare-and-swap on the revision counter.
+// Replace a dashboard's definition under an expected-revision check.
 //
-// API: POST /monit/dashboard/update (monit-dashboard-write-update).
-func (s *DashboardsService) WriteUpdate(ctx context.Context, req *DashboardUpdateRequest) (*DashboardUpdateOutput, *Response, error) {
-	out := new(DashboardUpdateOutput)
-	resp, err := s.client.do(ctx, "/monit/dashboard/update", req, out)
+// API: POST /rum/dashboard/update (rum-dashboard-write-update).
+func (s *DashboardsService) WriteUpdate(ctx context.Context, req *RUMDashboardUpdateRequest) (*RUMDashboardUpdateResponse, *Response, error) {
+	out := new(RUMDashboardUpdateResponse)
+	resp, err := s.client.do(ctx, "/rum/dashboard/update", req, out)
 	if err != nil {
 		return nil, resp, err
 	}

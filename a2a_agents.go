@@ -9,7 +9,7 @@ type A2aAgentsService service
 
 // Get A2A agent detail.
 //
-// Get one A2A agent by ID.
+// Return one A2A agent's configuration by ID, with auth secrets masked.
 //
 // API: POST /safari/a2a-agent/get (remote-agent-read-get).
 func (s *A2aAgentsService) ReadGet(ctx context.Context, req *A2aAgentIDRequest) (*A2aAgentItem, *Response, error) {
