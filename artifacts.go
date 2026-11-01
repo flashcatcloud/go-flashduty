@@ -9,7 +9,7 @@ type ArtifactsService service
 
 // Get artifact detail.
 //
-// Get a single published artifact by ID.
+// Get one published artifact by ID, including its source file, owner and public-share state.
 //
 // API: POST /safari/artifact/gallery/get (artifact-read-get).
 func (s *ArtifactsService) ReadGet(ctx context.Context, req *ArtifactIDRequest) (*PublishedArtifactItem, *Response, error) {

@@ -23,7 +23,7 @@ func (s *SchedulesService) ByPerson(ctx context.Context, req *ScheduleByPersonRe
 
 // Create schedule.
 //
-// Create a new on-call schedule (escalation rule schedule).
+// Create an on-call schedule with its rotation layers and shift notification settings.
 //
 // API: POST /schedule/create (scheduleCreate).
 func (s *SchedulesService) Create(ctx context.Context, req *ScheduleUpsertRequest) (*ScheduleIDResponse, *Response, error) {
@@ -37,7 +37,7 @@ func (s *SchedulesService) Create(ctx context.Context, req *ScheduleUpsertReques
 
 // Delete schedules.
 //
-// Delete one or more on-call schedules by ID.
+// Delete one or more on-call schedules by ID, together with their layers.
 //
 // API: POST /schedule/delete (scheduleDelete).
 func (s *SchedulesService) Delete(ctx context.Context, req *ScheduleIDsBodyRequest) (*Response, error) {
@@ -46,7 +46,7 @@ func (s *SchedulesService) Delete(ctx context.Context, req *ScheduleIDsBodyReque
 
 // Get schedule info.
 //
-// Return details of an on-call schedule including the computed schedule layers for the requested time window (max 45 days).
+// Return one on-call schedule with its layers and the shifts computed for a time window of up to 45 days.
 //
 // API: POST /schedule/info (scheduleInfo).
 func (s *SchedulesService) Info(ctx context.Context, req *ScheduleInfoRequest) (*ScheduleItem, *Response, error) {
@@ -60,7 +60,7 @@ func (s *SchedulesService) Info(ctx context.Context, req *ScheduleInfoRequest) (
 
 // Batch get schedules.
 //
-// Return details of multiple on-call schedules by their IDs.
+// Return the basic configuration of several on-call schedules by ID, without layers or computed shifts.
 //
 // API: POST /schedule/infos (scheduleInfos).
 func (s *SchedulesService) Infos(ctx context.Context, req *ScheduleIDsRequest) (*ScheduleSelfResponse, *Response, error) {
@@ -74,7 +74,7 @@ func (s *SchedulesService) Infos(ctx context.Context, req *ScheduleIDsRequest) (
 
 // List schedules.
 //
-// Return a paginated list of on-call schedules. When both start and end are provided (max 45 days apart), computed layer schedules are included.
+// List on-call schedules with filters and pagination; pass `start` and `end` to also compute shifts.
 //
 // API: POST /schedule/list (scheduleList).
 func (s *SchedulesService) List(ctx context.Context, req *ScheduleListRequest) (*ScheduleListResponse, *Response, error) {
@@ -102,7 +102,7 @@ func (s *SchedulesService) Preview(ctx context.Context, req *ScheduleUpsertReque
 
 // List my schedules.
 //
-// Return on-call schedules where the current user is assigned.
+// List the enabled on-call schedules the calling member belongs to, with the member's own shifts in the window.
 //
 // API: POST /schedule/self (scheduleSelf).
 func (s *SchedulesService) Self(ctx context.Context, req *ScheduleSelfRequest) (*ScheduleSelfResponse, *Response, error) {
@@ -116,7 +116,7 @@ func (s *SchedulesService) Self(ctx context.Context, req *ScheduleSelfRequest) (
 
 // Update schedule.
 //
-// Update an existing on-call schedule. Provide schedule_id to identify the schedule.
+// Update an on-call schedule identified by `schedule_id`; the layer list is replaced as a whole.
 //
 // API: POST /schedule/update (scheduleUpdate).
 func (s *SchedulesService) Update(ctx context.Context, req *ScheduleUpsertRequest) (*Response, error) {

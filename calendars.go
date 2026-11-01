@@ -9,7 +9,7 @@ type CalendarsService service
 
 // Delete calendar event.
 //
-// Delete one event of a personal calendar by event_id, or clear the calendar's own events off the days [start_at, end_at). Pass either event_id or both start_at and end_at. Cleared days fall back to the linked holiday calendars and the weekly workdays.
+// Delete one personal-calendar event by ID, or clear the calendar's own events from a date range.
 //
 // API: POST /calendar/event/delete (calEventDelete).
 func (s *CalendarsService) CalEventDelete(ctx context.Context, req *CalEventIDRequest) (*Response, error) {
@@ -18,7 +18,7 @@ func (s *CalendarsService) CalEventDelete(ctx context.Context, req *CalEventIDRe
 
 // List calendar events.
 //
-// Return events for a personal calendar within a year/month/day scope. When month and day are both omitted the whole year is returned. The response also carries days, the resolved state of every day in the scope.
+// Return a personal calendar's events for a year, month or day, plus the resolved state of each day.
 //
 // API: POST /calendar/event/list (calEventList).
 func (s *CalendarsService) CalEventList(ctx context.Context, req *CalEventListRequest) (*CalEventListResponse, *Response, error) {
@@ -32,7 +32,7 @@ func (s *CalendarsService) CalEventList(ctx context.Context, req *CalEventListRe
 
 // Upsert calendar event.
 //
-// Create or update an event the calendar owns (a day off or a working-day override) over the days [start_at, end_at). Omit event_id to create a new event; a given event_id must be an existing event of this calendar. The write clears the calendar's other own events off the same days: an event fully inside the range is deleted, one partly inside is shortened, and one spanning the range is split in two, so the latest write decides those days. end_at must be later than start_at.
+// Create or update one of a personal calendar's own events: a day off or a working-day override.
 //
 // API: POST /calendar/event/upsert (calEventUpsert).
 func (s *CalendarsService) CalEventUpsert(ctx context.Context, req *CalEventUpsertRequest) (*CalEventUpsertResponse, *Response, error) {
@@ -46,7 +46,7 @@ func (s *CalendarsService) CalEventUpsert(ctx context.Context, req *CalEventUpse
 
 // Create calendar.
 //
-// Create a personal service calendar. Each account is limited to 5 calendars.
+// Create a personal service calendar with its weekly workdays and linked holiday calendars.
 //
 // API: POST /calendar/create (calendarCreate).
 func (s *CalendarsService) CalendarCreate(ctx context.Context, req *CalendarCreateRequest) (*CalendarCreateResponse, *Response, error) {
@@ -60,7 +60,7 @@ func (s *CalendarsService) CalendarCreate(ctx context.Context, req *CalendarCrea
 
 // Delete calendar.
 //
-// Delete a personal service calendar. The call fails when referenced by escalation or silence rules.
+// Delete a personal service calendar and its events when no rule references it.
 //
 // API: POST /calendar/delete (calendarDelete).
 func (s *CalendarsService) CalendarDelete(ctx context.Context, req *CalendarIDRequest) (*Response, error) {
@@ -69,7 +69,7 @@ func (s *CalendarsService) CalendarDelete(ctx context.Context, req *CalendarIDRe
 
 // Get calendar info.
 //
-// Return details of a service calendar.
+// Return the details of one service calendar of the account by its ID.
 //
 // API: POST /calendar/info (calendarInfo).
 func (s *CalendarsService) CalendarInfo(ctx context.Context, req *CalendarIDRequest) (*CalendarItem, *Response, error) {
@@ -97,7 +97,7 @@ func (s *CalendarsService) CalendarList(ctx context.Context, req *CalendarListRe
 
 // Update calendar.
 //
-// Update a personal service calendar. Only non-null fields are updated.
+// Update a personal service calendar; only the fields you send are changed.
 //
 // API: POST /calendar/update (calendarUpdate).
 func (s *CalendarsService) CalendarUpdate(ctx context.Context, req *CalendarUpdateRequest) (*Response, error) {

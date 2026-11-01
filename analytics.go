@@ -9,7 +9,7 @@ type AnalyticsService service
 
 // Get account-level insight.
 //
-// Return aggregated incident insight metrics for the entire account.
+// Return incident and alert metrics for the whole account, one row per time bucket.
 //
 // API: POST /insight/account (insightByAccount).
 func (s *AnalyticsService) ByAccount(ctx context.Context, req *InsightQueryRequest) (*DimensionInsightResponse, *Response, error) {
@@ -23,7 +23,7 @@ func (s *AnalyticsService) ByAccount(ctx context.Context, req *InsightQueryReque
 
 // Get channel insight.
 //
-// Return insight metrics aggregated by channel.
+// Return incident and alert metrics grouped by channel, one row per channel per time bucket.
 //
 // API: POST /insight/channel (insightByChannel).
 func (s *AnalyticsService) ByChannel(ctx context.Context, req *InsightQueryRequest) (*DimensionInsightResponse, *Response, error) {
@@ -37,7 +37,7 @@ func (s *AnalyticsService) ByChannel(ctx context.Context, req *InsightQueryReque
 
 // Get responder insight.
 //
-// Return insight metrics aggregated by responder.
+// Return per-responder incident handling metrics, one row per responder per time bucket.
 //
 // API: POST /insight/responder (insightByResponder).
 func (s *AnalyticsService) ByResponder(ctx context.Context, req *InsightQueryRequest) (*ResponderInsightResponse, *Response, error) {
@@ -51,7 +51,7 @@ func (s *AnalyticsService) ByResponder(ctx context.Context, req *InsightQueryReq
 
 // Get team insight.
 //
-// Return insight metrics aggregated by team.
+// Return incident and alert metrics grouped by team, one row per team per time bucket.
 //
 // API: POST /insight/team (insightByTeam).
 func (s *AnalyticsService) ByTeam(ctx context.Context, req *InsightQueryRequest) (*DimensionInsightResponse, *Response, error) {
@@ -65,7 +65,7 @@ func (s *AnalyticsService) ByTeam(ctx context.Context, req *InsightQueryRequest)
 
 // Export channel insight.
 //
-// Export channel insight metrics as a CSV file — one row per channel (and per time/hour bucket when `aggregate_unit`/`split_hours` is used). The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope. `time_zone` defaults to UTC. Rows without a valid channel ID are skipped. Valid `export_fields` keys: channel_id, channel_name, total_incident_cnt, total_incidents_acknowledged, total_incidents_closed, total_incidents_auto_closed, total_incidents_manually_closed, total_incidents_timeout_closed, total_incidents_escalated, total_incidents_manually_escalated, total_incidents_timeout_escalated, total_incidents_reassigned, total_interruptions, total_notifications, total_engaged_seconds, mean_seconds_to_ack, mean_seconds_to_close, noise_reduction_pct, acknowledgement_pct, total_alert_cnt, total_alert_event_cnt, hours. The `hours` column is included by default only when `split_hours` is true. For compatibility, incident-export column keys are also accepted but produce empty columns.
+// Export channel insight metrics as a CSV file with the same rows as `/insight/channel`.
 //
 // The success body is a file, not a JSON envelope: it is returned on Response.Raw.
 //
@@ -76,7 +76,7 @@ func (s *AnalyticsService) ChannelExport(ctx context.Context, req *InsightQueryR
 
 // Export insight incidents.
 //
-// Export the filtered incident analytics list as a CSV file. The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope. CSV headers and formatted values use the request locale, falling back to the member locale and then the account locale. `time_zone` defaults to the account time zone, then `Asia/Shanghai`. Export stops after at most 100,000 rows. Valid `export_fields` keys: incident_id, title, severity, progress, channel_id, channel_name, team_id, team_name, created_at, alert_cnt, active_alert_cnt, alert_event_cnt, seconds_to_ack, seconds_to_close, closed_by, owner_id, owner_name, creator_id, creator_name, closer_id, closer_name, engaged_seconds, hours, notifications, interruptions, acknowledgements, ackers, assignments, reassignments, escalations, manual_escalations, timeout_escalations, assigned_to, raw_assigned_to, escalate_rule_name, responders, raw_responders, snooze_status, snoozed_before, ever_muted, frequency, is_rare, description, labels, fields. When `export_fields` is omitted, all columns are exported.
+// Export the incidents matched by the analytics filters as a CSV file, one row per incident.
 //
 // The success body is a file, not a JSON envelope: it is returned on Response.Raw.
 //
@@ -101,7 +101,7 @@ func (s *AnalyticsService) IncidentList(ctx context.Context, req *InsightInciden
 
 // Export responder insight.
 //
-// Export responder insight metrics as a CSV file — one row per responder (and per time/hour bucket when `aggregate_unit`/`split_hours` is used). The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope. `time_zone` defaults to UTC. Rows without a valid responder ID are skipped. Valid `export_fields` keys: responder_id, responder_name, total_incident_cnt, total_incidents_acknowledged, total_incidents_reassigned, total_incidents_escalated, total_incidents_manually_escalated, total_incidents_timeout_escalated, total_interruptions, total_notifications, total_engaged_seconds, mean_seconds_to_ack, acknowledgement_pct, hours. The `hours` column is included by default only when `split_hours` is true. For compatibility, incident-export column keys are also accepted but produce empty columns.
+// Export responder insight metrics as a CSV file with the same rows as `/insight/responder`.
 //
 // The success body is a file, not a JSON envelope: it is returned on Response.Raw.
 //
@@ -112,7 +112,7 @@ func (s *AnalyticsService) ResponderExport(ctx context.Context, req *InsightQuer
 
 // Export team insight.
 //
-// Export team insight metrics as a CSV file — one row per team (and per time/hour bucket when `aggregate_unit`/`split_hours` is used). The response is a CSV stream delivered with `Content-Disposition: attachment` — it is not a JSON envelope. `time_zone` defaults to UTC. Rows without a valid team ID are skipped. Valid `export_fields` keys: team_id, team_name, total_incident_cnt, total_incidents_acknowledged, total_incidents_closed, total_incidents_auto_closed, total_incidents_manually_closed, total_incidents_timeout_closed, total_incidents_escalated, total_incidents_manually_escalated, total_incidents_timeout_escalated, total_incidents_reassigned, total_interruptions, total_notifications, total_engaged_seconds, mean_seconds_to_ack, mean_seconds_to_close, noise_reduction_pct, acknowledgement_pct, total_alert_cnt, total_alert_event_cnt, hours. The `hours` column is included by default only when `split_hours` is true. For compatibility, incident-export column keys are also accepted but produce empty columns.
+// Export team insight metrics as a CSV file with the same rows as `/insight/team`.
 //
 // The success body is a file, not a JSON envelope: it is returned on Response.Raw.
 //

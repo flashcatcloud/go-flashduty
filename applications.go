@@ -158,7 +158,7 @@ func (s *ApplicationsService) WriteDelete(ctx context.Context, req *RUMApplicati
 
 // Update application.
 //
-// Update an existing RUM application. All fields except `application_id` are optional — only provided fields are updated.
+// Update selected fields of a RUM application; fields left out of the request keep their current values.
 //
 // API: POST /rum/application/update (rum-application-write-update).
 func (s *ApplicationsService) WriteUpdate(ctx context.Context, req *RUMApplicationUpdateRequest) (*Response, error) {
