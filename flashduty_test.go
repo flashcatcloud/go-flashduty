@@ -70,7 +70,7 @@ func TestOptionalObjectRequestFieldOmitsWhenUnset(t *testing.T) {
 
 	req, err := c.newRequest(context.Background(), http.MethodPost, "/silence-rule/create", &CreateSilenceRuleRequest{
 		RuleName: "recurring only",
-		TimeFilters: []CreateSilenceRuleRequestTimeFiltersItem{
+		TimeFilters: []TimeFilter{
 			{Start: "09:00", End: "18:00"},
 		},
 	})
@@ -87,7 +87,7 @@ func TestOptionalObjectRequestFieldOmitsWhenUnset(t *testing.T) {
 
 	req, err = c.newRequest(context.Background(), http.MethodPost, "/silence-rule/create", &CreateSilenceRuleRequest{
 		RuleName:   "one-off only",
-		TimeFilter: CreateSilenceRuleRequestTimeFilter{StartTime: 1000, EndTime: 2000},
+		TimeFilter: OnceTimeFilter{StartTime: 1000, EndTime: 2000},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -567,7 +567,7 @@ func TestNullableRequestFieldsSendExplicitZero(t *testing.T) {
 		{
 			name: "schedule notifies exactly at shift start",
 			path: "/schedule/create",
-			body: &ScheduleUpsertRequest{Notify: ScheduleNotify{AdvanceInTime: Int64(0)}},
+			body: &ScheduleUpsertRequest{Notify: &ScheduleNotify{AdvanceInTime: Int64(0)}},
 			at:   []string{"notify", "advance_in_time"},
 			want: float64(0),
 		},

@@ -89,6 +89,10 @@ func goName(s string) string {
 // serviceName derives a service type prefix from a two-level tag's last segment.
 // "On-call/Incidents" -> "Incidents", "Monitors/Alert rules" -> "AlertRules".
 func serviceName(tag string) string {
+	// Monitors and RUM both tag "Dashboards"; Monitors keeps the published name.
+	if tag == "RUM/Dashboards" {
+		return "RumDashboards"
+	}
 	seg := tag
 	if i := strings.LastIndex(tag, "/"); i >= 0 {
 		seg = tag[i+1:]

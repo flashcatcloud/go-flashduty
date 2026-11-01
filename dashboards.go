@@ -65,7 +65,7 @@ func (s *DashboardsService) ReadGet(ctx context.Context, req *DashboardIDRequest
 
 // List dashboards.
 //
-// List the dashboards in one folder.
+// List the dashboards stored directly in one folder, with word search and paging.
 //
 // API: POST /monit/dashboard/list (monit-dashboard-read-list).
 func (s *DashboardsService) ReadList(ctx context.Context, req *DashboardListRequest) (*DashboardListOutput, *Response, error) {
@@ -191,7 +191,7 @@ func (s *DashboardsService) WriteCreate(ctx context.Context, req *DashboardCreat
 
 // Delete dashboard.
 //
-// Move a dashboard to the trash.
+// Move a dashboard to the trash, where it can be restored for 30 days.
 //
 // API: POST /monit/dashboard/delete (monit-dashboard-write-delete).
 func (s *DashboardsService) WriteDelete(ctx context.Context, req *DashboardDeleteRequest) (*DashboardDeleteOutput, *Response, error) {

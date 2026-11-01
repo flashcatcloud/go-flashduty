@@ -9,7 +9,7 @@ type ErrorIngestionRulesService service
 
 // Create an error ingestion rule.
 //
-// Create a new error ingestion rule that filters which errors are stored.
+// Create a rule whose matching errors are kept out of issue grouping; matched errors are still stored.
 //
 // API: POST /rum/error-ingestion/rules/create (rum-error-ingestion-rules-create).
 func (s *ErrorIngestionRulesService) Create(ctx context.Context, req *RUMErrorIngestionCreateRequest) (*RUMErrorIngestionCreateResponse, *Response, error) {

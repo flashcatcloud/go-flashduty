@@ -37,7 +37,7 @@ func (s *RolesPermissionsService) ReadList(ctx context.Context, req *RoleListReq
 
 // List permissions.
 //
-// Return all available permissions, optionally filtered to those granted to specific roles.
+// List permission entries and mark which of them the given roles grant.
 //
 // API: POST /role/permission/list (role-read-list-permission).
 func (s *RolesPermissionsService) ReadListPermission(ctx context.Context, req *RolePermissionListRequest) (*RolePermissionListResponse, *Response, error) {
@@ -51,7 +51,7 @@ func (s *RolesPermissionsService) ReadListPermission(ctx context.Context, req *R
 
 // List permission factors.
 //
-// Return all permission factors (API, button, menu, URL, visit) granted to the calling member, optionally filtered by type. Requires a member-scoped credential — calls authenticated as the account principal (e.g. an account-level app key) are rejected with a 400, because the account principal implicitly holds every permission.
+// List the permission factors granted to the calling member through their roles.
 //
 // API: POST /role/permission/factor/list (role-read-list-permission-factor).
 func (s *RolesPermissionsService) ReadListPermissionFactor(ctx context.Context, req *PermissionFactorListRequest) (*PermissionFactorListResponse, *Response, error) {
@@ -65,7 +65,7 @@ func (s *RolesPermissionsService) ReadListPermissionFactor(ctx context.Context, 
 
 // Delete a role.
 //
-// Delete a custom role. While members still hold the role, the call fails with `ReferenceExist` unless `is_force` is true.
+// Delete a custom role, optionally revoking it from every member who still holds it.
 //
 // API: POST /role/delete (role-write-delete).
 func (s *RolesPermissionsService) WriteDelete(ctx context.Context, req *RoleDeleteRequest) (*Response, error) {
@@ -74,7 +74,7 @@ func (s *RolesPermissionsService) WriteDelete(ctx context.Context, req *RoleDele
 
 // Disable a role.
 //
-// Disable a custom role to prevent it from granting permissions.
+// Set a custom role's status to disabled without deleting it.
 //
 // API: POST /role/disable (role-write-disable).
 func (s *RolesPermissionsService) WriteDisable(ctx context.Context, req *RoleIDRequest) (*Response, error) {

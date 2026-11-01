@@ -9,7 +9,7 @@ type DiagnosticsService service
 
 // Query structured data.
 //
-// Run a synchronous ad-hoc query against a configured data source and return a stable `query_result.v1` result whose natural shape is frames, records, or samples. This public API requires monit-edge v0.65.0 or later.
+// Run a synchronous ad-hoc query against a data source and return a `query_result.v1` result as frames, records, or samples.
 //
 // API: POST /monit/query/data (monit-read-query-data).
 func (s *DiagnosticsService) QueryData(ctx context.Context, req *QueryDataRequest) (*QueryDataResponse, *Response, error) {

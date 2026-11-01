@@ -79,7 +79,7 @@ func (s *AlertsService) ReadList(ctx context.Context, req *AlertListRequest) (*A
 
 // List alerts by IDs.
 //
-// Return the details of multiple alerts by their IDs in a single request. Note: this endpoint does not paginate — `total` and `has_next_page` are always `0`/`false` and `search_after_ctx` is never set.
+// Return the details of several alerts by ID in one request, without pagination.
 //
 // API: POST /alert/list-by-ids (alert-read-list-by-ids).
 func (s *AlertsService) ReadListByIDs(ctx context.Context, req *AlertListByIDsRequest) (*AlertListResponse, *Response, error) {
@@ -119,9 +119,23 @@ func (s *AlertsService) ReadPipelineList(ctx context.Context, req *AlertPipeline
 	return out, resp, nil
 }
 
+// Preview alert pipeline processing.
+//
+// Run unsaved alert processing rules over one event, the way ingestion would.
+//
+// API: POST /alert/pipeline/preview (alert-read-pipeline-preview).
+func (s *AlertsService) ReadPipelinePreview(ctx context.Context, req *AlertPipelinePreviewRequest) (*AlertPipelinePreviewResponse, *Response, error) {
+	out := new(AlertPipelinePreviewResponse)
+	resp, err := s.client.do(ctx, "/alert/pipeline/preview", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Merge alerts into an incident.
 //
-// Associate one or more alerts with an existing incident. If a source alert previously belonged to a different incident and that incident becomes empty after the merge, it will be automatically closed.
+// Move one or more alerts into an existing incident and close source incidents left empty.
 //
 // API: POST /alert/merge (alert-write-merge).
 func (s *AlertsService) WriteMerge(ctx context.Context, req *AlertMergeRequest) (*Response, error) {

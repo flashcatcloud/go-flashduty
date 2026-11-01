@@ -51,7 +51,7 @@ func (s *StatusPagesService) ChangeCreate(ctx context.Context, req *CreateStatus
 
 // Delete status page event.
 //
-// Delete a status page event.
+// Delete an incident or maintenance event from a status page.
 //
 // API: POST /status-page/change/delete (statusPageChangeDelete).
 func (s *StatusPagesService) ChangeDelete(ctx context.Context, req *DeleteStatusPageChangeRequest) (*Response, error) {
@@ -74,7 +74,7 @@ func (s *StatusPagesService) ChangeInfo(ctx context.Context, req *StatusPagesCha
 
 // List status page events.
 //
-// List status page events for console management. Unlike the public display endpoints, the response includes hidden components.
+// List the incidents or maintenances of a status page by status and time window, including hidden components.
 //
 // API: GET /status-page/change/list (statusPageChangeList).
 func (s *StatusPagesService) ChangeList(ctx context.Context, req *StatusPagesChangeListRequest) (*StatusPageChangeListResponse, *Response, error) {
@@ -111,7 +111,7 @@ func (s *StatusPagesService) ChangeTimelineDelete(ctx context.Context, req *Dele
 
 // Update event timeline entry.
 //
-// Update a timeline entry for a status page event.
+// Edit the time or description of a status page event timeline entry.
 //
 // API: POST /status-page/change/timeline/update (statusPageChangeTimelineUpdate).
 func (s *StatusPagesService) ChangeTimelineUpdate(ctx context.Context, req *UpdateStatusPageChangeTimelineRequest) (*Response, error) {
@@ -120,7 +120,7 @@ func (s *StatusPagesService) ChangeTimelineUpdate(ctx context.Context, req *Upda
 
 // Update status page event.
 //
-// Update an existing status page event.
+// Update the title, responders, or linked events of a status page event.
 //
 // API: POST /status-page/change/update (statusPageChangeUpdate).
 func (s *StatusPagesService) ChangeUpdate(ctx context.Context, req *UpdateStatusPageChangeRequest) (*Response, error) {
@@ -129,7 +129,7 @@ func (s *StatusPagesService) ChangeUpdate(ctx context.Context, req *UpdateStatus
 
 // Delete status page component.
 //
-// Delete a service component from a status page.
+// Delete one or more service components from a status page.
 //
 // API: POST /status-page/component/delete (statusPageComponentDelete).
 func (s *StatusPagesService) ComponentDelete(ctx context.Context, req *DeleteStatusPageComponentRequest) (*Response, error) {
@@ -138,7 +138,7 @@ func (s *StatusPagesService) ComponentDelete(ctx context.Context, req *DeleteSta
 
 // Upsert status page component.
 //
-// Create or update a service component on a status page.
+// Create or update one or more service components on a status page.
 //
 // API: POST /status-page/component/upsert (statusPageComponentUpsert).
 func (s *StatusPagesService) ComponentUpsert(ctx context.Context, req *UpsertStatusPageComponentRequest) (*UpsertStatusPageComponentResponse, *Response, error) {
@@ -152,7 +152,7 @@ func (s *StatusPagesService) ComponentUpsert(ctx context.Context, req *UpsertSta
 
 // Create status page.
 //
-// Create a new status page.
+// Create a public or internal status page for the account.
 //
 // API: POST /status-page/create (statusPageCreate).
 func (s *StatusPagesService) Create(ctx context.Context, req *CreateStatusPageRequest) (*CreateStatusPageResponse, *Response, error) {
@@ -166,7 +166,7 @@ func (s *StatusPagesService) Create(ctx context.Context, req *CreateStatusPageRe
 
 // Delete status page.
 //
-// Delete a status page.
+// Delete a status page together with its events and subscriptions.
 //
 // API: POST /status-page/delete (statusPageDelete).
 func (s *StatusPagesService) Delete(ctx context.Context, req *DeleteStatusPageRequest) (*Response, error) {
@@ -231,7 +231,7 @@ func (s *StatusPagesService) MigrateStructure(ctx context.Context, req *MigrateS
 
 // Cancel status page migration.
 //
-// Cancel an in-progress status page migration job. Only jobs currently in the `running` state can be cancelled.
+// Cancel a running Atlassian Statuspage migration job.
 //
 // API: POST /status-page/migration/cancel (statusPageMigrationCancel).
 func (s *StatusPagesService) MigrationCancel(ctx context.Context, req *CancelStatusPageMigrationRequest) (*Response, error) {
@@ -254,7 +254,7 @@ func (s *StatusPagesService) MigrationStatus(ctx context.Context, req *StatusPag
 
 // Delete status page section.
 //
-// Delete a section from a status page.
+// Delete one or more sections from a status page; their components move to the top level.
 //
 // API: POST /status-page/section/delete (statusPageSectionDelete).
 func (s *StatusPagesService) SectionDelete(ctx context.Context, req *DeleteStatusPageSectionRequest) (*Response, error) {
@@ -263,7 +263,7 @@ func (s *StatusPagesService) SectionDelete(ctx context.Context, req *DeleteStatu
 
 // Upsert status page section.
 //
-// Create or update a section on a status page.
+// Create or update one or more sections that group components on a status page.
 //
 // API: POST /status-page/section/upsert (statusPageSectionUpsert).
 func (s *StatusPagesService) SectionUpsert(ctx context.Context, req *UpsertStatusPageSectionRequest) (*UpsertStatusPageSectionResponse, *Response, error) {
@@ -277,7 +277,7 @@ func (s *StatusPagesService) SectionUpsert(ctx context.Context, req *UpsertStatu
 
 // Export subscribers.
 //
-// Export subscribers list for a status page as a CSV attachment. The response is a `text/csv` file with columns: Method, Recipient, Components, Subscribe All, Locale.
+// Export the subscribers of a status page as a CSV file.
 //
 // The success body is a file, not a JSON envelope: it is returned on Response.Raw.
 //
@@ -288,7 +288,7 @@ func (s *StatusPagesService) SubscriberExport(ctx context.Context, req *ExportSt
 
 // Import subscribers.
 //
-// Bulk import subscribers for a status page. The account must be allowlisted for subscriber import; otherwise the call is rejected with an access-denied error.
+// Bulk import subscribers into a status page without sending confirmation emails.
 //
 // API: POST /status-page/subscriber/import (statusPageSubscriberImport).
 func (s *StatusPagesService) SubscriberImport(ctx context.Context, req *ImportStatusPageSubscribersRequest) (*Response, error) {
@@ -311,7 +311,7 @@ func (s *StatusPagesService) SubscriberList(ctx context.Context, req *StatusPage
 
 // Delete status page template.
 //
-// Delete an event template from a status page.
+// Delete a predefined event template or a message template from a status page.
 //
 // API: POST /status-page/template/delete (statusPageTemplateDelete).
 func (s *StatusPagesService) TemplateDelete(ctx context.Context, req *DeleteStatusPageTemplateRequest) (*Response, error) {
@@ -320,7 +320,7 @@ func (s *StatusPagesService) TemplateDelete(ctx context.Context, req *DeleteStat
 
 // List status page templates.
 //
-// List all event templates for a status page.
+// List the predefined event templates or message templates of a status page.
 //
 // API: GET /status-page/template/list (statusPageTemplateList).
 func (s *StatusPagesService) TemplateList(ctx context.Context, req *StatusPagesTemplateListRequest) (*ListStatusPageTemplatesResponse, *Response, error) {
@@ -334,7 +334,7 @@ func (s *StatusPagesService) TemplateList(ctx context.Context, req *StatusPagesT
 
 // Upsert status page template.
 //
-// Create or update an event template for a status page.
+// Create or update a predefined event template or a message template of a status page.
 //
 // API: POST /status-page/template/upsert (statusPageTemplateUpsert).
 func (s *StatusPagesService) TemplateUpsert(ctx context.Context, req *UpsertStatusPageTemplateRequest) (*UpsertStatusPageTemplateResponse, *Response, error) {
@@ -348,7 +348,7 @@ func (s *StatusPagesService) TemplateUpsert(ctx context.Context, req *UpsertStat
 
 // Update status page.
 //
-// Update an existing status page configuration.
+// Update the configuration of an existing status page; omitted fields keep their values.
 //
 // API: POST /status-page/update (statusPageUpdate).
 func (s *StatusPagesService) Update(ctx context.Context, req *UpdateStatusPageRequest) (*Response, error) {
