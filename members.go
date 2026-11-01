@@ -18,7 +18,7 @@ func (s *MembersService) MemberDelete(ctx context.Context, req *MemberDeleteRequ
 
 // Grant role to member.
 //
-// Add role assignments to a member. Role IDs that do not exist are silently ignored; if none resolve, the call is a no-op success.
+// Add one or more roles to a member's existing role assignments.
 //
 // API: POST /member/role/grant (memberGrantRole).
 func (s *MembersService) MemberGrantRole(ctx context.Context, req *MemberRoleGrantRequest) (*Response, error) {
@@ -27,7 +27,7 @@ func (s *MembersService) MemberGrantRole(ctx context.Context, req *MemberRoleGra
 
 // Get current member info.
 //
-// Return the profile of the member the credential belongs to. Requires a member-scoped credential — calls authenticated as the account principal (e.g. an account-level app key) are rejected with a 400.
+// Return the profile and account context of the member who owns the credential.
 //
 // API: POST /member/info (memberInfo).
 func (s *MembersService) MemberInfo(ctx context.Context) (*MemberInfoResponse, *Response, error) {
@@ -69,7 +69,7 @@ func (s *MembersService) MemberList(ctx context.Context, req *MemberListRequest)
 
 // Notify members.
 //
-// Send an email to account members on behalf of the caller, with content the caller supplies. Only callable with a credential minted for an AI SRE session; any other credential is rejected with `AccessDenied`. Delivery is asynchronous — `accepted` means the email was queued, not that it was delivered.
+// Email account members a message written by the calling AI SRE session.
 //
 // API: POST /member/notify (memberNotify).
 func (s *MembersService) MemberNotify(ctx context.Context, req *MemberNotifyRequest) (*MemberNotifyResponse, *Response, error) {
@@ -92,7 +92,7 @@ func (s *MembersService) MemberResetInfo(ctx context.Context, req *MemberResetIn
 
 // Revoke role from member.
 //
-// Remove role assignments from a member. Role IDs that do not exist are silently ignored; if none resolve, the call is a no-op success.
+// Remove one or more roles from a member's role assignments.
 //
 // API: POST /member/role/revoke (memberRevokeRole).
 func (s *MembersService) MemberRevokeRole(ctx context.Context, req *MemberRoleRevokeRequest) (*Response, error) {
@@ -101,7 +101,7 @@ func (s *MembersService) MemberRevokeRole(ctx context.Context, req *MemberRoleRe
 
 // Update member roles.
 //
-// Replace all role assignments for a member at once. Role IDs that do not exist are silently dropped; an empty `role_ids` resets the member to the built-in Viewer role (ID 8).
+// Replace a member's role assignments with the given set of roles.
 //
 // API: POST /member/role/update (memberUpdateRole).
 func (s *MembersService) MemberUpdateRole(ctx context.Context, req *MemberRoleUpdateRequest) (*Response, error) {

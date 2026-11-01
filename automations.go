@@ -9,7 +9,7 @@ type AutomationsService service
 
 // Get Automation rule.
 //
-// Get one Automation rule by ID.
+// Get one Automation rule by ID, including its trigger settings and execution destination.
 //
 // API: POST /safari/automation/rule/get (automation-rule-read-get).
 func (s *AutomationsService) RuleReadGet(ctx context.Context, req *AutomationRuleIDRequest) (*AutomationRuleItem, *Response, error) {
@@ -23,7 +23,7 @@ func (s *AutomationsService) RuleReadGet(ctx context.Context, req *AutomationRul
 
 // List Automation rules.
 //
-// List Automation rules visible to the caller.
+// List Automation rules visible to the caller, newest update first, with pagination and filters.
 //
 // API: POST /safari/automation/rule/list (automation-rule-read-list).
 func (s *AutomationsService) RuleReadList(ctx context.Context, req *AutomationRuleListRequest) (*AutomationRuleListResponse, *Response, error) {
@@ -37,7 +37,7 @@ func (s *AutomationsService) RuleReadList(ctx context.Context, req *AutomationRu
 
 // Create Automation rule.
 //
-// Create an Automation rule with schedule, HTTP POST, and On-call incident triggers.
+// Create an Automation rule with schedule, HTTP POST, On-call incident, and war room triggers.
 //
 // API: POST /safari/automation/rule/create (automation-rule-write-create).
 func (s *AutomationsService) RuleWriteCreate(ctx context.Context, req *AutomationRuleCreateRequest) (*AutomationRuleItem, *Response, error) {
@@ -51,7 +51,7 @@ func (s *AutomationsService) RuleWriteCreate(ctx context.Context, req *Automatio
 
 // Delete Automation rule.
 //
-// Delete an Automation rule.
+// Delete an Automation rule together with all of its triggers and their subscriptions.
 //
 // API: POST /safari/automation/rule/delete (automation-rule-write-delete).
 func (s *AutomationsService) RuleWriteDelete(ctx context.Context, req *AutomationRuleIDRequest) (*any, *Response, error) {
@@ -65,7 +65,7 @@ func (s *AutomationsService) RuleWriteDelete(ctx context.Context, req *Automatio
 
 // Run Automation rule.
 //
-// Manually run an Automation rule immediately, outside its schedule.
+// Run an Automation rule once right now, regardless of its triggers or enabled state.
 //
 // API: POST /safari/automation/rule/run (automation-rule-write-run).
 func (s *AutomationsService) RuleWriteRun(ctx context.Context, req *AutomationRuleIDRequest) (*ManualRunRuleResult, *Response, error) {
@@ -79,7 +79,7 @@ func (s *AutomationsService) RuleWriteRun(ctx context.Context, req *AutomationRu
 
 // Update Automation rule.
 //
-// Update mutable Automation rule fields, including HTTP POST and On-call incident trigger settings.
+// Update an Automation rule's fields and trigger settings; omitted fields keep their current values.
 //
 // API: POST /safari/automation/rule/update (automation-rule-write-update).
 func (s *AutomationsService) RuleWriteUpdate(ctx context.Context, req *AutomationRuleUpdateRequest) (*AutomationRuleItem, *Response, error) {
@@ -93,7 +93,7 @@ func (s *AutomationsService) RuleWriteUpdate(ctx context.Context, req *Automatio
 
 // List Automation runs.
 //
-// List run history for a rule the caller can manage.
+// List the run history of one Automation rule, newest first, with status, trigger, and time filters.
 //
 // API: POST /safari/automation/run/list (automation-run-read-list).
 func (s *AutomationsService) RunReadList(ctx context.Context, req *AutomationRunListRequest) (*AutomationRunListResponse, *Response, error) {
@@ -107,7 +107,7 @@ func (s *AutomationsService) RunReadList(ctx context.Context, req *AutomationRun
 
 // List Automation templates.
 //
-// List preset Automation templates for the requested locale.
+// List built-in Automation templates that prefill the create-rule form, in Chinese or English.
 //
 // API: POST /safari/automation/template/list (automation-template-read-list).
 func (s *AutomationsService) TemplateReadList(ctx context.Context, req *AutomationTemplateListRequest) (*AutomationTemplateListResponse, *Response, error) {

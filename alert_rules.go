@@ -9,7 +9,7 @@ type AlertRulesService service
 
 // Get rule audit snapshot.
 //
-// Return the audit record (including the `content` field, a JSON string of the rule snapshot at that point in time).
+// Return one audit record of an alert rule, including the rule snapshot stored in `content`.
 //
 // API: POST /monit/rule/audit/detail (monit-rule-read-audit-detail).
 func (s *AlertRulesService) ReadAuditDetail(ctx context.Context, req *AuditRecordIDRequest) (*AlertRuleAudit, *Response, error) {
@@ -37,7 +37,7 @@ func (s *AlertRulesService) ReadAudits(ctx context.Context, req *RuleIDRequest) 
 
 // Get rule counts by channel.
 //
-// Return an object mapping channel name to the number of rules routing alerts to that channel. If a channel name cannot be resolved, the channel ID (as a string) is used as the key.
+// Return how many alert rules route alerts to each collaboration space, keyed by space name.
 //
 // API: POST /monit/rule/counter/channel (monit-rule-read-counter-channel).
 func (s *AlertRulesService) ReadCounterChannel(ctx context.Context) (*RuleCounterChannelResponse, *Response, error) {
@@ -79,7 +79,7 @@ func (s *AlertRulesService) ReadInfoV2(ctx context.Context, req *RuleIDRequest) 
 
 // List alert rules.
 //
-// Return the basic information of all alert rules in a folder. For full rule details, call `POST /monit/rule/v2/info`.
+// Return basic information for the alert rules in a folder; call `POST /monit/rule/v2/info` for full details.
 //
 // API: POST /monit/rule/list/basic (monit-rule-read-list).
 func (s *AlertRulesService) ReadList(ctx context.Context, req *RuleListRequest) (*RuleBasicListResponse, *Response, error) {
@@ -125,7 +125,7 @@ func (s *AlertRulesService) WriteDeleteBatch(ctx context.Context, req *RuleIDsRe
 
 // Batch update rule fields.
 //
-// Update specific fields across multiple alert rules at once. Only the fields listed in `fields` are applied.
+// Update the fields listed in `fields` on multiple alert rules in one call.
 //
 // API: POST /monit/rule/update/fields (monit-rule-write-fields-update).
 func (s *AlertRulesService) WriteFieldsUpdate(ctx context.Context, req *RuleFieldsUpdateRequest) (*RuleNameMessageListResponse, *Response, error) {
