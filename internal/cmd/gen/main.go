@@ -88,6 +88,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	unwrapNullableUnions(spec)
 
 	g := &Gen{
 		root:       root,
@@ -126,6 +127,13 @@ func run() error {
 	g.reqGoNames = g.computeRequestReachable(asMap(spec["paths"]))
 
 	services := g.collectServices(asMap(spec["paths"]))
+	seen := map[string]string{}
+	for _, svc := range services {
+		if other, ok := seen[svc.Name]; ok {
+			return fmt.Errorf("tags %q and %q both generate service %s", other, svc.Tag, svc.Name)
+		}
+		seen[svc.Name] = svc.Tag
+	}
 
 	// Emit models first so type resolution can synthesize nested types, then
 	// services, then the wiring.
@@ -586,8 +594,14 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 	}
 	merged := map[string]any{"type": "object"}
 	props := map[string]any{}
-	for _, pm := range resolvedParts {
+	for i, pm := range resolvedParts {
 		for k, v := range asMap(pm["properties"]) {
+			// oneOf arms are alternatives: a field they type differently can only
+			// be `any`. An allOf part refines earlier parts, so it simply wins.
+			if prev, ok := asMap(props[k]), props[k] != nil; ok && i >= len(parts) && !sameJSONShape(prev, asMap(v)) {
+				props[k] = map[string]any{"description": asMap(v)["description"]}
+				continue
+			}
 			props[k] = v
 		}
 	}
@@ -611,6 +625,14 @@ func (g *Gen) mergeAllOf(s map[string]any) map[string]any {
 		merged["required"] = required
 	}
 	return merged
+}
+
+// sameJSONShape reports whether two property schemas decode the same JSON type.
+func sameJSONShape(a, b map[string]any) bool {
+	if typeStr(a) != typeStr(b) || refName(a) != refName(b) {
+		return false
+	}
+	return typeStr(a) != "array" || sameJSONShape(asMap(a["items"]), asMap(b["items"]))
 }
 
 func (g *Gen) emitModels() string {
@@ -1136,6 +1158,41 @@ func typeStr(s map[string]any) string {
 		}
 	}
 	return ""
+}
+
+// unwrapNullableUnions rewrites each `oneOf|anyOf: [X, {type: null}]` in place
+// into X marked `nullable: true`, the spelling goTypeOf and isNullable handle.
+// Left alone, goTypeOf reads the union as polymorphic and emits `any`.
+func unwrapNullableUnions(v any) {
+	switch node := v.(type) {
+	case []any:
+		for _, item := range node {
+			unwrapNullableUnions(item)
+		}
+	case map[string]any:
+		for _, key := range []string{"oneOf", "anyOf"} {
+			arms := asSlice(node[key])
+			if len(arms) != 2 {
+				continue
+			}
+			for i, arm := range arms {
+				if typeStr(asMap(arm)) != "null" {
+					continue
+				}
+				delete(node, key)
+				for k, val := range asMap(arms[1-i]) {
+					if _, ok := node[k]; !ok {
+						node[k] = val
+					}
+				}
+				node["nullable"] = true
+				break
+			}
+		}
+		for _, child := range node {
+			unwrapNullableUnions(child)
+		}
+	}
 }
 
 // isNullable reports whether a property schema marks itself nullable, in

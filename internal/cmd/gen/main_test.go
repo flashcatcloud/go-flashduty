@@ -457,3 +457,70 @@ func TestOpClassificationPredicates(t *testing.T) {
 		t.Error("JSON request body must stay on the generated path")
 	}
 }
+
+// A nullable reference spelled as a union must generate the same pointer as
+// `$ref` + `nullable: true`, not the `any` of a polymorphic field.
+func TestNullableUnionOfRefBecomesPointer(t *testing.T) {
+	for _, key := range []string{"oneOf", "anyOf"} {
+		t.Run(key, func(t *testing.T) {
+			schema := map[string]any{
+				"properties": map[string]any{
+					"notify": map[string]any{
+						key: []any{
+							map[string]any{"$ref": "#/components/schemas/Notify"},
+							map[string]any{"type": "null"},
+						},
+						"description": "Kept from the union.",
+					},
+					"either": map[string]any{
+						key: []any{
+							map[string]any{"$ref": "#/components/schemas/Notify"},
+							map[string]any{"$ref": "#/components/schemas/Other"},
+						},
+					},
+				},
+			}
+			g := newTestGen(map[string]any{
+				"Notify": map[string]any{"type": "object", "properties": map[string]any{"by": map[string]any{"type": "string"}}},
+				"Other":  map[string]any{"type": "object", "properties": map[string]any{"id": map[string]any{"type": "string"}}},
+			})
+			unwrapNullableUnions(schema)
+			src := g.emitStruct("Parent", schema)
+			if !strings.Contains(src, "Notify *Notify") {
+				t.Fatalf("nullable union did not become a pointer; got:\n%s", src)
+			}
+			if !strings.Contains(src, "Either any") {
+				t.Fatalf("a real union must stay any; got:\n%s", src)
+			}
+			if !strings.Contains(src, "Kept from the union.") {
+				t.Fatalf("union description lost; got:\n%s", src)
+			}
+		})
+	}
+}
+
+// A field typed differently across oneOf arms cannot be one Go type: picking an
+// arm fails to decode every other arm.
+func TestOneOfFieldTypedDifferentlyByArmBecomesAny(t *testing.T) {
+	g := newTestGen(map[string]any{
+		"Table": map[string]any{"type": "object", "properties": map[string]any{
+			"sort":  map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
+			"title": map[string]any{"type": "string"},
+		}},
+		"Bar": map[string]any{"type": "object", "properties": map[string]any{
+			"sort":  map[string]any{"type": "string"},
+			"title": map[string]any{"type": "string"},
+		}},
+	})
+	merged := g.mergeAllOf(map[string]any{"oneOf": []any{
+		map[string]any{"$ref": "#/components/schemas/Table"},
+		map[string]any{"$ref": "#/components/schemas/Bar"},
+	}})
+	src := g.emitStruct("Viz", merged)
+	if !strings.Contains(src, "Sort any") {
+		t.Fatalf("conflicting field must be any; got:\n%s", src)
+	}
+	if !strings.Contains(src, "Title *string") {
+		t.Fatalf("agreeing field must keep its type; got:\n%s", src)
+	}
+}
