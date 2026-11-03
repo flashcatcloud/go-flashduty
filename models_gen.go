@@ -1247,6 +1247,8 @@ type AlertRuleRecoveryQueryV2 struct {
 
 // AlertRuleThresholdV2 is generated from the Flashduty OpenAPI schema.
 type AlertRuleThresholdV2 struct {
+	// Count an active instance that is missing from every condition query of a successful round as one normal round, instead of freezing the instance in its current state. Only valid with `recovery_mode` `condition_clear` or `expression_match`; omitting it keeps the freeze-on-absence behavior of existing rules. For an enabled rule, every registered monit-edge in the clusters the rule matches must be v0.77.0 or later, otherwise saving the rule fails with `InvalidParameter`.
+	AbsentCountsAsNormal bool `json:"absent_counts_as_normal,omitempty" toon:"absent_counts_as_normal,omitempty"`
 	// Fire after the alert condition is met this many times; when enabled, minimum 1 and maximum 10000. Combined with `alerting_window_size` it means at least N hits within the last M evaluations.
 	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
 	// Optional sliding window size M: fire only when the condition is met at least `alerting_check_times` times within the last M evaluations. Omit for consecutive mode (N consecutive hits). Must satisfy `alerting_check_times` <= M <= 10000.
@@ -6774,8 +6776,6 @@ type KnowledgeWarning struct {
 type LicenseListResponse struct {
 	// People holding an active license.
 	Items []LicensePersonItem `json:"items" toon:"items"`
-	// Whether the account has used up its license release quota for the current 30-day window. While `true`, releasing a seat fails with error code `NoLicense`.
-	ReleaseLimited bool `json:"release_limited" toon:"release_limited"`
 	// Number of people holding an active license.
 	Total int64 `json:"total" toon:"total"`
 }
@@ -10176,9 +10176,11 @@ type RUMDataFieldMeta struct {
 
 // RUMDataQueryDefinition is generated from the Flashduty OpenAPI schema.
 type RUMDataQueryDefinition struct {
-	// When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows.
+	// Set to `true` to get a time series of a single `COUNT` or `SUM` as the increments of its running total: each bucket holds only what the bucket adds, so the running sum ends at the aggregate over the range. Requires `format` `time_series` and exactly one select field, `COUNT(...)` or `SUM(...)`, with an alias; a statement with `SELECT DISTINCT`, `GROUP BY`, `HAVING` or `LIMIT` makes the whole request fail with `InvalidParameter`. `COUNT(DISTINCT x)` is accepted and counts each `x` in its first bucket only. The query always runs unsampled, so the response carries no `sampling`.
+	Cumulative bool `json:"cumulative,omitempty" toon:"cumulative,omitempty"`
+	// When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows. A query that would otherwise be sampled can wait for the account's other unsampled queries; if it waits too long, its `error` entry is set with code `BadRequest`.
 	DisableSampling bool `json:"disable_sampling,omitempty" toon:"disable_sampling,omitempty"`
-	// Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A DQL parse error is reported in this query's `error` entry.
+	// Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A lone `*` matches every event and filters nothing. A DQL parse error is reported in this query's `error` entry.
 	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
 	// Output format. `table` returns rows; `time_series` returns bucketed time-series rows.
 	Format string `json:"format" toon:"format"`
@@ -10200,7 +10202,7 @@ type RUMDataQueryDefinition struct {
 type RUMDataQueryOutput struct {
 	// Query result. Omitted when the query failed.
 	Data RUMDataQueryResult `json:"data" toon:"data"`
-	// Set when this query failed after request validation (unknown table or column, invalid `dql` or `search_after_ctx`, database error). The code is always `InternalError`. Omitted when the query succeeded.
+	// Set when this query failed after request validation (unknown table or column, invalid `search_after_ctx`, database error). The code is `InternalError`, `InvalidParameter` when `dql` cannot be parsed, or `BadRequest` when the query times out. Omitted when the query succeeded.
 	Error any `json:"error" toon:"error"`
 }
 
