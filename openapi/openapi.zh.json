@@ -13853,10 +13853,6 @@
             },
             "type": "array"
           },
-          "release_limited": {
-            "description": "当前 30 天窗口内的许可释放配额是否已用尽。为 `true` 时释放席位会返回错误码 `NoLicense`。",
-            "type": "boolean"
-          },
           "total": {
             "description": "持有有效许可的人员数量。",
             "format": "int64",
@@ -13865,8 +13861,7 @@
         },
         "required": [
           "total",
-          "items",
-          "release_limited"
+          "items"
         ],
         "type": "object"
       },
@@ -20823,12 +20818,16 @@
       "RumDataQueryDefinition": {
         "description": "单个 RUM 数据查询定义。",
         "properties": {
+          "cumulative": {
+            "description": "设为 `true` 时，把单个 `COUNT` 或 `SUM` 的时间序列按累计值的增量返回：每个时间桶只填该桶新增的部分，累计和正好等于整个区间的聚合值。要求 `format` 为 `time_series`，并且只有一个带别名的 `COUNT(...)` 或 `SUM(...)` 字段；语句含 `SELECT DISTINCT`、`GROUP BY`、`HAVING` 或 `LIMIT` 时整个请求以 `InvalidParameter` 失败。支持 `COUNT(DISTINCT x)`，该值只在首次出现的桶里计一次。该查询始终不采样，因此响应不带 `sampling`。",
+            "type": "boolean"
+          },
           "disable_sampling": {
-            "description": "为 `true` 时始终查询全量数据，响应不会出现 `sampling`。为 `false`（默认）时，服务端可能对大时间跨度的聚合查询进行抽样。",
+            "description": "为 `true` 时始终查询全量数据，响应不会出现 `sampling`。为 `false`（默认）时，服务端可能对大时间跨度的聚合查询进行抽样。本会被抽样的查询可能需要等待该账户其他全量查询结束；等待过久时，该查询的 `error` 条目以 `BadRequest` 返回。",
             "type": "boolean"
           },
           "dql": {
-            "description": "可选的 RUM DQL 过滤表达式，会被转换后以 `AND` 方式并入 `sql` 的 `WHERE` 子句。DQL 解析失败时在该查询的 `error` 中返回。",
+            "description": "可选的 RUM DQL 过滤表达式，会被转换后以 `AND` 方式并入 `sql` 的 `WHERE` 子句。单独的 `*` 匹配所有事件，不加任何过滤。DQL 解析失败时在该查询的 `error` 中返回。",
             "type": "string"
           },
           "format": {
@@ -20889,7 +20888,7 @@
           },
           "error": {
             "$ref": "#/components/schemas/DutyError",
-            "description": "查询在请求校验通过后失败时返回（表或列不存在、`dql` 或 `search_after_ctx` 无效、数据库报错），错误码固定为 `InternalError`。查询成功时不返回。"
+            "description": "查询在请求校验通过后失败时返回（表或列不存在、`search_after_ctx` 无效、数据库报错），错误码为 `InternalError`；`dql` 解析失败时为 `InvalidParameter`；查询超时时为 `BadRequest`。查询成功时不返回。"
           }
         },
         "type": "object"
@@ -30411,6 +30410,10 @@
           "recovery": {
             "$ref": "#/components/schemas/AlertRuleRecoveryQueryV2",
             "description": "恢复判定配置。仅 `recovery_mode` 为 `expression_match` 或 `recovery_query_match` 时必填（`recovery.expr` 非空），其余模式不允许传入。"
+          },
+          "absent_counts_as_normal": {
+            "type": "boolean",
+            "description": "把在某轮成功评估中未出现在任何条件查询里的活动实例计为一次正常轮次，而不是把它冻结在当前状态。仅 `recovery_mode` 为 `condition_clear` 或 `expression_match` 时可用；省略该字段时保持既有规则「数据缺失即冻结」的行为。规则处于启用状态时，它匹配的集群内所有已注册的 monit-edge 都须为 v0.77.0 及以上版本，否则保存规则会以 `InvalidParameter` 失败。"
           }
         }
       },
@@ -53859,8 +53862,7 @@
                         "created_at": 0,
                         "updated_at": 0
                       }
-                    ],
-                    "release_limited": false
+                    ]
                   }
                 }
               }
@@ -58900,7 +58902,7 @@
           "RUM/RUM 数据查询"
         ],
         "x-mint": {
-          "content": "## 时间范围对齐与缓存\n\n为便于重复查询复用缓存结果，聚合查询的时间范围会被对齐到网格：\n\n- `format=time_series`：起始时间向下、结束时间向上取整到 `interval`。时间桶的数量和位置不变，首尾两个桶覆盖完整区间，而不是部分区间。\n- 聚合（非时序）查询：起始时间向下、结束时间向上取整到 `max(1 分钟, 时间范围 ÷ 1226 向上取到下一个标准间隔档)`，例如 24 小时对齐到 2 分钟，7 天对齐到 10 分钟，30 天对齐到 1 小时。时间范围短于 100 个网格步长时不对齐、不缓存。起始端最多多出一个网格步长的数据；结束端取整到未来，该部分没有数据。\n- 明细/列表查询（无聚合、分页），以及 SQL 中含有 `now()` 等随执行时间变化的函数的查询，不做对齐也不缓存。\n\n最近时间的数据结果最多可能滞后 60 秒。\n\n## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 单次请求可提交 1 到 10 个查询；每个查询的 `id` 会成为响应对象中的 key。\n- `start_time`、`end_time` 为 Unix 毫秒时间戳，跨度不超过 31 天。服务端会自动追加时间范围与账户过滤条件，`sql` 中无需再写。\n- `FROM` 填写 RUM 数据表名：`sessions`、`views`、`actions`、`errors`、`resources`、`long_tasks`、`vitals`、`issues` 或 `sourcemaps`（也接受单数形式）。列名即 `POST /rum/field/list` 返回的 `field_key`。\n- 若查询在顶层 `AND` 条件中用 `=` 或 `IN` 限定了 `application_id`，调用者必须能读取这些应用：所属团队不包含调用者的私有应用会让整个请求返回 `AccessDenied`，不存在的应用返回 `ResourceNotFound`，单次请求最多涉及 50 个不同应用。未限定应用的查询会自动跳过调用者无权读取的私有应用。\n- SQL 语法错误、`time_zone` 无效或时间范围不合法时，整个请求返回 `InvalidParameter`。之后阶段才失败的查询（表或列不存在、`dql` 无效、`search_after_ctx` 无效、数据库报错）只在该查询自己的结果中返回 `error`，错误码为 `InternalError`，其他查询仍正常返回 `data`。\n- `values` 按列组织：`values[i]` 是列 `fields[i]` 在所有行上的取值。\n- `table` 查询最多返回 1,000 行；未写 `LIMIT` 或超过 1,000 时按 1,000 处理。不含聚合、带 `ORDER BY` 且没有 `OFFSET` 的查询在本页取满时会返回 `search_after_ctx`，用相同的 `sql` 带上它即可取下一页。\n- `time_series` 查询会在最前面插入 `ts` 列（时间桶起点，Unix 毫秒），并按它分组、排序。桶宽以毫秒在 `interval` 中返回，取值为固定档位（1、2、5、10、20、50、100、200、500 毫秒；1、2、5、10、15、30 秒；1、2、5、10、15、30 分钟；1、2、3、6、12 小时；1、2、3、7 天；30、60、90、180 天）中同时不小于 `interval` 和「时间跨度 ÷ `max_points`」的最小一档。\n- 时间跨度较大时，聚合查询可能基于抽样数据执行；此时响应带有 `sampling`，且 `COUNT`、`SUM`、`COUNT(DISTINCT)` 列已乘以 `scale_factor`。设置 `disable_sampling: true` 可始终查询全量数据。",
+          "content": "## 时间范围对齐与缓存\n\n为便于重复查询复用缓存结果，聚合查询的时间范围会被对齐到网格：\n\n- `format=time_series`：起始时间向下、结束时间向上取整到 `interval`。时间桶的数量和位置不变，首尾两个桶覆盖完整区间，而不是部分区间。\n- 聚合（非时序）查询：起始时间向下、结束时间向上取整到 `max(1 分钟, 时间范围 ÷ 1226 向上取到下一个标准间隔档)`，例如 24 小时对齐到 2 分钟，7 天对齐到 10 分钟，30 天对齐到 1 小时。时间范围短于 100 个网格步长时不对齐、不缓存。起始端最多多出一个网格步长的数据；结束端取整到未来，该部分没有数据。\n- 明细/列表查询（无聚合、分页），以及 SQL 中含有 `now()` 等随执行时间变化的函数的查询，不做对齐也不缓存。\n\n最近时间的数据结果最多可能滞后 60 秒。\n\n## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 单次请求可提交 1 到 10 个查询；每个查询的 `id` 会成为响应对象中的 key。\n- `start_time`、`end_time` 为 Unix 毫秒时间戳，跨度不超过 31 天。服务端会自动追加时间范围与账户过滤条件，`sql` 中无需再写。\n- `FROM` 填写 RUM 数据表名：`sessions`、`views`、`actions`、`errors`、`resources`、`long_tasks`、`vitals`、`issues` 或 `sourcemaps`（也接受单数形式）。列名即 `POST /rum/field/list` 返回的 `field_key`。\n- 若查询在顶层 `AND` 条件中用 `=` 或 `IN` 限定了 `application_id`，调用者必须能读取这些应用：所属团队不包含调用者的私有应用会让整个请求返回 `AccessDenied`，不存在的应用返回 `ResourceNotFound`，单次请求最多涉及 50 个不同应用。未限定应用的查询会自动跳过调用者无权读取的私有应用。\n- SQL 语法错误、`time_zone` 无效或时间范围不合法时，整个请求返回 `InvalidParameter`。之后阶段才失败的查询（表或列不存在、`search_after_ctx` 无效、数据库报错）只在该查询自己的结果中返回 `error`，错误码为 `InternalError`，其他查询仍正常返回 `data`；`dql` 解析失败同样只影响该查询，错误码为 `InvalidParameter`，报错信息带上该查询原文。\n- `values` 按列组织：`values[i]` 是列 `fields[i]` 在所有行上的取值。\n- `table` 查询最多返回 1,000 行；未写 `LIMIT` 或超过 1,000 时按 1,000 处理。不含聚合、带 `ORDER BY` 且没有 `OFFSET` 的查询在本页取满时会返回 `search_after_ctx`，用相同的 `sql` 带上它即可取下一页。\n- `time_series` 查询会在最前面插入 `ts` 列（时间桶起点，Unix 毫秒），并按它分组、排序。桶宽以毫秒在 `interval` 中返回，取值为固定档位（1、2、5、10、20、50、100、200、500 毫秒；1、2、5、10、15、30 秒；1、2、5、10、15、30 分钟；1、2、3、6、12 小时；1、2、3、7 天；30、60、90、180 天）中同时不小于 `interval` 和「时间跨度 ÷ `max_points`」的最小一档。\n- 时间跨度较大时，聚合查询可能基于抽样数据执行；此时响应带有 `sampling`，且 `COUNT`、`SUM`、`COUNT(DISTINCT)` 列已乘以 `scale_factor`。设置 `disable_sampling: true` 可始终查询全量数据。",
           "href": "/zh/api-reference/rum/data-query/rum-read-data-query",
           "metadata": {
             "sidebarTitle": "查询 RUM 数据"

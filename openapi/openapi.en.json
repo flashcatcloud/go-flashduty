@@ -13853,10 +13853,6 @@
             },
             "type": "array"
           },
-          "release_limited": {
-            "description": "Whether the account has used up its license release quota for the current 30-day window. While `true`, releasing a seat fails with error code `NoLicense`.",
-            "type": "boolean"
-          },
           "total": {
             "description": "Number of people holding an active license.",
             "format": "int64",
@@ -13865,8 +13861,7 @@
         },
         "required": [
           "total",
-          "items",
-          "release_limited"
+          "items"
         ],
         "type": "object"
       },
@@ -20823,12 +20818,16 @@
       "RumDataQueryDefinition": {
         "description": "One RUM data query definition.",
         "properties": {
+          "cumulative": {
+            "description": "Set to `true` to get a time series of a single `COUNT` or `SUM` as the increments of its running total: each bucket holds only what the bucket adds, so the running sum ends at the aggregate over the range. Requires `format` `time_series` and exactly one select field, `COUNT(...)` or `SUM(...)`, with an alias; a statement with `SELECT DISTINCT`, `GROUP BY`, `HAVING` or `LIMIT` makes the whole request fail with `InvalidParameter`. `COUNT(DISTINCT x)` is accepted and counts each `x` in its first bucket only. The query always runs unsampled, so the response carries no `sampling`.",
+            "type": "boolean"
+          },
           "disable_sampling": {
-            "description": "When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows.",
+            "description": "When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows. A query that would otherwise be sampled can wait for the account's other unsampled queries; if it waits too long, its `error` entry is set with code `BadRequest`.",
             "type": "boolean"
           },
           "dql": {
-            "description": "Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A DQL parse error is reported in this query's `error` entry.",
+            "description": "Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A lone `*` matches every event and filters nothing. A DQL parse error is reported in this query's `error` entry.",
             "type": "string"
           },
           "format": {
@@ -20889,7 +20888,7 @@
           },
           "error": {
             "$ref": "#/components/schemas/DutyError",
-            "description": "Set when this query failed after request validation (unknown table or column, invalid `dql` or `search_after_ctx`, database error). The code is always `InternalError`. Omitted when the query succeeded."
+            "description": "Set when this query failed after request validation (unknown table or column, invalid `search_after_ctx`, database error). The code is `InternalError`, `InvalidParameter` when `dql` cannot be parsed, or `BadRequest` when the query times out. Omitted when the query succeeded."
           }
         },
         "type": "object"
@@ -30411,6 +30410,10 @@
           "recovery": {
             "$ref": "#/components/schemas/AlertRuleRecoveryQueryV2",
             "description": "Recovery evaluation config. Required (with non-empty `recovery.expr`) only when `recovery_mode` is `expression_match` or `recovery_query_match`; must be omitted for the other modes."
+          },
+          "absent_counts_as_normal": {
+            "type": "boolean",
+            "description": "Count an active instance that is missing from every condition query of a successful round as one normal round, instead of freezing the instance in its current state. Only valid with `recovery_mode` `condition_clear` or `expression_match`; omitting it keeps the freeze-on-absence behavior of existing rules. For an enabled rule, every registered monit-edge in the clusters the rule matches must be v0.77.0 or later, otherwise saving the rule fails with `InvalidParameter`."
           }
         }
       },
@@ -53859,8 +53862,7 @@
                         "created_at": 0,
                         "updated_at": 0
                       }
-                    ],
-                    "release_limited": false
+                    ]
                   }
                 }
               }
@@ -58900,7 +58902,7 @@
           "RUM/Data query"
         ],
         "x-mint": {
-          "content": "## Time range alignment and caching\n\nSo that repeated queries can reuse cached results, the time range of aggregation queries is aligned to a grid:\n\n- `format=time_series`: the start is rounded down and the end rounded up to the `interval`. The number and positions of buckets do not change; the first and last buckets now cover their full interval instead of a partial one.\n- Aggregate (non-time-series) queries: the start is rounded down and the end rounded up to `max(1 minute, range ÷ 1226 rounded up to the next standard interval step)`, for example 24h aligns to 2 minutes, 7d to 10 minutes, and 30d to 1 hour. Ranges shorter than 100 grid steps are neither aligned nor cached. At most one grid step of extra data is included at the start; the end rounds into the future, which holds no data.\n- Detail/list queries (no aggregation, pagination), and queries whose SQL calls functions that depend on when they run, such as `now()`, are neither aligned nor cached.\n\nResults may be up to 60 seconds stale for the most recent data.\n\n## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Send 1 to 10 queries in one request; each query `id` becomes a key in the response object.\n- `start_time` and `end_time` are Unix epoch milliseconds, at most 31 days apart. The server adds the time-range and account filters itself; you do not need them in `sql`.\n- `FROM` names a RUM scope table: `sessions`, `views`, `actions`, `errors`, `resources`, `long_tasks`, `vitals`, `issues` or `sourcemaps` (the singular form is also accepted). Column names are the `field_key` values returned by `POST /rum/field/list`.\n- A query whose top-level `AND` conditions pin `application_id` (`=` or `IN`) must name applications the caller can read: a private application the caller's team does not own fails the whole request with `AccessDenied`, an unknown one with `ResourceNotFound`, and one request may name at most 50 distinct applications. A query that names no application silently skips the private applications the caller cannot read.\n- Malformed SQL, an invalid `time_zone` or an out-of-range time window fails the whole request with `InvalidParameter`. A query that fails later (unknown table or column, invalid `dql`, invalid `search_after_ctx`, database error) only sets `error` on its own entry, with code `InternalError`; the other queries still return `data`.\n- `values` is column-major: `values[i]` holds every row's value of column `fields[i]`.\n- `table` queries return at most 1,000 rows; a missing `LIMIT` or one above 1,000 is replaced with 1,000. A non-aggregate query with `ORDER BY` and no `OFFSET` returns `search_after_ctx` when the page is full — send it back with the same `sql` to get the next page.\n- `time_series` queries get a `ts` column prepended (bucket start, Unix milliseconds), grouped and ordered by it. The bucket width, returned as `interval` in milliseconds, is the smallest step from a fixed ladder (1, 2, 5, 10, 20, 50, 100, 200, 500 ms; 1, 2, 5, 10, 15, 30 s; 1, 2, 5, 10, 15, 30 min; 1, 2, 3, 6, 12 h; 1, 2, 3, 7 d; 30, 60, 90, 180 d) that is at least both `interval` and the window length divided by `max_points`.\n- On large time windows an aggregate query may run on sampled data; the response then carries `sampling`, and `COUNT`, `SUM` and `COUNT(DISTINCT)` columns are already multiplied by `scale_factor`. Set `disable_sampling: true` to always query the full data.",
+          "content": "## Time range alignment and caching\n\nSo that repeated queries can reuse cached results, the time range of aggregation queries is aligned to a grid:\n\n- `format=time_series`: the start is rounded down and the end rounded up to the `interval`. The number and positions of buckets do not change; the first and last buckets now cover their full interval instead of a partial one.\n- Aggregate (non-time-series) queries: the start is rounded down and the end rounded up to `max(1 minute, range ÷ 1226 rounded up to the next standard interval step)`, for example 24h aligns to 2 minutes, 7d to 10 minutes, and 30d to 1 hour. Ranges shorter than 100 grid steps are neither aligned nor cached. At most one grid step of extra data is included at the start; the end rounds into the future, which holds no data.\n- Detail/list queries (no aggregation, pagination), and queries whose SQL calls functions that depend on when they run, such as `now()`, are neither aligned nor cached.\n\nResults may be up to 60 seconds stale for the most recent data.\n\n## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Send 1 to 10 queries in one request; each query `id` becomes a key in the response object.\n- `start_time` and `end_time` are Unix epoch milliseconds, at most 31 days apart. The server adds the time-range and account filters itself; you do not need them in `sql`.\n- `FROM` names a RUM scope table: `sessions`, `views`, `actions`, `errors`, `resources`, `long_tasks`, `vitals`, `issues` or `sourcemaps` (the singular form is also accepted). Column names are the `field_key` values returned by `POST /rum/field/list`.\n- A query whose top-level `AND` conditions pin `application_id` (`=` or `IN`) must name applications the caller can read: a private application the caller's team does not own fails the whole request with `AccessDenied`, an unknown one with `ResourceNotFound`, and one request may name at most 50 distinct applications. A query that names no application silently skips the private applications the caller cannot read.\n- Malformed SQL, an invalid `time_zone` or an out-of-range time window fails the whole request with `InvalidParameter`. A query that fails later (unknown table or column, invalid `search_after_ctx`, database error) only sets `error` on its own entry, with code `InternalError`; the other queries still return `data`. A `dql` the parser rejects also fails only its own entry, with code `InvalidParameter` and a message naming the query.\n- `values` is column-major: `values[i]` holds every row's value of column `fields[i]`.\n- `table` queries return at most 1,000 rows; a missing `LIMIT` or one above 1,000 is replaced with 1,000. A non-aggregate query with `ORDER BY` and no `OFFSET` returns `search_after_ctx` when the page is full — send it back with the same `sql` to get the next page.\n- `time_series` queries get a `ts` column prepended (bucket start, Unix milliseconds), grouped and ordered by it. The bucket width, returned as `interval` in milliseconds, is the smallest step from a fixed ladder (1, 2, 5, 10, 20, 50, 100, 200, 500 ms; 1, 2, 5, 10, 15, 30 s; 1, 2, 5, 10, 15, 30 min; 1, 2, 3, 6, 12 h; 1, 2, 3, 7 d; 30, 60, 90, 180 d) that is at least both `interval` and the window length divided by `max_points`.\n- On large time windows an aggregate query may run on sampled data; the response then carries `sampling`, and `COUNT`, `SUM` and `COUNT(DISTINCT)` columns are already multiplied by `scale_factor`. Set `disable_sampling: true` to always query the full data.",
           "href": "/en/api-reference/rum/data-query/rum-read-data-query",
           "metadata": {
             "sidebarTitle": "Query RUM data"
