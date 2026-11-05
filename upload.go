@@ -90,7 +90,7 @@ func (c *Client) uploadFile(ctx context.Context, path string, query url.Values, 
 		"body", "<multipart "+filename+">",
 	)
 
-	httpResp, err := c.client.Do(req)
+	httpResp, err := c.transferClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("flashduty: request to %s failed: %v", sanitizeURL(req.URL), sanitizeError(err))
 	}

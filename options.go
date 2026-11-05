@@ -30,7 +30,9 @@ func WithBaseURL(raw string) Option {
 	}
 }
 
-// WithTimeout sets the HTTP client timeout.
+// WithTimeout sets the overall timeout of JSON calls. Byte transfers (file
+// upload and download, session export and subscribe) ignore it — an overall
+// timeout also bounds reading the body — and are bounded by their ctx instead.
 func WithTimeout(d time.Duration) Option {
 	return func(c *Client) { c.client.Timeout = d }
 }
@@ -40,7 +42,9 @@ func WithUserAgent(ua string) Option {
 	return func(c *Client) { c.UserAgent = ua }
 }
 
-// WithHTTPClient supplies a custom *http.Client. Nil is ignored.
+// WithHTTPClient supplies a custom *http.Client. Nil is ignored. Its Timeout
+// applies to JSON calls only; byte transfers use a copy without it (see
+// WithTimeout).
 func WithHTTPClient(hc *http.Client) Option {
 	return func(c *Client) {
 		if hc != nil {

@@ -19,6 +19,17 @@ func TestSanitizeURLRedactsAppKey(t *testing.T) {
 	}
 }
 
+func TestSanitizeURLRedactsDownloadToken(t *testing.T) {
+	u, _ := url.Parse("https://api.flashcat.cloud/safari/artifact/stream?app_key=KEY&mode=download&t=SIGNED")
+	got := sanitizeURL(u)
+	if strings.Contains(got, "SIGNED") || strings.Contains(got, "KEY") {
+		t.Fatalf("credential leaked: %s", got)
+	}
+	if !strings.Contains(got, "mode=download") {
+		t.Fatalf("non-secret parameter lost: %s", got)
+	}
+}
+
 func TestSanitizeBodyRedactsSecrets(t *testing.T) {
 	in := `{"name":"n","password":"hunter2","env":{"OPENAI_API_KEY":"sk-xyz"}}`
 	got := sanitizeBody(in)

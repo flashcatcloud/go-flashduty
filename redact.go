@@ -18,8 +18,15 @@ const (
 func sanitizeURL(u *url.URL) string {
 	sanitized := *u
 	q := sanitized.Query()
-	if q.Has("app_key") {
-		q.Set("app_key", "[REDACTED]")
+	redacted := false
+	// app_key is the credential; t is a signed download token (artifact stream).
+	for _, k := range []string{"app_key", "t"} {
+		if q.Has(k) {
+			q.Set(k, "[REDACTED]")
+			redacted = true
+		}
+	}
+	if redacted {
 		sanitized.RawQuery = q.Encode()
 	}
 	return sanitized.String()
