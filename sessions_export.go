@@ -28,21 +28,23 @@ import (
 // API: POST /safari/session/export (session-read-export).
 func (s *SessionsService) Export(ctx context.Context, req *SessionExportRequest) (io.ReadCloser, *Response, error) {
 	// The success body is a stream, not a JSON envelope; ask for NDJSON.
-	return s.client.openStream(ctx, s.client.client, "/safari/session/export", "application/x-ndjson", req)
+	return s.client.openStream(ctx, http.MethodPost, "/safari/session/export", "application/x-ndjson", req)
 }
 
-// openStream POSTs req and returns the live success body for the caller to
-// close. Error responses are JSON envelopes even on a streaming endpoint: the
-// (bounded) body is drained and closed and surfaced as a typed error. hc is the
-// http.Client to send with, so a long-lived stream can drop the overall timeout.
-func (c *Client) openStream(ctx context.Context, hc *http.Client, path, accept string, req any) (io.ReadCloser, *Response, error) {
-	httpReq, err := c.newRequest(ctx, http.MethodPost, path, req)
+// openStream sends a request (POST with a JSON body, or GET with path already
+// carrying its query) on the transfer client and returns the live success body
+// for the caller to close. The transfer client has no overall timeout, so ctx is
+// what bounds the stream. Error responses are JSON envelopes even on a streaming
+// endpoint: the (bounded) body is drained and closed and surfaced as a typed
+// error.
+func (c *Client) openStream(ctx context.Context, method, path, accept string, req any) (io.ReadCloser, *Response, error) {
+	httpReq, err := c.newRequest(ctx, method, path, req)
 	if err != nil {
 		return nil, nil, err
 	}
 	httpReq.Header.Set("Accept", accept)
 
-	httpResp, err := hc.Do(httpReq)
+	httpResp, err := c.transferClient().Do(httpReq)
 	if err != nil {
 		return nil, nil, fmt.Errorf("flashduty: request to %s failed: %v", sanitizeURL(httpReq.URL), sanitizeError(err))
 	}

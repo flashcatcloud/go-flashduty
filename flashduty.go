@@ -227,6 +227,17 @@ func (c *Client) doMethodWithAppKey(ctx context.Context, method, path string, bo
 	return c.processResponse(httpResp, out)
 }
 
+// transferClient returns the client for byte transfers (file uploads, file
+// downloads, export streams). It shares c.client's Transport and settings but
+// has no overall Timeout: http.Client.Timeout also bounds reading the body, so
+// the 30s default that suits JSON calls cuts off any transfer that takes
+// longer, however healthy. The caller bounds a transfer through ctx instead.
+func (c *Client) transferClient() *http.Client {
+	hc := *c.client
+	hc.Timeout = 0
+	return &hc
+}
+
 // processResponse drains and interprets an HTTP response: it unwraps the
 // {request_id, error, data} envelope, decodes data into out (when non-nil),
 // and surfaces non-JSON success bodies on Response.Raw. Hand-written methods

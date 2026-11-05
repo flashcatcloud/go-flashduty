@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net/http"
 	"strings"
 )
 
@@ -41,20 +42,15 @@ type SessionEventFrame struct {
 // Subscribe opens POST /safari/session/subscribe and returns the live SSE
 // response body. The caller owns it and MUST Close it; read frames with
 // NewSessionFrameReader. The stream is unbounded in time (the server closes it
-// after an idle period), so it is served by a client with no overall timeout:
-// bound its lifetime with ctx.
+// after an idle period); like every stream it is served by the transfer client
+// with no overall timeout, so bound its lifetime with ctx.
 //
 // On any non-2xx status the body is the usual JSON error envelope: Subscribe
 // reads and closes it and returns a typed error with a nil ReadCloser.
 //
 // API: POST /safari/session/subscribe.
 func (s *SessionsService) Subscribe(ctx context.Context, req *SessionSubscribeRequest) (io.ReadCloser, *Response, error) {
-	// The shared client's Timeout also bounds reading the body, which would cut
-	// a long-lived stream. Copy it without the overall timeout; the transport
-	// and redirect policy are shared.
-	streamClient := *s.client.client
-	streamClient.Timeout = 0
-	return s.client.openStream(ctx, &streamClient, "/safari/session/subscribe", "text/event-stream", req)
+	return s.client.openStream(ctx, http.MethodPost, "/safari/session/subscribe", "text/event-stream", req)
 }
 
 // SessionStreamError is a server-reported error carried in-band on the stream

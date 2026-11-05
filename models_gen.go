@@ -14329,14 +14329,6 @@ type PreviewTemplateResponseCardElementsItemActionsItem struct {
 	Text string `json:"text" toon:"text"`
 }
 
-// ArtifactsReadStreamRequest holds the query parameters for Download or preview a file.
-type ArtifactsReadStreamRequest struct {
-	// Signed token issued by `POST /safari/artifact/sign`. Bound to the calling account and person; valid for 5 minutes.
-	T string `url:"t"`
-	// `download` (default) serves the file as an attachment; `preview` serves it inline for browser display. Any other value falls back to `download`.
-	Mode string `url:"mode,omitempty"`
-}
-
 // IncidentsPostMortemInfoRequest holds the query parameters for Get post-mortem.
 type IncidentsPostMortemInfoRequest struct {
 	// Post-mortem ID: a 32-character hex string derived from the account ID and the linked incident IDs.

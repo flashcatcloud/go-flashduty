@@ -264,6 +264,13 @@ func (g *Gen) collectServices(paths map[string]any) []service {
 // Response.Raw, and they generate as ordinary raw methods returning (*Response,
 // error).
 func isStreamingOp(o map[string]any) bool {
+	// The artifact stream returns a user's file verbatim: any content type (a
+	// JSON file would be decoded as the envelope and lost) and any size (Raw is
+	// capped at maxResponseBodySize). It gets a hand-written streaming method
+	// (see artifacts_download.go) even though the spec declares octet-stream.
+	if str(o, "operationId") == "artifact-read-stream" {
+		return true
+	}
 	resp := asMap(asMap(o["responses"])["200"])
 	content := asMap(resp["content"])
 	if len(content) == 0 {

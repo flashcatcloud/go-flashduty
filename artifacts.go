@@ -63,17 +63,6 @@ func (s *ArtifactsService) ReadSign(ctx context.Context, req *ArtifactSignReques
 	return out, resp, nil
 }
 
-// Download or preview a file.
-//
-// Download or preview a file's bytes using a signed token.
-//
-// The success body is a file, not a JSON envelope: it is returned on Response.Raw.
-//
-// API: GET /safari/artifact/stream (artifact-read-stream).
-func (s *ArtifactsService) ReadStream(ctx context.Context, req *ArtifactsReadStreamRequest) (*Response, error) {
-	return s.client.doGet(ctx, "/safari/artifact/stream", req, nil)
-}
-
 // Remove artifact from gallery.
 //
 // Detach an artifact from the gallery; the source file stays with its session.
