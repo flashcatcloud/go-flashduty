@@ -35,6 +35,9 @@ func TestSessionsWriteMessageSendsRequestAndDecodesAck(t *testing.T) {
 		if _, ok := body["team_id"]; ok {
 			t.Errorf("zero team_id must be omitted: %v", body)
 		}
+		if _, ok := body["steering"]; ok {
+			t.Errorf("false steering must be omitted: %v", body)
+		}
 		w.WriteHeader(http.StatusAccepted)
 		_, _ = io.WriteString(w, `{"request_id":"r1","data":{"session_id":"s1","invocation_id":"i1","root_invocation_id":"i1","delivery_mode":"reply_only"}}`)
 	})
@@ -55,6 +58,23 @@ func TestSessionsWriteMessageSendsRequestAndDecodesAck(t *testing.T) {
 	}
 	if ack.SessionID != "s1" || ack.InvocationID != "i1" || ack.RootInvocationID != "i1" || ack.DeliveryMode != "reply_only" {
 		t.Errorf("ack = %+v", ack)
+	}
+}
+
+func TestSessionsWriteMessageSendsSteering(t *testing.T) {
+	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		if body["steering"] != true {
+			t.Errorf("steering = %v, want true", body["steering"])
+		}
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = io.WriteString(w, `{"request_id":"r1","data":{"session_id":"s1","invocation_id":"i2","root_invocation_id":"i2"}}`)
+	})
+	if _, _, err := c.Sessions.WriteMessage(context.Background(), &SessionMessageRequest{SessionID: "s1", Query: "and now?", Steering: true}); err != nil {
+		t.Fatalf("WriteMessage: %v", err)
 	}
 }
 
