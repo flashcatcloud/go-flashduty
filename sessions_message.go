@@ -61,6 +61,12 @@ type SessionMessageRequest struct {
 	// agent answer through its reply tool only; check the ack to see whether
 	// the server accepted it.
 	DeliveryMode string `json:"delivery_mode,omitempty"`
+	// Steering asks the session's running turn to take this message in at its
+	// next step instead of queueing it for a turn of its own. Its answer then
+	// comes from that running turn, so read it from the session's event stream
+	// rather than only from this message's own invocation. Ignored when no turn
+	// is running.
+	Steering bool `json:"steering,omitempty"`
 	// TeamID binds a new session to a team (0 = account scope).
 	TeamID int64 `json:"team_id,omitempty"`
 	// EnvironmentKind selects the execution environment: "cloud" or "byoc".
