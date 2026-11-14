@@ -396,8 +396,10 @@ type AddIncidentResponderRequest struct {
 	IncidentID string `json:"incident_id" toon:"incident_id"`
 	// Notification settings for the newly added responders. Defaults to `{"follow_preference": true}`.
 	Notify AddIncidentResponderRequestNotify `json:"notify,omitzero" toon:"notify,omitempty"`
-	// Member IDs to add as responders. IDs that are already responders, or that do not exist in the account, are skipped.
-	PersonIDs []int64 `json:"person_ids" toon:"person_ids"`
+	// Member IDs to add as responders (at most 100). IDs that are already responders, or that do not exist in the account, are skipped.
+	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
+	// Team IDs whose members are added as responders (at most 20). Each team is expanded to its enabled members, merged with `person_ids`, and the result is capped at 100 responders.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
 }
 
 // AddWarRoomMemberRequest is generated from the Flashduty OpenAPI schema.
@@ -1247,6 +1249,8 @@ type AlertRuleRecoveryQueryV2 struct {
 
 // AlertRuleThresholdV2 is generated from the Flashduty OpenAPI schema.
 type AlertRuleThresholdV2 struct {
+	// Count an active instance that is missing from every condition query of a successful round as one normal round, instead of freezing the instance in its current state. Only valid with `recovery_mode` `condition_clear` or `expression_match`; omitting it keeps the freeze-on-absence behavior of existing rules. For an enabled rule, every registered monit-edge in the clusters the rule matches must be v0.77.0 or later, otherwise saving the rule fails with `InvalidParameter`.
+	AbsentCountsAsNormal bool `json:"absent_counts_as_normal,omitempty" toon:"absent_counts_as_normal,omitempty"`
 	// Fire after the alert condition is met this many times; when enabled, minimum 1 and maximum 10000. Combined with `alerting_window_size` it means at least N hits within the last M evaluations.
 	AlertingCheckTimes int64 `json:"alerting_check_times,omitempty" toon:"alerting_check_times,omitempty"`
 	// Optional sliding window size M: fire only when the condition is met at least `alerting_check_times` times within the last M evaluations. Omit for consecutive mode (N consecutive hits). Must satisfy `alerting_check_times` <= M <= 10000.
@@ -1500,6 +1504,8 @@ type AssignedTo struct {
 	Notify AssignedToNotify `json:"notify,omitzero" toon:"notify,omitempty"`
 	// Member IDs to assign directly.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
+	// Team IDs to assign by (1–20). Each team is expanded to its members that are enabled and merged into `person_ids` when the assignment runs, so a later membership change does not re-expand it; a selection whose teams hold no member of the account returns `InvalidParameter`, and the expanded responders are capped at 100 in total. Requests only: a stored assignment keeps the expanded members, so responses omit it.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
 	// How the assignment happened: `assign` first assignment; `reassign` reassignment of an already assigned incident; `escalate` moved by the escalation flow; `reopen` reassignment after the incident was reopened; empty string in responses when the incident was never assigned. Omit it in requests and the server derives it.
 	Type string `json:"type,omitempty" toon:"type,omitempty"`
 }
@@ -1888,6 +1894,8 @@ type BindWorkItemPostMortemRequest struct {
 
 // CalDay is generated from the Flashduty OpenAPI schema.
 type CalDay struct {
+	// Local wall-clock time (`HH:MM`) at which the day ends, when it is a working day that closes early. Omitted for a full day or a day off.
+	DayEnd string `json:"day_end" toon:"day_end"`
 	// ID of the event that decided the day. Absent when no event covers the day.
 	EventID string `json:"event_id" toon:"event_id"`
 	// Whether the day is a day off.
@@ -1918,6 +1926,8 @@ type CalEventItem struct {
 	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Creator person ID. Only present for private events.
 	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
+	// Local wall-clock time (`HH:MM`) at which a working day closes early, e.g. `12:00`. Only events of a shared exchange calendar carry one; omitted for a full day.
+	DayEnd string `json:"day_end" toon:"day_end"`
 	// Event description.
 	Description string `json:"description" toon:"description"`
 	// Event end date (YYYY-MM-DD, exclusive).
@@ -1936,7 +1946,7 @@ type CalEventItem struct {
 
 // CalEventListRequest is generated from the Flashduty OpenAPI schema.
 type CalEventListRequest struct {
-	// Calendar ID; obtain it from `POST /calendar/list`.
+	// Calendar ID, obtained from `POST /calendar/list`. A calendar listed there with `kind` = `exchange.holiday` is accepted too, so a trading calendar can be read directly.
 	CalID string `json:"cal_id" toon:"cal_id"`
 	// Day (1-31). 0 means no day filter.
 	Day int64 `json:"day,omitempty" toon:"day,omitempty"`
@@ -1990,7 +2000,7 @@ type CalendarCreateRequest struct {
 	CalName string `json:"cal_name" toon:"cal_name"`
 	// Calendar description.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// Additional public-holiday calendar IDs to inherit events from (for example zh-cn.china.official).
+	// Additional public calendar IDs to inherit events from — `region.official.holiday` IDs such as `zh-cn.china.official`, plus at most one `exchange.holiday` calendar. Linking an exchange calendar sets this calendar's `timezone` to the exchange's, overriding the value you send; linking two of them returns `InvalidParameter`.
 	ExtraCalIDs []string `json:"extra_cal_ids,omitempty" toon:"extra_cal_ids,omitempty"`
 	// Owning team ID; `0` or omitted means no team. A nonzero ID must be a team of the account.
 	TeamID uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
@@ -2033,7 +2043,7 @@ type CalendarItem struct {
 	Description string `json:"description" toon:"description"`
 	// Inherited public-holiday calendar IDs. Omitted when empty.
 	ExtraCalIDs []string `json:"extra_cal_ids" toon:"extra_cal_ids"`
-	// Calendar kind. `region.official.holiday` is a public regional holiday calendar (served by the central holiday service), `religion.holiday` is a public religious holiday calendar (reserved, currently no data), and `personal` is an account-created personal/team calendar.
+	// Calendar kind. `region.official.holiday` is a public regional holiday calendar (served by the central holiday service), `exchange.holiday` is a shared stock-exchange calendar whose timezone is the exchange's and whose dates a rule may read directly, `religion.holiday` is a public religious holiday calendar (reserved, currently no data), and `personal` is an account-created personal/team calendar.
 	Kind string `json:"kind" toon:"kind"`
 	// Calendar status. `enabled` means usable; `deleted` means removed and never returned by list endpoints.
 	Status string `json:"status" toon:"status"`
@@ -2051,7 +2061,7 @@ type CalendarItem struct {
 
 // CalendarListRequest is generated from the Flashduty OpenAPI schema.
 type CalendarListRequest struct {
-	// Calendar kind filter; defaults to personal when empty. `region.official.holiday` queries public regional holiday calendars (filtered by the caller's locale); `personal` queries account-created calendars.
+	// Calendar kind filter; defaults to personal when empty. `region.official.holiday` queries public regional holiday calendars (filtered by the caller's locale); `exchange.holiday` queries the shared stock-exchange calendars, whose `cal_id` a rule may read directly; `personal` queries account-created calendars.
 	Kind string `json:"kind,omitempty" toon:"kind,omitempty"`
 	// Disable locale filtering when listing public-holiday calendars.
 	NoLocale bool `json:"no_locale,omitempty" toon:"no_locale,omitempty"`
@@ -2073,7 +2083,7 @@ type CalendarUpdateRequest struct {
 	CalName *string `json:"cal_name,omitempty" toon:"cal_name,omitempty"`
 	// New description.
 	Description *string `json:"description,omitempty" toon:"description,omitempty"`
-	// Public holiday calendar IDs to inherit events from (see `POST /calendar/list` with `kind` = `region.official.holiday`). When sent, replaces the stored list; an empty array removes them all; omit to keep it.
+	// Public calendar IDs to inherit events from (see `POST /calendar/list` with `kind` = `region.official.holiday` or `exchange.holiday`); at most one of them may be an `exchange.holiday` calendar, and linking one sets `timezone` to the exchange's. When sent, replaces the stored list; an empty array removes them all; omit to keep it.
 	ExtraCalIDs []string `json:"extra_cal_ids,omitempty" toon:"extra_cal_ids,omitempty"`
 	// New owning team ID; obtain it from `POST /team/list`. `0` removes the team; a nonzero ID must be a team of the account.
 	TeamID *uint64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
@@ -2503,7 +2513,7 @@ type CreateEscalationRuleRequest struct {
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
 	// Incident conditions (OR of AND groups), matched against the incident the alert was grouped into, not against the alert. Keys: `title`, `description`, `severity` (alias `incident_severity`, `alert_severity`), `status` (alias `incident_status`, `alert_status`), `dedup_key`, `integration_id` (alias `data_source_id`), or any `labels.<name>`. Omit or leave empty to match every incident in the channel.
 	Filters FilterGroup `json:"filters,omitempty" toon:"filters,omitempty"`
-	// Escalation levels in order; the incident starts at the first level.
+	// Escalation levels in order; the incident starts at the first level. At least one level is required.
 	Layers []EscalateLayer `json:"layers" toon:"layers"`
 	// Evaluation order from `0` to `200`; lower values are evaluated first. Omit to place the rule after all existing rules (current highest priority + 1).
 	Priority *int64 `json:"priority,omitempty" toon:"priority,omitempty"`
@@ -2564,7 +2574,7 @@ type CreateIncidentCommentTypeResponse struct {
 
 // CreateIncidentRequest is generated from the Flashduty OpenAPI schema.
 type CreateIncidentRequest struct {
-	// Who to assign. When omitted or empty, the channel's escalation rules decide (a standalone incident gets no responders); required when the account has a create form. `person_ids`, `escalate_rule_id` and `emails` can be combined — responders are the union. Assignment runs after creation, and its failure does not undo the incident.
+	// Who to assign. When omitted or empty, the channel's escalation rules decide (a standalone incident gets no responders); required when the account has a create form. `person_ids`, `team_ids`, `escalate_rule_id` and `emails` can be combined — responders are the union. Assignment runs after creation, and its failure does not undo the incident.
 	AssignedTo CreateIncidentRequestAssignedTo `json:"assigned_to,omitzero" toon:"assigned_to,omitempty"`
 	// Channel to file the incident into; must exist in the account. Optional unless the account has a create form; leave it unset for a standalone incident.
 	ChannelID int64 `json:"channel_id,omitempty" toon:"channel_id,omitempty"`
@@ -5115,6 +5125,8 @@ type FeedDetailIncidentAssign struct {
 	Notify FeedDetailIncidentAssignNotify `json:"notify" toon:"notify"`
 	// Member IDs to assign directly.
 	PersonIDs []int64 `json:"person_ids" toon:"person_ids"`
+	// Team IDs to assign by (1–20). Each team is expanded to its members that are enabled and merged into `person_ids` when the assignment runs, so a later membership change does not re-expand it; a selection whose teams hold no member of the account returns `InvalidParameter`, and the expanded responders are capped at 100 in total. Requests only: a stored assignment keeps the expanded members, so responses omit it.
+	TeamIDs []int64 `json:"team_ids" toon:"team_ids"`
 	// Member IDs that received the assignment.
 	To []int64 `json:"to" toon:"to"`
 	// How the assignment happened: `assign` first assignment; `reassign` reassignment of an already assigned incident; `escalate` moved by the escalation flow; `reopen` reassignment after the incident was reopened; empty string in responses when the incident was never assigned. Omit it in requests and the server derives it.
@@ -5465,6 +5477,8 @@ type FeedItem struct {
 	AccountID int64 `json:"account_id" toon:"account_id"`
 	// AI SRE session that produced the entry. Omitted when no agent wrote it.
 	AgentSessionID string `json:"agent_session_id" toon:"agent_session_id"`
+	// Timeline signature of an entry AI SRE wrote on a person's behalf: `both` (the person and AI SRE, equally weighted), `self` (the person only) or `ai` (AI SRE only). Omitted for entries not written by AI SRE, and for AI SRE entries written before the setting existed, which read as `both`.
+	Byline string `json:"byline" toon:"byline"`
 	// Creation timestamp in Unix epoch milliseconds.
 	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Member ID of the creator. 0 for system-generated entries.
@@ -6772,28 +6786,48 @@ type KnowledgeWarning struct {
 
 // LicenseListResponse is generated from the Flashduty OpenAPI schema.
 type LicenseListResponse struct {
-	// People holding an active license.
+	// Whether automatic seat grabbing is off for the account, so only fixed or admin-assigned members hold a license.
+	AutoGrabDisabled bool `json:"auto_grab_disabled" toon:"auto_grab_disabled"`
+	// People counted in the current window: license holders and people revoked in it.
 	Items []LicensePersonItem `json:"items" toon:"items"`
-	// Whether the account has used up its license release quota for the current 30-day window. While `true`, releasing a seat fails with error code `NoLicense`.
-	ReleaseLimited bool `json:"release_limited" toon:"release_limited"`
-	// Number of people holding an active license.
+	// Seats purchased on the account's highest-version On-call plan. `0` when the account has no resource record yet.
+	LicenseCnt int64 `json:"license_cnt" toon:"license_cnt"`
+	// Whether the window-usage license rules already apply to this account. Before `rule_effective_at` the account keeps its earlier seat behaviour.
+	RuleEffective bool `json:"rule_effective" toon:"rule_effective"`
+	// Unix timestamp in seconds when the window-usage rules start for this account: its own creation time for an account created on or after 2026-11-09 00:00 +08:00, otherwise 2027-01-01 00:00 +08:00.
+	RuleEffectiveAt Timestamp `json:"rule_effective_at" toon:"rule_effective_at"`
+	// Number of people in `items`.
 	Total int64 `json:"total" toon:"total"`
+	// Unix timestamp in seconds when this window's single license reassignment was used; `0` when it has not been used.
+	TransferredAt Timestamp `json:"transferred_at" toon:"transferred_at"`
+	// Seats in use in the current window: people holding a license plus people revoked in this window, who stay counted until it ends.
+	UsedCnt int64 `json:"used_cnt" toon:"used_cnt"`
+	// Unix timestamp in seconds when the current license window ends; a window is 30 days long.
+	WindowEnd Timestamp `json:"window_end" toon:"window_end"`
+	// Unix timestamp in seconds when the current 30-day license window started.
+	WindowStart Timestamp `json:"window_start" toon:"window_start"`
 }
 
 // LicensePersonItem is generated from the Flashduty OpenAPI schema.
 type LicensePersonItem struct {
+	// Unix timestamp in seconds when the seat was recorded in this window. `0` when the window holds no record for the person.
+	AcquiredAt Timestamp `json:"acquired_at" toon:"acquired_at"`
 	// Unix timestamp when a fixed license was assigned. `0` for temporary licenses.
 	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// ID of the licensed person.
 	PersonID int64 `json:"person_id" toon:"person_id"`
 	// Display name of the licensed person.
 	PersonName string `json:"person_name" toon:"person_name"`
+	// Where the person stands in this window: `fixed` holds an explicitly assigned seat, `active` holds a temporary seat taken automatically or assigned by an admin, `revoked` had the seat taken back in this window and still counts until it ends.
+	Status string `json:"status" toon:"status"`
 	// License assignment type. `fixed` is explicitly assigned; `temporary` is held from the active license window.
 	Type string `json:"type" toon:"type"`
 	// Unix timestamp when a fixed license was last changed. `0` for temporary licenses.
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Person ID that last changed a fixed license. `0` for temporary licenses.
 	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// How the seat was taken: `auto` from an automatic grab, `admin` from an admin assignment, `fixed` from the window being seeded with the account's fixed licenses. Empty string when the window holds no record for the person, for example after a revocation.
+	Via string `json:"via" toon:"via"`
 }
 
 // LinkItem is generated from the Flashduty OpenAPI schema.
@@ -8791,6 +8825,10 @@ type RemoteConfigRule struct {
 
 // RemoteConfigValues is generated from the Flashduty OpenAPI schema.
 type RemoteConfigValues struct {
+	// Whether native SDKs send a crash beacon: a few hundred bytes sent while a foreground crash takes the process down, so the crash is counted even when the user never opens the app again. On by default in the SDKs; `false` also makes the collector discard beacons it still receives. Unlike the session-scoped knobs below, a change applies as soon as the SDK receives it.
+	CrashBeaconEnabled *bool `json:"crashBeaconEnabled,omitempty" toon:"crashBeaconEnabled,omitempty"`
+	// How long the crashed thread waits for the crash beacon before the process dies, in milliseconds (500–2000). Omitted, the SDK uses 1000.
+	CrashBeaconTimeoutMs *int64 `json:"crashBeaconTimeoutMs,omitempty" toon:"crashBeaconTimeoutMs,omitempty"`
 	// How Session Replay masks a page by default:
 	//
 	// - `mask`: replaces text and hides input values.
@@ -9389,6 +9427,8 @@ type RUMApplicationInfosResponse struct {
 type RUMApplicationItem struct {
 	// ID of the Flashduty account that owns the application.
 	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Whether the console reports active devices, signed-in users and device rates from the 30-day device table instead of session-based UV. Read from the account-level rollout list, so every application of the same account reports the same value; `false` keeps the session-based UV.
+	ActiveDevicesEnabled bool `json:"active_devices_enabled" toon:"active_devices_enabled"`
 	// Alerting configuration of the application. Always an object.
 	Alerting RUMApplicationAlerting `json:"alerting" toon:"alerting"`
 	// Unique application ID.
@@ -9411,6 +9451,8 @@ type RUMApplicationItem struct {
 	NoIP bool `json:"no_ip" toon:"no_ip"`
 	// Linked source code repositories, in order; the first entry is the primary repository. Empty array when none are linked. Linking grants no access by itself: AI sessions can only read repositories granted to the account's GitHub App installations.
 	Repositories []RUMApplicationRepository `json:"repositories" toon:"repositories"`
+	// Whether the console offers the AI session summary for this application's sessions. Read from the account-level feature switch, so every application of the same account reports the same value.
+	SessionSummaryEnabled bool `json:"session_summary_enabled" toon:"session_summary_enabled"`
 	// Application status:
 	//
 	// - `enabled`: the SDK `client_token` is accepted and data is collected. Every application created through the API starts in this state.
@@ -10176,9 +10218,13 @@ type RUMDataFieldMeta struct {
 
 // RUMDataQueryDefinition is generated from the Flashduty OpenAPI schema.
 type RUMDataQueryDefinition struct {
-	// When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows.
+	// Set to `true` to get a time series of a single `COUNT` or `SUM` as the increments of its running total: each bucket holds only what the bucket adds, so the running sum ends at the aggregate over the range. Requires `format` `time_series` and exactly one select field, `COUNT(...)` or `SUM(...)`, with an alias; a statement with `SELECT DISTINCT`, `GROUP BY`, `HAVING` or `LIMIT` makes the whole request fail with `InvalidParameter`. `COUNT(DISTINCT x)` is accepted and counts each `x` in its first bucket only. The query always runs unsampled, so the response carries no `sampling`.
+	Cumulative bool `json:"cumulative,omitempty" toon:"cumulative,omitempty"`
+	// Keeps a `crash_ledger` query to the devices counted on that table over the same range: `active_devices` keeps only devices with an active-device record (`device_key`), `sessions` only devices with a session (`usr_anonymous_id`). Use it on a crash count that is divided by a device count so the numerator counts the same devices as the denominator. Only supported when `sql` reads `crash_ledger`; another table, or a value outside the two, fails that query with `InvalidParameter`.
+	DevicesOn string `json:"devices_on,omitempty" toon:"devices_on,omitempty"`
+	// When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows. A query that would otherwise be sampled can wait for the account's other unsampled queries; if it waits too long, its `error` entry is set with code `BadRequest`.
 	DisableSampling bool `json:"disable_sampling,omitempty" toon:"disable_sampling,omitempty"`
-	// Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A DQL parse error is reported in this query's `error` entry.
+	// Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A lone `*` matches every event and filters nothing. A DQL parse error is reported in this query's `error` entry.
 	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
 	// Output format. `table` returns rows; `time_series` returns bucketed time-series rows.
 	Format string `json:"format" toon:"format"`
@@ -10200,7 +10246,7 @@ type RUMDataQueryDefinition struct {
 type RUMDataQueryOutput struct {
 	// Query result. Omitted when the query failed.
 	Data RUMDataQueryResult `json:"data" toon:"data"`
-	// Set when this query failed after request validation (unknown table or column, invalid `dql` or `search_after_ctx`, database error). The code is always `InternalError`. Omitted when the query succeeded.
+	// Set when this query failed after request validation (unknown table or column, invalid `search_after_ctx`, database error). The code is `InternalError`, `InvalidParameter` when `dql` cannot be parsed, or `BadRequest` when the query times out. Omitted when the query succeeded.
 	Error any `json:"error" toon:"error"`
 }
 
@@ -11718,6 +11764,8 @@ type SessionExportRequest struct {
 
 // SessionGetRequest is generated from the Flashduty OpenAPI schema.
 type SessionGetRequest struct {
+	// Set `true` to fill `credits_usage_nano` on the returned session. Omitted or `false` skips the credit aggregation and leaves the field out of the response.
+	IncludeCreditsUsage bool `json:"include_credits_usage,omitempty" toon:"include_credits_usage,omitempty"`
 	// Page size for events; takes precedence over `num_recent_events`. 0 uses the server default (100).
 	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
 	// Legacy page size: number of most-recent events to return. Superseded by `limit` when both are set; 0 uses the server default (100).
@@ -11776,6 +11824,8 @@ type SessionItem struct {
 	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
 	// Display name of the session creator. Returned by `POST /safari/session/list` only; omitted when the name lookup fails.
 	CreatorName string `json:"creator_name" toon:"creator_name"`
+	// Accounted credit usage in nanocredits for this session and the sessions it spawned, covering model, search and sandbox credits. Only `POST /safari/session/get` with `include_credits_usage` set fills it; absent means the figure is unavailable, which is different from an accounted zero.
+	CreditsUsageNano int64 `json:"credits_usage_nano" toon:"credits_usage_nano"`
 	// Size in tokens of the LLM context window as of the most recent turn. 0 means no turn has completed.
 	CurrentContextTokens int64 `json:"current_context_tokens" toon:"current_context_tokens"`
 	// Active working duration in milliseconds for the current or most recent round, excluding time spent waiting on ask_user; resets to 0 at the start of each new round.
@@ -12970,7 +13020,7 @@ type TemplateUpdateRequest struct {
 
 // TimeFilter is generated from the Flashduty OpenAPI schema.
 type TimeFilter struct {
-	// Service calendar ID from `POST /calendar/list` (for example `cal.xxxx`). When set, the window applies only on the calendar's workdays or days off, as chosen by `is_off`.
+	// Service calendar ID from `POST /calendar/list` (for example `cal.xxxx`, or a shared calendar such as `zh-cn.exchange.us`). When set, the window applies only on the calendar's workdays or days off as chosen by `is_off`, and `start` / `end` are read in that calendar's timezone — for a trading calendar, the exchange's — so the window means the same thing wherever the service runs.
 	CalID string `json:"cal_id,omitempty" toon:"cal_id,omitempty"`
 	// Window end, `HH:MM`, inclusive (`23:59` lasts to midnight).
 	End string `json:"end" toon:"end"`
@@ -13679,7 +13729,7 @@ type AccountInfoRestrictions struct {
 
 // AddIncidentResponderRequestNotify is generated from the Flashduty OpenAPI schema.
 type AddIncidentResponderRequestNotify struct {
-	// `true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When omitted, `personal_channels` must be set.
+	// `true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When both are omitted, `follow_preference` defaults to `true`, so an empty `notify` object is accepted.
 	FollowPreference *bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
 	// Channels used when `follow_preference` is `false`: `sms`, `voice`, `email`, `push` (mobile app push), or an IM app channel written as `feishu_app:<integration_id>`, `dingtalk_app:<integration_id>`, `wecom_app:<integration_id>`, `slack_app:<integration_id>`, or `teams_app:<integration_id>`. Ignored when `follow_preference` is `true`.
 	PersonalChannels []string `json:"personal_channels,omitempty" toon:"personal_channels,omitempty"`
@@ -13733,7 +13783,7 @@ type AlertRuleV2EnabledTimesItem struct {
 
 // AssignedToNotify is generated from the Flashduty OpenAPI schema.
 type AssignedToNotify struct {
-	// `true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When omitted, `personal_channels` must be set.
+	// `true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When both are omitted, `follow_preference` defaults to `true`, so an empty `notify` object is accepted.
 	FollowPreference *bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
 	// Channels used when `follow_preference` is `false`: `sms`, `voice`, `email`, `push` (mobile app push), or an IM app channel written as `feishu_app:<integration_id>`, `dingtalk_app:<integration_id>`, `wecom_app:<integration_id>`, `slack_app:<integration_id>`, or `teams_app:<integration_id>`. Ignored when `follow_preference` is `true`.
 	PersonalChannels []string `json:"personal_channels,omitempty" toon:"personal_channels,omitempty"`
@@ -13799,6 +13849,8 @@ type CreateIncidentRequestAssignedTo struct {
 	Notify CreateIncidentRequestAssignedToNotify `json:"notify,omitzero" toon:"notify,omitempty"`
 	// Member IDs to assign directly (1–100). Can be combined with `escalate_rule_id`.
 	PersonIDs []int64 `json:"person_ids,omitempty" toon:"person_ids,omitempty"`
+	// Team IDs to assign by (1–20). Each team is expanded to its members that are enabled and merged into `person_ids`; the responders are capped at 100 in total, and a selection whose teams hold no member of the account returns `InvalidParameter`.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
 	// Assignment type. Normally omitted: the server then sets `assign`, because a manual create is always a first assignment. A value you send is stored as-is.
 	// - `assign`: first assignment of the incident.
 	// - `reassign`: assignment replacing an earlier one.
@@ -13896,7 +13948,7 @@ type EscalateTargetWebhooksItem struct {
 
 // FeedDetailIncidentAssignNotify is generated from the Flashduty OpenAPI schema.
 type FeedDetailIncidentAssignNotify struct {
-	// `true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When omitted, `personal_channels` must be set.
+	// `true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When both are omitted, `follow_preference` defaults to `true`, so an empty `notify` object is accepted.
 	FollowPreference bool `json:"follow_preference" toon:"follow_preference"`
 	// Channels used when `follow_preference` is `false`: `sms`, `voice`, `email`, `push` (mobile app push), or an IM app channel written as `feishu_app:<integration_id>`, `dingtalk_app:<integration_id>`, `wecom_app:<integration_id>`, `slack_app:<integration_id>`, or `teams_app:<integration_id>`. Ignored when `follow_preference` is `true`.
 	PersonalChannels []string `json:"personal_channels" toon:"personal_channels"`
@@ -14263,7 +14315,7 @@ type CreateIncidentRequestAssignedToNotify struct {
 	FollowPreference *bool `json:"follow_preference,omitempty" toon:"follow_preference,omitempty"`
 	// Channels to use when `follow_preference` is false: `sms`, `voice`, `email`, `push`, or an IM app channel prefixed `feishu_app:`, `dingtalk_app:`, `wecom_app:`, `slack_app:` or `teams_app:`.
 	PersonalChannels []string `json:"personal_channels,omitempty" toon:"personal_channels,omitempty"`
-	// Notification template ID (MongoDB ObjectID).
+	// Notification template ID (MongoDB ObjectID). Must exist in the account, otherwise the call fails with `InvalidParameter`.
 	TemplateID string `json:"template_id,omitempty" toon:"template_id,omitempty"`
 }
 
