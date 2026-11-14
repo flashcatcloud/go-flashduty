@@ -750,10 +750,9 @@
       },
       "AddIncidentResponderRequest": {
         "type": "object",
-        "description": "向已有故障添加处理人员的参数。",
+        "description": "向已有故障添加处理人员的参数。`person_ids` 与 `team_ids` 至少要提供一个。",
         "required": [
-          "incident_id",
-          "person_ids"
+          "incident_id"
         ],
         "properties": {
           "incident_id": {
@@ -767,7 +766,17 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "要添加为处理人的成员 ID。已经是处理人或账户中不存在的 ID 会被跳过。"
+            "maxItems": 100,
+            "description": "要添加为处理人的成员 ID（最多 100 个）。已经是处理人或账户中不存在的 ID 会被跳过。"
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "maxItems": 20,
+            "description": "按团队添加处理人时的团队 ID 列表（最多 20 个）。每个团队展开为状态为启用的成员后与 `person_ids` 合并，处理人员总数上限为 100。"
           },
           "notify": {
             "type": "object",
@@ -778,7 +787,7 @@
                   "boolean",
                   "null"
                 ],
-                "description": "`true`：按每个人的个人通知偏好发送。`false`：使用 `personal_channels`，此时该字段不能为空。不传时必须设置 `personal_channels`。"
+                "description": "`true`：按每个人的个人通知偏好发送。`false`：使用 `personal_channels`，此时该字段不能为空。两者都不传时 `follow_preference` 按 `true` 处理，因此可以传空的 `notify` 对象。"
               },
               "personal_channels": {
                 "type": "array",
@@ -2935,7 +2944,7 @@
       },
       "AssignedTo": {
         "type": "object",
-        "description": "分派对象。请求中设置 `person_ids`、`escalate_rule_id` 或 `emails`；都未设置时服务端会重新匹配协作空间的分派策略。响应中该对象始终存在；从未分派过的故障 `type`、`id` 为空，`assigned_at` 为 `0`。",
+        "description": "分派对象。请求中设置 `person_ids`、`team_ids`、`escalate_rule_id` 或 `emails`；都未设置时服务端会重新匹配协作空间的分派策略。响应中该对象始终存在；从未分派过的故障 `type`、`id` 为空，`assigned_at` 为 `0`。",
         "properties": {
           "person_ids": {
             "type": "array",
@@ -2946,6 +2955,16 @@
             "minItems": 1,
             "maxItems": 100,
             "description": "直接指派的成员 ID 列表。"
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "minItems": 1,
+            "maxItems": 20,
+            "description": "按团队指派的团队 ID 列表（1–20 个）。分派执行时每个团队展开为状态为启用的成员并并入 `person_ids`，之后团队成员变动不会重新展开；若所选团队在账户中没有任何成员则返回 `InvalidParameter`，展开后处理人员总数上限为 100。仅请求可用：已落存的分派只保留展开后的成员，响应中不返回该字段。"
           },
           "escalate_rule_id": {
             "type": "string",
@@ -2986,7 +3005,7 @@
                   "boolean",
                   "null"
                 ],
-                "description": "`true`：按每个人的个人通知偏好发送。`false`：使用 `personal_channels`，此时该字段不能为空。不传时必须设置 `personal_channels`。"
+                "description": "`true`：按每个人的个人通知偏好发送。`false`：使用 `personal_channels`，此时该字段不能为空。两者都不传时 `follow_preference` 按 `true` 处理，因此可以传空的 `notify` 对象。"
               },
               "personal_channels": {
                 "type": "array",
@@ -4430,6 +4449,10 @@
             "type": "boolean",
             "description": "是否为非工作日。"
           },
+          "day_end": {
+            "type": "string",
+            "description": "该工作日提前收盘的当地时刻（`HH:MM`），例如 `12:00`。仅共享交易所日历的事件带该字段，整日不提前收盘时省略。"
+          },
           "created_at": {
             "type": "integer",
             "format": "int64",
@@ -4446,7 +4469,7 @@
         "description": "日历事件列表请求。day > 0 时必须同时指定 month；month 与 day 为 0 表示不过滤。",
         "properties": {
           "cal_id": {
-            "description": "日历 ID，可通过 `POST /calendar/list` 获取。",
+            "description": "日历 ID，可通过 `POST /calendar/list` 获取；该接口以 `kind` = `exchange.holiday` 返回的交易所日历 ID 同样可用，因此规则可直接读取交易所日历。",
             "type": "string"
           },
           "day": {
@@ -4521,6 +4544,10 @@
               "weekly"
             ],
             "type": "string"
+          },
+          "day_end": {
+            "type": "string",
+            "description": "该日提前收盘的当地时刻（`HH:MM`），仅在“工作日提前收盘”时返回；整日或休市日省略。"
           }
         },
         "required": [
@@ -4636,7 +4663,7 @@
             "items": {
               "type": "string"
             },
-            "description": "需要继承事件的公共节假日日历 ID 列表（例如 zh-cn.china.official）。"
+            "description": "需要继承事件的公共日历 ID 列表，例如 `zh-cn.china.official` 这样的 `region.official.holiday` 日历，以及最多一个 `exchange.holiday` 交易所日历。关联交易所日历后，本日历的 `timezone` 会跟随交易所时区并覆盖请求中的取值；关联两个交易所日历则返回 `InvalidParameter`。"
           }
         }
       },
@@ -4722,9 +4749,10 @@
           },
           "kind": {
             "type": "string",
-            "description": "日历类型。`region.official.holiday` 为地区法定假日公共日历（数据来自中心假日服务），`religion.holiday` 为宗教假日公共日历（预留值，当前无数据），`personal` 为账户自建的个人/团队日历。",
+            "description": "日历类型。`region.official.holiday` 为地区法定假日公共日历（数据来自中心假日服务），`exchange.holiday` 为共享的交易所休市日历，其时区即交易所时区，规则可直接读取其日期，`religion.holiday` 为宗教假日公共日历（预留值，当前无数据），`personal` 为账户自建的个人/团队日历。",
             "enum": [
               "region.official.holiday",
+              "exchange.holiday",
               "religion.holiday",
               "personal"
             ]
@@ -4779,9 +4807,10 @@
         "description": "日历列表请求。kind 用于按类型过滤；no_locale 在查询公共节假日日历时关闭 locale 过滤。",
         "properties": {
           "kind": {
-            "description": "日历类型过滤条件，为空时默认 personal。`region.official.holiday` 查询地区法定假日公共日历（按调用方 locale 过滤）；`personal` 查询账户自建日历。",
+            "description": "日历类型过滤条件，为空时默认 personal。`region.official.holiday` 查询地区法定假日公共日历（按调用方 locale 过滤）；`exchange.holiday` 查询共享的交易所休市日历，规则可直接读取其 `cal_id`；`personal` 查询账户自建日历。",
             "enum": [
               "region.official.holiday",
+              "exchange.holiday",
               "personal"
             ],
             "type": "string"
@@ -4872,7 +4901,7 @@
             "items": {
               "type": "string"
             },
-            "description": "要继承事件的公共节假日日历 ID（见 `kind` 为 `region.official.holiday` 的 `POST /calendar/list`）。传入时整体替换原列表，空数组即全部移除，不传则保持不变。"
+            "description": "要继承事件的公共日历 ID（见 `kind` 为 `region.official.holiday` 或 `exchange.holiday` 的 `POST /calendar/list`）；其中最多一个可以是 `exchange.holiday` 交易所日历，关联后 `timezone` 跟随交易所时区。传入时整体替换原列表，空数组即全部移除，不传则保持不变。"
           }
         }
       },
@@ -5725,7 +5754,8 @@
             "items": {
               "$ref": "#/components/schemas/EscalateLayer"
             },
-            "description": "按顺序排列的通知环节，故障从第一个环节开始。"
+            "description": "按顺序排列的通知环节，故障从第一个环节开始。至少需要配置一个环节。",
+            "minItems": 1
           },
           "time_filters": {
             "type": "array",
@@ -5902,7 +5932,7 @@
           },
           "assigned_to": {
             "type": "object",
-            "description": "分派对象。省略或为空时由协作空间的分派策略决定（独立故障不会有处理人员）；账户配置了创建表单时必填。`person_ids`、`escalate_rule_id` 和 `emails` 可同时设置，处理人员取并集。分派在创建之后执行，分派失败不会撤销故障。",
+            "description": "分派对象。省略或为空时由协作空间的分派策略决定（独立故障不会有处理人员）；账户配置了创建表单时必填。`person_ids`、`team_ids`、`escalate_rule_id` 和 `emails` 可同时设置，处理人员取并集。分派在创建之后执行，分派失败不会撤销故障。",
             "properties": {
               "person_ids": {
                 "type": "array",
@@ -5913,6 +5943,16 @@
                 "minItems": 1,
                 "maxItems": 100,
                 "description": "直接指派的成员 ID 列表（1–100 个），可与 `escalate_rule_id` 同时使用。"
+              },
+              "team_ids": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "minItems": 1,
+                "maxItems": 20,
+                "description": "按团队指派的团队 ID 列表（1–20 个）。每个团队展开为状态为启用的成员后并入 `person_ids`；处理人员总数上限为 100，若所选团队在账户中没有任何成员则返回 `InvalidParameter`。"
               },
               "escalate_rule_id": {
                 "type": "string",
@@ -5964,7 +6004,7 @@
                   "template_id": {
                     "type": "string",
                     "pattern": "^[0-9a-fA-F]{24}$",
-                    "description": "通知模板 ID(MongoDB ObjectID)。"
+                    "description": "通知模板 ID（MongoDB ObjectID）。必须是账户中存在的模板，否则返回 `InvalidParameter`。"
                   }
                 }
               }
@@ -10931,6 +10971,10 @@
           "agent_session_id": {
             "type": "string",
             "description": "写入该记录的 AI SRE 会话 ID；非智能体写入时不返回该字段。"
+          },
+          "byline": {
+            "type": "string",
+            "description": "AI SRE 代人写入的时间线条目的署名：`both` 表示人与 AI SRE 并重，`self` 仅记录人，`ai` 仅记录 AI SRE。非 AI SRE 写入的条目会省略该字段；在有该设置之前由 AI SRE 写入的条目也会省略，按 `both` 处理。"
           }
         }
       },
@@ -13844,34 +13888,75 @@
         ]
       },
       "LicenseListResponse": {
-        "description": "当前账户中持有固定或临时 On-call 许可的人员。",
+        "description": "账号当前 30 天 On-call 许可窗口的用量，以及计入该窗口的人员。",
         "properties": {
           "items": {
-            "description": "持有有效许可的人员。",
+            "description": "计入当前窗口的人员：持有许可的人员和本窗口被回收许可的人员。",
             "items": {
               "$ref": "#/components/schemas/LicensePersonItem"
             },
             "type": "array"
           },
-          "release_limited": {
-            "description": "当前 30 天窗口内的许可释放配额是否已用尽。为 `true` 时释放席位会返回错误码 `NoLicense`。",
-            "type": "boolean"
+          "license_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "账号最高版本 On-call 套餐已购买的许可数量。账号还没有资源记录时为 `0`。"
+          },
+          "used_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前窗口已占用的许可数量：持有许可的人员，加上本窗口被回收、但仍计入本窗口的人员。"
+          },
+          "window_start": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前许可窗口的起始时间，Unix 时间戳（秒）。窗口长度为 30 天。"
+          },
+          "window_end": {
+            "type": "integer",
+            "format": "int64",
+            "description": "当前许可窗口的结束时间，Unix 时间戳（秒）。"
+          },
+          "rule_effective": {
+            "type": "boolean",
+            "description": "窗口用量许可规则是否已对本账号生效。在 `rule_effective_at` 之前，账号沿用原有的许可行为。"
+          },
+          "rule_effective_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "窗口用量许可规则对本账号的生效时间，Unix 时间戳（秒）：2026-11-09 00:00（+08:00）及之后创建的账号为自己的创建时间，更早创建的账号为 2027-01-01 00:00（+08:00）。"
+          },
+          "auto_grab_disabled": {
+            "type": "boolean",
+            "description": "账号是否已关闭自动占用许可。开启后只有固定分配或被管理员指定的人员持有许可。"
+          },
+          "transferred_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "本窗口唯一一次许可转移的使用时间，Unix 时间戳（秒）。未使用过为 `0`。"
           },
           "total": {
-            "description": "持有有效许可的人员数量。",
+            "description": "`items` 中的人员数量。",
             "format": "int64",
             "type": "integer"
           }
         },
         "required": [
+          "license_cnt",
+          "used_cnt",
+          "window_start",
+          "window_end",
+          "rule_effective",
+          "rule_effective_at",
+          "auto_grab_disabled",
+          "transferred_at",
           "total",
-          "items",
-          "release_limited"
+          "items"
         ],
         "type": "object"
       },
       "LicensePersonItem": {
-        "description": "一名持有有效 On-call 许可的人员。",
+        "description": "一名计入当前 On-call 许可窗口的人员。",
         "properties": {
           "created_at": {
             "description": "固定许可的分配时间，Unix 时间戳。临时许可为 `0`。",
@@ -13895,6 +13980,30 @@
             ],
             "type": "string"
           },
+          "status": {
+            "type": "string",
+            "enum": [
+              "fixed",
+              "active",
+              "revoked"
+            ],
+            "description": "该人员在本窗口的状态：`fixed` 持有固定分配的许可，`active` 持有自动占用或管理员指定的临时许可，`revoked` 在本窗口被回收许可但仍计入本窗口直至结束。"
+          },
+          "via": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "admin",
+              "fixed",
+              ""
+            ],
+            "description": "许可的获得方式：`auto` 为自动占用，`admin` 为管理员指定，`fixed` 为窗口初始化时带入的固定许可。窗口中没有该人员的记录时为空字符串，例如已被回收。"
+          },
+          "acquired_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该人员在本窗口占用许可的记录时间，Unix 时间戳（秒）。窗口中没有该人员的记录时为 `0`。"
+          },
           "updated_at": {
             "description": "固定许可的最后修改时间，Unix 时间戳。临时许可为 `0`。",
             "format": "int64",
@@ -13910,6 +14019,9 @@
           "person_id",
           "person_name",
           "type",
+          "status",
+          "via",
+          "acquired_at",
           "updated_by",
           "created_at",
           "updated_at"
@@ -18688,6 +18800,22 @@
       "RemoteConfigValues": {
         "description": "配置可设置的 SDK 参数。每个字段都是可选的：规则与默认值都未设置的字段不会出现在 SDK 响应中，SDK 将沿用初始化值。",
         "properties": {
+          "crashBeaconEnabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "原生 SDK 是否上报崩溃信标：前台崩溃导致进程退出前发出的数百字节数据，使用户此后不再打开 App 也能统计到这次崩溃。SDK 默认开启；设为 `false` 后采集端也会丢弃已收到的信标。与之下的按会话生效的开关不同，该值在 SDK 收到时立即生效。"
+          },
+          "crashBeaconTimeoutMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 500,
+            "maximum": 2000,
+            "description": "崩溃线程等待崩溃信标发送的时长，单位毫秒（500–2000）；不传时 SDK 取 1000。"
+          },
           "defaultPrivacyLevel": {
             "description": "Session Replay 默认的页面脱敏方式：\n\n- `mask`：替换页面文本并隐藏输入值。\n- `mask-user-input`：保留页面文本，只隐藏用户输入的内容。\n- `allow`：按原样录制页面；已上传的内容无法事后脱敏。",
             "enum": [
@@ -20411,6 +20539,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "active_devices_enabled": {
+            "type": "boolean",
+            "description": "控制台是否按近 30 天的设备表统计活跃设备、登录用户与设备比率，而非基于会话的 UV。取自账号级灰度名单，因此同一账号下的所有应用取值一致；`false` 表示仍使用会话 UV。"
+          },
           "alerting": {
             "$ref": "#/components/schemas/RumApplicationAlerting",
             "description": "应用的告警配置，始终为对象。"
@@ -20505,11 +20637,16 @@
             "description": "最后更新者成员 ID。",
             "format": "int64",
             "type": "integer"
+          },
+          "session_summary_enabled": {
+            "type": "boolean",
+            "description": "是否为该应用的会话提供 AI 会话摘要。取值来自账户级特性开关，同一账户下的所有应用返回相同的值。"
           }
         },
         "type": "object",
         "required": [
           "account_id",
+          "active_devices_enabled",
           "application_id",
           "application_name",
           "type",
@@ -20526,7 +20663,8 @@
           "created_by",
           "updated_by",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "session_summary_enabled"
         ]
       },
       "RumApplicationLink": {
@@ -20823,12 +20961,24 @@
       "RumDataQueryDefinition": {
         "description": "单个 RUM 数据查询定义。",
         "properties": {
+          "cumulative": {
+            "description": "设为 `true` 时，把单个 `COUNT` 或 `SUM` 的时间序列按累计值的增量返回：每个时间桶只填该桶新增的部分，累计和正好等于整个区间的聚合值。要求 `format` 为 `time_series`，并且只有一个带别名的 `COUNT(...)` 或 `SUM(...)` 字段；语句含 `SELECT DISTINCT`、`GROUP BY`、`HAVING` 或 `LIMIT` 时整个请求以 `InvalidParameter` 失败。支持 `COUNT(DISTINCT x)`，该值只在首次出现的桶里计一次。该查询始终不采样，因此响应不带 `sampling`。",
+            "type": "boolean"
+          },
           "disable_sampling": {
-            "description": "为 `true` 时始终查询全量数据，响应不会出现 `sampling`。为 `false`（默认）时，服务端可能对大时间跨度的聚合查询进行抽样。",
+            "description": "为 `true` 时始终查询全量数据，响应不会出现 `sampling`。为 `false`（默认）时，服务端可能对大时间跨度的聚合查询进行抽样。本会被抽样的查询可能需要等待该账户其他全量查询结束；等待过久时，该查询的 `error` 条目以 `BadRequest` 返回。",
             "type": "boolean"
           },
           "dql": {
-            "description": "可选的 RUM DQL 过滤表达式，会被转换后以 `AND` 方式并入 `sql` 的 `WHERE` 子句。DQL 解析失败时在该查询的 `error` 中返回。",
+            "description": "可选的 RUM DQL 过滤表达式，会被转换后以 `AND` 方式并入 `sql` 的 `WHERE` 子句。单独的 `*` 匹配所有事件，不加任何过滤。DQL 解析失败时在该查询的 `error` 中返回。",
+            "type": "string"
+          },
+          "devices_on": {
+            "description": "把 `crash_ledger` 查询限制在该表同一时间范围内统计到的设备上：`active_devices` 只保留有活跃设备记录的设备（`device_key`），`sessions` 只保留有会话的设备（`usr_anonymous_id`）。用于「崩溃数 ÷ 设备数」这类比率，使分子与分母统计的是同一批设备。仅当 `sql` 读取 `crash_ledger` 时可用；其他表或两种取值之外的值会让该查询以 `InvalidParameter` 失败。",
+            "enum": [
+              "active_devices",
+              "sessions"
+            ],
             "type": "string"
           },
           "format": {
@@ -20889,7 +21039,7 @@
           },
           "error": {
             "$ref": "#/components/schemas/DutyError",
-            "description": "查询在请求校验通过后失败时返回（表或列不存在、`dql` 或 `search_after_ctx` 无效、数据库报错），错误码固定为 `InternalError`。查询成功时不返回。"
+            "description": "查询在请求校验通过后失败时返回（表或列不存在、`search_after_ctx` 无效、数据库报错），错误码为 `InternalError`；`dql` 解析失败时为 `InvalidParameter`；查询超时时为 `BadRequest`。查询成功时不返回。"
           }
         },
         "type": "object"
@@ -24881,6 +25031,10 @@
       "SessionGetRequest": {
         "description": "查询单个会话，并返回其最近事件的一页（向更早方向分页）。",
         "properties": {
+          "include_credits_usage": {
+            "type": "boolean",
+            "description": "设为 `true` 时返回的会话带上 `credits_usage_nano`。不传或传 `false` 时跳过积分聚合，响应中不含该字段。"
+          },
           "limit": {
             "description": "事件每页数量；优先于 `num_recent_events`。0 使用服务端默认值（100）。",
             "maximum": 1000,
@@ -25126,6 +25280,14 @@
           },
           "token_usage": {
             "$ref": "#/components/schemas/SessionTokenUsage"
+          },
+          "credits_usage_nano": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "本会话及其派生会话已计账的积分消耗，单位为 nanocredit，包含模型、搜索与沙箱三部分。仅 `POST /safari/session/get` 且带 `include_credits_usage` 时填充；字段缺失表示数据不可得，与已计账为 0 不同。"
           },
           "current_context_tokens": {
             "type": "integer",
@@ -28135,7 +28297,7 @@
           },
           "cal_id": {
             "type": "string",
-            "description": "服务日历 ID，来自 `POST /calendar/list`（如 `cal.xxxx`）。设置后，窗口只在该日历的工作日或休息日生效，由 `is_off` 决定。"
+            "description": "服务日历 ID，取自 `POST /calendar/list`（例如 `cal.xxxx`，或 `zh-cn.exchange.us` 这类共享日历）。设置后，时间窗只在 `is_off` 指定的工作日或休息日生效，且 `start` / `end` 按该日历的时区解读——交易所日历时即交易所时区——因此无论服务部署在哪里，时间窗含义都一致。"
           },
           "is_off": {
             "type": "boolean",
@@ -28485,7 +28647,8 @@
             "items": {
               "$ref": "#/components/schemas/EscalateLayer"
             },
-            "description": "分派环节列表，至少包含一个环节。"
+            "description": "分派环节列表，至少包含一个环节。",
+            "minItems": 1
           },
           "time_filters": {
             "type": "array",
@@ -30411,6 +30574,10 @@
           "recovery": {
             "$ref": "#/components/schemas/AlertRuleRecoveryQueryV2",
             "description": "恢复判定配置。仅 `recovery_mode` 为 `expression_match` 或 `recovery_query_match` 时必填（`recovery.expr` 非空），其余模式不允许传入。"
+          },
+          "absent_counts_as_normal": {
+            "type": "boolean",
+            "description": "把在某轮成功评估中未出现在任何条件查询里的活动实例计为一次正常轮次，而不是把它冻结在当前状态。仅 `recovery_mode` 为 `condition_clear` 或 `expression_match` 时可用；省略该字段时保持既有规则「数据缺失即冻结」的行为。规则处于启用状态时，它匹配的集群内所有已注册的 monit-edge 都须为 v0.77.0 及以上版本，否则保存规则会以 `InvalidParameter` 失败。"
           }
         }
       },
@@ -38084,7 +38251,7 @@
           "On-call/告警管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- `alert_ids` 中的每个 ID 和 `incident_id` 都必须属于调用方账户，不存在的 ID 返回 `InvalidParameter`。\n- 已在目标故障中的告警会被跳过。来源故障合并后若不再有告警，会被关闭。\n- `title` 和 `owner_id` 仅在与目标故障当前值不同时才会更新。\n- 同一账户同一时间只处理一个故障变更，并发调用返回 `RequestTooFrequently`。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- `alert_ids` 中的每个 ID 和 `incident_id` 都必须属于调用方账户，不存在的 ID 返回 `InvalidParameter`。\n- 已在目标故障中的告警会被跳过。来源故障合并后若不再有告警，会被关闭。\n- `title` 和 `owner_id` 仅在与目标故障当前值不同时才会更新。",
           "href": "/zh/api-reference/on-call/alerts/alert-write-merge",
           "metadata": {
             "sidebarTitle": "将告警合并到故障"
@@ -38662,7 +38829,7 @@
           "On-call/日历管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **服务日历管理**（`on-call`） |\n\n## 使用说明\n\n- 每个账户最多 5 个日历：账户已有 5 个日历后，任何成员的创建请求都返回 `InvalidParameter`。\n- `cal_name` 在账户内必须唯一，`timezone` 必须是合法的 IANA 时区，非零 `team_id` 必须是账户中的团队，否则返回 `InvalidParameter`。\n- 每次调用都会记录到账户审计日志。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **服务日历管理**（`on-call`） |\n\n## 使用说明\n\n- 每个账户最多 20 个日历：账户已有 20 个日历后，任何成员的创建请求都返回 `InvalidParameter`。\n- `cal_name` 在账户内必须唯一，`timezone` 必须是合法的 IANA 时区，非零 `team_id` 必须是账户中的团队，否则返回 `InvalidParameter`。\n- 每次调用都会记录到账户审计日志。",
           "href": "/zh/api-reference/on-call/calendars/calendar-create",
           "metadata": {
             "sidebarTitle": "创建服务日历"
@@ -39196,7 +39363,7 @@
           "On-call/日历管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 不传 `kind` 时返回个人日历。`region.official.holiday` 返回公共节假日日历，默认按调用方语言区域过滤，`no_locale` 为 `true` 时不过滤；其 `cal_id` 可填入 `extra_cal_ids`。\n- 列表不分页，`total` 等于返回的条目数。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 不传 `kind` 时返回个人日历。`region.official.holiday` 与 `exchange.holiday` 返回共享日历（公共节假日，以及时区为交易所时区的交易日历），默认按调用方语言区域过滤，`no_locale` 为 `true` 时不过滤；节假日日历的 `cal_id` 可填入 `extra_cal_ids`，交易所日历的 `cal_id` 可直接在规则中引用。\n- 列表不分页，`total` 等于返回的条目数。",
           "href": "/zh/api-reference/on-call/calendars/calendar-list",
           "metadata": {
             "sidebarTitle": "查询服务日历列表"
@@ -44899,7 +45066,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 要提及成员，在 `comment` 中嵌入形如 `[@显示名](flashduty://ref/member/<member_id>)` 的 markdown 链接。被提及的成员会收到专门的个人通知，不受 `mute_reply` 影响。\n- 不带链接语法的纯 `@名字` 文本不会形成提及。\n- 服务端会将每个提及的显示名改写为成员的规范名称。\n- 同一账户内有其他关闭、重开、合并、评论或删除操作正在执行时返回 `RequestTooFrequently`，稍后重试即可。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 要提及成员，在 `comment` 中嵌入形如 `[@显示名](flashduty://ref/member/<member_id>)` 的 markdown 链接。被提及的成员会收到专门的个人通知，不受 `mute_reply` 影响。\n- 不带链接语法的纯 `@名字` 文本不会形成提及。\n- 服务端会将每个提及的显示名改写为成员的规范名称。",
           "href": "/zh/api-reference/on-call/incidents/incident-comment",
           "metadata": {
             "sidebarTitle": "评论故障"
@@ -46317,7 +46484,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 源故障的全部告警会移动到目标故障，目标故障同时继承源故障的集成。\n- 仍未关闭的源故障会被关闭。`remove_source_incidents` 为 `true` 时随后永久删除源故障；否则源故障保持关闭，并在时间线写入一条指向目标故障的 `i_merge` 记录。\n- 目标故障的处理进度、处理人和分派不变；传入 `title` 时会替换目标故障标题。\n- 同一账户内有其他关闭、重开、合并、评论或删除操作正在执行时返回 `RequestTooFrequently`，稍后重试即可。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 源故障的全部告警会移动到目标故障，目标故障同时继承源故障的集成。\n- 仍未关闭的源故障会被关闭。`remove_source_incidents` 为 `true` 时随后永久删除源故障；否则源故障保持关闭，并在时间线写入一条指向目标故障的 `i_merge` 记录。\n- 目标故障的处理进度、处理人和分派不变；传入 `title` 时会替换目标故障标题。",
           "href": "/zh/api-reference/on-call/incidents/incident-merge",
           "metadata": {
             "sidebarTitle": "合并故障"
@@ -47660,7 +47827,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 删除不可恢复。被删除故障的分析统计数据会在后台清除。\n- 任一故障属于调用者无权访问的协作空间时返回 `InvalidParameter`。\n- 不存在的故障 ID 会被忽略。\n- 同一账户内有其他关闭、重开、合并、评论或删除操作正在执行时返回 `RequestTooFrequently`，稍后重试即可。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 删除不可恢复。被删除故障的分析统计数据会在后台清除。\n- 任一故障属于调用者无权访问的协作空间时返回 `InvalidParameter`。\n- 不存在的故障 ID 会被忽略。",
           "href": "/zh/api-reference/on-call/incidents/incident-remove",
           "metadata": {
             "sidebarTitle": "删除故障"
@@ -47735,7 +47902,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 所有故障都必须处于 `Closed`，否则整个请求返回 `InvalidParameter`。\n- 重开后故障回到 `Triggered`，`ack_time`、`close_time`、`closer_id` 以及所有处理人的认领状态都会被重置。\n- 每个故障按原分派对象从第一级重新分派，`assigned_to.type` 置为 `reopen`。\n- 同一账户内有其他关闭、重开、合并、评论或删除操作正在执行时返回 `RequestTooFrequently`，稍后重试即可。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 所有故障都必须处于 `Closed`，否则整个请求返回 `InvalidParameter`。\n- 重开后故障回到 `Triggered`，`ack_time`、`close_time`、`closer_id` 以及所有处理人的认领状态都会被重置。\n- 每个故障按原分派对象从第一级重新分派，`assigned_to.type` 置为 `reopen`。",
           "href": "/zh/api-reference/on-call/incidents/incident-reopen",
           "metadata": {
             "sidebarTitle": "重开故障"
@@ -47886,7 +48053,7 @@
           "On-call/故障管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 关闭表单生效时，`custom_fields`、`summary` 和 `images` 必须符合其中可见元素及必填规则。\n- 批量操作只有在全部选中的故障解析到同一张表单时才接受表单值；否则请逐条关闭。\n- 旧字段 `values` 和 `custom_values` 会被拒绝，请使用 `custom_fields`。\n- 已关闭的故障会被跳过，不报错；存在不认识的故障 ID 时整个请求返回 `InvalidParameter`。\n- 关闭处于 `Triggered` 的故障时，会先以调用者身份自动认领。\n- 关闭后，故障下未完成的行动项会转为后续行动，之后到达的事件也不再合并进该故障已有的告警。\n- 同一账户内有其他关闭、重开、合并、评论或删除操作正在执行时返回 `RequestTooFrequently`，稍后重试即可。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **故障管理**或**协作空间管理**（`on-call`） |\n\n## 使用说明\n\n- 关闭表单生效时，`custom_fields`、`summary` 和 `images` 必须符合其中可见元素及必填规则。\n- 批量操作只有在全部选中的故障解析到同一张表单时才接受表单值；否则请逐条关闭。\n- 旧字段 `values` 和 `custom_values` 会被拒绝，请使用 `custom_fields`。\n- 已关闭的故障会被跳过，不报错；存在不认识的故障 ID 时整个请求返回 `InvalidParameter`。\n- 关闭处于 `Triggered` 的故障时，会先以调用者身份自动认领。\n- 关闭后，故障下未完成的行动项会转为后续行动，之后到达的事件也不再合并进该故障已有的告警。",
           "href": "/zh/api-reference/on-call/incidents/incident-resolve",
           "metadata": {
             "sidebarTitle": "恢复故障"
@@ -53807,12 +53974,12 @@
       "post": {
         "operationId": "oncall-license-read-license-list",
         "summary": "查询 On-call 许可列表",
-        "description": "查询当前账户中正在使用固定或临时 On-call 许可的人员。",
+        "description": "查询当前许可窗口的用量，以及计入该窗口的人员。",
         "tags": [
           "On-call/许可管理"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无——任意有效的 `app_key` 都可以调用此接口 |\n\n## 使用说明\n\n- `items` 仅包含持有固定或临时 On-call 许可的人员。\n- 对临时许可，`updated_by`、`created_at` 和 `updated_at` 均为 `0`。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无——任意有效的 `app_key` 都可以调用此接口 |\n\n## 使用说明\n\n- `license_cnt`、`used_cnt`、`window_start`、`window_end` 描述账号当前 30 天的许可窗口；窗口从账号创建时间开始计算。\n- `rule_effective_at` 是窗口用量许可规则对本账号的生效时间：2026-11-09 00:00（+08:00）及之后创建的账号为自身创建时间，更早创建的账号为 2027-01-01 00:00（+08:00）。在此之前 `license_cnt` 与 `used_cnt` 仅供参考。\n- `items` 包含计入窗口的全部人员：固定与临时持有者，以及本窗口被回收许可的人员（`status` 为 `revoked`）。\n- 固定许可的 `updated_by`、`created_at`、`updated_at` 取自固定许可记录；临时许可为 `0`。\n- `via` 与 `acquired_at` 仅用于展示：说明许可是在本窗口如何、何时被占用的，不代表人员权限。",
           "href": "/zh/api-reference/on-call/licenses/oncall-license-read-license-list",
           "metadata": {
             "sidebarTitle": "查询 On-call 许可列表"
@@ -53841,12 +54008,23 @@
                 "example": {
                   "request_id": "01J0D5Y31GY2TWAHRP3Q8K4M6N",
                   "data": {
-                    "total": 2,
+                    "license_cnt": 6,
+                    "used_cnt": 3,
+                    "window_start": 1793232000,
+                    "window_end": 1795824000,
+                    "rule_effective": false,
+                    "rule_effective_at": 1798732800,
+                    "auto_grab_disabled": false,
+                    "transferred_at": 0,
+                    "total": 3,
                     "items": [
                       {
                         "person_id": 80011,
                         "person_name": "Yuki Zhang",
                         "type": "fixed",
+                        "status": "fixed",
+                        "via": "fixed",
+                        "acquired_at": 1793232000,
                         "updated_by": 80001,
                         "created_at": 1719792000,
                         "updated_at": 1719878400
@@ -53855,12 +54033,25 @@
                         "person_id": 80012,
                         "person_name": "Alex Chen",
                         "type": "temporary",
+                        "status": "active",
+                        "via": "auto",
+                        "acquired_at": 1794021720,
+                        "updated_by": 0,
+                        "created_at": 0,
+                        "updated_at": 0
+                      },
+                      {
+                        "person_id": 80013,
+                        "person_name": "Mei Lin",
+                        "type": "temporary",
+                        "status": "revoked",
+                        "via": "",
+                        "acquired_at": 0,
                         "updated_by": 0,
                         "created_at": 0,
                         "updated_at": 0
                       }
-                    ],
-                    "release_limited": false
+                    ]
                   }
                 }
               }
@@ -55358,6 +55549,7 @@
                 "example": {
                   "data": {
                     "account_id": 2451002751131,
+                    "active_devices_enabled": true,
                     "alerting": {
                       "channel_ids": [
                         2490121812131
@@ -55406,7 +55598,8 @@
                         "repo": "acme/web-app",
                         "subdir": "apps/web"
                       }
-                    ]
+                    ],
+                    "session_summary_enabled": true
                   },
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
                 },
@@ -55487,6 +55680,7 @@
                     "items": [
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             5962711836131,
@@ -55518,10 +55712,12 @@
                         "type": "browser",
                         "updated_at": 1772096392711,
                         "updated_by": 3122470302131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       },
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             2490121812131
@@ -55565,7 +55761,8 @@
                         "type": "browser",
                         "updated_at": 1773398630657,
                         "updated_by": 3790925372131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       }
                     ]
                   },
@@ -55649,6 +55846,7 @@
                     "items": [
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             2490121812131
@@ -55692,10 +55890,12 @@
                         "type": "browser",
                         "updated_at": 1773398630657,
                         "updated_by": 3790925372131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       },
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             5962711836131,
@@ -55727,7 +55927,8 @@
                         "type": "browser",
                         "updated_at": 1772096392711,
                         "updated_by": 3122470302131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       }
                     ],
                     "total": 7
@@ -58900,7 +59101,7 @@
           "RUM/RUM 数据查询"
         ],
         "x-mint": {
-          "content": "## 时间范围对齐与缓存\n\n为便于重复查询复用缓存结果，聚合查询的时间范围会被对齐到网格：\n\n- `format=time_series`：起始时间向下、结束时间向上取整到 `interval`。时间桶的数量和位置不变，首尾两个桶覆盖完整区间，而不是部分区间。\n- 聚合（非时序）查询：起始时间向下、结束时间向上取整到 `max(1 分钟, 时间范围 ÷ 1226 向上取到下一个标准间隔档)`，例如 24 小时对齐到 2 分钟，7 天对齐到 10 分钟，30 天对齐到 1 小时。时间范围短于 100 个网格步长时不对齐、不缓存。起始端最多多出一个网格步长的数据；结束端取整到未来，该部分没有数据。\n- 明细/列表查询（无聚合、分页），以及 SQL 中含有 `now()` 等随执行时间变化的函数的查询，不做对齐也不缓存。\n\n最近时间的数据结果最多可能滞后 60 秒。\n\n## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 单次请求可提交 1 到 10 个查询；每个查询的 `id` 会成为响应对象中的 key。\n- `start_time`、`end_time` 为 Unix 毫秒时间戳，跨度不超过 31 天。服务端会自动追加时间范围与账户过滤条件，`sql` 中无需再写。\n- `FROM` 填写 RUM 数据表名：`sessions`、`views`、`actions`、`errors`、`resources`、`long_tasks`、`vitals`、`issues` 或 `sourcemaps`（也接受单数形式）。列名即 `POST /rum/field/list` 返回的 `field_key`。\n- 若查询在顶层 `AND` 条件中用 `=` 或 `IN` 限定了 `application_id`，调用者必须能读取这些应用：所属团队不包含调用者的私有应用会让整个请求返回 `AccessDenied`，不存在的应用返回 `ResourceNotFound`，单次请求最多涉及 50 个不同应用。未限定应用的查询会自动跳过调用者无权读取的私有应用。\n- SQL 语法错误、`time_zone` 无效或时间范围不合法时，整个请求返回 `InvalidParameter`。之后阶段才失败的查询（表或列不存在、`dql` 无效、`search_after_ctx` 无效、数据库报错）只在该查询自己的结果中返回 `error`，错误码为 `InternalError`，其他查询仍正常返回 `data`。\n- `values` 按列组织：`values[i]` 是列 `fields[i]` 在所有行上的取值。\n- `table` 查询最多返回 1,000 行；未写 `LIMIT` 或超过 1,000 时按 1,000 处理。不含聚合、带 `ORDER BY` 且没有 `OFFSET` 的查询在本页取满时会返回 `search_after_ctx`，用相同的 `sql` 带上它即可取下一页。\n- `time_series` 查询会在最前面插入 `ts` 列（时间桶起点，Unix 毫秒），并按它分组、排序。桶宽以毫秒在 `interval` 中返回，取值为固定档位（1、2、5、10、20、50、100、200、500 毫秒；1、2、5、10、15、30 秒；1、2、5、10、15、30 分钟；1、2、3、6、12 小时；1、2、3、7 天；30、60、90、180 天）中同时不小于 `interval` 和「时间跨度 ÷ `max_points`」的最小一档。\n- 时间跨度较大时，聚合查询可能基于抽样数据执行；此时响应带有 `sampling`，且 `COUNT`、`SUM`、`COUNT(DISTINCT)` 列已乘以 `scale_factor`。设置 `disable_sampling: true` 可始终查询全量数据。",
+          "content": "## 时间范围对齐与缓存\n\n为便于重复查询复用缓存结果，聚合查询的时间范围会被对齐到网格：\n\n- `format=time_series`：起始时间向下、结束时间向上取整到 `interval`。时间桶的数量和位置不变，首尾两个桶覆盖完整区间，而不是部分区间。\n- 聚合（非时序）查询：起始时间向下、结束时间向上取整到 `max(1 分钟, 时间范围 ÷ 1226 向上取到下一个标准间隔档)`，例如 24 小时对齐到 2 分钟，7 天对齐到 10 分钟，30 天对齐到 1 小时。时间范围短于 100 个网格步长时不对齐、不缓存。起始端最多多出一个网格步长的数据；结束端取整到未来，该部分没有数据。\n- 明细/列表查询（无聚合、分页），以及 SQL 中含有 `now()` 等随执行时间变化的函数的查询，不做对齐也不缓存。\n\n最近时间的数据结果最多可能滞后 60 秒。\n\n## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 单次请求可提交 1 到 10 个查询；每个查询的 `id` 会成为响应对象中的 key。\n- `start_time`、`end_time` 为 Unix 毫秒时间戳，跨度不超过 31 天。服务端会自动追加时间范围与账户过滤条件，`sql` 中无需再写。\n- `FROM` 填写 RUM 数据表名：`sessions`、`views`、`actions`、`errors`、`resources`、`long_tasks`、`vitals`、`issues` 或 `sourcemaps`（也接受单数形式）。列名即 `POST /rum/field/list` 返回的 `field_key`。\n- 若查询在顶层 `AND` 条件中用 `=` 或 `IN` 限定了 `application_id`，调用者必须能读取这些应用：所属团队不包含调用者的私有应用会让整个请求返回 `AccessDenied`，不存在的应用返回 `ResourceNotFound`，单次请求最多涉及 50 个不同应用。未限定应用的查询会自动跳过调用者无权读取的私有应用。\n- SQL 语法错误、`time_zone` 无效或时间范围不合法时，整个请求返回 `InvalidParameter`。之后阶段才失败的查询（表或列不存在、`search_after_ctx` 无效、数据库报错）只在该查询自己的结果中返回 `error`，错误码为 `InternalError`，其他查询仍正常返回 `data`；`dql` 解析失败同样只影响该查询，错误码为 `InvalidParameter`，报错信息带上该查询原文。\n- `values` 按列组织：`values[i]` 是列 `fields[i]` 在所有行上的取值。\n- `table` 查询最多返回 1,000 行；未写 `LIMIT` 或超过 1,000 时按 1,000 处理。不含聚合、带 `ORDER BY` 且没有 `OFFSET` 的查询在本页取满时会返回 `search_after_ctx`，用相同的 `sql` 带上它即可取下一页。\n- `time_series` 查询会在最前面插入 `ts` 列（时间桶起点，Unix 毫秒），并按它分组、排序。桶宽以毫秒在 `interval` 中返回，取值为固定档位（1、2、5、10、20、50、100、200、500 毫秒；1、2、5、10、15、30 秒；1、2、5、10、15、30 分钟；1、2、3、6、12 小时；1、2、3、7 天；30、60、90、180 天）中同时不小于 `interval` 和「时间跨度 ÷ `max_points`」的最小一档。\n- 时间跨度较大时，聚合查询可能基于抽样数据执行；此时响应带有 `sampling`，且 `COUNT`、`SUM`、`COUNT(DISTINCT)` 列已乘以 `scale_factor`。设置 `disable_sampling: true` 可始终查询全量数据。",
           "href": "/zh/api-reference/rum/data-query/rum-read-data-query",
           "metadata": {
             "sidebarTitle": "查询 RUM 数据"

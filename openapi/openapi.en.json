@@ -750,10 +750,9 @@
       },
       "AddIncidentResponderRequest": {
         "type": "object",
-        "description": "Parameters for adding responders to an existing incident.",
+        "description": "Parameters for adding responders to an existing incident. At least one of `person_ids` and `team_ids` is required.",
         "required": [
-          "incident_id",
-          "person_ids"
+          "incident_id"
         ],
         "properties": {
           "incident_id": {
@@ -767,7 +766,17 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "Member IDs to add as responders. IDs that are already responders, or that do not exist in the account, are skipped."
+            "maxItems": 100,
+            "description": "Member IDs to add as responders (at most 100). IDs that are already responders, or that do not exist in the account, are skipped."
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "maxItems": 20,
+            "description": "Team IDs whose members are added as responders (at most 20). Each team is expanded to its enabled members, merged with `person_ids`, and the result is capped at 100 responders."
           },
           "notify": {
             "type": "object",
@@ -778,7 +787,7 @@
                   "boolean",
                   "null"
                 ],
-                "description": "`true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When omitted, `personal_channels` must be set."
+                "description": "`true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When both are omitted, `follow_preference` defaults to `true`, so an empty `notify` object is accepted."
               },
               "personal_channels": {
                 "type": "array",
@@ -2935,7 +2944,7 @@
       },
       "AssignedTo": {
         "type": "object",
-        "description": "Assignment target. In requests, set `person_ids`, `escalate_rule_id`, or `emails`; when none is set the server re-runs the channel's escalation rule matching. In responses the object is always present; an incident that was never assigned has empty `type`, `id`, and `assigned_at` of `0`.",
+        "description": "Assignment target. In requests, set `person_ids`, `team_ids`, `escalate_rule_id`, or `emails`; when none is set the server re-runs the channel's escalation rule matching. In responses the object is always present; an incident that was never assigned has empty `type`, `id`, and `assigned_at` of `0`.",
         "properties": {
           "person_ids": {
             "type": "array",
@@ -2946,6 +2955,16 @@
             "minItems": 1,
             "maxItems": 100,
             "description": "Member IDs to assign directly."
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "minItems": 1,
+            "maxItems": 20,
+            "description": "Team IDs to assign by (1–20). Each team is expanded to its members that are enabled and merged into `person_ids` when the assignment runs, so a later membership change does not re-expand it; a selection whose teams hold no member of the account returns `InvalidParameter`, and the expanded responders are capped at 100 in total. Requests only: a stored assignment keeps the expanded members, so responses omit it."
           },
           "escalate_rule_id": {
             "type": "string",
@@ -2986,7 +3005,7 @@
                   "boolean",
                   "null"
                 ],
-                "description": "`true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When omitted, `personal_channels` must be set."
+                "description": "`true`: notify each person through their personal notification preference. `false`: use `personal_channels`, which must then be non-empty. When both are omitted, `follow_preference` defaults to `true`, so an empty `notify` object is accepted."
               },
               "personal_channels": {
                 "type": "array",
@@ -4430,6 +4449,10 @@
             "type": "boolean",
             "description": "Whether the event marks a non-working day."
           },
+          "day_end": {
+            "type": "string",
+            "description": "Local wall-clock time (`HH:MM`) at which a working day closes early, e.g. `12:00`. Only events of a shared exchange calendar carry one; omitted for a full day."
+          },
           "created_at": {
             "type": "integer",
             "format": "int64",
@@ -4446,7 +4469,7 @@
         "description": "Calendar event list request. When day > 0 month must also be specified. month and day accept 0 to mean \"not filtered\".",
         "properties": {
           "cal_id": {
-            "description": "Calendar ID; obtain it from `POST /calendar/list`.",
+            "description": "Calendar ID, obtained from `POST /calendar/list`. A calendar listed there with `kind` = `exchange.holiday` is accepted too, so a trading calendar can be read directly.",
             "type": "string"
           },
           "day": {
@@ -4521,6 +4544,10 @@
               "weekly"
             ],
             "type": "string"
+          },
+          "day_end": {
+            "type": "string",
+            "description": "Local wall-clock time (`HH:MM`) at which the day ends, when it is a working day that closes early. Omitted for a full day or a day off."
           }
         },
         "required": [
@@ -4636,7 +4663,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Additional public-holiday calendar IDs to inherit events from (for example zh-cn.china.official)."
+            "description": "Additional public calendar IDs to inherit events from — `region.official.holiday` IDs such as `zh-cn.china.official`, plus at most one `exchange.holiday` calendar. Linking an exchange calendar sets this calendar's `timezone` to the exchange's, overriding the value you send; linking two of them returns `InvalidParameter`."
           }
         }
       },
@@ -4722,9 +4749,10 @@
           },
           "kind": {
             "type": "string",
-            "description": "Calendar kind. `region.official.holiday` is a public regional holiday calendar (served by the central holiday service), `religion.holiday` is a public religious holiday calendar (reserved, currently no data), and `personal` is an account-created personal/team calendar.",
+            "description": "Calendar kind. `region.official.holiday` is a public regional holiday calendar (served by the central holiday service), `exchange.holiday` is a shared stock-exchange calendar whose timezone is the exchange's and whose dates a rule may read directly, `religion.holiday` is a public religious holiday calendar (reserved, currently no data), and `personal` is an account-created personal/team calendar.",
             "enum": [
               "region.official.holiday",
+              "exchange.holiday",
               "religion.holiday",
               "personal"
             ]
@@ -4779,9 +4807,10 @@
         "description": "Calendar list request. kind filters by calendar kind; no_locale disables locale filtering for public holiday calendars.",
         "properties": {
           "kind": {
-            "description": "Calendar kind filter; defaults to personal when empty. `region.official.holiday` queries public regional holiday calendars (filtered by the caller's locale); `personal` queries account-created calendars.",
+            "description": "Calendar kind filter; defaults to personal when empty. `region.official.holiday` queries public regional holiday calendars (filtered by the caller's locale); `exchange.holiday` queries the shared stock-exchange calendars, whose `cal_id` a rule may read directly; `personal` queries account-created calendars.",
             "enum": [
               "region.official.holiday",
+              "exchange.holiday",
               "personal"
             ],
             "type": "string"
@@ -4872,7 +4901,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Public holiday calendar IDs to inherit events from (see `POST /calendar/list` with `kind` = `region.official.holiday`). When sent, replaces the stored list; an empty array removes them all; omit to keep it."
+            "description": "Public calendar IDs to inherit events from (see `POST /calendar/list` with `kind` = `region.official.holiday` or `exchange.holiday`); at most one of them may be an `exchange.holiday` calendar, and linking one sets `timezone` to the exchange's. When sent, replaces the stored list; an empty array removes them all; omit to keep it."
           }
         }
       },
@@ -5725,7 +5754,8 @@
             "items": {
               "$ref": "#/components/schemas/EscalateLayer"
             },
-            "description": "Escalation levels in order; the incident starts at the first level."
+            "description": "Escalation levels in order; the incident starts at the first level. At least one level is required.",
+            "minItems": 1
           },
           "time_filters": {
             "type": "array",
@@ -5902,7 +5932,7 @@
           },
           "assigned_to": {
             "type": "object",
-            "description": "Who to assign. When omitted or empty, the channel's escalation rules decide (a standalone incident gets no responders); required when the account has a create form. `person_ids`, `escalate_rule_id` and `emails` can be combined — responders are the union. Assignment runs after creation, and its failure does not undo the incident.",
+            "description": "Who to assign. When omitted or empty, the channel's escalation rules decide (a standalone incident gets no responders); required when the account has a create form. `person_ids`, `team_ids`, `escalate_rule_id` and `emails` can be combined — responders are the union. Assignment runs after creation, and its failure does not undo the incident.",
             "properties": {
               "person_ids": {
                 "type": "array",
@@ -5913,6 +5943,16 @@
                 "minItems": 1,
                 "maxItems": 100,
                 "description": "Member IDs to assign directly (1–100). Can be combined with `escalate_rule_id`."
+              },
+              "team_ids": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "minItems": 1,
+                "maxItems": 20,
+                "description": "Team IDs to assign by (1–20). Each team is expanded to its members that are enabled and merged into `person_ids`; the responders are capped at 100 in total, and a selection whose teams hold no member of the account returns `InvalidParameter`."
               },
               "escalate_rule_id": {
                 "type": "string",
@@ -5964,7 +6004,7 @@
                   "template_id": {
                     "type": "string",
                     "pattern": "^[0-9a-fA-F]{24}$",
-                    "description": "Notification template ID (MongoDB ObjectID)."
+                    "description": "Notification template ID (MongoDB ObjectID). Must exist in the account, otherwise the call fails with `InvalidParameter`."
                   }
                 }
               }
@@ -10931,6 +10971,10 @@
           "agent_session_id": {
             "type": "string",
             "description": "AI SRE session that produced the entry. Omitted when no agent wrote it."
+          },
+          "byline": {
+            "type": "string",
+            "description": "Timeline signature of an entry AI SRE wrote on a person's behalf: `both` (the person and AI SRE, equally weighted), `self` (the person only) or `ai` (AI SRE only). Omitted for entries not written by AI SRE, and for AI SRE entries written before the setting existed, which read as `both`."
           }
         }
       },
@@ -13844,34 +13888,75 @@
         ]
       },
       "LicenseListResponse": {
-        "description": "People with active fixed or temporary On-call licenses.",
+        "description": "License usage of the account's current 30-day On-call window, plus the people counted in it.",
         "properties": {
           "items": {
-            "description": "People holding an active license.",
+            "description": "People counted in the current window: license holders and people revoked in it.",
             "items": {
               "$ref": "#/components/schemas/LicensePersonItem"
             },
             "type": "array"
           },
-          "release_limited": {
-            "description": "Whether the account has used up its license release quota for the current 30-day window. While `true`, releasing a seat fails with error code `NoLicense`.",
-            "type": "boolean"
+          "license_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Seats purchased on the account's highest-version On-call plan. `0` when the account has no resource record yet."
+          },
+          "used_cnt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Seats in use in the current window: people holding a license plus people revoked in this window, who stay counted until it ends."
+          },
+          "window_start": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the current 30-day license window started."
+          },
+          "window_end": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the current license window ends; a window is 30 days long."
+          },
+          "rule_effective": {
+            "type": "boolean",
+            "description": "Whether the window-usage license rules already apply to this account. Before `rule_effective_at` the account keeps its earlier seat behaviour."
+          },
+          "rule_effective_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the window-usage rules start for this account: its own creation time for an account created on or after 2026-11-09 00:00 +08:00, otherwise 2027-01-01 00:00 +08:00."
+          },
+          "auto_grab_disabled": {
+            "type": "boolean",
+            "description": "Whether automatic seat grabbing is off for the account, so only fixed or admin-assigned members hold a license."
+          },
+          "transferred_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when this window's single license reassignment was used; `0` when it has not been used."
           },
           "total": {
-            "description": "Number of people holding an active license.",
+            "description": "Number of people in `items`.",
             "format": "int64",
             "type": "integer"
           }
         },
         "required": [
+          "license_cnt",
+          "used_cnt",
+          "window_start",
+          "window_end",
+          "rule_effective",
+          "rule_effective_at",
+          "auto_grab_disabled",
+          "transferred_at",
           "total",
-          "items",
-          "release_limited"
+          "items"
         ],
         "type": "object"
       },
       "LicensePersonItem": {
-        "description": "One person with an active On-call license.",
+        "description": "One person counted in the current On-call license window.",
         "properties": {
           "created_at": {
             "description": "Unix timestamp when a fixed license was assigned. `0` for temporary licenses.",
@@ -13895,6 +13980,30 @@
             ],
             "type": "string"
           },
+          "status": {
+            "type": "string",
+            "enum": [
+              "fixed",
+              "active",
+              "revoked"
+            ],
+            "description": "Where the person stands in this window: `fixed` holds an explicitly assigned seat, `active` holds a temporary seat taken automatically or assigned by an admin, `revoked` had the seat taken back in this window and still counts until it ends."
+          },
+          "via": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "admin",
+              "fixed",
+              ""
+            ],
+            "description": "How the seat was taken: `auto` from an automatic grab, `admin` from an admin assignment, `fixed` from the window being seeded with the account's fixed licenses. Empty string when the window holds no record for the person, for example after a revocation."
+          },
+          "acquired_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the seat was recorded in this window. `0` when the window holds no record for the person."
+          },
           "updated_at": {
             "description": "Unix timestamp when a fixed license was last changed. `0` for temporary licenses.",
             "format": "int64",
@@ -13910,6 +14019,9 @@
           "person_id",
           "person_name",
           "type",
+          "status",
+          "via",
+          "acquired_at",
           "updated_by",
           "created_at",
           "updated_at"
@@ -18688,6 +18800,22 @@
       "RemoteConfigValues": {
         "description": "The SDK knobs a configuration can set. Every field is optional: a value absent from both rule and default is omitted from the SDK response, which tells the SDK to keep its init value.",
         "properties": {
+          "crashBeaconEnabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether native SDKs send a crash beacon: a few hundred bytes sent while a foreground crash takes the process down, so the crash is counted even when the user never opens the app again. On by default in the SDKs; `false` also makes the collector discard beacons it still receives. Unlike the session-scoped knobs below, a change applies as soon as the SDK receives it."
+          },
+          "crashBeaconTimeoutMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 500,
+            "maximum": 2000,
+            "description": "How long the crashed thread waits for the crash beacon before the process dies, in milliseconds (500–2000). Omitted, the SDK uses 1000."
+          },
           "defaultPrivacyLevel": {
             "description": "How Session Replay masks a page by default:\n\n- `mask`: replaces text and hides input values.\n- `mask-user-input`: keeps page text but hides what users type.\n- `allow`: records the page as it is; content already uploaded cannot be masked later.",
             "enum": [
@@ -20411,6 +20539,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "active_devices_enabled": {
+            "type": "boolean",
+            "description": "Whether the console reports active devices, signed-in users and device rates from the 30-day device table instead of session-based UV. Read from the account-level rollout list, so every application of the same account reports the same value; `false` keeps the session-based UV."
+          },
           "alerting": {
             "$ref": "#/components/schemas/RumApplicationAlerting",
             "description": "Alerting configuration of the application. Always an object."
@@ -20505,11 +20637,16 @@
             "description": "Last updater member ID.",
             "format": "int64",
             "type": "integer"
+          },
+          "session_summary_enabled": {
+            "type": "boolean",
+            "description": "Whether the console offers the AI session summary for this application's sessions. Read from the account-level feature switch, so every application of the same account reports the same value."
           }
         },
         "type": "object",
         "required": [
           "account_id",
+          "active_devices_enabled",
           "application_id",
           "application_name",
           "type",
@@ -20526,7 +20663,8 @@
           "created_by",
           "updated_by",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "session_summary_enabled"
         ]
       },
       "RumApplicationLink": {
@@ -20823,12 +20961,24 @@
       "RumDataQueryDefinition": {
         "description": "One RUM data query definition.",
         "properties": {
+          "cumulative": {
+            "description": "Set to `true` to get a time series of a single `COUNT` or `SUM` as the increments of its running total: each bucket holds only what the bucket adds, so the running sum ends at the aggregate over the range. Requires `format` `time_series` and exactly one select field, `COUNT(...)` or `SUM(...)`, with an alias; a statement with `SELECT DISTINCT`, `GROUP BY`, `HAVING` or `LIMIT` makes the whole request fail with `InvalidParameter`. `COUNT(DISTINCT x)` is accepted and counts each `x` in its first bucket only. The query always runs unsampled, so the response carries no `sampling`.",
+            "type": "boolean"
+          },
           "disable_sampling": {
-            "description": "When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows.",
+            "description": "When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows. A query that would otherwise be sampled can wait for the account's other unsampled queries; if it waits too long, its `error` entry is set with code `BadRequest`.",
             "type": "boolean"
           },
           "dql": {
-            "description": "Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A DQL parse error is reported in this query's `error` entry.",
+            "description": "Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A lone `*` matches every event and filters nothing. A DQL parse error is reported in this query's `error` entry.",
+            "type": "string"
+          },
+          "devices_on": {
+            "description": "Keeps a `crash_ledger` query to the devices counted on that table over the same range: `active_devices` keeps only devices with an active-device record (`device_key`), `sessions` only devices with a session (`usr_anonymous_id`). Use it on a crash count that is divided by a device count so the numerator counts the same devices as the denominator. Only supported when `sql` reads `crash_ledger`; another table, or a value outside the two, fails that query with `InvalidParameter`.",
+            "enum": [
+              "active_devices",
+              "sessions"
+            ],
             "type": "string"
           },
           "format": {
@@ -20889,7 +21039,7 @@
           },
           "error": {
             "$ref": "#/components/schemas/DutyError",
-            "description": "Set when this query failed after request validation (unknown table or column, invalid `dql` or `search_after_ctx`, database error). The code is always `InternalError`. Omitted when the query succeeded."
+            "description": "Set when this query failed after request validation (unknown table or column, invalid `search_after_ctx`, database error). The code is `InternalError`, `InvalidParameter` when `dql` cannot be parsed, or `BadRequest` when the query times out. Omitted when the query succeeded."
           }
         },
         "type": "object"
@@ -24881,6 +25031,10 @@
       "SessionGetRequest": {
         "description": "Fetch one session plus a backward-paged window of its most recent events.",
         "properties": {
+          "include_credits_usage": {
+            "type": "boolean",
+            "description": "Set `true` to fill `credits_usage_nano` on the returned session. Omitted or `false` skips the credit aggregation and leaves the field out of the response."
+          },
           "limit": {
             "description": "Page size for events; takes precedence over `num_recent_events`. 0 uses the server default (100).",
             "maximum": 1000,
@@ -25126,6 +25280,14 @@
           },
           "token_usage": {
             "$ref": "#/components/schemas/SessionTokenUsage"
+          },
+          "credits_usage_nano": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Accounted credit usage in nanocredits for this session and the sessions it spawned, covering model, search and sandbox credits. Only `POST /safari/session/get` with `include_credits_usage` set fills it; absent means the figure is unavailable, which is different from an accounted zero."
           },
           "current_context_tokens": {
             "type": "integer",
@@ -28135,7 +28297,7 @@
           },
           "cal_id": {
             "type": "string",
-            "description": "Service calendar ID from `POST /calendar/list` (for example `cal.xxxx`). When set, the window applies only on the calendar's workdays or days off, as chosen by `is_off`."
+            "description": "Service calendar ID from `POST /calendar/list` (for example `cal.xxxx`, or a shared calendar such as `zh-cn.exchange.us`). When set, the window applies only on the calendar's workdays or days off as chosen by `is_off`, and `start` / `end` are read in that calendar's timezone — for a trading calendar, the exchange's — so the window means the same thing wherever the service runs."
           },
           "is_off": {
             "type": "boolean",
@@ -28485,7 +28647,8 @@
             "items": {
               "$ref": "#/components/schemas/EscalateLayer"
             },
-            "description": "Escalation levels in order. At least one level is required."
+            "description": "Escalation levels in order. At least one level is required.",
+            "minItems": 1
           },
           "time_filters": {
             "type": "array",
@@ -30411,6 +30574,10 @@
           "recovery": {
             "$ref": "#/components/schemas/AlertRuleRecoveryQueryV2",
             "description": "Recovery evaluation config. Required (with non-empty `recovery.expr`) only when `recovery_mode` is `expression_match` or `recovery_query_match`; must be omitted for the other modes."
+          },
+          "absent_counts_as_normal": {
+            "type": "boolean",
+            "description": "Count an active instance that is missing from every condition query of a successful round as one normal round, instead of freezing the instance in its current state. Only valid with `recovery_mode` `condition_clear` or `expression_match`; omitting it keeps the freeze-on-absence behavior of existing rules. For an enabled rule, every registered monit-edge in the clusters the rule matches must be v0.77.0 or later, otherwise saving the rule fails with `InvalidParameter`."
           }
         }
       },
@@ -38084,7 +38251,7 @@
           "On-call/Alerts"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Every `alert_ids` entry and the `incident_id` must belong to the account; an unknown ID returns `InvalidParameter`.\n- Alerts already in the target incident are skipped. A source incident left with no alerts is closed.\n- `title` and `owner_id` update the target incident only when they differ from its current values.\n- Only one incident change runs per account at a time; a concurrent call returns `RequestTooFrequently`.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Every `alert_ids` entry and the `incident_id` must belong to the account; an unknown ID returns `InvalidParameter`.\n- Alerts already in the target incident are skipped. A source incident left with no alerts is closed.\n- `title` and `owner_id` update the target incident only when they differ from its current values.",
           "href": "/en/api-reference/on-call/alerts/alert-write-merge",
           "metadata": {
             "sidebarTitle": "Merge alerts into an incident"
@@ -38662,7 +38829,7 @@
           "On-call/Calendars"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Calendars Manage** (`on-call`) |\n\n## Usage\n\n- An account can hold at most 5 calendars: once it has 5, a create call by any member returns `InvalidParameter`.\n- `cal_name` must be unique within the account, `timezone` must be a valid IANA name, and a nonzero `team_id` must be a team of the account; otherwise the call returns `InvalidParameter`.\n- Every call is recorded in the account audit log.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Calendars Manage** (`on-call`) |\n\n## Usage\n\n- An account can hold at most 20 calendars: once it has 20, a create call by any member returns `InvalidParameter`.\n- `cal_name` must be unique within the account, `timezone` must be a valid IANA name, and a nonzero `team_id` must be a team of the account; otherwise the call returns `InvalidParameter`.\n- Every call is recorded in the account audit log.",
           "href": "/en/api-reference/on-call/calendars/calendar-create",
           "metadata": {
             "sidebarTitle": "Create calendar"
@@ -39196,7 +39363,7 @@
           "On-call/Calendars"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Without `kind`, personal calendars are returned. `region.official.holiday` returns public holiday calendars, filtered to the caller's locale unless `no_locale` is `true`; use their `cal_id` in `extra_cal_ids`.\n- The list is not paginated; `total` equals the number of items.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Without `kind`, personal calendars are returned. `region.official.holiday` and `exchange.holiday` return the shared calendars (public holidays, and stock-exchange trading days whose timezone is the exchange's), filtered to the caller's locale unless `no_locale` is `true`; use a holiday `cal_id` in `extra_cal_ids`, and an exchange `cal_id` directly in a rule.\n- The list is not paginated; `total` equals the number of items.",
           "href": "/en/api-reference/on-call/calendars/calendar-list",
           "metadata": {
             "sidebarTitle": "List calendars"
@@ -44899,7 +45066,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- To mention a member, embed a markdown link in `comment` in the form `[@Display Name](flashduty://ref/member/<member_id>)`. Mentioned members receive a dedicated personal notification, which is not affected by `mute_reply`.\n- Plain `@name` text without the link syntax does not create a mention.\n- The server rewrites each mention's display label to the member's canonical name.\n- Returns `RequestTooFrequently` while another resolve, reopen, merge, comment, or delete is running in the same account; retry after a short delay.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- To mention a member, embed a markdown link in `comment` in the form `[@Display Name](flashduty://ref/member/<member_id>)`. Mentioned members receive a dedicated personal notification, which is not affected by `mute_reply`.\n- Plain `@name` text without the link syntax does not create a mention.\n- The server rewrites each mention's display label to the member's canonical name.",
           "href": "/en/api-reference/on-call/incidents/incident-comment",
           "metadata": {
             "sidebarTitle": "Add comment to incident"
@@ -46317,7 +46484,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- All alerts of the source incidents move to the target incident, and the target gains the sources' integrations.\n- Source incidents that are still open are closed. With `remove_source_incidents: true` they are then permanently deleted; otherwise they stay closed with an `i_merge` timeline entry that points to the target.\n- The target's progress, responders, and assignment do not change; `title`, when set, replaces the target's title.\n- Returns `RequestTooFrequently` while another resolve, reopen, merge, comment, or delete is running in the same account; retry after a short delay.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- All alerts of the source incidents move to the target incident, and the target gains the sources' integrations.\n- Source incidents that are still open are closed. With `remove_source_incidents: true` they are then permanently deleted; otherwise they stay closed with an `i_merge` timeline entry that points to the target.\n- The target's progress, responders, and assignment do not change; `title`, when set, replaces the target's title.",
           "href": "/en/api-reference/on-call/incidents/incident-merge",
           "metadata": {
             "sidebarTitle": "Merge incidents"
@@ -47660,7 +47827,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- Deletion cannot be undone. Analytics statistics of the deleted incidents are removed in the background.\n- Fails with `InvalidParameter` if any incident belongs to a channel the caller cannot access.\n- IDs that do not match an incident are ignored.\n- Returns `RequestTooFrequently` while another resolve, reopen, merge, comment, or delete is running in the same account; retry after a short delay.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- Deletion cannot be undone. Analytics statistics of the deleted incidents are removed in the background.\n- Fails with `InvalidParameter` if any incident belongs to a channel the caller cannot access.\n- IDs that do not match an incident are ignored.",
           "href": "/en/api-reference/on-call/incidents/incident-remove",
           "metadata": {
             "sidebarTitle": "Delete an incident"
@@ -47735,7 +47902,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- Every incident must be `Closed`; otherwise the whole call fails with `InvalidParameter`.\n- Reopened incidents return to `Triggered`, with `ack_time`, `close_time`, `closer_id`, and every responder's acknowledgement reset.\n- Each incident is reassigned to its previous assignment target starting at the first escalation level, with `assigned_to.type` set to `reopen`.\n- Returns `RequestTooFrequently` while another resolve, reopen, merge, comment, or delete is running in the same account; retry after a short delay.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- Every incident must be `Closed`; otherwise the whole call fails with `InvalidParameter`.\n- Reopened incidents return to `Triggered`, with `ack_time`, `close_time`, `closer_id`, and every responder's acknowledgement reset.\n- Each incident is reassigned to its previous assignment target starting at the first escalation level, with `assigned_to.type` set to `reopen`.",
           "href": "/en/api-reference/on-call/incidents/incident-reopen",
           "metadata": {
             "sidebarTitle": "Reopen incident"
@@ -47886,7 +48053,7 @@
           "On-call/Incidents"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- When a resolution form applies, `custom_fields`, `summary`, and `images` must match its visible elements and required rules.\n- For a batch, form values are accepted only when every selected incident resolves to the same form; otherwise resolve incidents individually.\n- The legacy `values` and `custom_values` properties are rejected; use `custom_fields`.\n- Incidents that are already closed are skipped without error; an unknown ID fails the whole call with `InvalidParameter`.\n- Resolving a `Triggered` incident first acknowledges it on behalf of the caller.\n- After closing, unfinished action items of the incident are converted to follow-ups, and later events no longer merge into the incident's existing alerts.\n- Returns `RequestTooFrequently` while another resolve, reopen, merge, comment, or delete is running in the same account; retry after a short delay.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Incidents Manage** or **Channels Manage** (`on-call`) |\n\n## Usage\n\n- When a resolution form applies, `custom_fields`, `summary`, and `images` must match its visible elements and required rules.\n- For a batch, form values are accepted only when every selected incident resolves to the same form; otherwise resolve incidents individually.\n- The legacy `values` and `custom_values` properties are rejected; use `custom_fields`.\n- Incidents that are already closed are skipped without error; an unknown ID fails the whole call with `InvalidParameter`.\n- Resolving a `Triggered` incident first acknowledges it on behalf of the caller.\n- After closing, unfinished action items of the incident are converted to follow-ups, and later events no longer merge into the incident's existing alerts.",
           "href": "/en/api-reference/on-call/incidents/incident-resolve",
           "metadata": {
             "sidebarTitle": "Resolve incident"
@@ -53807,12 +53974,12 @@
       "post": {
         "operationId": "oncall-license-read-license-list",
         "summary": "List On-call licenses",
-        "description": "List people with active fixed or temporary On-call licenses in the current account.",
+        "description": "List the current license window's usage and the people counted in it.",
         "tags": [
           "On-call/Licenses"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `items` contains only people with an active fixed or temporary On-call license.\n- For temporary licenses, `updated_by`, `created_at`, and `updated_at` are `0`.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `license_cnt`, `used_cnt`, `window_start` and `window_end` describe the account's current 30-day license window; a window starts at the account's creation time.\n- `rule_effective_at` is when the window-usage rules start for this account — 2026-11-09 00:00 +08:00 for an account created on or after that date, 2027-01-01 00:00 +08:00 for an older account. Before it, `license_cnt` and `used_cnt` are informational.\n- `items` contains everyone counted in the window: fixed and temporary holders plus people revoked in it, which come back with `status: revoked`.\n- For a fixed seat, `updated_by`, `created_at` and `updated_at` come from the fixed-license record; for a temporary seat they are `0`.\n- `via` and `acquired_at` are display-only: they say how and when the seat was taken in this window, not what the person may do.",
           "href": "/en/api-reference/on-call/licenses/oncall-license-read-license-list",
           "metadata": {
             "sidebarTitle": "List On-call licenses"
@@ -53841,12 +54008,23 @@
                 "example": {
                   "request_id": "01J0D5Y31GY2TWAHRP3Q8K4M6N",
                   "data": {
-                    "total": 2,
+                    "license_cnt": 6,
+                    "used_cnt": 3,
+                    "window_start": 1793232000,
+                    "window_end": 1795824000,
+                    "rule_effective": false,
+                    "rule_effective_at": 1798732800,
+                    "auto_grab_disabled": false,
+                    "transferred_at": 0,
+                    "total": 3,
                     "items": [
                       {
                         "person_id": 80011,
                         "person_name": "Yuki Zhang",
                         "type": "fixed",
+                        "status": "fixed",
+                        "via": "fixed",
+                        "acquired_at": 1793232000,
                         "updated_by": 80001,
                         "created_at": 1719792000,
                         "updated_at": 1719878400
@@ -53855,12 +54033,25 @@
                         "person_id": 80012,
                         "person_name": "Alex Chen",
                         "type": "temporary",
+                        "status": "active",
+                        "via": "auto",
+                        "acquired_at": 1794021720,
+                        "updated_by": 0,
+                        "created_at": 0,
+                        "updated_at": 0
+                      },
+                      {
+                        "person_id": 80013,
+                        "person_name": "Mei Lin",
+                        "type": "temporary",
+                        "status": "revoked",
+                        "via": "",
+                        "acquired_at": 0,
                         "updated_by": 0,
                         "created_at": 0,
                         "updated_at": 0
                       }
-                    ],
-                    "release_limited": false
+                    ]
                   }
                 }
               }
@@ -55358,6 +55549,7 @@
                 "example": {
                   "data": {
                     "account_id": 2451002751131,
+                    "active_devices_enabled": true,
                     "alerting": {
                       "channel_ids": [
                         2490121812131
@@ -55406,7 +55598,8 @@
                         "repo": "acme/web-app",
                         "subdir": "apps/web"
                       }
-                    ]
+                    ],
+                    "session_summary_enabled": true
                   },
                   "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4"
                 },
@@ -55487,6 +55680,7 @@
                     "items": [
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             5962711836131,
@@ -55518,10 +55712,12 @@
                         "type": "browser",
                         "updated_at": 1772096392711,
                         "updated_by": 3122470302131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       },
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             2490121812131
@@ -55565,7 +55761,8 @@
                         "type": "browser",
                         "updated_at": 1773398630657,
                         "updated_by": 3790925372131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       }
                     ]
                   },
@@ -55649,6 +55846,7 @@
                     "items": [
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             2490121812131
@@ -55692,10 +55890,12 @@
                         "type": "browser",
                         "updated_at": 1773398630657,
                         "updated_by": 3790925372131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       },
                       {
                         "account_id": 2451002751131,
+                        "active_devices_enabled": true,
                         "alerting": {
                           "channel_ids": [
                             5962711836131,
@@ -55727,7 +55927,8 @@
                         "type": "browser",
                         "updated_at": 1772096392711,
                         "updated_by": 3122470302131,
-                        "repositories": []
+                        "repositories": [],
+                        "session_summary_enabled": true
                       }
                     ],
                     "total": 7
@@ -58900,7 +59101,7 @@
           "RUM/Data query"
         ],
         "x-mint": {
-          "content": "## Time range alignment and caching\n\nSo that repeated queries can reuse cached results, the time range of aggregation queries is aligned to a grid:\n\n- `format=time_series`: the start is rounded down and the end rounded up to the `interval`. The number and positions of buckets do not change; the first and last buckets now cover their full interval instead of a partial one.\n- Aggregate (non-time-series) queries: the start is rounded down and the end rounded up to `max(1 minute, range ÷ 1226 rounded up to the next standard interval step)`, for example 24h aligns to 2 minutes, 7d to 10 minutes, and 30d to 1 hour. Ranges shorter than 100 grid steps are neither aligned nor cached. At most one grid step of extra data is included at the start; the end rounds into the future, which holds no data.\n- Detail/list queries (no aggregation, pagination), and queries whose SQL calls functions that depend on when they run, such as `now()`, are neither aligned nor cached.\n\nResults may be up to 60 seconds stale for the most recent data.\n\n## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Send 1 to 10 queries in one request; each query `id` becomes a key in the response object.\n- `start_time` and `end_time` are Unix epoch milliseconds, at most 31 days apart. The server adds the time-range and account filters itself; you do not need them in `sql`.\n- `FROM` names a RUM scope table: `sessions`, `views`, `actions`, `errors`, `resources`, `long_tasks`, `vitals`, `issues` or `sourcemaps` (the singular form is also accepted). Column names are the `field_key` values returned by `POST /rum/field/list`.\n- A query whose top-level `AND` conditions pin `application_id` (`=` or `IN`) must name applications the caller can read: a private application the caller's team does not own fails the whole request with `AccessDenied`, an unknown one with `ResourceNotFound`, and one request may name at most 50 distinct applications. A query that names no application silently skips the private applications the caller cannot read.\n- Malformed SQL, an invalid `time_zone` or an out-of-range time window fails the whole request with `InvalidParameter`. A query that fails later (unknown table or column, invalid `dql`, invalid `search_after_ctx`, database error) only sets `error` on its own entry, with code `InternalError`; the other queries still return `data`.\n- `values` is column-major: `values[i]` holds every row's value of column `fields[i]`.\n- `table` queries return at most 1,000 rows; a missing `LIMIT` or one above 1,000 is replaced with 1,000. A non-aggregate query with `ORDER BY` and no `OFFSET` returns `search_after_ctx` when the page is full — send it back with the same `sql` to get the next page.\n- `time_series` queries get a `ts` column prepended (bucket start, Unix milliseconds), grouped and ordered by it. The bucket width, returned as `interval` in milliseconds, is the smallest step from a fixed ladder (1, 2, 5, 10, 20, 50, 100, 200, 500 ms; 1, 2, 5, 10, 15, 30 s; 1, 2, 5, 10, 15, 30 min; 1, 2, 3, 6, 12 h; 1, 2, 3, 7 d; 30, 60, 90, 180 d) that is at least both `interval` and the window length divided by `max_points`.\n- On large time windows an aggregate query may run on sampled data; the response then carries `sampling`, and `COUNT`, `SUM` and `COUNT(DISTINCT)` columns are already multiplied by `scale_factor`. Set `disable_sampling: true` to always query the full data.",
+          "content": "## Time range alignment and caching\n\nSo that repeated queries can reuse cached results, the time range of aggregation queries is aligned to a grid:\n\n- `format=time_series`: the start is rounded down and the end rounded up to the `interval`. The number and positions of buckets do not change; the first and last buckets now cover their full interval instead of a partial one.\n- Aggregate (non-time-series) queries: the start is rounded down and the end rounded up to `max(1 minute, range ÷ 1226 rounded up to the next standard interval step)`, for example 24h aligns to 2 minutes, 7d to 10 minutes, and 30d to 1 hour. Ranges shorter than 100 grid steps are neither aligned nor cached. At most one grid step of extra data is included at the start; the end rounds into the future, which holds no data.\n- Detail/list queries (no aggregation, pagination), and queries whose SQL calls functions that depend on when they run, such as `now()`, are neither aligned nor cached.\n\nResults may be up to 60 seconds stale for the most recent data.\n\n## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Send 1 to 10 queries in one request; each query `id` becomes a key in the response object.\n- `start_time` and `end_time` are Unix epoch milliseconds, at most 31 days apart. The server adds the time-range and account filters itself; you do not need them in `sql`.\n- `FROM` names a RUM scope table: `sessions`, `views`, `actions`, `errors`, `resources`, `long_tasks`, `vitals`, `issues` or `sourcemaps` (the singular form is also accepted). Column names are the `field_key` values returned by `POST /rum/field/list`.\n- A query whose top-level `AND` conditions pin `application_id` (`=` or `IN`) must name applications the caller can read: a private application the caller's team does not own fails the whole request with `AccessDenied`, an unknown one with `ResourceNotFound`, and one request may name at most 50 distinct applications. A query that names no application silently skips the private applications the caller cannot read.\n- Malformed SQL, an invalid `time_zone` or an out-of-range time window fails the whole request with `InvalidParameter`. A query that fails later (unknown table or column, invalid `search_after_ctx`, database error) only sets `error` on its own entry, with code `InternalError`; the other queries still return `data`. A `dql` the parser rejects also fails only its own entry, with code `InvalidParameter` and a message naming the query.\n- `values` is column-major: `values[i]` holds every row's value of column `fields[i]`.\n- `table` queries return at most 1,000 rows; a missing `LIMIT` or one above 1,000 is replaced with 1,000. A non-aggregate query with `ORDER BY` and no `OFFSET` returns `search_after_ctx` when the page is full — send it back with the same `sql` to get the next page.\n- `time_series` queries get a `ts` column prepended (bucket start, Unix milliseconds), grouped and ordered by it. The bucket width, returned as `interval` in milliseconds, is the smallest step from a fixed ladder (1, 2, 5, 10, 20, 50, 100, 200, 500 ms; 1, 2, 5, 10, 15, 30 s; 1, 2, 5, 10, 15, 30 min; 1, 2, 3, 6, 12 h; 1, 2, 3, 7 d; 30, 60, 90, 180 d) that is at least both `interval` and the window length divided by `max_points`.\n- On large time windows an aggregate query may run on sampled data; the response then carries `sampling`, and `COUNT`, `SUM` and `COUNT(DISTINCT)` columns are already multiplied by `scale_factor`. Set `disable_sampling: true` to always query the full data.",
           "href": "/en/api-reference/rum/data-query/rum-read-data-query",
           "metadata": {
             "sidebarTitle": "Query RUM data"
