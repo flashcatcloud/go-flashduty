@@ -9,7 +9,7 @@ type LicensesService service
 
 // List On-call licenses.
 //
-// List people with active fixed or temporary On-call licenses in the current account.
+// List the current license window's usage and the people counted in it.
 //
 // API: POST /oncall/license/list (oncall-license-read-license-list).
 func (s *LicensesService) List(ctx context.Context) (*LicenseListResponse, *Response, error) {
