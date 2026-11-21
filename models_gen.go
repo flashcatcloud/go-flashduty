@@ -837,16 +837,16 @@ type AlertItem struct {
 
 // AlertListByIDsRequest is generated from the Flashduty OpenAPI schema.
 type AlertListByIDsRequest struct {
-	// Alert IDs (ObjectID hex strings) to fetch. A malformed ID fails the request; IDs not found in the account are left out of the result.
+	// Alert IDs (ObjectID hex strings) to fetch. A malformed ID fails the request; IDs not found in the account are left out of the result. At most 100 items per request; split larger sets into several calls.
 	AlertIDs []string `json:"alert_ids" toon:"alert_ids"`
 }
 
 // AlertListRequest is generated from the Flashduty OpenAPI schema.
 type AlertListRequest struct {
 	ListOptions
-	// Filter to specific alert IDs (ObjectID hex strings). Invalid IDs are ignored; if none are valid, the result is empty.
+	// Filter to specific alert IDs (ObjectID hex strings). Invalid IDs are ignored; if none are valid, the result is empty. At most 100 items per request; split larger sets into several calls.
 	AlertIDs []string `json:"alert_ids,omitempty" toon:"alert_ids,omitempty"`
-	// Filter by alert deduplication keys.
+	// Filter by alert deduplication keys. At most 100 items per request; split larger sets into several calls.
 	AlertKeys []string `json:"alert_keys,omitempty" toon:"alert_keys,omitempty"`
 	// Comma-separated filter on `alert_severity`, e.g. `Critical,Warning`. Allowed values: `Critical`, `Warning`, `Info`, `Ok`; other values return `InvalidParameter`. `Ok` matches nothing because `alert_severity` is never `Ok`.
 	AlertSeverity string `json:"alert_severity,omitempty" toon:"alert_severity,omitempty"`
@@ -882,7 +882,7 @@ type AlertListResponse struct {
 
 // AlertMergeRequest is generated from the Flashduty OpenAPI schema.
 type AlertMergeRequest struct {
-	// Alert IDs to merge (ObjectID hex strings); obtain them from `POST /alert/list`. Every ID must belong to the caller's account.
+	// Alert IDs to merge (ObjectID hex strings); obtain them from `POST /alert/list`. Every ID must belong to the caller's account. At most 100 items per request; split larger sets into several calls.
 	AlertIDs []string `json:"alert_ids" toon:"alert_ids"`
 	// Optional comment recorded on the merge feed entry. At most 1024 characters.
 	Comment string `json:"comment,omitempty" toon:"comment,omitempty"`
@@ -1603,7 +1603,7 @@ type AuditSearchResponse struct {
 type AutomationRuleCreateRequest struct {
 	// Schedule in local time of `timezone`. Accepts 4 fields (`hour day month weekday`, minute defaults to 0) or 5 fields (`minute hour day month weekday`). The minute must be one fixed integer; seconds (6 fields) are not supported; setting both day-of-month and day-of-week is rejected. Required even for rules that use only other triggers: send a valid expression with `schedule_trigger_enabled=false`.
 	CronExpr string `json:"cron_expr" toon:"cron_expr"`
-	// Whether the rule's automatic triggers (schedule, HTTP POST, On-call incident, war room) are armed after creation. Defaults to `false`. Manual runs work either way.
+	// Whether the rule's automatic triggers (schedule, HTTP POST, On-call incident, war room, RUM issue) are armed after creation. Defaults to `false`. Manual runs work either way.
 	Enabled bool `json:"enabled,omitempty" toon:"enabled,omitempty"`
 	// BYOC runner ID. Required when `environment_kind=byoc` and rejected for other kinds. A personal rule can only use account-scope runners; a team rule can use account-scope runners or runners of its own team.
 	EnvironmentID string `json:"environment_id,omitempty" toon:"environment_id,omitempty"`
@@ -1623,6 +1623,12 @@ type AutomationRuleCreateRequest struct {
 	OncallIncidentTriggerEnabled bool `json:"oncall_incident_trigger_enabled,omitempty" toon:"oncall_incident_trigger_enabled,omitempty"`
 	// Task instruction sent to the AI SRE agent on every run. Must not be empty after trimming spaces.
 	Prompt string `json:"prompt" toon:"prompt"`
+	// RUM application IDs to watch; issue alerts of these applications can start a run. Each ID must be non-empty.
+	RUMIssueApplicationIDs []string `json:"rum_issue_application_ids,omitempty" toon:"rum_issue_application_ids,omitempty"`
+	// RUM issue alert severities that start a run: `Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels.
+	RUMIssueSeverities []string `json:"rum_issue_severities,omitempty" toon:"rum_issue_severities,omitempty"`
+	// Whether to create the RUM issue trigger. It is created when this is `true` or `rum_issue_application_ids` is non-empty; creating it needs at least one application and one severity.
+	RUMIssueTriggerEnabled bool `json:"rum_issue_trigger_enabled,omitempty" toon:"rum_issue_trigger_enabled,omitempty"`
 	// Where the rule's runs execute. `web` (default): in a web console session. `current-chat`: in the IM chat the rule is created from; accepted only from a live IM conversation with the AI SRE agent, so API calls that send it get `400`.
 	RunIn *string `json:"run_in,omitempty" toon:"run_in,omitempty"`
 	// Whether the schedule trigger is enabled. Defaults to `true` when omitted; send `false` for rules that should fire only from other triggers.
@@ -1663,7 +1669,7 @@ type AutomationRuleItem struct {
 	EnvironmentKind string `json:"environment_kind" toon:"environment_kind"`
 	// Read-only description of where the rule runs.
 	ExecutionLocation AutomationRuleItemExecutionLocation `json:"execution_location" toon:"execution_location"`
-	// Where runs started by the schedule, HTTP POST, On-call incident, and manual triggers execute: `web_console` (a web console session) or `im` (the IM chat the rule was created from). War room runs always execute in the war room's group chat. Fixed at creation.
+	// Where runs started by the schedule, HTTP POST, On-call incident, RUM issue, and manual triggers execute: `web_console` (a web console session) or `im` (the IM chat the rule was created from). War room runs always execute in the war room's group chat. Fixed at creation.
 	ExecutionPlace string `json:"execution_place" toon:"execution_place"`
 	// HTTP POST trigger token. Returned only in the response that issues it: create with `http_post_trigger_enabled=true`, an update that creates the trigger, or an update with `rotate_http_post_trigger_token=true`. Save it; it cannot be read again.
 	HTTPPostToken string `json:"http_post_token" toon:"http_post_token"`
@@ -1693,6 +1699,14 @@ type AutomationRuleItem struct {
 	Prompt string `json:"prompt" toon:"prompt"`
 	// Rule ID (prefix `arule_`). Pass it as `rule_id` to get, update, delete, run, and list-runs calls.
 	RuleID string `json:"rule_id" toon:"rule_id"`
+	// RUM application IDs whose issue alerts can start a run. Omitted when the rule has no RUM issue trigger.
+	RUMIssueApplicationIDs []string `json:"rum_issue_application_ids" toon:"rum_issue_application_ids"`
+	// RUM issue alert severities that start a run: `Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels. Omitted when the rule has no RUM issue trigger.
+	RUMIssueSeverities []string `json:"rum_issue_severities" toon:"rum_issue_severities"`
+	// Whether the RUM issue trigger is enabled.
+	RUMIssueTriggerEnabled bool `json:"rum_issue_trigger_enabled" toon:"rum_issue_trigger_enabled"`
+	// RUM issue trigger ID. Omitted when the rule has no RUM issue trigger.
+	RUMIssueTriggerID string `json:"rum_issue_trigger_id" toon:"rum_issue_trigger_id"`
 	// Hidden session run scope. One of: `person` (personal rule, team_id=0, runs as the creator; disabled when the creator leaves the account), `team` (team rule, team_id>0, owned by the team and shared with its members; survives the creator leaving). Derived from the rule's team_id.
 	RunScope string `json:"run_scope" toon:"run_scope"`
 	// Next scheduled fire time, Unix milliseconds. 0 means no future scheduled fire is available.
@@ -1750,6 +1764,8 @@ type AutomationRunItem struct {
 	CompletedAt TimestampMilli `json:"completed_at" toon:"completed_at"`
 	// Creation time, Unix milliseconds.
 	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// AI SRE credits accounted to the run's own session and its subagents, in nanocredits (1 credit = 1e9 nanocredits). Omitted when the run has no session of its own (an IM run or an On-call fan-in skip), when metering is off, or when the lookup failed; accounting lags the run by a few seconds.
+	CreditsUsageNano int64 `json:"credits_usage_nano" toon:"credits_usage_nano"`
 	// Duration in milliseconds.
 	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
 	// Error code; empty when the run did not fail.
@@ -1802,6 +1818,7 @@ type AutomationRunItem struct {
 	// | `http_post` | Fired via the rule's HTTP POST trigger |
 	// | `oncall_incident` | Fired by a matching On-call incident |
 	// | `war_room_created` | Fired when a war room was created for a matching incident; runs in that group chat |
+	// | `rum_issue` | Fired by a RUM issue alert delivered for one of the rule's RUM issue trigger applications |
 	TriggerKind string `json:"trigger_kind" toon:"trigger_kind"`
 	// Last update time, Unix milliseconds.
 	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
@@ -1810,6 +1827,8 @@ type AutomationRunItem struct {
 // AutomationRunListRequest is generated from the Flashduty OpenAPI schema.
 type AutomationRunListRequest struct {
 	ListOptions
+	// Case-insensitive substring filter on the name the run history shows — the session name, the session ID when the session is unnamed, or the incident number and title of an On-call fan-in skip. Trimmed; omit or send an empty string for no filter. At most 64 characters.
+	Keyword string `json:"keyword,omitempty" toon:"keyword,omitempty"`
 	// Target rule ID, from the list returned by `POST /safari/automation/rule/list`.
 	RuleID string `json:"rule_id" toon:"rule_id"`
 	// Start-time lower bound, Unix milliseconds. Values below the 180-day run-history retention floor are clamped to it (that floor is also the default when omitted).
@@ -1818,7 +1837,7 @@ type AutomationRunListRequest struct {
 	StartedBeforeMs int64 `json:"started_before_ms,omitempty" toon:"started_before_ms,omitempty"`
 	// Run status filter: `queued`, `running`, `retrying`, `succeeded`, `partial` (partially succeeded), `failed`, `skipped` (e.g. rule or trigger no longer valid), `abandoned` (stale run terminated by the system), `blocked` (terminal; produced output but a connector is waiting on a human authorization); omit for no filter.
 	Status string `json:"status,omitempty" toon:"status,omitempty"`
-	// Trigger filter: `schedule` schedule trigger, `debug` debug run, `manual` manual run, `http_post` HTTP POST trigger, `oncall_incident` On-call incident trigger, `war_room_created` war room trigger; omit for no filter.
+	// Trigger filter: `schedule` schedule trigger, `debug` debug run, `manual` manual run, `http_post` HTTP POST trigger, `oncall_incident` On-call incident trigger, `war_room_created` war room trigger, `rum_issue` RUM issue trigger; omit for no filter.
 	TriggerKind string `json:"trigger_kind,omitempty" toon:"trigger_kind,omitempty"`
 }
 
@@ -1862,6 +1881,10 @@ type AutomationTemplateItem struct {
 	OncallIncidentTriggerEnabled bool `json:"oncall_incident_trigger_enabled" toon:"oncall_incident_trigger_enabled"`
 	// Prefill for the create request's `prompt`.
 	Prompt string `json:"prompt" toon:"prompt"`
+	// Prefill for `rum_issue_severities` (`Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels). Omitted when the template does not use the RUM issue trigger.
+	RUMIssueSeverities []string `json:"rum_issue_severities" toon:"rum_issue_severities"`
+	// Prefill for `rum_issue_trigger_enabled`; when `true`, add `rum_issue_application_ids` before creating.
+	RUMIssueTriggerEnabled bool `json:"rum_issue_trigger_enabled" toon:"rum_issue_trigger_enabled"`
 	// Prefill for `schedule_trigger_enabled`; `true` exactly when `cron_expr` is present.
 	ScheduleTriggerEnabled bool `json:"schedule_trigger_enabled" toon:"schedule_trigger_enabled"`
 	// Prefill for `war_room_severities` (`Critical` (most severe), `Warning`, or `Info` (least severe) — the On-call incident severity levels). Omitted when the template does not use the war room trigger.
@@ -2485,7 +2508,7 @@ type CreateChannelRequest struct {
 	IsPrivate bool `json:"is_private,omitempty" toon:"is_private,omitempty"`
 	// Additional teams that can manage the channel. Up to 3 entries.
 	ManagingTeamIDs []int64 `json:"managing_team_ids,omitempty" toon:"managing_team_ids,omitempty"`
-	// Integration type IDs (the `plugin_id` shown on integrations returned by `POST /integration/list`). For each ID, a channel-exclusive integration of that type is created, named after the type. An unknown ID returns `InvalidParameter`.
+	// Integration type IDs (the `plugin_id` shown on integrations returned by `POST /integration/list`). For each ID, a channel-exclusive integration of that type is created, named after the type. An unknown ID returns `InvalidParameter`. At most 50 items per request; split larger sets into several calls. Duplicates are ignored.
 	PluginIDs []int64 `json:"plugin_ids,omitempty" toon:"plugin_ids,omitempty"`
 	// Owning team ID; obtain it from `POST /team/list`. Required and must exist.
 	TeamID int64 `json:"team_id" toon:"team_id"`
@@ -2737,7 +2760,7 @@ type CreateStatusPageDraftRequest struct {
 type CreateStatusPageRequest struct {
 	// Get-in-touch contact, such as a mailto or website URL.
 	ContactInfo string `json:"contact_info,omitempty" toon:"contact_info,omitempty"`
-	// Custom domain; allowed only for public pages and must not be used by another status page.
+	// Custom domain; allowed only for public pages and must not be used by another status page. Must be a valid public hostname (at least two labels, no IP literal); platform-owned domains such as `flashcat.cloud` and `flashduty.com` themselves are rejected.
 	CustomDomain string `json:"custom_domain,omitempty" toon:"custom_domain,omitempty"`
 	// Custom navigation links shown on the status page.
 	CustomLinks []map[string]string `json:"custom_links,omitempty" toon:"custom_links,omitempty"`
@@ -3413,6 +3436,8 @@ type DashboardListItem struct {
 	// Unix timestamp in seconds.
 	UpdatedAt Timestamp      `json:"updated_at" toon:"updated_at"`
 	UpdatedBy DashboardActor `json:"updated_by" toon:"updated_by"`
+	// Whether the caller's folder grant (team member, folder creator, account owner or admin) allows editing, moving or deleting this dashboard. Role permissions of the APP Key are checked separately.
+	Writable bool `json:"writable" toon:"writable"`
 }
 
 // DashboardListOutput is generated from the Flashduty OpenAPI schema.
@@ -3809,6 +3834,8 @@ type DashboardResource struct {
 	// Unix timestamp in seconds.
 	UpdatedAt Timestamp      `json:"updated_at" toon:"updated_at"`
 	UpdatedBy DashboardActor `json:"updated_by" toon:"updated_by"`
+	// Whether the caller's folder grant (team member, folder creator, account owner or admin) allows editing, moving or deleting this dashboard. Role permissions of the APP Key are checked separately.
+	Writable bool `json:"writable" toon:"writable"`
 }
 
 // DashboardRestoreRequest is generated from the Flashduty OpenAPI schema.
@@ -3916,6 +3943,8 @@ type DashboardSearchRequest struct {
 	ListOptions
 	// Search words separated by whitespace; at least one word and at most 128 Unicode code points. A dashboard matches when every word appears in its title or description.
 	Query string `json:"query" toon:"query"`
+	// Which folders the response covers. `mine` covers the folders of the caller's teams and the folders the caller created, plus their descendants; `all` covers every folder of the account. When omitted, it is `all` for account owners, admins and roles with the all-teams view scope, and `mine` for other members. Any other value fails with `InvalidParameter`.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
 	// Sort keys; defaults to `updated_at` descending.
 	Sort []DashboardSort `json:"sort,omitempty" toon:"sort,omitempty"`
 }
@@ -4730,7 +4759,7 @@ type EnrichmentSampleListResponse struct {
 type EnrichmentUpsertRequest struct {
 	// Integration ID to configure enrichment rules for.
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
-	// Ordered rule list that replaces the integration's whole rule set; send `[]` to remove all rules. Rules run in this order.
+	// Ordered rule list that replaces the integration's whole rule set; send `[]` to remove all rules. Rules run in this order. At most 100 items per request; split larger sets into several calls.
 	Rules []EnrichRule `json:"rules" toon:"rules"`
 }
 
@@ -5663,12 +5692,50 @@ type FolderItem struct {
 	UpdaterName string `json:"updater_name" toon:"updater_name"`
 }
 
+// FolderListItem is generated from the Flashduty OpenAPI schema.
+type FolderListItem struct {
+	// Owning account ID.
+	AccountID uint64 `json:"account_id" toon:"account_id"`
+	// Creation time as a Unix timestamp in seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Member ID of the creator; the creator can always see and modify the folder.
+	CreatorID uint64 `json:"creator_id" toon:"creator_id"`
+	// Name of the creator.
+	CreatorName string `json:"creator_name" toon:"creator_name"`
+	// Folder ID. Pass it as `id` to update, move, or delete the folder, as `parent_id` or `dest_parent_id` to nest folders under it, and as `folder_id` on alert rules and dashboards.
+	ID uint64 `json:"id" toon:"id"`
+	// Folder name.
+	Name string `json:"name" toon:"name"`
+	// Free-form note.
+	Note string `json:"note" toon:"note"`
+	// Parent folder ID; 0 at the root.
+	ParentID uint64 `json:"parent_id" toon:"parent_id"`
+	// Comma-separated ancestor IDs from the root, excluding this folder; empty at the root.
+	ParentPath string `json:"parent_path" toon:"parent_path"`
+	// ID of the team the folder belongs to; 0 when it has no team. Members of the team can see and modify the folder.
+	TeamID uint64 `json:"team_id" toon:"team_id"`
+	// Time of the last update or move as a Unix timestamp in seconds.
+	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// Member ID of the last updater. Updates and moves both set it.
+	UpdaterID uint64 `json:"updater_id" toon:"updater_id"`
+	// Name of the last updater.
+	UpdaterName string `json:"updater_name" toon:"updater_name"`
+	// Whether the caller's folder grant (team member, folder creator, account owner or admin) allows editing this folder and its contents. Role permissions of the APP Key are checked separately.
+	Writable bool `json:"writable" toon:"writable"`
+}
+
 // FolderMoveRequest is generated from the Flashduty OpenAPI schema.
 type FolderMoveRequest struct {
 	// ID of the new parent folder; send 0 to move to the root. The field cannot be omitted. Must differ from `id` and must not be a descendant of the folder.
 	DestParentID uint64 `json:"dest_parent_id" toon:"dest_parent_id"`
 	// ID of the folder to move, from `/monit/folder/list`.
 	ID uint64 `json:"id" toon:"id"`
+}
+
+// FolderScopeRequest is generated from the Flashduty OpenAPI schema.
+type FolderScopeRequest struct {
+	// Which folders the response covers. `mine` covers the folders of the caller's teams and the folders the caller created, plus their descendants; `all` covers every folder of the account. When omitted, it is `all` for account owners, admins and roles with the all-teams view scope, and `mine` for other members. Any other value fails with `InvalidParameter`.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
 }
 
 // FolderUpdateRequest is generated from the Flashduty OpenAPI schema.
@@ -6890,6 +6957,8 @@ type ListChannelsRequest struct {
 	ChannelName string `json:"channel_name,omitempty" toon:"channel_name,omitempty"`
 	// When true, return only `channel_id`, `channel_name`, `description`, `status` and `is_starred` for each channel, with all matches in one page.
 	IsBrief bool `json:"is_brief,omitempty" toon:"is_brief,omitempty"`
+	// When true, return only channels created by the calling identity — the member ID for a member-authenticated call, the account ID for an `app_key` call. Applied together with the other filters, so combining it with `team_ids` or `is_my_managed` narrows the result further.
+	IsMyCreated bool `json:"is_my_created,omitempty" toon:"is_my_created,omitempty"`
 	// When true, return only channels owned by one of the caller's teams or created by the caller. Takes precedence over `is_my_team` and `is_my_starred`.
 	IsMyManaged bool `json:"is_my_managed,omitempty" toon:"is_my_managed,omitempty"`
 	// When true, return only channels the caller has starred. Cannot be combined with `is_my_team`.
@@ -6998,10 +7067,12 @@ type ListIncidentsRequest struct {
 	EverMuted bool `json:"ever_muted,omitempty" toon:"ever_muted,omitempty"`
 	// When true, include only incidents that still have an action item or follow-up that is neither `done` nor `cancelled`. `false` applies no filter.
 	HasUnfinishedWorkItem bool `json:"has_unfinished_work_item,omitempty" toon:"has_unfinished_work_item,omitempty"`
-	// Restrict to the given incident IDs.
+	// Restrict to the given incident IDs. At most 100 items per request; split larger sets into several calls.
 	IncidentIDs []string `json:"incident_ids,omitempty" toon:"incident_ids,omitempty"`
 	// Comma-separated severities to match, for example `Critical,Warning`. Values: `Critical` most severe, `Warning`, `Info` least severe.
 	IncidentSeverity string `json:"incident_severity,omitempty" toon:"incident_severity,omitempty"`
+	// Keep only incidents holding an alert from any of these integration types (plugin keys, e.g. `prometheus`, `aliyun.cm`); any listed value matches. Omit to skip this filter.
+	IntegrationTypes []string `json:"integration_types,omitempty" toon:"integration_types,omitempty"`
 	// When true, restrict to incidents in channels the user personally owns.
 	IsMyChannel bool `json:"is_my_channel,omitempty" toon:"is_my_channel,omitempty"`
 	// When true, restrict to incidents in channels owned by the user's teams.
@@ -7010,7 +7081,7 @@ type ListIncidentsRequest struct {
 	IsRare bool `json:"is_rare,omitempty" toon:"is_rare,omitempty"`
 	// When true, include only snoozed incidents.
 	IsSnoozed bool `json:"is_snoozed,omitempty" toon:"is_snoozed,omitempty"`
-	// Filter by incident short numbers (the numbers shown before incident titles in the console).
+	// Filter by incident short numbers (the numbers shown before incident titles in the console). At most 100 items per request; split larger sets into several calls.
 	Nums []string `json:"nums,omitempty" toon:"nums,omitempty"`
 	// Comma-separated progress states to match, for example `Triggered,Processing`. Values: `Triggered` not yet acknowledged; `Processing` acknowledged and being handled; `Closed` resolved. Omit to match every state.
 	Progress string `json:"progress,omitempty" toon:"progress,omitempty"`
@@ -7525,7 +7596,7 @@ type MappingAPIItem struct {
 	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Free-text description (at most 500 characters); an empty string when none was given.
 	Description string `json:"description" toon:"description"`
-	// Request headers sent with every call, returned in plain text to callers who can edit the API (the account owner or an admin, the API's creator, or a member of its team). `null` when none are configured or the caller cannot edit the API.
+	// Request headers sent with every call, returned to callers who can edit the API (the account owner or an admin, the API's creator, or a member of its team), with the values of security-sensitive names masked as `******`. `null` when none are configured or the caller cannot edit the API. Sensitive names are `authorization`, `proxy-authorization`, `cookie`, `set-cookie`, `x-api-key`, `www-authenticate`, `proxy-authenticate`, and any name containing `token`, `secret`, `key`, `pass`, `auth`, `cookie`, `credential`, `bearer` or `signature`.
 	Headers map[string]string `json:"headers" toon:"headers"`
 	// Whether TLS verification is skipped.
 	InsecureSkipVerify bool `json:"insecure_skip_verify" toon:"insecure_skip_verify"`
@@ -7561,7 +7632,7 @@ type MappingAPIUpdateRequest struct {
 	APIName *string `json:"api_name,omitempty" toon:"api_name,omitempty"`
 	// New description; longer than 500 characters is truncated. Omit to keep, send `""` to clear.
 	Description *string `json:"description,omitempty" toon:"description,omitempty"`
-	// Replaces the whole header map when sent; send `{}` to remove all headers. Omit to keep. In SaaS, sensitive header names (see `/enrichment/mapping/api/create`) are rejected; keys are at most 1,024 characters and values at most 4,096.
+	// Replaces the whole header map when sent; send `{}` to remove all headers. Omit to keep. In SaaS, sensitive header names (see `/enrichment/mapping/api/create`) are rejected; keys are at most 1,024 characters and values at most 4,096. Send a stored value back as `******` to keep it unchanged; a masked value with no stored counterpart is rejected. When `url` changes the endpoint's scheme, host, port or user info, sensitive headers must be re-entered — omitting `headers` or sending any masked value then returns `InvalidParameter`.
 	Headers map[string]string `json:"headers,omitempty" toon:"headers,omitempty"`
 	// New TLS skip-verify setting. Omit to keep.
 	InsecureSkipVerify *bool `json:"insecure_skip_verify,omitempty" toon:"insecure_skip_verify,omitempty"`
@@ -7790,7 +7861,7 @@ type MemberInfoResponse struct {
 type MemberInviteRequest struct {
 	// Invite source. Only takes effect when the account has member invites disabled and the value is `api`: members are created directly in the enabled state with email/phone marked verified and no invitation sent. Any other value follows the normal invite flow
 	From string `json:"from,omitempty" toon:"from,omitempty"`
-	// Members to invite in one call (at least 1). Each entry needs either an `email`, or `member_name` + `phone` together.
+	// Members to invite in one call (at least 1). Each entry needs either an `email`, or `member_name` + `phone` together. At most 20 items per request; split larger sets into several calls.
 	Members []InviteMemberItem `json:"members" toon:"members"`
 }
 
@@ -9112,6 +9183,8 @@ type RoleItem struct {
 	Status string `json:"status" toon:"status"`
 	// Unix epoch seconds the role was last updated.
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
+	// Read visibility the role grants its holders. `team` — only data of their own teams. `all` — every team's data in the account, readable but not editable. A custom role created without `view_scope` defaults to `team`.
+	ViewScope string `json:"view_scope" toon:"view_scope"`
 }
 
 // RoleListRequest is generated from the Flashduty OpenAPI schema.
@@ -9156,6 +9229,8 @@ type RoleUpsertRequest struct {
 	RoleID uint64 `json:"role_id,omitempty" toon:"role_id,omitempty"`
 	// Role display name. 1–39 characters.
 	RoleName string `json:"role_name" toon:"role_name"`
+	// Read visibility the role grants. `team` — only data of their own teams; `all` — read-only visibility across every team in the account. A new role defaults to `team`; on update, omit it to keep the current value. Setting `all` requires the account owner or an Admin, otherwise the call returns `AccessDenied`.
+	ViewScope string `json:"view_scope,omitempty" toon:"view_scope,omitempty"`
 }
 
 // RoleUpsertResponse is generated from the Flashduty OpenAPI schema.
@@ -9608,6 +9683,310 @@ type RUMApplicationUpdateRequest struct {
 	Type *string `json:"type,omitempty" toon:"type,omitempty"`
 }
 
+// RUMBehaviorDayCount is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorDayCount struct {
+	// Count on that day.
+	Count int64 `json:"count" toon:"count"`
+	// Day in `YYYY-MM-DD` form, in the account's display time zone.
+	Date string `json:"date" toon:"date"`
+}
+
+// RUMBehaviorElementMatch is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorElementMatch struct {
+	// Which element attribute is compared: `name` the element name the SDK reported, `selector` its CSS selector.
+	By string `json:"by" toon:"by"`
+	// How `value` is compared: `eq` exactly, `contains` a substring, `prefix` from the start, `regex` a regular expression.
+	Op string `json:"op" toon:"op"`
+	// Element name or selector to match. Same length limits as a page match value.
+	Value string `json:"value" toon:"value"`
+}
+
+// RUMBehaviorEvent is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEvent struct {
+	// Creation time, Unix timestamp in milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Person ID of the member who created the event.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Free-text description, at most 512 bytes.
+	Description string `json:"description" toon:"description"`
+	// Behavior event ID (a short UUID assigned at creation).
+	EventID string `json:"event_id" toon:"event_id"`
+	// Name of the event, unique per application. 1-128 characters.
+	Name string `json:"name" toon:"name"`
+	// Rules of the event. They are OR-ed: a raw action belongs to the event when any rule matches it. 1-20 rules.
+	Rules []RUMBehaviorRule `json:"rules" toon:"rules"`
+	// Visibility of the event: `enabled` is listed in the console, `hidden` keeps it out of the event list while saved funnels may still use it. Deleted events are never returned.
+	Status string `json:"status" toon:"status"`
+	// Last update time, Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Person ID of the member who last changed the event.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Version of the event; a name or rule change bumps it and keeps the previous version in the history.
+	Version int64 `json:"version" toon:"version"`
+}
+
+// RUMBehaviorEventCreateRequest is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventCreateRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Free-text description, at most 512 bytes.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Event name, unique per application. 1-128 characters.
+	Name string `json:"name" toon:"name"`
+	// Rules of the event. They are OR-ed: a raw action belongs to the event when any rule matches it. 1-20 rules.
+	Rules []RUMBehaviorRule `json:"rules" toon:"rules"`
+}
+
+// RUMBehaviorEventHistoryResponse is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventHistoryResponse struct {
+	// One entry per saved version.
+	Items []RUMBehaviorVersion `json:"items" toon:"items"`
+}
+
+// RUMBehaviorEventIDRequest is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventIDRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Behavior event ID (a short UUID assigned at creation).
+	EventID string `json:"event_id" toon:"event_id"`
+}
+
+// RUMBehaviorEventInfoRequest is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventInfoRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Behavior event ID (a short UUID assigned at creation).
+	EventID string `json:"event_id" toon:"event_id"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMBehaviorEventInfoResponse is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventInfoResponse struct {
+	// Daily hit counts across the window.
+	Daily []RUMBehaviorDayCount `json:"daily" toon:"daily"`
+	// The event itself.
+	Event RUMBehaviorEvent `json:"event" toon:"event"`
+	// Saved funnels whose steps use this event.
+	Funnels []RUMBehaviorFunnelRef `json:"funnels" toon:"funnels"`
+}
+
+// RUMBehaviorEventListItem is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventListItem struct {
+	// Creation time, Unix timestamp in milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Person ID of the member who created the event.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Free-text description, at most 512 bytes.
+	Description string `json:"description" toon:"description"`
+	// Behavior event ID (a short UUID assigned at creation).
+	EventID string `json:"event_id" toon:"event_id"`
+	// Saved funnels whose steps use this event; empty when none do.
+	Funnels []RUMBehaviorFunnelRef `json:"funnels" toon:"funnels"`
+	// Matching actions in the window.
+	Hits int64 `json:"hits" toon:"hits"`
+	// Name of the event, unique per application. 1-128 characters.
+	Name string `json:"name" toon:"name"`
+	// Hits in the equally long period right before the window.
+	PrevHits int64 `json:"prev_hits" toon:"prev_hits"`
+	// Rules of the event. They are OR-ed: a raw action belongs to the event when any rule matches it. 1-20 rules.
+	Rules []RUMBehaviorRule `json:"rules" toon:"rules"`
+	// Visibility of the event: `enabled` is listed in the console, `hidden` keeps it out of the event list while saved funnels may still use it. Deleted events are never returned.
+	Status string `json:"status" toon:"status"`
+	// Last update time, Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Person ID of the member who last changed the event.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Version of the event; a name or rule change bumps it and keeps the previous version in the history.
+	Version int64 `json:"version" toon:"version"`
+	// Distinct visitors behind those actions.
+	Visitors int64 `json:"visitors" toon:"visitors"`
+}
+
+// RUMBehaviorEventListRequest is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventListRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMBehaviorEventListResponse is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventListResponse struct {
+	// One entry per event, most recently updated first.
+	Items []RUMBehaviorEventListItem `json:"items" toon:"items"`
+}
+
+// RUMBehaviorEventPreview is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventPreview struct {
+	// Daily hit counts across the window.
+	Daily []RUMBehaviorDayCount `json:"daily" toon:"daily"`
+	// Matching actions in the window.
+	Hits int64 `json:"hits" toon:"hits"`
+	// Top matched click groups.
+	Matches []RUMBehaviorMatchedClick `json:"matches" toon:"matches"`
+	// Enabled events that overlap with these rules.
+	Overlaps []RUMBehaviorOverlap `json:"overlaps" toon:"overlaps"`
+	// All clicks on the pages the rules hit, matching or not.
+	PageClicks int64 `json:"page_clicks" toon:"page_clicks"`
+	// Matching actions flagged as rage clicks or taps.
+	RageClicks int64 `json:"rage_clicks" toon:"rage_clicks"`
+	// Distinct visitors behind those actions.
+	Visitors int64 `json:"visitors" toon:"visitors"`
+}
+
+// RUMBehaviorEventPreviewRequest is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventPreviewRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Event to leave out of the overlap list, typically the one being edited.
+	ExceptEventID string `json:"except_event_id,omitempty" toon:"except_event_id,omitempty"`
+	// Rules of the event. They are OR-ed: a raw action belongs to the event when any rule matches it. 1-20 rules.
+	Rules []RUMBehaviorRule `json:"rules" toon:"rules"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMBehaviorEventRawClicksRequest is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventRawClicksRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Maximum groups to return. 1-200, default 100.
+	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
+	// When `true`, return only groups no saved event matches yet.
+	OnlyUnclassified bool `json:"only_unclassified,omitempty" toon:"only_unclassified,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMBehaviorEventRawClicksResponse is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventRawClicksResponse struct {
+	// Groups ordered by clicks, descending.
+	Items []RUMBehaviorRawClick `json:"items" toon:"items"`
+	// Share of sessions the query read; 1 when exact. The counts below are scaled up to the whole window.
+	SampleRate float64 `json:"sample_rate" toon:"sample_rate"`
+}
+
+// RUMBehaviorEventUpdateRequest is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorEventUpdateRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// New description. Omit to keep the current one; a description-only edit does not bump `version`.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// Behavior event ID (a short UUID assigned at creation).
+	EventID string `json:"event_id" toon:"event_id"`
+	// New name. Omit to keep the current one; a name or rule change bumps `version`.
+	Name *string `json:"name,omitempty" toon:"name,omitempty"`
+	// Replacement rules. Omit to keep the current ones. 1-20 rules.
+	Rules []RUMBehaviorRule `json:"rules,omitempty" toon:"rules,omitempty"`
+}
+
+// RUMBehaviorFunnelRef is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorFunnelRef struct {
+	// Funnel ID (a short UUID assigned at creation).
+	FunnelID string `json:"funnel_id" toon:"funnel_id"`
+	// Name of the funnel.
+	Name string `json:"name" toon:"name"`
+}
+
+// RUMBehaviorMatch is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorMatch struct {
+	// How `value` is compared with the page path group: `eq` exactly, `contains` a substring, `prefix` from the start, `wildcard` an anchored `*` glob, `regex` a regular expression.
+	Op string `json:"op" toon:"op"`
+	// Comparison value. At most 512 bytes without control characters; a `regex` value is limited to 200 bytes and must compile.
+	Value string `json:"value" toon:"value"`
+}
+
+// RUMBehaviorMatchedClick is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorMatchedClick struct {
+	// Kind of the matched action: `click` on the web, `tap` on mobile.
+	ActionType string `json:"action_type" toon:"action_type"`
+	// Clicks in the group within the window.
+	Count int64 `json:"count" toon:"count"`
+	// Element name reported for the group; empty when the SDK did not name it.
+	Name string `json:"name" toon:"name"`
+	// Page path group of the clicks.
+	Page string `json:"page" toon:"page"`
+	// The most common selector in the group.
+	Selector string `json:"selector" toon:"selector"`
+	// Number of distinct selectors merged into this group.
+	SelectorCount int64 `json:"selector_count" toon:"selector_count"`
+}
+
+// RUMBehaviorOverlap is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorOverlap struct {
+	// Behavior event ID (a short UUID assigned at creation).
+	EventID string `json:"event_id" toon:"event_id"`
+	// Name of the other event.
+	Name string `json:"name" toon:"name"`
+	// Actions matched by both events.
+	Shared int64 `json:"shared" toon:"shared"`
+}
+
+// RUMBehaviorRawClick is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorRawClick struct {
+	// Clicks in the window.
+	Clicks int64 `json:"clicks" toon:"clicks"`
+	// Clicks followed by an error. A lower bound.
+	ErrorClicks int64 `json:"error_clicks" toon:"error_clicks"`
+	// First existing behavior event that already matches this group. Omitted when none does.
+	EventID string `json:"event_id" toon:"event_id"`
+	// Name of `event_id`. Omitted together with it.
+	EventName string `json:"event_name" toon:"event_name"`
+	// Rage clicks plus dead clicks in the group.
+	Frustrated int64 `json:"frustrated" toon:"frustrated"`
+	// Element name reported for the group; empty when the SDK did not name it.
+	Name string `json:"name" toon:"name"`
+	// Page path group.
+	Page string `json:"page" toon:"page"`
+	// Distinct selectors merged into the group.
+	SelectorCount int64 `json:"selector_count" toon:"selector_count"`
+	// Up to 10 of those selectors.
+	Selectors []string `json:"selectors" toon:"selectors"`
+	// Distinct visitors who clicked.
+	Visitors int64 `json:"visitors" toon:"visitors"`
+}
+
+// RUMBehaviorRule is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorRule struct {
+	// Clicked element. Required for a `click` rule.
+	Element RUMBehaviorElementMatch `json:"element,omitzero" toon:"element,omitempty"`
+	// Action name for a `custom` rule, matched exactly.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Page the click happened on, matched against the page path group. Required for a `click` rule.
+	Page RUMBehaviorMatch `json:"page,omitzero" toon:"page,omitempty"`
+	// Rule kind: `click` matches an autocaptured click or tap and needs both `page` and `element`; `custom` matches the action name reported in code through `addAction` and needs `name`.
+	Type string `json:"type" toon:"type"`
+}
+
+// RUMBehaviorRuleBook is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorRuleBook struct {
+	// Rules of the event. They are OR-ed: a raw action belongs to the event when any rule matches it. 1-20 rules.
+	Rules []RUMBehaviorRule `json:"rules" toon:"rules"`
+}
+
+// RUMBehaviorVersion is generated from the Flashduty OpenAPI schema.
+type RUMBehaviorVersion struct {
+	// Name as of that version.
+	Name string `json:"name" toon:"name"`
+	// Rules of the event. They are OR-ed: a raw action belongs to the event when any rule matches it. 1-20 rules.
+	Rules []RUMBehaviorRule `json:"rules" toon:"rules"`
+	// Save time of that version, Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Person ID of the member who saved that version.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Version number.
+	Version int64 `json:"version" toon:"version"`
+}
+
 // RUMDashboardActor is generated from the Flashduty OpenAPI schema.
 type RUMDashboardActor struct {
 	// Person ID.
@@ -9821,11 +10200,13 @@ type RUMDashboardPanel struct {
 	// Required for every panel kind except `text`, which must omit it.
 	DatasourceRef RUMDashboardDatasourceRef `json:"datasource_ref,omitzero" toon:"datasource_ref,omitempty"`
 	// Panel description, at most 1024 characters.
-	Description string                   `json:"description,omitempty" toon:"description,omitempty"`
-	Grid        RUMDashboardGridPosition `json:"grid" toon:"grid"`
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Formula over the panel's queries, e.g. `A / B`, using their `ref_id`s. Allowed on `time_series`, `stat` and `table` only; the browser evaluates it and the panel shows only its result. Grammar: `+`, `-`, `*`, `/`, parentheses, numbers and one uppercase letter A–Z per query ref; at most 200 bytes; every ref must be a query of this panel; a `table` or `time_series` formula requires the same `group_by` on every query.
+	Formula string                   `json:"formula,omitempty" toon:"formula,omitempty"`
+	Grid    RUMDashboardGridPosition `json:"grid" toon:"grid"`
 	// Panel ID, a canonical UUIDv7, unique in the dashboard.
 	ID string `json:"id" toon:"id"`
-	// Queries of the panel, each with a unique `ref_id`. `time_series` and `top_list` take 1-26 queries, `table`, `stat` and `bar` exactly 1, `text` none.
+	// Queries of the panel, each with a unique `ref_id`. `time_series` and `top_list` take 1-26 queries; `table` and `stat` take 1-26 when the panel has a `formula` and exactly 1 without one; `bar` exactly 1; `text` none.
 	Queries []RUMDashboardPanelQuery `json:"queries" toon:"queries"`
 	// Panel title, 1–189 characters.
 	Title     string                `json:"title" toon:"title"`
@@ -10224,7 +10605,7 @@ type RUMDataQueryDefinition struct {
 	DevicesOn string `json:"devices_on,omitempty" toon:"devices_on,omitempty"`
 	// When `true`, the query always runs on the full data and the response never carries `sampling`. When `false` (default), the server may sample aggregate queries over large time windows. A query that would otherwise be sampled can wait for the account's other unsampled queries; if it waits too long, its `error` entry is set with code `BadRequest`.
 	DisableSampling bool `json:"disable_sampling,omitempty" toon:"disable_sampling,omitempty"`
-	// Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A lone `*` matches every event and filters nothing. A DQL parse error is reported in this query's `error` entry.
+	// Optional RUM DQL filter. It is translated and `AND`-ed into the `WHERE` clause of `sql`. A lone `*` matches every event and filters nothing. A DQL parse error is reported in this query's `error` entry. A value list in a filter (`field:(a OR b ...)`) may hold at most 100 values.
 	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
 	// Output format. `table` returns rows; `time_series` returns bucketed time-series rows.
 	Format string `json:"format" toon:"format"`
@@ -10236,7 +10617,7 @@ type RUMDataQueryDefinition struct {
 	MaxPoints int64 `json:"max_points,omitempty" toon:"max_points,omitempty"`
 	// Cursor from a previous response's `search_after_ctx`, to fetch the next page of the same `table` query. Only used by non-aggregate queries with `ORDER BY` and no `OFFSET`. An invalid value makes this query fail.
 	SearchAfterCtx string `json:"search_after_ctx,omitempty" toon:"search_after_ctx,omitempty"`
-	// RUM SQL `SELECT` statement. `FROM` names a scope table (`sessions`, `views`, `actions`, `errors`, `resources`, `long_tasks`, `vitals`, `issues`, `sourcemaps`); columns are `field_key` values from `POST /rum/field/list`. The server adds the account and time-range filters.
+	// RUM SQL `SELECT` statement. `FROM` names a scope table (`sessions`, `views`, `actions`, `errors`, `resources`, `long_tasks`, `vitals`, `issues`, `sourcemaps`); columns are `field_key` values from `POST /rum/field/list`. The server adds the account and time-range filters. A value list in a filter (`field IN (...)`) may hold at most 100 values.
 	Sql string `json:"sql" toon:"sql"`
 	// IANA time zone name, such as `Asia/Shanghai`, used to align `time_series` bucket boundaries to local time. Defaults to UTC alignment. Ignored for `table` queries; an unknown name fails the request with `InvalidParameter`.
 	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
@@ -10451,7 +10832,7 @@ type RUMErrorIngestionUpdateRequest struct {
 
 // RUMFacetCountRequest is generated from the Flashduty OpenAPI schema.
 type RUMFacetCountRequest struct {
-	// RUM DQL filter expression applied before counting. Fields in it are validated against the `scope`.
+	// RUM DQL filter expression applied before counting. Fields in it are validated against the `scope`. A value list in a filter (`field:(a OR b ...)`) may hold at most 100 values.
 	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
 	// End of the time range, Unix epoch milliseconds. Maximum 31-day span.
 	EndTime int64 `json:"end_time" toon:"end_time"`
@@ -10477,7 +10858,7 @@ type RUMFacetCountRequest struct {
 	// | `issue` | Aggregated error-tracking issues |
 	// | `sourcemap` | Sourcemap / symbol files |
 	Scope string `json:"scope" toon:"scope"`
-	// Bare SQL `WHERE` condition (without the `WHERE` keyword) for extra filtering, such as `env = 'prod'`. Any occurrence of `SELECT` is rejected.
+	// Bare SQL `WHERE` condition (without the `WHERE` keyword) for extra filtering, such as `env = 'prod'`. Any occurrence of `SELECT` is rejected. A value list in a filter (`field IN (...)`) may hold at most 100 values.
 	Sql string `json:"sql,omitempty" toon:"sql,omitempty"`
 	// Start of the time range, Unix epoch milliseconds.
 	StartTime int64 `json:"start_time" toon:"start_time"`
@@ -10573,6 +10954,630 @@ type RUMFieldListResponse struct {
 	Items []RUMFieldItem `json:"items" toon:"items"`
 }
 
+// RUMFunnelAppRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelAppRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+}
+
+// RUMFunnelBreakdown is generated from the Flashduty OpenAPI schema.
+type RUMFunnelBreakdown struct {
+	// Dimension the breakdown was computed on: `env`, `version`, `device_type`, `browser_name`, `os_name` or `geo_country`.
+	Field string `json:"field" toon:"field"`
+	// The largest values by units entered, largest first; at most 8.
+	Items []RUMFunnelSlice `json:"items" toon:"items"`
+	// The remaining values, summed into one slice. Omitted when there are none.
+	Others RUMFunnelSlice `json:"others" toon:"others"`
+}
+
+// RUMFunnelBreakdownRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelBreakdownRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Funnel definition: the ordered steps, the counting unit and optional filters. 2 to 10 steps.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Dimension to split by. Unsupported values return `InvalidParameter`. Dimension to split by: `env`, `version`, `device_type`, `browser_name`, `os_name` or `geo_country` — the columns shared by the views and actions tables.
+	Field string `json:"field" toon:"field"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMFunnelCreateRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelCreateRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Funnel definition: the ordered steps, the counting unit and optional filters. 2 to 10 steps.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// Funnel name. 1-128 characters.
+	Name string `json:"name" toon:"name"`
+}
+
+// RUMFunnelDay is generated from the Flashduty OpenAPI schema.
+type RUMFunnelDay struct {
+	// Units that completed it.
+	Completed int64 `json:"completed" toon:"completed"`
+	// Day in `YYYY-MM-DD` form, in the account's display time zone.
+	Date string `json:"date" toon:"date"`
+	// Units that started the funnel that day.
+	Entered int64 `json:"entered" toon:"entered"`
+	// `true` when that day's visitors have not had the full conversion window yet, so the rate is still rising. Always `false` when counting sessions.
+	Incomplete bool `json:"incomplete" toon:"incomplete"`
+	// Completion percentage that day.
+	Rate float64 `json:"rate" toon:"rate"`
+}
+
+// RUMFunnelDefinition is generated from the Flashduty OpenAPI schema.
+type RUMFunnelDefinition struct {
+	// Filters applied before counting. Omit for no filtering.
+	Filters []RUMFunnelFilter `json:"filters,omitempty" toon:"filters,omitempty"`
+	// Ordered steps. 2-10 steps; units must reach them in this order to convert.
+	Steps []RUMFunnelStep `json:"steps" toon:"steps"`
+	// Counting unit: `session` counts sessions, `visitor` counts visitors.
+	Unit string `json:"unit" toon:"unit"`
+	// Conversion window for `unit=visitor`: `24` or `168` hours. Must be set for visitors and is ignored for sessions.
+	WindowHours int64 `json:"window_hours,omitempty" toon:"window_hours,omitempty"`
+}
+
+// RUMFunnelDrivers is generated from the Flashduty OpenAPI schema.
+type RUMFunnelDrivers struct {
+	// Units that went on to the next step.
+	Converted int64 `json:"converted" toon:"converted"`
+	// Factors ranked by how much they separate converted from dropped units.
+	Factors []RUMFunnelFactor `json:"factors" toon:"factors"`
+	// The dropped units' paths as flow links.
+	Flow []RUMFunnelFlowLink `json:"flow" toon:"flow"`
+	// Step the drill-down starts from, 1-based.
+	FromStep int64 `json:"from_step" toon:"from_step"`
+	// Where the dropped units went right after the step.
+	NextPages []RUMFunnelNextPage `json:"next_pages" toon:"next_pages"`
+	// Units that reached that step.
+	Reached int64 `json:"reached" toon:"reached"`
+	// Example sessions that dropped here.
+	Sessions []RUMFunnelDroppedSession `json:"sessions" toon:"sessions"`
+}
+
+// RUMFunnelDriversRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelDriversRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Split the funnel by this dimension before explaining the drop: `env`, `version`, `device_type`, `browser_name`, `os_name` or `geo_country`. Omit for the overall funnel.
+	Compare string `json:"compare,omitempty" toon:"compare,omitempty"`
+	// Funnel definition: the ordered steps, the counting unit and optional filters. 2 to 10 steps.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Step the drill-down starts from, 1-based. It must be a step with a following one.
+	FromStep int64 `json:"from_step" toon:"from_step"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMFunnelDroppedSession is generated from the Flashduty OpenAPI schema.
+type RUMFunnelDroppedSession struct {
+	// Duration of the whole session, in milliseconds.
+	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
+	// Factor kinds the session met between the two steps.
+	Factors []string `json:"factors" toon:"factors"`
+	// Whether the session has a replay to open.
+	HasReplay bool `json:"has_replay" toon:"has_replay"`
+	// RUM session ID.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Views in the whole session.
+	Views int64 `json:"views" toon:"views"`
+}
+
+// RUMFunnelFactor is generated from the Flashduty OpenAPI schema.
+type RUMFunnelFactor struct {
+	// `hit_rate` minus `miss_rate`, in percentage points; negative means the factor hurts conversion.
+	Diff float64 `json:"diff" toon:"diff"`
+	// Units that met the factor.
+	Hit int64 `json:"hit" toon:"hit"`
+	// Percentage of the units that met it and then converted.
+	HitRate float64 `json:"hit_rate" toon:"hit_rate"`
+	// Version an `error` factor was first seen in. Omitted when unknown or for other kinds.
+	IssueFirstSeenVersion string `json:"issue_first_seen_version" toon:"issue_first_seen_version"`
+	// Issue status for an `error` factor. Omitted for other kinds.
+	IssueStatus string `json:"issue_status" toon:"issue_status"`
+	// Factor identity: the issue ID for `error`, the resource path group for `slow_api`. Empty for `slow_page`, `rage` and `dead`, which are counted as whole kinds.
+	Key string `json:"key" toon:"key"`
+	// Factor kind: `error` an error grouped into an issue, `slow_api` an XHR/fetch slower than 3 s, `slow_page` a page whose LCP exceeded 4 s, `rage` a rage click or tap, `dead` a dead click.
+	Kind string `json:"kind" toon:"kind"`
+	// Human-readable label: the error type and message for `error`, the resource path group for `slow_api`; empty for `slow_page`, `rage` and `dead`.
+	Label string `json:"label" toon:"label"`
+	// `true` when either side has too few units for the comparison to be conclusive.
+	LowSample bool `json:"low_sample" toon:"low_sample"`
+	// Units that did not meet the factor.
+	Miss int64 `json:"miss" toon:"miss"`
+	// Percentage of the units that did not meet it and still converted.
+	MissRate float64 `json:"miss_rate" toon:"miss_rate"`
+	// A session that met the factor, to open in replay. Omitted when none is available.
+	SampleSession string `json:"sample_session" toon:"sample_session"`
+}
+
+// RUMFunnelFilter is generated from the Flashduty OpenAPI schema.
+type RUMFunnelFilter struct {
+	// Dimension to split by: `env`, `version`, `device_type`, `browser_name`, `os_name` or `geo_country` — the columns shared by the views and actions tables.
+	Field string `json:"field" toon:"field"`
+	// Accepted values for the field. 1-50 values.
+	Values []string `json:"values" toon:"values"`
+}
+
+// RUMFunnelFlowLink is generated from the Flashduty OpenAPI schema.
+type RUMFunnelFlowLink struct {
+	// Units on this link.
+	Count int64 `json:"count" toon:"count"`
+	// Page path group at the previous hop. Empty at hop 1.
+	From string `json:"from" toon:"from"`
+	// Hop number; hop 1 leaves the step itself, so its `from` is empty.
+	Level int64 `json:"level" toon:"level"`
+	// Page path group at this hop. Empty when the units left the site, `*` when they went to pages outside this hop's top few.
+	To string `json:"to" toon:"to"`
+}
+
+// RUMFunnelGroup is generated from the Flashduty OpenAPI schema.
+type RUMFunnelGroup struct {
+	// Median seconds from the first step to the last among completed units.
+	DurationP50 int64 `json:"duration_p50" toon:"duration_p50"`
+	// 90th percentile of that duration, in seconds.
+	DurationP90 int64 `json:"duration_p90" toon:"duration_p90"`
+	// Percentage of entered units that completed the funnel.
+	OverallConversion float64 `json:"overall_conversion" toon:"overall_conversion"`
+	// One entry per step, in the definition's order.
+	Steps []RUMFunnelStepResult `json:"steps" toon:"steps"`
+	// Units that reached the last step.
+	TotalCompleted int64 `json:"total_completed" toon:"total_completed"`
+	// Units that reached the first step.
+	TotalEntered int64 `json:"total_entered" toon:"total_entered"`
+	// Counting unit the result is in: `session` or `visitor`.
+	Unit string `json:"unit" toon:"unit"`
+	// Value of the compare dimension. Empty when the events report no value.
+	Value string `json:"value" toon:"value"`
+}
+
+// RUMFunnelIDRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelIDRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Funnel ID (a short UUID assigned at creation).
+	FunnelID string `json:"funnel_id" toon:"funnel_id"`
+}
+
+// RUMFunnelListResponse is generated from the Flashduty OpenAPI schema.
+type RUMFunnelListResponse struct {
+	// One entry per saved funnel.
+	Items []RUMFunnelSaved `json:"items" toon:"items"`
+}
+
+// RUMFunnelNextPage is generated from the Flashduty OpenAPI schema.
+type RUMFunnelNextPage struct {
+	// Units that went there.
+	Count int64 `json:"count" toon:"count"`
+	// Page path group they viewed next. Empty means they left.
+	Page string `json:"page" toon:"page"`
+}
+
+// RUMFunnelPageFlow is generated from the Flashduty OpenAPI schema.
+type RUMFunnelPageFlow struct {
+	// Flow links. With `direction=after` an empty `to` means the session left the site; with `before` it means the session began there.
+	Flow []RUMFunnelFlowLink `json:"flow" toon:"flow"`
+	// View name most often reported for the start and each page of the flow, keyed by page path group. A page whose name equals its path is left out.
+	Names map[string]string `json:"names" toon:"names"`
+	// Share of sessions the query read; 1 when exact. `sessions` and counts are scaled up.
+	SampleRate float64 `json:"sample_rate" toon:"sample_rate"`
+	// Sessions that reached the start page.
+	Sessions int64 `json:"sessions" toon:"sessions"`
+}
+
+// RUMFunnelPathSession is generated from the Flashduty OpenAPI schema.
+type RUMFunnelPathSession struct {
+	// Browser the session reported.
+	Browser string `json:"browser" toon:"browser"`
+	// Device type the session reported.
+	DeviceType string `json:"device_type" toon:"device_type"`
+	// Milliseconds from the start of the session's first view to the end of its last view in the window.
+	DurationMs int64 `json:"duration_ms" toon:"duration_ms"`
+	// Errors the session had in the window, counted as the funnel drivers count them.
+	ErrorCount int64 `json:"error_count" toon:"error_count"`
+	// Whether the session has a replay to open.
+	HasReplay bool `json:"has_replay" toon:"has_replay"`
+	// Operating system the session reported.
+	OS string `json:"os" toon:"os"`
+	// The session's pages around its first visit to the start, folded the way the flow folds them: up to `depth` pages before the start, the start, up to `depth` after. For the entry, the first `depth+1` pages from the landing page.
+	Path []string `json:"path" toon:"path"`
+	// RUM session ID.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Index of the start page inside `path`.
+	StartIndex int64 `json:"start_index" toon:"start_index"`
+	// When the session made the hop, Unix timestamp in milliseconds: when it viewed `to`, or when it last viewed a page before leaving. At level 0, when it first reached the start.
+	Time TimestampMilli `json:"time" toon:"time"`
+	// User name when the application sets one, otherwise the user ID. Empty for an anonymous visitor.
+	User string `json:"user" toon:"user"`
+	// Application version the session reported.
+	Version string `json:"version" toon:"version"`
+	// Views the session had in the window.
+	ViewCount int64 `json:"view_count" toon:"view_count"`
+}
+
+// RUMFunnelPathSessionsRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelPathSessionsRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Depth the flow was queried with. 2-5, default 3.
+	Depth int64 `json:"depth,omitempty" toon:"depth,omitempty"`
+	// Direction along the session: `after` follows the pages viewed after the start, `before` the pages viewed before it.
+	Direction string `json:"direction" toon:"direction"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Filters applied to the views the flow is built from.
+	Filters []RUMFunnelFilter `json:"filters,omitempty" toon:"filters,omitempty"`
+	// Page path group at the previous level, to pick one band of the flow. Not checked at level 1; an empty string is a real value (the session's entry, or that it left).
+	From *string `json:"from,omitempty" toon:"from,omitempty"`
+	// Level of the flow the sessions come from; 0 is the start page itself, whose sessions all reached it.
+	Level int64 `json:"level" toon:"level"`
+	// Page path group the flow was built from. Omit to follow the session's entry.
+	Start string `json:"start,omitempty" toon:"start,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+	// Page path group at `level`. Omit to describe the node whatever the session came from; an empty string is a real value.
+	To *string `json:"to,omitempty" toon:"to,omitempty"`
+}
+
+// RUMFunnelPathSessionsResponse is generated from the Flashduty OpenAPI schema.
+type RUMFunnelPathSessionsResponse struct {
+	// Up to 20 sessions.
+	Items []RUMFunnelPathSession `json:"items" toon:"items"`
+}
+
+// RUMFunnelPathsRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelPathsRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// How many distinct pages to follow. 2-5, default 3.
+	Depth int64 `json:"depth,omitempty" toon:"depth,omitempty"`
+	// Direction along the session: `after` follows the pages viewed after the start, `before` the pages viewed before it.
+	Direction string `json:"direction" toon:"direction"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Filters applied to the views the flow is built from. Omit for no filtering.
+	Filters []RUMFunnelFilter `json:"filters,omitempty" toon:"filters,omitempty"`
+	// Page path group to follow. Omit to follow the session's entry; `direction=before` requires it.
+	Start string `json:"start,omitempty" toon:"start,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMFunnelQueryRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelQueryRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Split the funnel by this dimension and return its two most frequent values. Omit for the overall funnel only. Dimension to split by: `env`, `version`, `device_type`, `browser_name`, `os_name` or `geo_country` — the columns shared by the views and actions tables.
+	Compare string `json:"compare,omitempty" toon:"compare,omitempty"`
+	// Funnel definition: the ordered steps, the counting unit and optional filters. 2 to 10 steps.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMFunnelQueryResponse is generated from the Flashduty OpenAPI schema.
+type RUMFunnelQueryResponse struct {
+	// The funnel per value of `compare`, two values at most. Empty when `compare` was omitted.
+	Groups []RUMFunnelGroup `json:"groups" toon:"groups"`
+	// The overall funnel.
+	Result RUMFunnelResult `json:"result" toon:"result"`
+}
+
+// RUMFunnelResult is generated from the Flashduty OpenAPI schema.
+type RUMFunnelResult struct {
+	// Median seconds from the first step to the last among completed units.
+	DurationP50 int64 `json:"duration_p50" toon:"duration_p50"`
+	// 90th percentile of that duration, in seconds.
+	DurationP90 int64 `json:"duration_p90" toon:"duration_p90"`
+	// Percentage of entered units that completed the funnel.
+	OverallConversion float64 `json:"overall_conversion" toon:"overall_conversion"`
+	// One entry per step, in the definition's order.
+	Steps []RUMFunnelStepResult `json:"steps" toon:"steps"`
+	// Units that reached the last step.
+	TotalCompleted int64 `json:"total_completed" toon:"total_completed"`
+	// Units that reached the first step.
+	TotalEntered int64 `json:"total_entered" toon:"total_entered"`
+	// Counting unit the result is in: `session` or `visitor`.
+	Unit string `json:"unit" toon:"unit"`
+}
+
+// RUMFunnelSaved is generated from the Flashduty OpenAPI schema.
+type RUMFunnelSaved struct {
+	// Creation time, Unix timestamp in milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Person ID of the member who created the funnel.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// The saved definition.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// Funnel ID (a short UUID assigned at creation).
+	FunnelID string `json:"funnel_id" toon:"funnel_id"`
+	// Funnel name. 1-128 characters.
+	Name string `json:"name" toon:"name"`
+	// Last update time, Unix timestamp in milliseconds.
+	UpdatedAt TimestampMilli `json:"updated_at" toon:"updated_at"`
+	// Person ID of the member who last changed the funnel.
+	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// RUMFunnelSlice is generated from the Flashduty OpenAPI schema.
+type RUMFunnelSlice struct {
+	// Units that completed it.
+	Completed int64 `json:"completed" toon:"completed"`
+	// Percentage of `entered` that completed.
+	Conversion float64 `json:"conversion" toon:"conversion"`
+	// Units that entered the funnel.
+	Entered int64 `json:"entered" toon:"entered"`
+	// Units that reached each step in order; the first equals `entered` and the last equals `completed`.
+	Steps []int64 `json:"steps" toon:"steps"`
+	// Value of the dimension. Empty when the dimension was not reported.
+	Value string `json:"value" toon:"value"`
+}
+
+// RUMFunnelStep is generated from the Flashduty OpenAPI schema.
+type RUMFunnelStep struct {
+	// Behavior event of an `event` step. Ignored for other kinds.
+	EventID string `json:"event_id,omitempty" toon:"event_id,omitempty"`
+	// Step kind: `page` is a page view matched on the page path group (needs `page`), `event` is a saved behavior event (needs `event_id`), `custom` is an action reported in code through `addAction` (needs `name`).
+	Kind string `json:"kind" toon:"kind"`
+	// Label shown for the step; it is echoed back as the step result's `label`. Defaults to an empty string.
+	Label string `json:"label,omitempty" toon:"label,omitempty"`
+	// Action name of a `custom` step, matched exactly. Ignored for other kinds.
+	Name string `json:"name,omitempty" toon:"name,omitempty"`
+	// Page match of a `page` step. Ignored for other kinds.
+	Page RUMBehaviorMatch `json:"page,omitzero" toon:"page,omitempty"`
+}
+
+// RUMFunnelStepResult is generated from the Flashduty OpenAPI schema.
+type RUMFunnelStepResult struct {
+	// Percentage of the previous step's units that reached this one.
+	ConvFromPrev float64 `json:"conv_from_prev" toon:"conv_from_prev"`
+	// Percentage of the first step's units that reached this one.
+	ConvFromTop float64 `json:"conv_from_top" toon:"conv_from_top"`
+	// Units that reached this step and every step before it.
+	Count int64 `json:"count" toon:"count"`
+	// Units lost since the previous step.
+	Drop int64 `json:"drop" toon:"drop"`
+	// Median seconds from the first step to this one among units that reached it in order. `null` for the first step and when no ordered path was found.
+	DurationP50 int64 `json:"duration_p50" toon:"duration_p50"`
+	// Label of the step from the definition.
+	Label string `json:"label" toon:"label"`
+}
+
+// RUMFunnelSuggestRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelSuggestRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMFunnelSuggestResponse is generated from the Flashduty OpenAPI schema.
+type RUMFunnelSuggestResponse struct {
+	// Suggestions ordered by sessions, descending.
+	Items []RUMFunnelSuggestion `json:"items" toon:"items"`
+}
+
+// RUMFunnelSuggestion is generated from the Flashduty OpenAPI schema.
+type RUMFunnelSuggestion struct {
+	// Page path groups of the suggestion, in visit order.
+	Pages []string `json:"pages" toon:"pages"`
+	// Sessions that followed this path in the window.
+	Sessions int64 `json:"sessions" toon:"sessions"`
+}
+
+// RUMFunnelTrend is generated from the Flashduty OpenAPI schema.
+type RUMFunnelTrend struct {
+	// One entry per day of the window.
+	Days []RUMFunnelDay `json:"days" toon:"days"`
+	// Versions first seen in the window. Empty when there are none.
+	Versions []RUMFunnelVersionMark `json:"versions" toon:"versions"`
+}
+
+// RUMFunnelTrendRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelTrendRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Funnel definition: the ordered steps, the counting unit and optional filters. 2 to 10 steps.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMFunnelUpdateRequest is generated from the Flashduty OpenAPI schema.
+type RUMFunnelUpdateRequest struct {
+	// RUM application ID. The caller needs read access to it; for write operations, manage access.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Funnel definition: the ordered steps, the counting unit and optional filters. 2 to 10 steps.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// Funnel to update. Required by the handler; the call fails with `InvalidParameter` when it is missing.
+	FunnelID string `json:"funnel_id" toon:"funnel_id"`
+	// New funnel name. 1-128 characters.
+	Name string `json:"name" toon:"name"`
+}
+
+// RUMFunnelVersionMark is generated from the Flashduty OpenAPI schema.
+type RUMFunnelVersionMark struct {
+	// First time it was seen, Unix timestamp in milliseconds.
+	FirstSeen TimestampMilli `json:"first_seen" toon:"first_seen"`
+	// Version string as the SDK reported it.
+	Version string `json:"version" toon:"version"`
+}
+
+// RUMHeatmapBackground is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapBackground struct {
+	// Moment to render, Unix timestamp in milliseconds: the last click in that view, when the page has settled and the clicked elements exist; the snapshot time when the view has no click.
+	FrameTime TimestampMilli `json:"frame_time" toon:"frame_time"`
+	// RUM session ID of the snapshot.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Start of the snapshot segment, Unix timestamp in milliseconds.
+	StartTime TimestampMilli `json:"start_time" toon:"start_time"`
+	// ID of the view the snapshot belongs to.
+	ViewID string `json:"view_id" toon:"view_id"`
+	// Viewport height of the frame, in CSS pixels.
+	ViewportHeight int64 `json:"viewport_height" toon:"viewport_height"`
+	// Viewport width of the frame, in CSS pixels.
+	ViewportWidth int64 `json:"viewport_width" toon:"viewport_width"`
+}
+
+// RUMHeatmapBackgroundResponse is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapBackgroundResponse struct {
+	// The chosen frame, or `null` when the page has no replay in the scope.
+	Background *RUMHeatmapBackgroundResponseBackground `json:"background" toon:"background"`
+}
+
+// RUMHeatmapClickPoint is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapClickPoint struct {
+	// Whether the click was followed by an error.
+	Error bool `json:"error" toon:"error"`
+	// Height of the element, in CSS pixels.
+	Height int64 `json:"height" toon:"height"`
+	// Element name; empty when the SDK could not name it.
+	Name string `json:"name" toon:"name"`
+	// CSS selector of the clicked element.
+	Selector string `json:"selector" toon:"selector"`
+	// Width of the element, in CSS pixels.
+	Width int64 `json:"width" toon:"width"`
+	// Horizontal offset inside the element, in CSS pixels.
+	X float64 `json:"x" toon:"x"`
+	// Vertical offset inside the element, in CSS pixels.
+	Y float64 `json:"y" toon:"y"`
+}
+
+// RUMHeatmapClickPointsResult is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapClickPointsResult struct {
+	// Clicks in range that carry no position and are not plotted.
+	ClicksWithoutXy int64 `json:"clicks_without_xy" toon:"clicks_without_xy"`
+	// Clicks in the scope, at most 5000.
+	Points []RUMHeatmapClickPoint `json:"points" toon:"points"`
+	// Earliest positioned click in range, Unix timestamp in milliseconds; 0 when none has position data. It tells how far back the click map reaches.
+	PositionsSince TimestampMilli `json:"positions_since" toon:"positions_since"`
+	// `true` when more clicks existed than were returned.
+	Truncated bool `json:"truncated" toon:"truncated"`
+}
+
+// RUMHeatmapCohort is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapCohort struct {
+	// `true` keeps only the units that reached the next step, `false` only those that dropped.
+	Converted bool `json:"converted,omitempty" toon:"converted,omitempty"`
+	// Funnel whose transition defines the cohort. 2 to 10 steps.
+	Definition RUMFunnelDefinition `json:"definition" toon:"definition"`
+	// Step the transition starts from, 1-based. It must be a step with a following one.
+	FromStep int64 `json:"from_step" toon:"from_step"`
+}
+
+// RUMHeatmapElement is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapElement struct {
+	// Clicks on the element.
+	Clicks int64 `json:"clicks" toon:"clicks"`
+	// Percentage of its clicks that were dead clicks; a high value usually means the element is not clickable. Reported only for elements with at least 100 clicks.
+	DeadPct float64 `json:"dead_pct" toon:"dead_pct"`
+	// Percentage of its clicks followed by an error, a lower bound. Reported only for elements with at least 100 clicks.
+	ErrorPct float64 `json:"error_pct" toon:"error_pct"`
+	// Existing behavior event that matches this element. Omitted when none does.
+	EventID string `json:"event_id" toon:"event_id"`
+	// Name of `event_id`. Omitted together with it.
+	EventName string `json:"event_name" toon:"event_name"`
+	// Percentage of its clicks that were rage or dead clicks. Reported only for elements with at least 100 clicks, `null` otherwise.
+	FrustratedPct float64 `json:"frustrated_pct" toon:"frustrated_pct"`
+	// Element name; empty when the SDK could not name it.
+	Name string `json:"name" toon:"name"`
+	// Distinct selectors merged into this element.
+	SelectorCount int64 `json:"selector_count" toon:"selector_count"`
+	// Up to 10 of those selectors.
+	Selectors []string `json:"selectors" toon:"selectors"`
+	// Sessions (or visitors, when the cohort counts visitors) that clicked it.
+	Units int64 `json:"units" toon:"units"`
+	// Distinct visitors who clicked it.
+	Visitors int64 `json:"visitors" toon:"visitors"`
+}
+
+// RUMHeatmapElementsResult is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapElementsResult struct {
+	// Elements ordered by clicks, descending.
+	Elements []RUMHeatmapElement `json:"elements" toon:"elements"`
+	// Units that viewed the page; an element's `units` divided by it is its click-through rate, comparable between cohorts of different sizes.
+	PageUnits int64 `json:"page_units" toon:"page_units"`
+	// Clicks on the page in the scope.
+	TotalClicks int64 `json:"total_clicks" toon:"total_clicks"`
+}
+
+// RUMHeatmapPage is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapPage struct {
+	// Clicks recorded on the page.
+	Clicks int64 `json:"clicks" toon:"clicks"`
+	// Page path group.
+	Page string `json:"page" toon:"page"`
+	// Page views in the window.
+	Views int64 `json:"views" toon:"views"`
+}
+
+// RUMHeatmapPagesRequest is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapPagesRequest struct {
+	// RUM application ID. The caller needs read access to it.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
+// RUMHeatmapPagesResponse is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapPagesResponse struct {
+	// Up to 50 pages, most viewed first.
+	Items []RUMHeatmapPage `json:"items" toon:"items"`
+}
+
+// RUMHeatmapScrollBand is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapScrollBand struct {
+	// Scroll depth as a percentage of the page height.
+	DepthPct int64 `json:"depth_pct" toon:"depth_pct"`
+	// Percentage of views that reached that depth.
+	ReachPct float64 `json:"reach_pct" toon:"reach_pct"`
+}
+
+// RUMHeatmapScrollResult is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapScrollResult struct {
+	// All views of the page in the scope, for the coverage note.
+	AllViews int64 `json:"all_views" toon:"all_views"`
+	// Average viewport height, in CSS pixels.
+	AvgFoldPx int64 `json:"avg_fold_px" toon:"avg_fold_px"`
+	// Average page height, in CSS pixels.
+	AvgPageHeightPx int64 `json:"avg_page_height_px" toon:"avg_page_height_px"`
+	// Reach per depth band, shallowest first.
+	Bands []RUMHeatmapScrollBand `json:"bands" toon:"bands"`
+	// Views with scroll data.
+	Views int64 `json:"views" toon:"views"`
+}
+
+// RUMHeatmapTargetRequest is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapTargetRequest struct {
+	// RUM application ID. The caller needs read access to it.
+	ApplicationID string `json:"application_id" toon:"application_id"`
+	// Restrict the heatmap to the units of one funnel transition. Omit for all traffic.
+	Cohort RUMHeatmapCohort `json:"cohort,omitzero" toon:"cohort,omitempty"`
+	// End of the window, Unix timestamp in milliseconds. Defaults to now when omitted.
+	EndTime int64 `json:"end_time,omitempty" toon:"end_time,omitempty"`
+	// Exclusive upper bound on the viewport width: views narrower than `max_width` are included. 0 or omitted means no upper bound; it must be greater than `min_width` when both are set.
+	MaxWidth int64 `json:"max_width,omitempty" toon:"max_width,omitempty"`
+	// Smallest viewport width in CSS pixels to include. 0 or omitted means no lower bound.
+	MinWidth int64 `json:"min_width,omitempty" toon:"min_width,omitempty"`
+	// Page path group the heatmap is about, e.g. `/checkout`. Required.
+	Page string `json:"page" toon:"page"`
+	// Start of the window, Unix timestamp in milliseconds. Omit both bounds to use the last 7 days; a range wider than 14 days is rejected.
+	StartTime int64 `json:"start_time,omitempty" toon:"start_time,omitempty"`
+}
+
 // RUMIssueExportRequest is generated from the Flashduty OpenAPI schema.
 type RUMIssueExportRequest struct {
 	ListOptions
@@ -10584,7 +11589,7 @@ type RUMIssueExportRequest struct {
 	ByIntersection bool `json:"by_intersection,omitempty" toon:"by_intersection,omitempty"`
 	// Console origin used to build the `issue_url` column, e.g. `https://console.flashcat.cloud`; a trailing `/` is trimmed. The service cannot infer it. When omitted, `issue_url` holds only the path `/rum/error-tracking/issue/<issue_id>`.
 	ConsoleOrigin string `json:"console_origin,omitempty" toon:"console_origin,omitempty"`
-	// DQL query for advanced filtering. Field names must be fields of the `issue` scope (see `POST /rum/field/list` with `scopes: ["issue"]`); a bare full-text term searches the error message. Cannot be used with `sql`.
+	// DQL query for advanced filtering. Field names must be fields of the `issue` scope (see `POST /rum/field/list` with `scopes: ["issue"]`); a bare full-text term searches the error message. Cannot be used with `sql`. A value list in a filter (`field:(a OR b ...)`) may hold at most 100 values.
 	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
 	// End of the time range, Unix epoch milliseconds. Must be greater than `start_time`; maximum range: 183 days.
 	EndTime int64 `json:"end_time" toon:"end_time"`
@@ -10639,7 +11644,7 @@ type RUMIssueExportRequest struct {
 	// | `error_count` | Error occurrence count |
 	// | `severity` | Severity rank (`Critical` > `Warning` > `Info`) |
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
-	// SQL-style WHERE condition for advanced filtering, without the `WHERE` keyword (for example `error_count > 100`). Field names must be fields of the `issue` scope; any text containing `SELECT` is rejected. Cannot be used with `dql`.
+	// SQL-style WHERE condition for advanced filtering, without the `WHERE` keyword (for example `error_count > 100`). Field names must be fields of the `issue` scope; any text containing `SELECT` is rejected. Cannot be used with `dql`. A value list in a filter (`field IN (...)`) may hold at most 100 values.
 	Sql string `json:"sql,omitempty" toon:"sql,omitempty"`
 	// Start of the time range, Unix timestamp in milliseconds (a value that looks like seconds is rejected). Issues are matched by creation time unless `by_intersection` is `true`.
 	StartTime int64 `json:"start_time" toon:"start_time"`
@@ -10739,7 +11744,7 @@ type RUMIssueListRequest struct {
 	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
 	// When `true`, match by time-range overlap: return issues still active within the window (`last_seen_timestamp` >= `start_time`) even if created before it. Default `false` returns only issues created inside the window.
 	ByIntersection bool `json:"by_intersection,omitempty" toon:"by_intersection,omitempty"`
-	// DQL query for advanced filtering. Field names must be fields of the `issue` scope (see `POST /rum/field/list` with `scopes: ["issue"]`); a bare full-text term searches the error message. Cannot be used with `sql`.
+	// DQL query for advanced filtering. Field names must be fields of the `issue` scope (see `POST /rum/field/list` with `scopes: ["issue"]`); a bare full-text term searches the error message. Cannot be used with `sql`. A value list in a filter (`field:(a OR b ...)`) may hold at most 100 values.
 	Dql string `json:"dql,omitempty" toon:"dql,omitempty"`
 	// End of the time range, Unix epoch milliseconds. Must be greater than `start_time`; maximum range: 183 days.
 	EndTime int64 `json:"end_time" toon:"end_time"`
@@ -10755,7 +11760,7 @@ type RUMIssueListRequest struct {
 	// | `error_count` | Error occurrence count |
 	// | `severity` | Severity rank (`Critical` > `Warning` > `Info`) |
 	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
-	// SQL-style WHERE condition for advanced filtering, without the `WHERE` keyword (for example `error_count > 100`). Field names must be fields of the `issue` scope; any text containing `SELECT` is rejected. Cannot be used with `dql`.
+	// SQL-style WHERE condition for advanced filtering, without the `WHERE` keyword (for example `error_count > 100`). Field names must be fields of the `issue` scope; any text containing `SELECT` is rejected. Cannot be used with `dql`. A value list in a filter (`field IN (...)`) may hold at most 100 values.
 	Sql string `json:"sql,omitempty" toon:"sql,omitempty"`
 	// Start of the time range, Unix timestamp in milliseconds (a value that looks like seconds is rejected). Issues are matched by creation time unless `by_intersection` is `true`.
 	StartTime int64 `json:"start_time" toon:"start_time"`
@@ -11202,6 +12207,8 @@ type RUMSessionReplayMetaItem struct {
 
 // RUMSessionReplayMetaRequest is generated from the Flashduty OpenAPI schema.
 type RUMSessionReplayMetaRequest struct {
+	// Identifies the application the session belongs to. Optional; when set, only that application's session rows are considered, and the caller must be able to read it. Use it when one `session_id` was recorded under several applications.
+	ApplicationID string `json:"application_id,omitempty" toon:"application_id,omitempty"`
 	// RUM session ID (the `session.id` attribute on RUM events).
 	SessionID string `json:"session_id" toon:"session_id"`
 	// Session start time, Unix milliseconds. Optional. When set, it must match the session's start exactly; use it to pick one session when a `session_id` was reused.
@@ -11210,6 +12217,8 @@ type RUMSessionReplayMetaRequest struct {
 
 // RUMSessionReplaySegmentsRequest is generated from the Flashduty OpenAPI schema.
 type RUMSessionReplaySegmentsRequest struct {
+	// Identifies the application the session belongs to. Optional; when set, the call fails unless that application is one of the session's recorded applications, and only its segments are served.
+	ApplicationID string `json:"application_id,omitempty" toon:"application_id,omitempty"`
 	// Maximum number of segments to return. 1-99, default 20.
 	Limit int64 `json:"limit,omitempty" toon:"limit,omitempty"`
 	// Pagination cursor from a previous call. Take it from the `search_after_ctx` field (URL mode) or the `X-Search-After-Ctx` response header (streaming mode).
@@ -11387,13 +12396,13 @@ type ScheduleIDResponse struct {
 
 // ScheduleIDsBodyRequest is generated from the Flashduty OpenAPI schema.
 type ScheduleIDsBodyRequest struct {
-	// Schedule IDs to operate on; obtain them from `POST /schedule/list`.
+	// Schedule IDs to operate on; obtain them from `POST /schedule/list`. At most 100 items per request; split larger sets into several calls. Duplicates are ignored.
 	ScheduleIDs []int64 `json:"schedule_ids" toon:"schedule_ids"`
 }
 
 // ScheduleIDsRequest is generated from the Flashduty OpenAPI schema.
 type ScheduleIDsRequest struct {
-	// Schedule ID list; obtain IDs from `POST /schedule/list`.
+	// Schedule ID list; obtain IDs from `POST /schedule/list`. At most 100 items per request; split larger sets into several calls. Duplicates are ignored.
 	ScheduleIDs []int64 `json:"schedule_ids" toon:"schedule_ids"`
 }
 
@@ -11671,7 +12680,7 @@ type ScheduleUpsertRequest struct {
 	Disabled *int64 `json:"disabled,omitempty" toon:"disabled,omitempty"`
 	// Preview window end, 10-digit Unix seconds, after `start` and at most 45 days later. Required for `/schedule/preview`; ignored by create and update.
 	End int64 `json:"end,omitempty" toon:"end,omitempty"`
-	// Rotation layers. Required in practice: on update the list replaces all existing layers, so omitting it deletes every layer.
+	// Rotation layers. Required in practice: on update the list replaces all existing layers, so omitting it deletes every layer. At most 1000 items per request; split larger sets into several calls.
 	Layers []ScheduleLayer `json:"layers,omitempty" toon:"layers,omitempty"`
 	// Legacy name field, used on create only when `schedule_name` is empty. Ignored on update.
 	Name *string `json:"name,omitempty" toon:"name,omitempty"`
@@ -12832,6 +13841,8 @@ type TemplateCreateRequest struct {
 	TeamID int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	// Microsoft Teams app message template source.
 	TeamsApp string `json:"teams_app,omitempty" toon:"teams_app,omitempty"`
+	// Whether Microsoft Teams app cards sent with this template carry the Create War Room button. Defaults to `false`.
+	TeamsAppWarRoomEnabled bool `json:"teams_app_war_room_enabled,omitempty" toon:"teams_app_war_room_enabled,omitempty"`
 	// Telegram bot message template source.
 	Telegram string `json:"telegram,omitempty" toon:"telegram,omitempty"`
 	// Template name, 1–39 characters, unique among the account's non-deleted templates and different from the built-in preset template's name in every supported language.
@@ -12846,6 +13857,10 @@ type TemplateCreateRequest struct {
 	WecomMarkdownV2Enabled bool `json:"wecom_markdown_v2_enabled,omitempty" toon:"wecom_markdown_v2_enabled,omitempty"`
 	// Zoom bot message template source.
 	Zoom string `json:"zoom,omitempty" toon:"zoom,omitempty"`
+	// Zoom app message template source.
+	ZoomApp string `json:"zoom_app,omitempty" toon:"zoom_app,omitempty"`
+	// Whether Zoom app cards sent with this template carry the Create War Room button. Defaults to `false`.
+	ZoomAppWarRoomEnabled bool `json:"zoom_app_war_room_enabled,omitempty" toon:"zoom_app_war_room_enabled,omitempty"`
 }
 
 // TemplateCreateResponse is generated from the Flashduty OpenAPI schema.
@@ -12913,6 +13928,8 @@ type TemplateItem struct {
 	TeamID int64 `json:"team_id" toon:"team_id"`
 	// Microsoft Teams app message template source.
 	TeamsApp string `json:"teams_app" toon:"teams_app"`
+	// Whether Microsoft Teams app cards show the Create War Room button. Hidden for closed incidents and when the incident has no responders.
+	TeamsAppWarRoomEnabled bool `json:"teams_app_war_room_enabled" toon:"teams_app_war_room_enabled"`
 	// Telegram bot message template source.
 	Telegram string `json:"telegram" toon:"telegram"`
 	// Template ID (24-character hex). The built-in preset template always has the ID `6321aad26c12104586a88916`.
@@ -12933,6 +13950,10 @@ type TemplateItem struct {
 	WecomMarkdownV2Enabled bool `json:"wecom_markdown_v2_enabled" toon:"wecom_markdown_v2_enabled"`
 	// Zoom bot message template source.
 	Zoom string `json:"zoom" toon:"zoom"`
+	// Zoom app message template source.
+	ZoomApp string `json:"zoom_app" toon:"zoom_app"`
+	// Whether Zoom app cards show the Create War Room button. Hidden for closed incidents and when the incident has no responders.
+	ZoomAppWarRoomEnabled bool `json:"zoom_app_war_room_enabled" toon:"zoom_app_war_room_enabled"`
 }
 
 // TemplateListRequest is generated from the Flashduty OpenAPI schema.
@@ -13000,6 +14021,8 @@ type TemplateUpdateRequest struct {
 	TeamID *int64 `json:"team_id,omitempty" toon:"team_id,omitempty"`
 	// Microsoft Teams app message template source. Omit to keep the current content; send an empty string to clear it.
 	TeamsApp *string `json:"teams_app,omitempty" toon:"teams_app,omitempty"`
+	// When set, show or hide the Create War Room button on Microsoft Teams app cards. Omit to keep the existing setting.
+	TeamsAppWarRoomEnabled *bool `json:"teams_app_war_room_enabled,omitempty" toon:"teams_app_war_room_enabled,omitempty"`
 	// Telegram bot message template source. Omit to keep the current content; send an empty string to clear it.
 	Telegram *string `json:"telegram,omitempty" toon:"telegram,omitempty"`
 	// Target template ID; obtain it from `POST /template/list`.
@@ -13016,6 +14039,10 @@ type TemplateUpdateRequest struct {
 	WecomMarkdownV2Enabled *bool `json:"wecom_markdown_v2_enabled,omitempty" toon:"wecom_markdown_v2_enabled,omitempty"`
 	// Zoom bot message template source. Omit to keep the current content; send an empty string to clear it.
 	Zoom *string `json:"zoom,omitempty" toon:"zoom,omitempty"`
+	// Zoom app message template source. Omit to keep the current content; send an empty string to clear it.
+	ZoomApp *string `json:"zoom_app,omitempty" toon:"zoom_app,omitempty"`
+	// When set, show or hide the Create War Room button on Zoom app cards. Omit to keep the existing setting.
+	ZoomAppWarRoomEnabled *bool `json:"zoom_app_war_room_enabled,omitempty" toon:"zoom_app_war_room_enabled,omitempty"`
 }
 
 // TimeFilter is generated from the Flashduty OpenAPI schema.
@@ -13304,7 +14331,7 @@ type UpdateStatusPageChangeTimelineRequest struct {
 type UpdateStatusPageRequest struct {
 	// Get-in-touch contact, such as a mailto or website URL. Omit or pass null to keep the existing value.
 	ContactInfo *string `json:"contact_info,omitempty" toon:"contact_info,omitempty"`
-	// Custom domain for a public status page; must not be used by another status page. Rejected for internal pages. Omit or pass null to keep the existing value; an empty string removes the domain.
+	// Custom domain for a public status page; must not be used by another status page. Rejected for internal pages. Omit or pass null to keep the existing value; an empty string removes the domain. A new domain must be a valid public hostname (at least two labels, no IP literal); platform-owned domains such as `flashcat.cloud` and `flashduty.com` themselves are rejected.
 	CustomDomain *string `json:"custom_domain,omitempty" toon:"custom_domain,omitempty"`
 	// Custom navigation links shown on the status page. Omit or pass an empty array to keep the current links.
 	CustomLinks []map[string]string `json:"custom_links,omitempty" toon:"custom_links,omitempty"`
@@ -14154,6 +15181,22 @@ type RuleConfigsRelateQueriesItem struct {
 	Expr string `json:"expr" toon:"expr"`
 	// Relate-query identifier.
 	Name string `json:"name" toon:"name"`
+}
+
+// RUMHeatmapBackgroundResponseBackground is generated from the Flashduty OpenAPI schema.
+type RUMHeatmapBackgroundResponseBackground struct {
+	// Moment to render, Unix timestamp in milliseconds.
+	FrameTime TimestampMilli `json:"frame_time" toon:"frame_time"`
+	// RUM session ID of the snapshot.
+	SessionID string `json:"session_id" toon:"session_id"`
+	// Start of the snapshot segment, Unix timestamp in milliseconds.
+	StartTime TimestampMilli `json:"start_time" toon:"start_time"`
+	// ID of the view the snapshot belongs to.
+	ViewID string `json:"view_id" toon:"view_id"`
+	// Viewport height of the frame, in CSS pixels.
+	ViewportHeight int64 `json:"viewport_height" toon:"viewport_height"`
+	// Viewport width of the frame, in CSS pixels.
+	ViewportWidth int64 `json:"viewport_width" toon:"viewport_width"`
 }
 
 // RUMIssueItemError is generated from the Flashduty OpenAPI schema.
