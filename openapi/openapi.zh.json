@@ -6577,7 +6577,7 @@
           },
           "subscription": {
             "$ref": "#/components/schemas/StatusPageSubscriptionItem",
-            "description": "订阅渠道开关，默认均为 `false`。公开页只能开启 `email`，内部页只能开启 `im`。"
+            "description": "订阅渠道开关，默认均为 `false`。公开页可开启 `email`、`slack`、`teams`，内部页仅可开启 `im`。"
           }
         },
         "required": [
@@ -9802,6 +9802,16 @@
             },
             "type": "array"
           },
+          "method": {
+            "description": "可选：按订阅渠道过滤。公开页支持 `email`、`slack` 或 `teams`；留空则导出公开页全部渠道订阅者。",
+            "enum": [
+              "email",
+              "im",
+              "slack",
+              "teams"
+            ],
+            "type": "string"
+          },
           "page_id": {
             "description": "状态页 ID，可通过 `GET /status-page/list` 获取。",
             "format": "int64",
@@ -9825,15 +9835,21 @@
         "properties": {
           "recipient": {
             "type": "string",
-            "description": "订阅接收方：公开状态页为邮箱地址，内部状态页为用户 ID。"
+            "description": "订阅接收方：邮件为邮箱地址，Slack/Teams 为脱敏后的频道工作区或 Webhook 域名，内部状态页为用户 ID。"
           },
           "method": {
             "type": "string",
             "enum": [
               "email",
-              "im"
+              "im",
+              "slack",
+              "teams"
             ],
-            "description": "订阅通知方式。`email` 为邮件订阅（公开状态页）；`im` 为 IM 即时消息订阅（内部状态页）。取值由状态页类型决定。"
+            "description": "订阅通知方式（公开页为 `email`、`slack`、`teams`；内部页为 `im`）。"
+          },
+          "display_meta": {
+            "$ref": "#/components/schemas/StatusPageSubscriberDisplayMeta",
+            "description": "Slack 与 Teams 频道订阅者的非敏感展示元数据。"
           },
           "components": {
             "type": "array",
@@ -11588,7 +11604,7 @@
       },
       "ImportStatusPageSubscribersRequest": {
         "type": "object",
-        "description": "批量导入订阅者所需的参数。每个订阅者的 `recipient` 非空且不超过 255 字符；并且至少订阅一个组件/事件，或将 `all` 置为 true。",
+        "description": "批量导入订阅者所需的参数。每个订阅者的 `recipient` 非空（不超过 255 字符；Teams Webhook URL 不超过 2048 字符），并且至少订阅一个组件/事件，或将 `all` 置为 true。",
         "required": [
           "page_id",
           "method"
@@ -11603,9 +11619,10 @@
             "type": "string",
             "enum": [
               "email",
-              "im"
+              "im",
+              "teams"
             ],
-            "description": "订阅通知方式。`email` 仅适用于公开状态页，`im` 仅适用于内部状态页。"
+            "description": "订阅通知方式。公开状态页支持 `email` 与 `teams`（Microsoft Teams Workflows Webhook URL），内部状态页支持 `im`。"
           },
           "subscribers": {
             "type": "array",
@@ -27177,6 +27194,40 @@
         ],
         "type": "object"
       },
+      "StatusPageSubscriberDisplayMeta": {
+        "type": "object",
+        "description": "公开状态页 Slack 或 Teams 频道订阅者的非敏感展示元数据。",
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "description": "Slack 工作区 ID。"
+          },
+          "team_name": {
+            "type": "string",
+            "description": "Slack 工作区名称。"
+          },
+          "channel_id": {
+            "type": "string",
+            "description": "Slack 频道 ID。"
+          },
+          "channel_name": {
+            "type": "string",
+            "description": "Slack 频道名称。"
+          },
+          "webhook_host": {
+            "type": "string",
+            "description": "Microsoft Teams Workflows Webhook 主机名。"
+          },
+          "webhook_tail": {
+            "type": "string",
+            "description": "用于区分同一主机下不同 Teams Webhook 的非敏感短标识。"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Webhook 提供方标识（如 `power_automate`、`power_platform`）。"
+          }
+        }
+      },
       "StatusPageSubscriberExportResponse": {
         "description": "CSV 文件（Content-Type: text/csv; charset=utf-8），包含列：Method、Recipient、Components、Subscribe All、Locale。",
         "format": "binary",
@@ -27217,6 +27268,14 @@
           },
           "im": {
             "description": "是否开启 IM 订阅。",
+            "type": "boolean"
+          },
+          "slack": {
+            "description": "是否开启 Slack 频道订阅（仅公开状态页）。",
+            "type": "boolean"
+          },
+          "teams": {
+            "description": "是否开启 Microsoft Teams Workflows 频道订阅（仅公开状态页）。",
             "type": "boolean"
           }
         },
@@ -29156,7 +29215,7 @@
           },
           "subscription": {
             "$ref": "#/components/schemas/StatusPageSubscriptionItem",
-            "description": "订阅渠道开关。公开页只能开启 `email`，内部页只能开启 `im`。省略或传 null 时保持不变。"
+            "description": "订阅渠道开关。公开页可开启 `email`、`slack`、`teams`，内部页仅可开启 `im`。省略或传 null 时保持不变。"
           },
           "template_preference": {
             "type": [
@@ -69971,12 +70030,12 @@
       "post": {
         "operationId": "statusPageMigrateEmailSubscribers",
         "summary": "迁移邮件订阅者",
-        "description": "启动迁移任务，从 Atlassian Statuspage 将邮件订阅者导入到已有的 Flashduty 状态页。",
+        "description": "启动迁移任务，从 Atlassian Statuspage 将邮件订阅者（并尽力迁移新版 Microsoft Teams Workflows 频道订阅者）导入到已有的 Flashduty 状态页。",
         "tags": [
           "On-call/状态页"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **30 次/分钟**；**2 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 需要 On-call 专业版套餐，否则返回 `AccessDenied`。\n- 异步执行并返回 `job_id`，请轮询 `GET /status-page/migration/status`。每个账户同一时间只能运行一个迁移任务。\n- 请在对同一源页面执行 `POST /status-page/migrate-structure` 之后调用：组件订阅会映射到结构迁移创建的组件，无法映射的订阅者改为订阅全部组件。\n- 非邮件、已隔离或无邮箱地址的订阅者会被跳过并计入 `progress.subscribers_skipped`；目标页上已存在的接收人保持不变。\n- 每次调用都会记录到账户审计日志，请勿在请求字段中写入敏感信息。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **30 次/分钟**；**2 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 需要 On-call 专业版套餐，否则返回 `AccessDenied`。\n- 异步执行并返回 `job_id`，请轮询 `GET /status-page/migration/status`。每个账户同一时间只能运行一个迁移任务。\n- 请在对同一源页面执行 `POST /status-page/migrate-structure` 之后调用：组件订阅会映射到结构迁移创建的组件，无法映射的订阅者改为订阅全部组件。\n- 新版 Microsoft Teams Workflows Webhook 订阅者（`*.logic.azure.com` / `*.api.powerplatform.com`）将尽力自动迁移并开启目标页 `teams` 订阅开关；已退市的旧版 Office 365 Connectors（`*.webhook.office.com`）及 Atlassian API 不导出的 Slack 订阅者会被跳过并在 `progress.warnings` 中汇总提示。\n- 其余非邮件、已隔离或无接收地址的订阅者会被跳过并计入 `progress.subscribers_skipped`；目标页上已存在的接收人保持不变。\n- 每次调用都会记录到账户审计日志，请勿在请求字段中写入敏感信息。",
           "href": "/zh/api-reference/on-call/status-pages/status-page-migrate-email-subscribers",
           "metadata": {
             "sidebarTitle": "迁移邮件订阅者"
@@ -70687,6 +70746,21 @@
               "type": "string"
             },
             "description": "用于筛选订阅者的组件 ID，多个以英文逗号分隔。"
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "email",
+                "im",
+                "slack",
+                "teams"
+              ]
+            },
+            "description": "可选：按订阅渠道过滤（公开页支持 `email`、`slack`、`teams`；内部页为 `im`）。公开页留空则返回全部公开渠道订阅者。"
           },
           {
             "name": "p",

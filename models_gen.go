@@ -2753,7 +2753,7 @@ type CreateStatusPageRequest struct {
 	PageHeader string `json:"page_header,omitempty" toon:"page_header,omitempty"`
 	// Accepted for compatibility but not stored; it has no effect.
 	PageTitle string `json:"page_title,omitempty" toon:"page_title,omitempty"`
-	// Subscription channel toggles; both default to `false`. A public page can enable only `email` and an internal page only `im`.
+	// Subscription channel toggles; all default to `false`. A public page may enable `email`, `slack`, and `teams`, while an internal page may enable only `im`.
 	Subscription StatusPageSubscriptionItem `json:"subscription,omitzero" toon:"subscription,omitempty"`
 	// Visibility type: `public` accessible to anyone, `internal` restricted to logged-in members of this account.
 	Type string `json:"type" toon:"type"`
@@ -4992,6 +4992,8 @@ type ExploreSample struct {
 type ExportStatusPageSubscribersRequest struct {
 	// Optional component IDs to filter subscribers by.
 	ComponentIDs []string `json:"component_ids,omitempty" toon:"component_ids,omitempty"`
+	// Optional subscription method filter. Public pages support `email`, `slack`, or `teams`; omitted exports all public channels.
+	Method string `json:"method,omitempty" toon:"method,omitempty"`
 	// Status page ID; obtain it from `GET /status-page/list`.
 	PageID int64 `json:"page_id" toon:"page_id"`
 }
@@ -5002,11 +5004,13 @@ type ExportedStatusPageSubscriberItem struct {
 	All bool `json:"all" toon:"all"`
 	// Components the subscriber follows; each item carries only `component_id` and `name`. Empty when `all` is `true`.
 	Components []StatusPageComponentItem `json:"components" toon:"components"`
+	// Non-sensitive channel display metadata returned for Slack and Teams subscribers.
+	DisplayMeta StatusPageSubscriberDisplayMeta `json:"display_meta" toon:"display_meta"`
 	// Preferred locale for notifications. Omitted when empty.
 	Locale string `json:"locale" toon:"locale"`
-	// Subscription notification method. `email` is email subscription (public pages); `im` is IM subscription (internal pages). Determined by the page type.
+	// Subscription notification method (`email`, `slack`, `teams` for public pages; `im` for internal pages).
 	Method string `json:"method" toon:"method"`
-	// Subscriber recipient: email address for public pages, user ID for internal pages.
+	// Subscriber recipient: email address for email, redacted channel workspace or webhook host for Slack/Teams, or user ID for internal pages.
 	Recipient string `json:"recipient" toon:"recipient"`
 }
 
@@ -5792,7 +5796,7 @@ type ImportStatusPageSubscriberItem struct {
 
 // ImportStatusPageSubscribersRequest is generated from the Flashduty OpenAPI schema.
 type ImportStatusPageSubscribersRequest struct {
-	// Subscription method. `email` is only valid for public pages; `im` is only valid for internal pages.
+	// Subscription method. `email` and `teams` (Microsoft Teams Workflows webhook URLs) apply to public pages; `im` applies to internal pages.
 	Method string `json:"method" toon:"method"`
 	// Target status page ID; obtain it from `GET /status-page/list`.
 	PageID int64 `json:"page_id" toon:"page_id"`
@@ -12644,6 +12648,24 @@ type StatusPageSectionItem struct {
 	SectionID string `json:"section_id" toon:"section_id"`
 }
 
+// StatusPageSubscriberDisplayMeta is generated from the Flashduty OpenAPI schema.
+type StatusPageSubscriberDisplayMeta struct {
+	// Slack channel ID.
+	ChannelID string `json:"channel_id" toon:"channel_id"`
+	// Slack channel name.
+	ChannelName string `json:"channel_name" toon:"channel_name"`
+	// Webhook provider identifier (e.g. `power_automate`, `power_platform`).
+	Provider string `json:"provider" toon:"provider"`
+	// Slack workspace ID.
+	TeamID string `json:"team_id" toon:"team_id"`
+	// Slack workspace name.
+	TeamName string `json:"team_name" toon:"team_name"`
+	// Microsoft Teams Workflows webhook hostname.
+	WebhookHost string `json:"webhook_host" toon:"webhook_host"`
+	// Short non-secret identifier for distinguishing Teams webhooks on the same host.
+	WebhookTail string `json:"webhook_tail" toon:"webhook_tail"`
+}
+
 // StatusPageSubscriberListResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageSubscriberListResponse struct {
 	// Whether there is at least one more page after the current one.
@@ -12660,6 +12682,10 @@ type StatusPageSubscriptionItem struct {
 	Email bool `json:"email" toon:"email"`
 	// Whether IM subscription is enabled.
 	Im bool `json:"im" toon:"im"`
+	// Whether Slack channel subscription is enabled (public pages only).
+	Slack bool `json:"slack,omitempty" toon:"slack,omitempty"`
+	// Whether Microsoft Teams Workflows subscription is enabled (public pages only).
+	Teams bool `json:"teams,omitempty" toon:"teams,omitempty"`
 }
 
 // StringMapPatch is generated from the Flashduty OpenAPI schema.
@@ -13330,7 +13356,7 @@ type UpdateStatusPageRequest struct {
 	PageID int64 `json:"page_id" toon:"page_id"`
 	// Accepted for compatibility but not stored; it has no effect.
 	PageTitle *string `json:"page_title,omitempty" toon:"page_title,omitempty"`
-	// Subscription channel toggles. A public page can enable only `email` and an internal page only `im`. Omit or pass null to keep the existing value.
+	// Subscription channel toggles. A public page may enable `email`, `slack`, and `teams`, while an internal page may enable only `im`. Omit or pass null to keep the existing value.
 	Subscription StatusPageSubscriptionItem `json:"subscription,omitzero" toon:"subscription,omitempty"`
 	// Event template mode used when publishing events in the console: `message` (status descriptions: per-status texts) or `pre_defined` (full status updates: complete examples with title, status, and description). Omit or pass null to keep the current value; the value is not validated.
 	TemplatePreference *string `json:"template_preference,omitempty" toon:"template_preference,omitempty"`
@@ -14449,6 +14475,8 @@ type StatusPagesSubscriberListRequest struct {
 	PageID int64 `url:"page_id"`
 	// Comma-separated component IDs to filter subscribers by.
 	ComponentIDs string `url:"component_ids,omitempty"`
+	// Optional subscription method filter (`email`, `slack`, `teams` for public pages; `im` for internal pages). Omit on public pages to return all public subscribers.
+	Method string `url:"method,omitempty"`
 	// Page number (1-based).
 	P int64 `url:"p,omitempty"`
 	// Page size (1-100).

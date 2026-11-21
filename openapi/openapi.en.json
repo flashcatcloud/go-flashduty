@@ -6577,7 +6577,7 @@
           },
           "subscription": {
             "$ref": "#/components/schemas/StatusPageSubscriptionItem",
-            "description": "Subscription channel toggles; both default to `false`. A public page can enable only `email` and an internal page only `im`."
+            "description": "Subscription channel toggles; all default to `false`. A public page may enable `email`, `slack`, and `teams`, while an internal page may enable only `im`."
           }
         },
         "required": [
@@ -9802,6 +9802,16 @@
             },
             "type": "array"
           },
+          "method": {
+            "description": "Optional subscription method filter. Public pages support `email`, `slack`, or `teams`; omitted exports all public channels.",
+            "enum": [
+              "email",
+              "im",
+              "slack",
+              "teams"
+            ],
+            "type": "string"
+          },
           "page_id": {
             "description": "Status page ID; obtain it from `GET /status-page/list`.",
             "format": "int64",
@@ -9825,15 +9835,21 @@
         "properties": {
           "recipient": {
             "type": "string",
-            "description": "Subscriber recipient: email address for public pages, user ID for internal pages."
+            "description": "Subscriber recipient: email address for email, redacted channel workspace or webhook host for Slack/Teams, or user ID for internal pages."
           },
           "method": {
             "type": "string",
             "enum": [
               "email",
-              "im"
+              "im",
+              "slack",
+              "teams"
             ],
-            "description": "Subscription notification method. `email` is email subscription (public pages); `im` is IM subscription (internal pages). Determined by the page type."
+            "description": "Subscription notification method (`email`, `slack`, `teams` for public pages; `im` for internal pages)."
+          },
+          "display_meta": {
+            "$ref": "#/components/schemas/StatusPageSubscriberDisplayMeta",
+            "description": "Non-sensitive channel display metadata returned for Slack and Teams subscribers."
           },
           "components": {
             "type": "array",
@@ -11588,7 +11604,7 @@
       },
       "ImportStatusPageSubscribersRequest": {
         "type": "object",
-        "description": "Parameters for bulk-importing subscribers. Each subscriber must have a non-empty `recipient` (≤255 chars) and subscribe to at least one component, change, or set `all: true`.",
+        "description": "Parameters for bulk-importing subscribers. Each subscriber must have a non-empty `recipient` (≤255 chars, or ≤2048 chars for Teams webhook URLs) and subscribe to at least one component, change, or set `all: true`.",
         "required": [
           "page_id",
           "method"
@@ -11603,9 +11619,10 @@
             "type": "string",
             "enum": [
               "email",
-              "im"
+              "im",
+              "teams"
             ],
-            "description": "Subscription method. `email` is only valid for public pages; `im` is only valid for internal pages."
+            "description": "Subscription method. `email` and `teams` (Microsoft Teams Workflows webhook URLs) apply to public pages; `im` applies to internal pages."
           },
           "subscribers": {
             "type": "array",
@@ -27177,6 +27194,40 @@
         ],
         "type": "object"
       },
+      "StatusPageSubscriberDisplayMeta": {
+        "type": "object",
+        "description": "Non-sensitive display metadata for a public Slack or Teams channel subscriber.",
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "description": "Slack workspace ID."
+          },
+          "team_name": {
+            "type": "string",
+            "description": "Slack workspace name."
+          },
+          "channel_id": {
+            "type": "string",
+            "description": "Slack channel ID."
+          },
+          "channel_name": {
+            "type": "string",
+            "description": "Slack channel name."
+          },
+          "webhook_host": {
+            "type": "string",
+            "description": "Microsoft Teams Workflows webhook hostname."
+          },
+          "webhook_tail": {
+            "type": "string",
+            "description": "Short non-secret identifier for distinguishing Teams webhooks on the same host."
+          },
+          "provider": {
+            "type": "string",
+            "description": "Webhook provider identifier (e.g. `power_automate`, `power_platform`)."
+          }
+        }
+      },
       "StatusPageSubscriberExportResponse": {
         "description": "A CSV file (Content-Type: text/csv; charset=utf-8) containing columns: Method, Recipient, Components, Subscribe All, Locale.",
         "format": "binary",
@@ -27217,6 +27268,14 @@
           },
           "im": {
             "description": "Whether IM subscription is enabled.",
+            "type": "boolean"
+          },
+          "slack": {
+            "description": "Whether Slack channel subscription is enabled (public pages only).",
+            "type": "boolean"
+          },
+          "teams": {
+            "description": "Whether Microsoft Teams Workflows subscription is enabled (public pages only).",
             "type": "boolean"
           }
         },
@@ -29156,7 +29215,7 @@
           },
           "subscription": {
             "$ref": "#/components/schemas/StatusPageSubscriptionItem",
-            "description": "Subscription channel toggles. A public page can enable only `email` and an internal page only `im`. Omit or pass null to keep the existing value."
+            "description": "Subscription channel toggles. A public page may enable `email`, `slack`, and `teams`, while an internal page may enable only `im`. Omit or pass null to keep the existing value."
           },
           "template_preference": {
             "type": [
@@ -69971,12 +70030,12 @@
       "post": {
         "operationId": "statusPageMigrateEmailSubscribers",
         "summary": "Migrate email subscribers",
-        "description": "Start a migration job that imports email subscribers from an Atlassian Statuspage into an existing Flashduty status page.",
+        "description": "Start a migration job that imports email subscribers (and best-effort Microsoft Teams Workflows channel subscribers) from an Atlassian Statuspage into an existing Flashduty status page.",
         "tags": [
           "On-call/Status pages"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **30 requests/minute**; **2 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Requires the On-call Professional plan; other accounts get `AccessDenied`.\n- Runs asynchronously and returns `job_id`; poll `GET /status-page/migration/status`. Only one migration job per account can run at a time.\n- Run it after `POST /status-page/migrate-structure` for the same source page: component subscriptions are mapped to the components that migration created, and a subscriber whose components cannot be mapped is subscribed to all components.\n- Non-email, quarantined, and address-less subscribers are skipped and counted in `progress.subscribers_skipped`; recipients already subscribed on the target page are left unchanged.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **30 requests/minute**; **2 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Requires the On-call Professional plan; other accounts get `AccessDenied`.\n- Runs asynchronously and returns `job_id`; poll `GET /status-page/migration/status`. Only one migration job per account can run at a time.\n- Run it after `POST /status-page/migrate-structure` for the same source page: component subscriptions are mapped to the components that migration created, and a subscriber whose components cannot be mapped is subscribed to all components.\n- Modern Microsoft Teams Workflows webhook subscribers (`*.logic.azure.com` / `*.api.powerplatform.com`) are migrated best-effort and auto-enable `teams` on the target page. Retired Office 365 Connectors (`*.webhook.office.com`) and Slack subscribers (whose webhook tokens are not exported by Atlassian API) are skipped with summary entries in `progress.warnings`.\n- Other non-email, quarantined, and address-less subscribers are skipped and counted in `progress.subscribers_skipped`; recipients already subscribed on the target page are left unchanged.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
           "href": "/en/api-reference/on-call/status-pages/status-page-migrate-email-subscribers",
           "metadata": {
             "sidebarTitle": "Migrate email subscribers"
@@ -70687,6 +70746,21 @@
               "type": "string"
             },
             "description": "Comma-separated component IDs to filter subscribers by."
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "email",
+                "im",
+                "slack",
+                "teams"
+              ]
+            },
+            "description": "Optional subscription method filter (`email`, `slack`, `teams` for public pages; `im` for internal pages). Omit on public pages to return all public subscribers."
           },
           {
             "name": "p",
