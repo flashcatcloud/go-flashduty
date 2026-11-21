@@ -9,12 +9,12 @@ type RuleFoldersService service
 
 // Get monitor folder health.
 //
-// Get issue flags for the visible monitor folders, including issues in their descendants.
+// Get issue flags for the monitor folders in the requested scope, including issues in their descendants.
 //
 // API: POST /monit/folder/health (monit-folder-read-health).
-func (s *RuleFoldersService) ReadHealth(ctx context.Context) (*FolderHealthOutput, *Response, error) {
+func (s *RuleFoldersService) ReadHealth(ctx context.Context, req *FolderScopeRequest) (*FolderHealthOutput, *Response, error) {
 	out := new(FolderHealthOutput)
-	resp, err := s.client.do(ctx, "/monit/folder/health", nil, out)
+	resp, err := s.client.do(ctx, "/monit/folder/health", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -23,12 +23,12 @@ func (s *RuleFoldersService) ReadHealth(ctx context.Context) (*FolderHealthOutpu
 
 // List monitor folders.
 //
-// List every monitor folder the caller can read.
+// List the monitor folders in the requested scope.
 //
 // API: POST /monit/folder/list (monit-folder-read-list).
-func (s *RuleFoldersService) ReadList(ctx context.Context) (*[]FolderItem, *Response, error) {
-	out := new([]FolderItem)
-	resp, err := s.client.do(ctx, "/monit/folder/list", nil, out)
+func (s *RuleFoldersService) ReadList(ctx context.Context, req *FolderScopeRequest) (*[]FolderListItem, *Response, error) {
+	out := new([]FolderListItem)
+	resp, err := s.client.do(ctx, "/monit/folder/list", req, out)
 	if err != nil {
 		return nil, resp, err
 	}
