@@ -7,6 +7,17 @@ import "context"
 // SkillsService handles the "AI SRE/Skills" API resource.
 type SkillsService service
 
+// Download skill package.
+//
+// Download one skill as a zip archive.
+//
+// The success body is a file, not a JSON envelope: it is returned on Response.Raw.
+//
+// API: POST /safari/skill/download (skill-read-download).
+func (s *SkillsService) ReadDownload(ctx context.Context, req *SkillGetRequest) (*Response, error) {
+	return s.client.do(ctx, "/safari/skill/download", req, nil)
+}
+
 // Enable skill.
 //
 // Enable a disabled skill so the agent can load it.
