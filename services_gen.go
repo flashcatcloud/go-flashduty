@@ -13,6 +13,7 @@ type genServices struct {
 	Automations              *AutomationsService
 	Knowledge                *KnowledgeService
 	McpServers               *McpServersService
+	Runners                  *RunnersService
 	Sessions                 *SessionsService
 	Skills                   *SkillsService
 	AlertRules               *AlertRulesService
@@ -59,6 +60,7 @@ func (c *Client) initServices() {
 	c.Automations = (*AutomationsService)(&c.common)
 	c.Knowledge = (*KnowledgeService)(&c.common)
 	c.McpServers = (*McpServersService)(&c.common)
+	c.Runners = (*RunnersService)(&c.common)
 	c.Sessions = (*SessionsService)(&c.common)
 	c.Skills = (*SkillsService)(&c.common)
 	c.AlertRules = (*AlertRulesService)(&c.common)

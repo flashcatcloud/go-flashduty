@@ -37680,6 +37680,167 @@
             "description": "Replacement type-specific configuration. Omitted or null keeps it; masked or omitted secret fields retain their stored value."
           }
         }
+      },
+      "SelfHostedEnvironmentListRequest": {
+        "type": "object",
+        "description": "Filter and pagination for the self-hosted Runner list.",
+        "properties": {
+          "p": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Page number, starting from 1."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Page size. Defaults to 20 once pagination is in effect."
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "account",
+              "team"
+            ],
+            "description": "`all` account-scope and team Runners; `account` account-scope only; `team` team Runners only. Overrides `include_account`."
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Substring filter over name, ID, labels, status, version, OS, architecture, hostname and IP address. Up to 128 characters."
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Restrict team Runners to these teams; IDs of teams the caller does not belong to are ignored."
+          },
+          "include_account": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to include account-scope Runners (`team_id` = 0). Defaults to `true`; ignored when `scope` is set."
+          },
+          "orderby": {
+            "type": "string",
+            "enum": [
+              "name",
+              "created_at"
+            ],
+            "description": "Sort column: `name` or `created_at`. Empty keeps the default order (`created_at` descending) and ignores `asc`."
+          },
+          "asc": {
+            "type": "boolean",
+            "default": false,
+            "description": "Sort ascending when `orderby` is set."
+          }
+        }
+      },
+      "SelfHostedEnvironmentListResponse": {
+        "type": "object",
+        "description": "A page of self-hosted Runners.",
+        "required": [
+          "environments",
+          "total",
+          "latest_version"
+        ],
+        "properties": {
+          "environments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelfHostedEnvironmentItem"
+            },
+            "description": "Runners on this page."
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of Runners matching the filter."
+          },
+          "latest_version": {
+            "type": "string",
+            "description": "Latest Runner version offered by the platform; compare it with each item's `version` to find Runners that need an upgrade."
+          }
+        }
+      },
+      "SelfHostedEnvironmentItem": {
+        "type": "object",
+        "description": "A self-hosted Runner.",
+        "required": [
+          "environment_id",
+          "name",
+          "labels",
+          "status",
+          "team_id",
+          "can_edit",
+          "created_at"
+        ],
+        "properties": {
+          "environment_id": {
+            "type": "string",
+            "description": "Runner ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "Runner name."
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Labels set on the Runner; empty array when none."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "online",
+              "offline",
+              "degraded"
+            ],
+            "description": "Live status: `pending` created but never connected; `online` connected; `offline` was connected, now disconnected; `degraded` connected but the executor is unhealthy."
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Owning team ID; 0 for an account-scope Runner."
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "`true` when the caller can manage this Runner."
+          },
+          "version": {
+            "type": "string",
+            "description": "Runner version reported on its last connection; omitted before the first connection."
+          },
+          "os": {
+            "type": "string",
+            "description": "Operating system reported by the Runner, such as `linux` or `darwin`."
+          },
+          "arch": {
+            "type": "string",
+            "description": "CPU architecture reported by the Runner, such as `amd64` or `arm64`."
+          },
+          "hostname": {
+            "type": "string",
+            "description": "Hostname of the machine the Runner runs on."
+          },
+          "ip_address": {
+            "type": "string",
+            "description": "IP address the Runner last connected from."
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Creation time in Unix epoch milliseconds."
+          },
+          "vcs_credentials_disabled": {
+            "type": "boolean",
+            "description": "`true` when GitHub/GitLab tokens are not injected into commands on this Runner; omitted otherwise."
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -77948,6 +78109,109 @@
           }
         }
       }
+    },
+    "/safari/environment/self-hosted/list": {
+      "post": {
+        "operationId": "environment-read-self-hosted-list",
+        "summary": "List self-hosted Runners",
+        "description": "List the account's self-hosted Runners with their labels, status and host details.",
+        "tags": [
+          "AI SRE/Runners"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Returns account-scope Runners plus Runners of teams the caller belongs to; `team_ids` outside the caller's teams are silently dropped.\n- `scope` overrides `include_account`: `account` returns only account-scope Runners, `team` only team Runners, `all` (or empty) both.\n- `query` is a case-insensitive substring match over name, ID, labels, status, version, OS, architecture, hostname and IP address, so a label value finds the Runners that carry it.\n- Without `p`, `limit`, `query` or `orderby` every visible Runner is returned in one page; once any of them is set the list is paginated (`limit` defaults to 20). Default order is `created_at` descending.\n- `status` is live: `degraded` means the Runner is connected but its executor is unhealthy. The connection token is never returned.\n",
+          "href": "/en/api-reference/ai-sre/runners/environment-read-self-hosted-list",
+          "metadata": {
+            "sidebarTitle": "List self-hosted Runners"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelfHostedEnvironmentListRequest"
+              },
+              "example": {
+                "p": 1,
+                "limit": 20,
+                "query": "prod"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SelfHostedEnvironmentListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "environments": [
+                      {
+                        "environment_id": "env_9pL3xQ7mN2vK8wR4tY6hJ1",
+                        "name": "prod-k8s-bj",
+                        "labels": [
+                          "prod",
+                          "k8s",
+                          "region=cn-beijing"
+                        ],
+                        "status": "online",
+                        "team_id": 2586851485973,
+                        "can_edit": true,
+                        "version": "0.1.40",
+                        "os": "linux",
+                        "arch": "amd64",
+                        "hostname": "ops-jump-01",
+                        "ip_address": "10.20.3.17",
+                        "created_at": 1788000000000
+                      }
+                    ],
+                    "total": 1,
+                    "latest_version": "0.1.40"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
     }
   },
   "security": [
@@ -78127,6 +78391,10 @@
     {
       "name": "On-call/Dedicated integrations",
       "description": "Manage alert integrations owned by individual channels."
+    },
+    {
+      "name": "AI SRE/Runners",
+      "description": "Self-hosted Runner (BYOC) management."
     }
   ]
 }
