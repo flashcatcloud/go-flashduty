@@ -217,7 +217,7 @@ func (s *StatusPagesService) Info(ctx context.Context, req *StatusPagesInfoReque
 
 // Migrate email subscribers.
 //
-// Start a migration job that imports email subscribers from an Atlassian Statuspage into an existing Flashduty status page.
+// Start a migration job that imports email subscribers (and best-effort Microsoft Teams Workflows channel subscribers) from an Atlassian Statuspage into an existing Flashduty status page.
 //
 // API: POST /status-page/migrate-email-subscribers (statusPageMigrateEmailSubscribers).
 func (s *StatusPagesService) MigrateEmailSubscribers(ctx context.Context, req *MigrateStatusPageEmailSubscribersRequest) (*StatusPageMigrationStartResponse, *Response, error) {
