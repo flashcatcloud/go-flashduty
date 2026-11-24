@@ -37680,6 +37680,167 @@
             "description": "按集成类型替换配置；省略或为 null 时保留，已脱敏或省略的密钥类字段保留原值。"
           }
         }
+      },
+      "SelfHostedEnvironmentListRequest": {
+        "type": "object",
+        "description": "自托管 Runner 列表的过滤与分页条件。",
+        "properties": {
+          "p": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "页码，从 1 开始。"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "每页条数，分页生效时默认 20。"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "account",
+              "team"
+            ],
+            "description": "`all` 账户级和团队 Runner；`account` 只要账户级；`team` 只要团队 Runner。优先于 `include_account`。"
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "按子串过滤名称、ID、标签、状态、版本、操作系统、架构、主机名和 IP 地址，最多 128 个字符。"
+          },
+          "team_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "只返回这些团队的团队 Runner；调用者不在的团队 ID 会被忽略。"
+          },
+          "include_account": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否包含账户级 Runner（`team_id` 为 0），默认 `true`；传了 `scope` 时忽略。"
+          },
+          "orderby": {
+            "type": "string",
+            "enum": [
+              "name",
+              "created_at"
+            ],
+            "description": "排序字段：`name` 或 `created_at`。不传时保持默认顺序（`created_at` 倒序）并忽略 `asc`。"
+          },
+          "asc": {
+            "type": "boolean",
+            "default": false,
+            "description": "传了 `orderby` 时是否升序。"
+          }
+        }
+      },
+      "SelfHostedEnvironmentListResponse": {
+        "type": "object",
+        "description": "一页自托管 Runner。",
+        "required": [
+          "environments",
+          "total",
+          "latest_version"
+        ],
+        "properties": {
+          "environments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelfHostedEnvironmentItem"
+            },
+            "description": "本页的 Runner。"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "符合过滤条件的 Runner 总数。"
+          },
+          "latest_version": {
+            "type": "string",
+            "description": "平台提供的最新 Runner 版本；与每条的 `version` 对比可找出需要升级的 Runner。"
+          }
+        }
+      },
+      "SelfHostedEnvironmentItem": {
+        "type": "object",
+        "description": "一个自托管 Runner。",
+        "required": [
+          "environment_id",
+          "name",
+          "labels",
+          "status",
+          "team_id",
+          "can_edit",
+          "created_at"
+        ],
+        "properties": {
+          "environment_id": {
+            "type": "string",
+            "description": "Runner ID。"
+          },
+          "name": {
+            "type": "string",
+            "description": "Runner 名称。"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Runner 上设置的标签；没有时为空数组。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "online",
+              "offline",
+              "degraded"
+            ],
+            "description": "实时状态：`pending` 已创建但从未连接；`online` 已连接；`offline` 曾连接、现已断开；`degraded` 已连接但执行器不健康。"
+          },
+          "team_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "所属团队 ID；账户级 Runner 为 0。"
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "调用者可以管理该 Runner 时为 `true`。"
+          },
+          "version": {
+            "type": "string",
+            "description": "Runner 最近一次连接时上报的版本；首次连接前不返回。"
+          },
+          "os": {
+            "type": "string",
+            "description": "Runner 上报的操作系统，例如 `linux`、`darwin`。"
+          },
+          "arch": {
+            "type": "string",
+            "description": "Runner 上报的 CPU 架构，例如 `amd64`、`arm64`。"
+          },
+          "hostname": {
+            "type": "string",
+            "description": "Runner 所在机器的主机名。"
+          },
+          "ip_address": {
+            "type": "string",
+            "description": "Runner 最近一次连接的来源 IP。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间，Unix 毫秒级时间戳。"
+          },
+          "vcs_credentials_disabled": {
+            "type": "boolean",
+            "description": "不向该 Runner 上的命令注入 GitHub/GitLab token 时为 `true`；否则不返回。"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -77948,6 +78109,109 @@
           }
         }
       }
+    },
+    "/safari/environment/self-hosted/list": {
+      "post": {
+        "operationId": "environment-read-self-hosted-list",
+        "summary": "查询自托管 Runner 列表",
+        "description": "查询账户下的自托管 Runner，包括标签、状态和主机信息。",
+        "tags": [
+          "AI SRE/自托管 Runner"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 返回账户级 Runner 和调用者所在团队的 Runner；`team_ids` 中调用者不在的团队会被忽略。\n- `scope` 优先于 `include_account`：`account` 只返回账户级 Runner，`team` 只返回团队 Runner，`all`（或不传）两者都返回。\n- `query` 按子串匹配名称、ID、标签、状态、版本、操作系统、架构、主机名和 IP 地址，不区分大小写，因此用标签值可以找到带该标签的 Runner。\n- `p`、`limit`、`query`、`orderby` 都不传时，一次返回全部可见 Runner；传了任意一个就分页（`limit` 默认 20）。默认按 `created_at` 倒序。\n- `status` 是实时状态：`degraded` 表示 Runner 已连接但执行器不健康。不会返回连接 token。\n",
+          "href": "/zh/api-reference/ai-sre/runners/environment-read-self-hosted-list",
+          "metadata": {
+            "sidebarTitle": "查询自托管 Runner 列表"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelfHostedEnvironmentListRequest"
+              },
+              "example": {
+                "p": 1,
+                "limit": 20,
+                "query": "prod"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SelfHostedEnvironmentListResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "environments": [
+                      {
+                        "environment_id": "env_9pL3xQ7mN2vK8wR4tY6hJ1",
+                        "name": "prod-k8s-bj",
+                        "labels": [
+                          "prod",
+                          "k8s",
+                          "region=cn-beijing"
+                        ],
+                        "status": "online",
+                        "team_id": 2586851485973,
+                        "can_edit": true,
+                        "version": "0.1.40",
+                        "os": "linux",
+                        "arch": "amd64",
+                        "hostname": "ops-jump-01",
+                        "ip_address": "10.20.3.17",
+                        "created_at": 1788000000000
+                      }
+                    ],
+                    "total": 1,
+                    "latest_version": "0.1.40"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
     }
   },
   "security": [
@@ -78127,6 +78391,10 @@
     {
       "name": "On-call/专属集成",
       "description": "管理各协作空间的专属告警集成。"
+    },
+    {
+      "name": "AI SRE/自托管 Runner",
+      "description": "自托管 Runner（BYOC）管理。"
     }
   ]
 }

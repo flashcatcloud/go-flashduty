@@ -11691,6 +11691,63 @@ type ScheduleUpsertRequest struct {
 	TimeZone string `json:"time_zone,omitempty" toon:"time_zone,omitempty"`
 }
 
+// SelfHostedEnvironmentItem is generated from the Flashduty OpenAPI schema.
+type SelfHostedEnvironmentItem struct {
+	// CPU architecture reported by the Runner, such as `amd64` or `arm64`.
+	Arch string `json:"arch" toon:"arch"`
+	// `true` when the caller can manage this Runner.
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
+	// Creation time in Unix epoch milliseconds.
+	CreatedAt TimestampMilli `json:"created_at" toon:"created_at"`
+	// Runner ID.
+	EnvironmentID string `json:"environment_id" toon:"environment_id"`
+	// Hostname of the machine the Runner runs on.
+	Hostname string `json:"hostname" toon:"hostname"`
+	// IP address the Runner last connected from.
+	IPAddress string `json:"ip_address" toon:"ip_address"`
+	// Labels set on the Runner; empty array when none.
+	Labels []string `json:"labels" toon:"labels"`
+	// Runner name.
+	Name string `json:"name" toon:"name"`
+	// Operating system reported by the Runner, such as `linux` or `darwin`.
+	OS string `json:"os" toon:"os"`
+	// Live status: `pending` created but never connected; `online` connected; `offline` was connected, now disconnected; `degraded` connected but the executor is unhealthy.
+	Status string `json:"status" toon:"status"`
+	// Owning team ID; 0 for an account-scope Runner.
+	TeamID int64 `json:"team_id" toon:"team_id"`
+	// `true` when GitHub/GitLab tokens are not injected into commands on this Runner; omitted otherwise.
+	VcsCredentialsDisabled bool `json:"vcs_credentials_disabled" toon:"vcs_credentials_disabled"`
+	// Runner version reported on its last connection; omitted before the first connection.
+	Version string `json:"version" toon:"version"`
+}
+
+// SelfHostedEnvironmentListRequest is generated from the Flashduty OpenAPI schema.
+type SelfHostedEnvironmentListRequest struct {
+	ListOptions
+	// Sort ascending when `orderby` is set.
+	Asc bool `json:"asc,omitempty" toon:"asc,omitempty"`
+	// Whether to include account-scope Runners (`team_id` = 0). Defaults to `true`; ignored when `scope` is set.
+	IncludeAccount bool `json:"include_account,omitempty" toon:"include_account,omitempty"`
+	// Sort column: `name` or `created_at`. Empty keeps the default order (`created_at` descending) and ignores `asc`.
+	Orderby string `json:"orderby,omitempty" toon:"orderby,omitempty"`
+	// Substring filter over name, ID, labels, status, version, OS, architecture, hostname and IP address. Up to 128 characters.
+	Query string `json:"query,omitempty" toon:"query,omitempty"`
+	// `all` account-scope and team Runners; `account` account-scope only; `team` team Runners only. Overrides `include_account`.
+	Scope string `json:"scope,omitempty" toon:"scope,omitempty"`
+	// Restrict team Runners to these teams; IDs of teams the caller does not belong to are ignored.
+	TeamIDs []int64 `json:"team_ids,omitempty" toon:"team_ids,omitempty"`
+}
+
+// SelfHostedEnvironmentListResponse is generated from the Flashduty OpenAPI schema.
+type SelfHostedEnvironmentListResponse struct {
+	// Runners on this page.
+	Environments []SelfHostedEnvironmentItem `json:"environments" toon:"environments"`
+	// Latest Runner version offered by the platform; compare it with each item's `version` to find Runners that need an upgrade.
+	LatestVersion string `json:"latest_version" toon:"latest_version"`
+	// Number of Runners matching the filter.
+	Total int64 `json:"total" toon:"total"`
+}
+
 // ServiceDeskPlusRequestListRequest is generated from the Flashduty OpenAPI schema.
 type ServiceDeskPlusRequestListRequest struct {
 	ListOptions

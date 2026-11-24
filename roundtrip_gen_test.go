@@ -232,6 +232,7 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /safari/automation/rule/update":             func(d json.RawMessage) error { var v AutomationRuleItem; return json.Unmarshal(d, &v) },
 	"POST /safari/automation/run/list":                func(d json.RawMessage) error { var v AutomationRunListResponse; return json.Unmarshal(d, &v) },
 	"POST /safari/automation/template/list":           func(d json.RawMessage) error { var v AutomationTemplateListResponse; return json.Unmarshal(d, &v) },
+	"POST /safari/environment/self-hosted/list":       func(d json.RawMessage) error { var v SelfHostedEnvironmentListResponse; return json.Unmarshal(d, &v) },
 	"POST /safari/knowledge/file/delete":              func(d json.RawMessage) error { var v KnowledgeFileDeleteResponse; return json.Unmarshal(d, &v) },
 	"POST /safari/knowledge/file/get":                 func(d json.RawMessage) error { var v KnowledgeFileGetResponse; return json.Unmarshal(d, &v) },
 	"POST /safari/knowledge/file/list":                func(d json.RawMessage) error { var v KnowledgeFileListResponse; return json.Unmarshal(d, &v) },
