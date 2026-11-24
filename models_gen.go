@@ -7087,6 +7087,20 @@ type ListPastIncidentsResponse struct {
 	Items []PastIncidentItem `json:"items" toon:"items"`
 }
 
+// ListPersonLinkedRequest is generated from the Flashduty OpenAPI schema.
+type ListPersonLinkedRequest struct {
+	// Alias for `integration_id` (legacy parameter name). Either `integration_id` or `data_source_id` must be provided.
+	DataSourceID int64 `json:"data_source_id,omitempty" toon:"data_source_id,omitempty"`
+	// IM integration ID; obtain it from `POST /datasource/im/war-room-enabled/list`. Either `integration_id` or `data_source_id` must be provided.
+	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+}
+
+// ListPersonLinkedResponse is generated from the Flashduty OpenAPI schema.
+type ListPersonLinkedResponse struct {
+	// Unique person IDs currently bound to this IM integration's app.
+	PersonIDs []int64 `json:"person_ids" toon:"person_ids"`
+}
+
 // ListPostMortemTemplatesRequest is generated from the Flashduty OpenAPI schema.
 type ListPostMortemTemplatesRequest struct {
 	ListOptions
@@ -13125,12 +13139,18 @@ type TryLinkPersonRequest struct {
 
 // TryLinkPersonResponse is generated from the Flashduty OpenAPI schema.
 type TryLinkPersonResponse struct {
+	// Person IDs that were already linked to this IM app before this call.
+	AlreadyLinkedPersonIDs []int64 `json:"already_linked_person_ids" toon:"already_linked_person_ids"`
 	// Person IDs linked to the IM app during this call. Empty when nobody was newly linked.
 	NewLinkedPersonIDs []int64 `json:"new_linked_person_ids" toon:"new_linked_person_ids"`
 	// Unlinked members skipped because they have neither an email nor a phone number.
 	NoContactCount int64 `json:"no_contact_count" toon:"no_contact_count"`
+	// Unlinked person IDs skipped because they have neither a verified email nor a verified phone number.
+	NoContactPersonIDs []int64 `json:"no_contact_person_ids" toon:"no_contact_person_ids"`
 	// Members with an email or phone that were looked up but not newly linked: not found on the IM platform, the IM account is already linked to another member, or the lookup failed for them.
 	UnmatchedCount int64 `json:"unmatched_count" toon:"unmatched_count"`
+	// Person IDs with verified contacts that were looked up during this call but not newly linked.
+	UnmatchedPersonIDs []int64 `json:"unmatched_person_ids" toon:"unmatched_person_ids"`
 }
 
 // UnackIncidentRequest is generated from the Flashduty OpenAPI schema.

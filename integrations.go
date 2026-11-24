@@ -21,6 +21,20 @@ func (s *IntegrationsService) AlertReadEmailPreview(ctx context.Context, req *Al
 	return out, resp, nil
 }
 
+// List IM-linked persons.
+//
+// Return the person IDs already linked to the specified IM integration.
+//
+// API: POST /datasource/im/person-linked/list (datasourceImPersonLinkedList).
+func (s *IntegrationsService) DatasourceImPersonLinkedList(ctx context.Context, req *ListPersonLinkedRequest) (*ListPersonLinkedResponse, *Response, error) {
+	out := new(ListPersonLinkedResponse)
+	resp, err := s.client.do(ctx, "/datasource/im/person-linked/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Attempt IM person linking.
 //
 // Try to automatically link unbound members to their IM accounts for one integration.

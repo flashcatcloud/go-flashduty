@@ -14992,6 +14992,39 @@
         ],
         "type": "object"
       },
+      "ListPersonLinkedRequest": {
+        "type": "object",
+        "description": "Parameters for listing persons already linked to an IM integration.",
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "IM integration ID; obtain it from `POST /datasource/im/war-room-enabled/list`. Either `integration_id` or `data_source_id` must be provided."
+          },
+          "data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Alias for `integration_id` (legacy parameter name). Either `integration_id` or `data_source_id` must be provided."
+          }
+        }
+      },
+      "ListPersonLinkedResponse": {
+        "type": "object",
+        "description": "Persons currently linked to the IM integration.",
+        "required": [
+          "person_ids"
+        ],
+        "properties": {
+          "person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Unique person IDs currently bound to this IM integration's app."
+          }
+        }
+      },
       "ListWarRoomEnabledResponse": {
         "description": "War-room-enabled IM integration list response.",
         "properties": {
@@ -28439,6 +28472,30 @@
           "no_contact_count": {
             "type": "integer",
             "description": "Unlinked members skipped because they have neither an email nor a phone number."
+          },
+          "already_linked_person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Person IDs that were already linked to this IM app before this call."
+          },
+          "unmatched_person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Person IDs with verified contacts that were looked up during this call but not newly linked."
+          },
+          "no_contact_person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Unlinked person IDs skipped because they have neither a verified email nor a verified phone number."
           }
         }
       },
@@ -42774,6 +42831,84 @@
         }
       }
     },
+    "/datasource/im/person-linked/list": {
+      "post": {
+        "operationId": "datasourceImPersonLinkedList",
+        "summary": "List IM-linked persons",
+        "description": "Return the person IDs already linked to the specified IM integration.",
+        "tags": [
+          "On-call/Integrations"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | **Integrations View** (`on-call`) |\n\n## Usage\n\n- Accepts either `integration_id` or `data_source_id` (both refer to the same IM integration ID from `POST /datasource/im/war-room-enabled/list`).\n- Returns `person_ids` for all account members (including the account owner if bound) currently linked to this integration's IM app.\n- Only IM integrations that support person linking (Feishu, DingTalk, WeCom, Slack, Teams, Zoom) are accepted; other types return `InvalidParameter`.",
+          "href": "/en/api-reference/on-call/integrations/datasource-im-person-linked-list",
+          "metadata": {
+            "sidebarTitle": "List IM-linked persons"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListPersonLinkedRequest"
+              },
+              "example": {
+                "integration_id": 6113996590131
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ListPersonLinkedResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "person_ids": [
+                      5348648172131,
+                      6113996590132
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/datasource/im/person/try-link": {
       "post": {
         "operationId": "datasourceImPersonTryLink",
@@ -42816,7 +42951,17 @@
                       5348648172131
                     ],
                     "unmatched_count": 2,
-                    "no_contact_count": 1
+                    "no_contact_count": 1,
+                    "already_linked_person_ids": [
+                      5348648172130
+                    ],
+                    "unmatched_person_ids": [
+                      5348648172132,
+                      5348648172133
+                    ],
+                    "no_contact_person_ids": [
+                      5348648172134
+                    ]
                   }
                 }
               }
