@@ -14992,6 +14992,39 @@
         ],
         "type": "object"
       },
+      "ListPersonLinkedRequest": {
+        "type": "object",
+        "description": "查看指定 IM 集成已关联人员的参数。",
+        "properties": {
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "IM 集成 ID，可通过 `POST /datasource/im/war-room-enabled/list` 获取。`integration_id` 与 `data_source_id` 至少传一个。"
+          },
+          "data_source_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "`integration_id` 的兼容别名。`integration_id` 与 `data_source_id` 至少传一个。"
+          }
+        }
+      },
+      "ListPersonLinkedResponse": {
+        "type": "object",
+        "description": "指定 IM 集成当前已关联的人员列表。",
+        "required": [
+          "person_ids"
+        ],
+        "properties": {
+          "person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "已绑定到该 IM 应用的去重人员 ID 列表。"
+          }
+        }
+      },
       "ListWarRoomEnabledResponse": {
         "description": "已开启作战室功能的 IM 集成列表响应。",
         "properties": {
@@ -28439,6 +28472,30 @@
           "no_contact_count": {
             "type": "integer",
             "description": "因既无邮箱也无手机号而被跳过的未关联成员数。"
+          },
+          "already_linked_person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "在本次调用之前已绑定到该 IM 应用的人员 ID 列表。"
+          },
+          "unmatched_person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "本次调用中有已验证联系方式、已查询但未能新关联的人员 ID 列表。"
+          },
+          "no_contact_person_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "因既无已验证邮箱也无已验证手机号而被跳过的未关联人员 ID 列表。"
           }
         }
       },
@@ -42774,6 +42831,84 @@
         }
       }
     },
+    "/datasource/im/person-linked/list": {
+      "post": {
+        "operationId": "datasourceImPersonLinkedList",
+        "summary": "查看 IM 已关联人员列表",
+        "description": "返回已关联到指定 IM 集成的所有人员 ID。",
+        "tags": [
+          "On-call/集成中心"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | **集成中心查看**（`on-call`） |\n\n## 使用说明\n\n- 支持传 `integration_id` 或 `data_source_id`（均为 IM 集成 ID，可通过 `POST /datasource/im/war-room-enabled/list` 获取）。\n- 返回该集成对应的 IM 应用下所有已绑定的 `person_ids`。\n- 仅支持人员关联的 IM 集成（飞书、钉钉、企业微信、Slack、Teams、Zoom）；其他类型返回 `InvalidParameter`。",
+          "href": "/zh/api-reference/on-call/integrations/datasource-im-person-linked-list",
+          "metadata": {
+            "sidebarTitle": "查看 IM 已关联人员列表"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListPersonLinkedRequest"
+              },
+              "example": {
+                "integration_id": 6113996590131
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ListPersonLinkedResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "person_ids": [
+                      5348648172131,
+                      6113996590132
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/datasource/im/person/try-link": {
       "post": {
         "operationId": "datasourceImPersonTryLink",
@@ -42816,7 +42951,17 @@
                       5348648172131
                     ],
                     "unmatched_count": 2,
-                    "no_contact_count": 1
+                    "no_contact_count": 1,
+                    "already_linked_person_ids": [
+                      5348648172130
+                    ],
+                    "unmatched_person_ids": [
+                      5348648172132,
+                      5348648172133
+                    ],
+                    "no_contact_person_ids": [
+                      5348648172134
+                    ]
                   }
                 }
               }

@@ -57,6 +57,7 @@ var exampleDataDecoders = map[string]func(json.RawMessage) error{
 	"POST /channel/unsubscribe/rule/create":              func(d json.RawMessage) error { var v RuleCreateResponse; return json.Unmarshal(d, &v) },
 	"POST /channel/unsubscribe/rule/list":                func(d json.RawMessage) error { var v ListDropRulesResponse; return json.Unmarshal(d, &v) },
 	"POST /channel/update":                               func(d json.RawMessage) error { var v UpdateChannelResponse; return json.Unmarshal(d, &v) },
+	"POST /datasource/im/person-linked/list":             func(d json.RawMessage) error { var v ListPersonLinkedResponse; return json.Unmarshal(d, &v) },
 	"POST /datasource/im/person/try-link":                func(d json.RawMessage) error { var v TryLinkPersonResponse; return json.Unmarshal(d, &v) },
 	"POST /datasource/im/war-room-enabled/list":          func(d json.RawMessage) error { var v ListWarRoomEnabledResponse; return json.Unmarshal(d, &v) },
 	"POST /enrichment/info":                              func(d json.RawMessage) error { var v EnrichmentItem; return json.Unmarshal(d, &v) },
