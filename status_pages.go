@@ -187,6 +187,20 @@ func (s *StatusPagesService) DraftCreate(ctx context.Context, req *CreateStatusP
 	return out, resp, nil
 }
 
+// Get status page draft.
+//
+// Get one status page draft and whether it has been published.
+//
+// API: GET /status-page/draft/info (statusPageDraftInfo).
+func (s *StatusPagesService) DraftInfo(ctx context.Context, req *StatusPagesDraftInfoRequest) (*StatusPageDraftInfoResponse, *Response, error) {
+	out := new(StatusPageDraftInfoResponse)
+	resp, err := s.client.doGet(ctx, "/status-page/draft/info", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get status page detail.
 //
 // Retrieve detailed configuration for a specific status page.

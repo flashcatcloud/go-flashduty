@@ -12456,6 +12456,34 @@ type StatusPageDraftCreateResponse struct {
 	DraftID string `json:"draft_id" toon:"draft_id"`
 }
 
+// StatusPageDraftInfoResponse is generated from the Flashduty OpenAPI schema.
+type StatusPageDraftInfoResponse struct {
+	// Event the draft appends an update to; 0 when the draft creates a new event.
+	ChangeID int64 `json:"change_id" toon:"change_id"`
+	// Publish time in Unix epoch seconds; 0 while `pending`.
+	ConsumedAt Timestamp `json:"consumed_at" toon:"consumed_at"`
+	// Member ID of the member who published the draft; 0 while `pending`.
+	ConsumedBy int64 `json:"consumed_by" toon:"consumed_by"`
+	// Event the draft was published to; 0 while `pending`.
+	ConsumedChangeID int64 `json:"consumed_change_id" toon:"consumed_change_id"`
+	// Creation time in Unix epoch seconds.
+	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
+	// Member ID of the creator.
+	CreatedBy int64 `json:"created_by" toon:"created_by"`
+	// Draft payload exactly as stored by `POST /status-page/draft/create`.
+	Draft map[string]any `json:"draft" toon:"draft"`
+	// Draft ID.
+	DraftID string `json:"draft_id" toon:"draft_id"`
+	// Target status page ID from the draft payload.
+	PageID int64 `json:"page_id" toon:"page_id"`
+	// Producer label passed at creation; empty when not set.
+	Source string `json:"source" toon:"source"`
+	// Publish state: `pending` not yet published; `published` already published to an event.
+	Status string `json:"status" toon:"status"`
+	// Event type: `incident` unplanned incident; `maintenance` planned maintenance.
+	Type string `json:"type" toon:"type"`
+}
+
 // StatusPageInfoResponse is generated from the Flashduty OpenAPI schema.
 type StatusPageInfoResponse struct {
 	// Components tracked on the status page.
@@ -14429,6 +14457,12 @@ type StatusPagesChangeListRequest struct {
 	Type string `url:"type"`
 	// Event status filter. Required. Must be a status valid for the given `type` (`investigating`/`identified`/`monitoring`/`resolved` for `incident`; `scheduled`/`ongoing`/`completed` for `maintenance`).
 	Status string `url:"status"`
+}
+
+// StatusPagesDraftInfoRequest holds the query parameters for Get status page draft.
+type StatusPagesDraftInfoRequest struct {
+	// Draft ID returned by `POST /status-page/draft/create`.
+	DraftID string `url:"draft_id"`
 }
 
 // StatusPagesInfoRequest holds the query parameters for Get status page detail.

@@ -26777,6 +26777,90 @@
           }
         }
       },
+      "StatusPageDraftInfoResponse": {
+        "type": "object",
+        "description": "已存储的状态页草稿及其发布状态。",
+        "required": [
+          "draft_id",
+          "status",
+          "page_id",
+          "change_id",
+          "type",
+          "draft",
+          "source",
+          "created_by",
+          "created_at",
+          "consumed_at",
+          "consumed_change_id",
+          "consumed_by"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "description": "草稿 ID。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "published"
+            ],
+            "description": "发布状态：`pending` 尚未发布；`published` 已发布到事件。"
+          },
+          "page_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "草稿载荷中的目标状态页 ID。"
+          },
+          "change_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "草稿要追加更新的事件；草稿用于新建事件时为 0。"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "incident",
+              "maintenance"
+            ],
+            "description": "事件类型：`incident` 非计划故障；`maintenance` 计划维护。"
+          },
+          "draft": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "与 `POST /status-page/draft/create` 存入时完全一致的草稿载荷。"
+          },
+          "source": {
+            "type": "string",
+            "description": "创建时传入的来源标识；未设置时为空。"
+          },
+          "created_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建者的成员 ID。"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间，Unix 秒级时间戳。"
+          },
+          "consumed_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "发布时间，Unix 秒级时间戳；`pending` 时为 0。"
+          },
+          "consumed_change_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "草稿发布到的事件；`pending` 时为 0。"
+          },
+          "consumed_by": {
+            "type": "integer",
+            "format": "int64",
+            "description": "发布该草稿的成员 ID；`pending` 时为 0。"
+          }
+        }
+      },
       "StatusPageInfoResponse": {
         "allOf": [
           {
@@ -66383,6 +66467,69 @@
         }
       }
     },
+    "/safari/skill/download": {
+      "post": {
+        "operationId": "skill-read-download",
+        "summary": "下载技能包",
+        "description": "以 zip 压缩包下载一个技能。",
+        "tags": [
+          "AI SRE/技能"
+        ],
+        "security": [
+          {
+            "AppKeyAuth": []
+          }
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **60 次/分钟**；**3 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 成功时响应体是 zip 文件本身，不是 JSON 包装（`Content-Type: application/zip`）；出错时仍返回标准 JSON 错误包装。\n- 压缩包内是一个以技能命名的目录，`SKILL.md` 和技能的其他文件都在其中；`Content-Disposition` 中的文件名与之相同，例如 `k8s-triage.zip`。\n- 可以下载账户级技能和调用者所在团队的技能；其他团队的技能、不存在或已删除的 `skill_id` 均返回 `ResourceNotFound`。\n- 每次调用都会记录到账户审计日志。\n",
+          "href": "/zh/api-reference/ai-sre/skills/skill-read-download",
+          "metadata": {
+            "sidebarTitle": "下载技能包"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "技能的 zip 压缩包。`Content-Disposition` 为 `attachment`，文件名为 `<技能名>.zip`。",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkillGetRequest"
+              },
+              "example": {
+                "skill_id": "skill_8s7Hn2kLpQ3xYbVc4Wd2m"
+              }
+            }
+          }
+        }
+      }
+    },
     "/safari/skill/list": {
       "post": {
         "operationId": "skill-read-list",
@@ -69741,6 +69888,102 @@
                 "source": "ai_sre:sess_01KC3H2A9ZQ8W7E6R5T4Y3U2I1"
               }
             }
+          }
+        }
+      }
+    },
+    "/status-page/draft/info": {
+      "get": {
+        "operationId": "statusPageDraftInfo",
+        "summary": "查看状态页草稿",
+        "description": "查看一个状态页草稿及其是否已发布。",
+        "tags": [
+          "On-call/状态页"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 用于读回 `POST /status-page/draft/create` 存下的草稿，例如确认是否已有人发布。\n- 草稿通过 `POST /status-page/change/create` 或 `POST /status-page/change/timeline/create` 发布前 `status` 为 `pending`，发布后为 `published`；`pending` 时 `consumed_at`、`consumed_change_id`、`consumed_by` 均为 0。\n- `draft_id` 不存在、属于其他账户，或草稿已删除（创建 30 天后）时返回 `ResourceNotFound`。\n",
+          "href": "/zh/api-reference/on-call/status-pages/status-page-draft-info",
+          "metadata": {
+            "sidebarTitle": "查看状态页草稿"
+          }
+        },
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "由 `POST /status-page/draft/create` 返回的草稿 ID。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/StatusPageDraftInfoResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "draft_id": "draft_3xK9mQ2vN7pR4wT8yH1sJ5",
+                    "status": "pending",
+                    "page_id": 5750613685214,
+                    "change_id": 0,
+                    "type": "incident",
+                    "draft": {
+                      "v": 1,
+                      "page_id": 5750613685214,
+                      "type": "incident",
+                      "name": "Web Console Degraded Performance",
+                      "message": "We are investigating degraded performance affecting the web console.",
+                      "affected_components": [
+                        {
+                          "component_id": "01KC3GAZ6ZJE40H55GM31RPWZE",
+                          "status": "degraded"
+                        }
+                      ]
+                    },
+                    "source": "ai_sre:sess_01KC3H2A9ZQ8W7E6R5T4Y3U2I1",
+                    "created_by": 2476444212131,
+                    "created_at": 1788000000,
+                    "consumed_at": 0,
+                    "consumed_change_id": 0,
+                    "consumed_by": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
