@@ -2113,7 +2113,7 @@ type ChangeActor struct {
 type ChangeChecklistItem struct {
 	// Unix timestamp in seconds when the item was ticked; omitted when the item is not ticked.
 	At int64 `json:"at,omitempty" toon:"at,omitempty"`
-	// Member who ticked it, as an email; omitted when the item is not ticked.
+	// Display name of the member who ticked it; omitted when the item is not ticked.
 	By string `json:"by,omitempty" toon:"by,omitempty"`
 	// Whether the item has been ticked off.
 	Done bool `json:"done,omitempty" toon:"done,omitempty"`
@@ -2243,7 +2243,7 @@ type ChangeInfo struct {
 	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// External link to the source change record.
 	Link string `json:"link" toon:"link"`
-	// Statuses a console write may move this change to from its current status; `Canceled`, `Done` and `Failed` are terminal and leave this empty. Only `POST /change/info` fills it, so it is omitted from list responses.
+	// Statuses a console write may move this change to from its current status. `Canceled` moves nowhere, so the field is omitted; `Done` and `Failed` can be reopened to `Processing`. Only `POST /change/info` fills it, so it is omitted from list responses.
 	NextStatuses []string `json:"next_statuses" toon:"next_statuses"`
 	// Group the change's notifications go to: the first notification policy of the change form that matches the change's collaboration space. `null` when none matches.
 	NotifyTarget *ChangeNotifyTarget `json:"notify_target" toon:"notify_target"`
@@ -2325,7 +2325,7 @@ type ChangeItem struct {
 	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// External link to the source change record.
 	Link string `json:"link" toon:"link"`
-	// Statuses a console write may move this change to from its current status; `Canceled`, `Done` and `Failed` are terminal and leave this empty. Only `POST /change/info` fills it, so it is omitted from list responses.
+	// Statuses a console write may move this change to from its current status. `Canceled` moves nowhere, so the field is omitted; `Done` and `Failed` can be reopened to `Processing`. Only `POST /change/info` fills it, so it is omitted from list responses.
 	NextStatuses []string `json:"next_statuses" toon:"next_statuses"`
 	// Person performing the change, as a member email or a free-form name; empty when not filled.
 	Operator string `json:"operator" toon:"operator"`
@@ -2763,6 +2763,8 @@ type CreateFieldRequest struct {
 	FieldType string `json:"field_type" toon:"field_type"`
 	// Required and non-empty for `single_select`/`multi_select` (unique strings, each 1–200 chars). Must be omitted or empty for `checkbox`/`text`.
 	Options []string `json:"options,omitempty" toon:"options,omitempty"`
+	// Objects the field is offered on: `incident`, `change`, or both. Omit for incidents only. When sent, it must name at least one value, without duplicates.
+	Usage []string `json:"usage,omitempty" toon:"usage,omitempty"`
 	// Value type. `checkbox` requires `bool`; all other types require `string`. Immutable after creation. `float` is a reserved value currently rejected for every `field_type`.
 	ValueType string `json:"value_type" toon:"value_type"`
 }
@@ -5775,6 +5777,8 @@ type FieldItem struct {
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// Last updater member ID.
 	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+	// Objects the field is offered on: `incident`, `change`, or both. A field created without `usage` reads as `["incident"]`.
+	Usage []string `json:"usage" toon:"usage"`
 	// Value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`. `float` is reserved and never occurs today.
 	ValueType string `json:"value_type" toon:"value_type"`
 }
@@ -13547,6 +13551,8 @@ type UpdateFieldRequest struct {
 	FieldID string `json:"field_id" toon:"field_id"`
 	// Replacement options list. Must obey the same per-type rules as create. Note: the update always overwrites `display_name`, `description`, `options`, and `default_value` with the submitted values, so for `single_select`/`multi_select` fields a non-empty `options` list must be sent on every update.
 	Options []string `json:"options,omitempty" toon:"options,omitempty"`
+	// Objects the field is offered on: `incident`, `change`, or both. Omit to keep the current value. When sent, it must name at least one value, without duplicates.
+	Usage []string `json:"usage,omitzero" toon:"usage,omitempty"`
 }
 
 // UpdateIncidentCommentTypeRequest is generated from the Flashduty OpenAPI schema.

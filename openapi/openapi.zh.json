@@ -5228,7 +5228,7 @@
               ],
               "description": "该变更可以流转到的状态。"
             },
-            "description": "控制台写入时可从当前状态流转到的状态；`Canceled`、`Done`、`Failed` 为终态，此时为空。仅 `POST /change/info` 返回该字段，列表接口不返回。"
+            "description": "控制台写入时可从当前状态流转到的状态。`Canceled` 不能再流转，此时不返回该字段；`Done` 和 `Failed` 可重新打开为 `Processing`。仅 `POST /change/info` 返回该字段，列表接口不返回。"
           },
           "creator": {
             "oneOf": [
@@ -5932,7 +5932,7 @@
           },
           "display_name": {
             "type": "string",
-            "maxLength": 39,
+            "maxLength": 40,
             "description": "展示名，账号内须唯一。"
           },
           "description": {
@@ -5985,6 +5985,18 @@
                 "type": "null"
               }
             ]
+          },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "字段适用的对象。\n| 取值 | 含义 |\n|---|---|\n| `incident` | 故障。 |\n| `change` | 变更。 |"
+            },
+            "description": "字段适用的对象：`incident`、`change`，或两者都有。不传则只用于故障。传了就至少包含一个值，且不能重复。"
           }
         }
       },
@@ -11257,7 +11269,7 @@
           },
           "display_name": {
             "description": "界面展示名。",
-            "maxLength": 39,
+            "maxLength": 40,
             "type": "string"
           },
           "field_id": {
@@ -11310,6 +11322,18 @@
             "format": "int64",
             "type": "integer"
           },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "字段适用的对象。\n| 取值 | 含义 |\n|---|---|\n| `incident` | 故障。 |\n| `change` | 变更。 |"
+            },
+            "description": "字段适用的对象：`incident`、`change`，或两者都有。创建时未传 `usage` 的字段读取为 `[\"incident\"]`。"
+          },
           "value_type": {
             "description": "取值类型。`checkbox` 固定为 `bool`；`single_select`/`multi_select`/`text` 固定为 `string`。`float` 为保留值，当前不会出现。",
             "enum": [
@@ -11334,7 +11358,8 @@
           "updated_at",
           "description",
           "options",
-          "default_value"
+          "default_value",
+          "usage"
         ],
         "type": "object"
       },
@@ -14350,7 +14375,7 @@
           },
           "by": {
             "type": "string",
-            "description": "勾选该项的成员邮箱；未勾选时不返回。"
+            "description": "勾选该项的成员名称；未勾选时不返回。"
           },
           "at": {
             "type": "integer",
@@ -29355,8 +29380,8 @@
           },
           "display_name": {
             "type": "string",
-            "maxLength": 39,
-            "description": "新的显示名称（最长 39 字符），须在未删除字段中保持唯一。每次都会写入。"
+            "maxLength": 40,
+            "description": "新的显示名称（最长 40 字符），须在未删除字段中保持唯一。每次都会写入。"
           },
           "description": {
             "type": "string",
@@ -29388,6 +29413,19 @@
                 "type": "null"
               }
             ]
+          },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "字段适用的对象。\n| 取值 | 含义 |\n|---|---|\n| `incident` | 故障。 |\n| `change` | 变更。 |"
+            },
+            "description": "字段适用的对象：`incident`、`change`，或两者都有。不传则保持原值。传了就至少包含一个值，且不能重复。",
+            "x-flashduty-preserve-absence": true
           }
         }
       },
@@ -45607,7 +45645,7 @@
           "On-call/标签增强"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 需要标准版或更高版本的订阅，否则返回 `NoLicense`。\n- 每个账户默认最多 15 个未删除的自定义字段（部分账户上限更高），超出返回 `InvalidParameter`。\n- `field_name` 为 1–39 个字符，须匹配 `^[a-zA-Z_][a-zA-Z0-9_]*$`，唯一且创建后不可修改。已删除字段的名称只能在 `field_type` 和 `value_type` 都相同时复用。`display_name` 在未删除字段中须唯一。\n- 类型规则：`checkbox` 要求 `value_type=bool` 且不带 `options`；`single_select`/`multi_select` 要求 `value_type=string` 且 `options` 非空、不重复；`text` 要求 `value_type=string` 且不带 `options`。\n- 响应只包含 `field_id` 和 `field_name`，完整信息请调用 `/field/info`。\n- 同一账户并发创建会返回 `RequestTooFrequently`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 需要标准版或更高版本的订阅，否则返回 `NoLicense`。\n- 每个账户默认最多 15 个未删除的自定义字段（部分账户上限更高），超出返回 `InvalidParameter`。\n- `field_name` 为 1–39 个字符，须匹配 `^[a-zA-Z_][a-zA-Z0-9_]*$`，唯一且创建后不可修改。已删除字段的名称只能在 `field_type` 和 `value_type` 都相同时复用。`display_name` 在未删除字段中须唯一。\n- 类型规则：`checkbox` 要求 `value_type=bool` 且不带 `options`；`single_select`/`multi_select` 要求 `value_type=string` 且 `options` 非空、不重复；`text` 要求 `value_type=string` 且不带 `options`。\n- `usage` 决定字段用在哪里：故障、变更，或两者都用。不传则只用于故障。变更的 `fields` 只接受 `usage` 包含 `change` 的字段。\n- 响应只包含 `field_id` 和 `field_name`，完整信息请调用 `/field/info`。\n- 同一账户并发创建会返回 `RequestTooFrequently`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
           "href": "/zh/api-reference/on-call/alert-enrichment/field-write-create",
           "metadata": {
             "sidebarTitle": "创建自定义字段"
@@ -45844,6 +45882,9 @@
                       "Low"
                     ],
                     "default_value": "Medium",
+                    "usage": [
+                      "incident"
+                    ],
                     "status": "enabled",
                     "creator_id": 80011,
                     "updated_by": 80011,
@@ -45939,6 +45980,9 @@
                           "Low"
                         ],
                         "default_value": "Medium",
+                        "usage": [
+                          "incident"
+                        ],
                         "status": "enabled",
                         "creator_id": 80011,
                         "updated_by": 80011,
@@ -45993,7 +46037,7 @@
           "On-call/标签增强"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 每次调用都会用请求值覆盖 `display_name`、`description`、`options` 和 `default_value`，不传即被清空，请始终传完整的目标值。\n- `field_name`、`field_type`、`value_type` 不可修改；`options` 和 `default_value` 须满足创建时的类型规则。\n- `field_id` 不存在时返回 `InvalidParameter`；`display_name` 在未删除字段中须保持唯一。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 每次调用都会用请求值覆盖 `display_name`、`description`、`options` 和 `default_value`，不传即被清空，请始终传完整的目标值。`usage` 例外：不传时保持原值。\n- `field_name`、`field_type`、`value_type` 不可修改；`options` 和 `default_value` 须满足创建时的类型规则。\n- `field_id` 不存在时返回 `InvalidParameter`；`display_name` 在未删除字段中须保持唯一。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
           "href": "/zh/api-reference/on-call/alert-enrichment/field-write-update",
           "metadata": {
             "sidebarTitle": "变更自定义字段"

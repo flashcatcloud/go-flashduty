@@ -5228,7 +5228,7 @@
               ],
               "description": "Status the change may move to."
             },
-            "description": "Statuses a console write may move this change to from its current status; `Canceled`, `Done` and `Failed` are terminal and leave this empty. Only `POST /change/info` fills it, so it is omitted from list responses."
+            "description": "Statuses a console write may move this change to from its current status. `Canceled` moves nowhere, so the field is omitted; `Done` and `Failed` can be reopened to `Processing`. Only `POST /change/info` fills it, so it is omitted from list responses."
           },
           "creator": {
             "oneOf": [
@@ -5932,7 +5932,7 @@
           },
           "display_name": {
             "type": "string",
-            "maxLength": 39,
+            "maxLength": 40,
             "description": "Human-readable name. Must be unique within the account."
           },
           "description": {
@@ -5985,6 +5985,18 @@
                 "type": "null"
               }
             ]
+          },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "Object the field is offered on.\n| Value | Meaning |\n|---|---|\n| `incident` | Incidents. |\n| `change` | Changes. |"
+            },
+            "description": "Objects the field is offered on: `incident`, `change`, or both. Omit for incidents only. When sent, it must name at least one value, without duplicates."
           }
         }
       },
@@ -11257,7 +11269,7 @@
           },
           "display_name": {
             "description": "Human-readable name shown in the UI.",
-            "maxLength": 39,
+            "maxLength": 40,
             "type": "string"
           },
           "field_id": {
@@ -11310,6 +11322,18 @@
             "format": "int64",
             "type": "integer"
           },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "Object the field is offered on.\n| Value | Meaning |\n|---|---|\n| `incident` | Incidents. |\n| `change` | Changes. |"
+            },
+            "description": "Objects the field is offered on: `incident`, `change`, or both. A field created without `usage` reads as `[\"incident\"]`."
+          },
           "value_type": {
             "description": "Value type. `checkbox` is always `bool`; `single_select`/`multi_select`/`text` are always `string`. `float` is reserved and never occurs today.",
             "enum": [
@@ -11334,7 +11358,8 @@
           "updated_at",
           "description",
           "options",
-          "default_value"
+          "default_value",
+          "usage"
         ],
         "type": "object"
       },
@@ -14350,7 +14375,7 @@
           },
           "by": {
             "type": "string",
-            "description": "Member who ticked it, as an email; omitted when the item is not ticked."
+            "description": "Display name of the member who ticked it; omitted when the item is not ticked."
           },
           "at": {
             "type": "integer",
@@ -29355,7 +29380,7 @@
           },
           "display_name": {
             "type": "string",
-            "maxLength": 39,
+            "maxLength": 40,
             "description": "New display name (max 39 characters); must stay unique among non-deleted fields. Always written."
           },
           "description": {
@@ -29388,6 +29413,19 @@
                 "type": "null"
               }
             ]
+          },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "Object the field is offered on.\n| Value | Meaning |\n|---|---|\n| `incident` | Incidents. |\n| `change` | Changes. |"
+            },
+            "description": "Objects the field is offered on: `incident`, `change`, or both. Omit to keep the current value. When sent, it must name at least one value, without duplicates.",
+            "x-flashduty-preserve-absence": true
           }
         }
       },
@@ -45607,7 +45645,7 @@
           "On-call/Alert enrichment"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Custom Fields Manage** (`on-call`) |\n\n## Usage\n\n- Requires the Standard plan or higher; otherwise `NoLicense`.\n- An account holds at most 15 non-deleted custom fields by default (some accounts have a higher limit); exceeding it returns `InvalidParameter`.\n- `field_name` is 1–39 characters matching `^[a-zA-Z_][a-zA-Z0-9_]*$`, unique, and immutable. The name of a deleted field can be reused only with the same `field_type` and `value_type`. `display_name` must be unique among non-deleted fields.\n- Type rules: `checkbox` requires `value_type=bool` and no `options`; `single_select`/`multi_select` require `value_type=string` and a non-empty list of unique `options`; `text` requires `value_type=string` and no `options`.\n- The response contains only `field_id` and `field_name`; use `/field/info` for the full object.\n- Concurrent create calls in one account return `RequestTooFrequently`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Custom Fields Manage** (`on-call`) |\n\n## Usage\n\n- Requires the Standard plan or higher; otherwise `NoLicense`.\n- An account holds at most 15 non-deleted custom fields by default (some accounts have a higher limit); exceeding it returns `InvalidParameter`.\n- `field_name` is 1–39 characters matching `^[a-zA-Z_][a-zA-Z0-9_]*$`, unique, and immutable. The name of a deleted field can be reused only with the same `field_type` and `value_type`. `display_name` must be unique among non-deleted fields.\n- Type rules: `checkbox` requires `value_type=bool` and no `options`; `single_select`/`multi_select` require `value_type=string` and a non-empty list of unique `options`; `text` requires `value_type=string` and no `options`.\n- `usage` sets where the field is offered: on incidents, on changes, or both. Omit it for incidents only. A change's `fields` accept only fields whose `usage` includes `change`.\n- The response contains only `field_id` and `field_name`; use `/field/info` for the full object.\n- Concurrent create calls in one account return `RequestTooFrequently`.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
           "href": "/en/api-reference/on-call/alert-enrichment/field-write-create",
           "metadata": {
             "sidebarTitle": "Create field"
@@ -45844,6 +45882,9 @@
                       "Low"
                     ],
                     "default_value": "Medium",
+                    "usage": [
+                      "incident"
+                    ],
                     "status": "enabled",
                     "creator_id": 80011,
                     "updated_by": 80011,
@@ -45939,6 +45980,9 @@
                           "Low"
                         ],
                         "default_value": "Medium",
+                        "usage": [
+                          "incident"
+                        ],
                         "status": "enabled",
                         "creator_id": 80011,
                         "updated_by": 80011,
@@ -45993,7 +46037,7 @@
           "On-call/Alert enrichment"
         ],
         "x-mint": {
-          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Custom Fields Manage** (`on-call`) |\n\n## Usage\n\n- `display_name`, `description`, `options` and `default_value` are all overwritten with the request values on every call; a field left out is cleared. Always send the full desired values.\n- `field_name`, `field_type` and `value_type` cannot change; `options` and `default_value` must satisfy the type rules of create.\n- An unknown `field_id` returns `InvalidParameter`; `display_name` must stay unique among non-deleted fields.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | **Custom Fields Manage** (`on-call`) |\n\n## Usage\n\n- `display_name`, `description`, `options` and `default_value` are all overwritten with the request values on every call; a field left out is cleared. Always send the full desired values. `usage` is the exception: left out, it keeps its current value.\n- `field_name`, `field_type` and `value_type` cannot change; `options` and `default_value` must satisfy the type rules of create.\n- An unknown `field_id` returns `InvalidParameter`; `display_name` must stay unique among non-deleted fields.\n- Every call is recorded in the account audit log. Don't put secrets in request fields.",
           "href": "/en/api-reference/on-call/alert-enrichment/field-write-update",
           "metadata": {
             "sidebarTitle": "Update field"
