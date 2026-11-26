@@ -29381,7 +29381,7 @@
           "display_name": {
             "type": "string",
             "maxLength": 40,
-            "description": "New display name (max 39 characters); must stay unique among non-deleted fields. Always written."
+            "description": "New display name (max 40 characters); must stay unique among non-deleted fields. Always written."
           },
           "description": {
             "type": "string",

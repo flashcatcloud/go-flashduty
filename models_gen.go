@@ -13545,7 +13545,7 @@ type UpdateFieldRequest struct {
 	DefaultValue any `json:"default_value,omitempty" toon:"default_value,omitempty"`
 	// New description. Always written: omitting it clears the description.
 	Description string `json:"description,omitempty" toon:"description,omitempty"`
-	// New display name (max 39 characters); must stay unique among non-deleted fields. Always written.
+	// New display name (max 40 characters); must stay unique among non-deleted fields. Always written.
 	DisplayName string `json:"display_name,omitempty" toon:"display_name,omitempty"`
 	// Field ID — 24-character hex ObjectID.
 	FieldID string `json:"field_id" toon:"field_id"`
