@@ -4968,6 +4968,58 @@
             "type": "string",
             "description": "指向源变更记录的外部链接。"
           },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该事件携带的计划开始时间，Unix 时间戳（秒）；事件未设置时为 `0`。"
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "该事件携带的计划结束时间，Unix 时间戳（秒）；事件未设置时为 `0`。"
+          },
+          "operator": {
+            "type": "string",
+            "description": "该事件携带的执行人；事件未设置时为空字符串。"
+          },
+          "impact": {
+            "type": "string",
+            "description": "该事件携带的变更影响，Markdown 文本；事件未设置时为空字符串。"
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "该事件携带的回滚方案，Markdown 文本；事件未设置时为空字符串。"
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "该事件携带的清单；非空列表（即使是空数组）会整体替换变更已存储的清单。"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "该事件携带的自定义字段取值，按字段名索引；按字段名合并进变更已存储的取值。"
+          },
+          "actor": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChangeActor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "写入该事件的成员或集成；ID 无法解析时为 `null`。"
+          },
+          "diff": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ChangeDiff"
+            },
+            "description": "该事件改动的字段，按字段名给出变化前后的值；事件未改动任何字段时不返回。"
+          },
           "event_time": {
             "type": "integer",
             "format": "int64",
@@ -5009,6 +5061,14 @@
           "change_key",
           "change_status",
           "link",
+          "planned_start_time",
+          "planned_end_time",
+          "operator",
+          "impact",
+          "backout_plan",
+          "checklist",
+          "fields",
+          "actor",
           "event_time",
           "labels",
           "created_at",
@@ -5083,6 +5143,11 @@
             "format": "int64",
             "description": "变更开始时的 Unix 时间戳（秒）。"
           },
+          "actual_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "变更实际开始时间，Unix 时间戳（秒）：其事件中最早一条处于已开始状态（`Processing`、`Done`、`Failed`）的事件时间；从未开始时为 `0`。`start_time` 是首次写入时间，对计划中的变更远早于实际执行。"
+          },
           "last_time": {
             "type": "integer",
             "format": "int64",
@@ -5107,6 +5172,75 @@
             "type": "string",
             "description": "指向源变更记录的外部链接。"
           },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "计划开始时间，Unix 时间戳（秒）；未填写计划时为 `0`。"
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "计划结束时间，Unix 时间戳（秒）；未填写计划时为 `0`，且不会早于 `planned_start_time`。"
+          },
+          "operator": {
+            "type": "string",
+            "description": "变更执行人，成员邮箱或自由文本姓名；未填写时为空字符串。"
+          },
+          "impact": {
+            "type": "string",
+            "description": "变更影响，Markdown 文本；未填写时为空字符串。"
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "变更回滚方案，Markdown 文本；未填写时为空字符串。"
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "变更的执行清单；控制台编辑会整体替换，推送只要携带了清单也会整体替换。没有清单时为空数组。"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "账号自定义变更字段的取值，按字段名索引；未填写时为空对象。"
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "调用方是否有权编辑该变更：管理员可编辑全部变更，普通成员只能编辑自己所在协作空间的变更，未关联协作空间（`channel_id` 为 0）的变更对成员只读。"
+          },
+          "is_console": {
+            "type": "boolean",
+            "description": "该变更是否由账号内置的控制台集成写入（而非外部集成推送）。"
+          },
+          "next_statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Planned",
+                "Ready",
+                "Processing",
+                "Canceled",
+                "Done",
+                "Failed"
+              ],
+              "description": "该变更可以流转到的状态。"
+            },
+            "description": "控制台写入时可从当前状态流转到的状态。`Canceled` 不能再流转，此时不返回该字段；`Done` 和 `Failed` 可重新打开为 `Processing`。仅 `POST /change/info` 返回该字段，列表接口不返回。"
+          },
+          "creator": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChangeActor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "变更第一条事件的写入方；变更没有事件或写入方无法解析时为 `null`。"
+          },
           "events": {
             "type": "array",
             "items": {
@@ -5128,10 +5262,21 @@
           "change_key",
           "change_status",
           "start_time",
+          "actual_start_time",
           "last_time",
           "end_time",
           "labels",
-          "link"
+          "link",
+          "planned_start_time",
+          "planned_end_time",
+          "operator",
+          "impact",
+          "backout_plan",
+          "checklist",
+          "fields",
+          "can_edit",
+          "is_console",
+          "creator"
         ]
       },
       "ChannelCreateResponse": {
@@ -5787,7 +5932,7 @@
           },
           "display_name": {
             "type": "string",
-            "maxLength": 39,
+            "maxLength": 40,
             "description": "展示名，账号内须唯一。"
           },
           "description": {
@@ -5840,6 +5985,18 @@
                 "type": "null"
               }
             ]
+          },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "字段适用的对象。\n| 取值 | 含义 |\n|---|---|\n| `incident` | 故障。 |\n| `change` | 变更。 |"
+            },
+            "description": "字段适用的对象：`incident`、`change`，或两者都有。不传则只用于故障。传了就至少包含一个值，且不能重复。"
           }
         }
       },
@@ -11112,7 +11269,7 @@
           },
           "display_name": {
             "description": "界面展示名。",
-            "maxLength": 39,
+            "maxLength": 40,
             "type": "string"
           },
           "field_id": {
@@ -11165,6 +11322,18 @@
             "format": "int64",
             "type": "integer"
           },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "字段适用的对象。\n| 取值 | 含义 |\n|---|---|\n| `incident` | 故障。 |\n| `change` | 变更。 |"
+            },
+            "description": "字段适用的对象：`incident`、`change`，或两者都有。创建时未传 `usage` 的字段读取为 `[\"incident\"]`。"
+          },
           "value_type": {
             "description": "取值类型。`checkbox` 固定为 `bool`；`single_select`/`multi_select`/`text` 固定为 `string`。`float` 为保留值，当前不会出现。",
             "enum": [
@@ -11189,7 +11358,8 @@
           "updated_at",
           "description",
           "options",
-          "default_value"
+          "default_value",
+          "usage"
         ],
         "type": "object"
       },
@@ -14187,6 +14357,391 @@
           "has_next_page",
           "items"
         ]
+      },
+      "ChangeChecklistItem": {
+        "type": "object",
+        "description": "变更执行清单中的一项。",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "清单项内容。"
+          },
+          "done": {
+            "type": "boolean",
+            "description": "该项是否已勾选完成。"
+          },
+          "by": {
+            "type": "string",
+            "description": "勾选该项的成员名称；未勾选时不返回。"
+          },
+          "at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "勾选时间，Unix 时间戳（秒）；未勾选时不返回。"
+          }
+        }
+      },
+      "ChangeActor": {
+        "type": "object",
+        "description": "写入该变更的成员或集成。",
+        "required": [
+          "type",
+          "id",
+          "name"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "member",
+              "integration"
+            ],
+            "description": "写入方类型：`member` 表示控制台写入，`integration` 表示推送写入。"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "与 `type` 对应的成员 ID 或集成 ID。"
+          },
+          "name": {
+            "type": "string",
+            "description": "成员展示名或集成名称；ID 无法解析时为空字符串。"
+          }
+        }
+      },
+      "ChangeDiff": {
+        "type": "object",
+        "description": "变更事件中某个字段变化前后的值。",
+        "required": [
+          "before",
+          "after"
+        ],
+        "properties": {
+          "before": {
+            "type": "string",
+            "description": "事件发生前的值。"
+          },
+          "after": {
+            "type": "string",
+            "description": "事件发生后的值。"
+          }
+        }
+      },
+      "ChangeInfoRequest": {
+        "type": "object",
+        "description": "指定一个变更：按 `change_id`，或按 `integration_id` 加 `change_key`。",
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "变更 ID，24 位十六进制字符串。"
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "上报该变更的集成；与 `change_key` 一起使用。"
+          },
+          "change_key": {
+            "type": "string",
+            "description": "该集成下的变更键；与 `integration_id` 一起使用。"
+          }
+        }
+      },
+      "ChangeInfo": {
+        "description": "变更详情：变更本身、全部事件，以及通知发往的群组。",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChangeItem"
+          },
+          {
+            "type": "object",
+            "required": [
+              "notify_target"
+            ],
+            "properties": {
+              "events": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChangeEventItem"
+                },
+                "description": "该变更的全部事件，按时间从早到晚排列。"
+              },
+              "notify_target": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ChangeNotifyTarget"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "该变更通知发往的群组：变更表单中第一条与变更所在协作空间匹配的通知策略。没有匹配时为 `null`。"
+              }
+            }
+          }
+        ]
+      },
+      "ChangeNotifyTarget": {
+        "type": "object",
+        "description": "变更表单中绑定的通知群组。不返回 Webhook 地址和令牌。",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "im_app",
+              "webhook"
+            ],
+            "description": "群组的接入方式。\n| 取值 | 含义 |\n|---|---|\n| `im_app` | IM 应用集成中的一个群聊。 |\n| `webhook` | 群机器人或自定义 Webhook。 |"
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "`im_app` 群组所用的 IM 应用集成；其他类型不返回。"
+          },
+          "chat_id": {
+            "type": "string",
+            "description": "`im_app` 群组的群聊 ID，或 Telegram 机器人的会话；未设置时不返回。"
+          },
+          "chat_name": {
+            "type": "string",
+            "description": "群聊名称；未设置时不返回。"
+          },
+          "webhook_type": {
+            "type": "string",
+            "description": "`webhook` 群组的机器人类型：`feishu`、`dingtalk`、`wecom`、`slack`、`telegram` 或 `zoom`；自定义 Webhook 为 `generic` 或不返回。"
+          }
+        }
+      },
+      "CreateChangeRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "channel_id"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "变更标题，不能为空。"
+          },
+          "description": {
+            "type": "string",
+            "description": "变更描述。"
+          },
+          "change_status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Ready",
+              "Processing",
+              "Canceled",
+              "Done",
+              "Failed"
+            ],
+            "description": "初始状态，默认为 `Planned`。\n| 取值 | 含义 |\n|---|---|\n| `Planned` | 已计划，未开始。 |\n| `Ready` | 就绪，待执行。 |\n| `Processing` | 执行中。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |\n| `Failed` | 失败。 |",
+            "default": "Planned"
+          },
+          "link": {
+            "type": "string",
+            "description": "指向变更记录的外部链接：完整的 `http`/`https` 地址，或为空。"
+          },
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "变更所属的协作空间，创建后不能修改。"
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "键值标签。键不符合 `[a-zA-Z_][a-zA-Z0-9_]*` 时，其中的空格和标点会被替换为 `_`。"
+          },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "计划开始时间，Unix 时间戳（秒或毫秒）。"
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "计划结束时间，Unix 时间戳（秒或毫秒）；不能早于 `planned_start_time`。"
+          },
+          "operator": {
+            "type": "string",
+            "description": "变更执行人，成员邮箱或自由文本姓名。"
+          },
+          "impact": {
+            "type": "string",
+            "description": "变更影响，Markdown 文本。"
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "变更回滚方案，Markdown 文本。"
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "执行清单。`by` 和 `at` 会被忽略；`done` 为 `true` 的项记为调用方勾选。"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "自定义字段取值，按字段名索引。每个键都必须是已启用、且可用于变更的自定义字段。"
+          }
+        }
+      },
+      "CreateChangeResponse": {
+        "type": "object",
+        "description": "新建的变更。",
+        "required": [
+          "change_id",
+          "change_key"
+        ],
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "新变更的 ID，24 位十六进制字符串。"
+          },
+          "change_key": {
+            "type": "string",
+            "description": "平台生成的变更键，格式为 `CHG-<yyyyMMdd>-<4 位字符>`。"
+          }
+        }
+      },
+      "UpdateChangeRequest": {
+        "type": "object",
+        "required": [
+          "change_id"
+        ],
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "要更新的变更 ID，24 位十六进制字符串。"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "变更标题，不能为空。"
+          },
+          "description": {
+            "type": "string",
+            "description": "变更描述。不传则保持原值，传空字符串即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "change_status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Ready",
+              "Processing",
+              "Canceled",
+              "Done",
+              "Failed"
+            ],
+            "description": "新状态；必须是当前状态，或当前状态可流转到的状态（见 `POST /change/info` 的 `next_statuses`）。\n| 取值 | 含义 |\n|---|---|\n| `Planned` | 已计划，未开始。 |\n| `Ready` | 就绪，待执行。 |\n| `Processing` | 执行中。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |\n| `Failed` | 失败。 |"
+          },
+          "link": {
+            "type": "string",
+            "description": "指向变更记录的外部链接：完整的 `http`/`https` 地址，或为空。不传则保持原值，传空字符串即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "要新增或覆盖的标签；值为空字符串的键会被删除，未传的键保持不变。"
+          },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "计划开始时间，Unix 时间戳（秒或毫秒）。不传则保持原值，传 `0` 即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "计划结束时间，Unix 时间戳（秒或毫秒）；不能早于 `planned_start_time`。不传则保持原值，传 `0` 即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "operator": {
+            "type": "string",
+            "description": "变更执行人，成员邮箱或自由文本姓名。不传则保持原值，传空字符串即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "impact": {
+            "type": "string",
+            "description": "变更影响，Markdown 文本。不传则保持原值，传空字符串即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "变更回滚方案，Markdown 文本。不传则保持原值，传空字符串即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "完整的执行清单，整体替换原清单。`by` 和 `at` 会被忽略；原来已按相同 `text` 勾选的项保留原勾选人，新勾选的项记为调用方勾选。不传则保持原清单，传空数组即清空。",
+            "x-flashduty-preserve-absence": true
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "要设置的自定义字段取值，按字段名索引；值为 `null` 的键会被删除，未传的键保持不变。"
+          }
+        }
+      },
+      "UpdateChangeResponse": {
+        "type": "object",
+        "description": "更新后的变更。",
+        "required": [
+          "change_id",
+          "change_key",
+          "change_status"
+        ],
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "变更 ID。"
+          },
+          "change_key": {
+            "type": "string",
+            "description": "变更键。"
+          },
+          "change_status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Ready",
+              "Processing",
+              "Canceled",
+              "Done",
+              "Failed"
+            ],
+            "description": "更新后的变更状态。\n| 取值 | 含义 |\n|---|---|\n| `Planned` | 已计划，未开始。 |\n| `Ready` | 就绪，待执行。 |\n| `Processing` | 执行中。 |\n| `Canceled` | 已取消。 |\n| `Done` | 已完成。 |\n| `Failed` | 失败。 |"
+          }
+        }
       },
       "ListChannelsRequest": {
         "type": "object",
@@ -28825,8 +29380,8 @@
           },
           "display_name": {
             "type": "string",
-            "maxLength": 39,
-            "description": "新的显示名称（最长 39 字符），须在未删除字段中保持唯一。每次都会写入。"
+            "maxLength": 40,
+            "description": "新的显示名称（最长 40 字符），须在未删除字段中保持唯一。每次都会写入。"
           },
           "description": {
             "type": "string",
@@ -28858,6 +29413,19 @@
                 "type": "null"
               }
             ]
+          },
+          "usage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "incident",
+                "change"
+              ],
+              "description": "字段适用的对象。\n| 取值 | 含义 |\n|---|---|\n| `incident` | 故障。 |\n| `change` | 变更。 |"
+            },
+            "description": "字段适用的对象：`incident`、`change`，或两者都有。不传则保持原值。传了就至少包含一个值，且不能重复。",
+            "x-flashduty-preserve-absence": true
           }
         }
       },
@@ -39970,6 +40538,375 @@
         }
       }
     },
+    "/change/info": {
+      "post": {
+        "operationId": "change-read-info",
+        "summary": "查询变更详情",
+        "description": "按变更 ID，或按集成与变更键，返回单个变更及其全部事件。",
+        "tags": [
+          "On-call/变更管理"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **1,000 次/分钟**；**50 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 传 `change_id`，或同时传 `integration_id` 与 `change_key`；否则返回 `InvalidParameter`。传了 `change_id` 时忽略另外两个参数。\n- 与 `POST /change/list` 不同，详情接口没有时间窗口：任意日期的变更都能读取。\n- `events` 包含该变更的全部事件，按时间从早到晚排列。`next_statuses` 列出 `POST /change/update` 可以把该变更流转到的状态。\n- `notify_target` 是该变更通知发往的群组；变更表单没有为其协作空间绑定群组时为 `null`。\n- 变更不存在时返回 `InvalidParameter`。公开协作空间中的变更、以及未关联协作空间的变更，所有成员都能读取；私有协作空间中的变更只有账户所有者、管理员、该空间的创建者和其所属团队的成员能读取，否则返回 `AccessDenied`。",
+          "href": "/zh/api-reference/on-call/changes/change-read-info",
+          "metadata": {
+            "sidebarTitle": "查询变更详情"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChangeInfo"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                    "account_id": 10001,
+                    "channel_id": 5001,
+                    "channel_name": "Production",
+                    "channel_status": "enabled",
+                    "integration_id": 362,
+                    "integration_name": "控制台",
+                    "title": "Upgrade payment-service to v3.2.0",
+                    "description": "Rolling upgrade of payment-service in the production cluster.",
+                    "change_key": "CHG-20261126-7Q2K",
+                    "change_status": "Processing",
+                    "start_time": 1764140400,
+                    "actual_start_time": 1764147700,
+                    "last_time": 1764147700,
+                    "end_time": 0,
+                    "labels": {
+                      "service": "payment-service",
+                      "env": "prod"
+                    },
+                    "link": "https://ci.example.com/pipelines/4821",
+                    "planned_start_time": 1764147600,
+                    "planned_end_time": 1764151200,
+                    "operator": "alice@example.com",
+                    "impact": "Payments may be retried for up to 30 seconds per pod.",
+                    "backout_plan": "Roll back the deployment to v3.1.4.",
+                    "checklist": [
+                      {
+                        "text": "Notify the support team",
+                        "done": true,
+                        "by": "Alice Chen",
+                        "at": 1764147650
+                      },
+                      {
+                        "text": "Verify error rate after rollout",
+                        "done": false
+                      }
+                    ],
+                    "fields": {
+                      "risk_level": "medium"
+                    },
+                    "can_edit": true,
+                    "is_console": true,
+                    "next_statuses": [
+                      "Done",
+                      "Failed"
+                    ],
+                    "creator": {
+                      "type": "member",
+                      "id": 2000001,
+                      "name": "Alice Chen"
+                    },
+                    "events": [
+                      {
+                        "event_id": "664a1b2c3d4e5f6a7b8c9d0f",
+                        "account_id": 10001,
+                        "channel_id": 5001,
+                        "integration_id": 362,
+                        "title": "Upgrade payment-service to v3.2.0",
+                        "description": "Rolling upgrade of payment-service in the production cluster.",
+                        "change_key": "CHG-20261126-7Q2K",
+                        "change_status": "Processing",
+                        "link": "https://ci.example.com/pipelines/4821",
+                        "planned_start_time": 1764147600,
+                        "planned_end_time": 1764151200,
+                        "operator": "alice@example.com",
+                        "impact": "Payments may be retried for up to 30 seconds per pod.",
+                        "backout_plan": "Roll back the deployment to v3.1.4.",
+                        "checklist": [
+                          {
+                            "text": "Notify the support team",
+                            "done": true,
+                            "by": "Alice Chen",
+                            "at": 1764147650
+                          },
+                          {
+                            "text": "Verify error rate after rollout",
+                            "done": false
+                          }
+                        ],
+                        "fields": {
+                          "risk_level": "medium"
+                        },
+                        "actor": {
+                          "type": "member",
+                          "id": 2000001,
+                          "name": "Alice Chen"
+                        },
+                        "diff": {
+                          "change_status": {
+                            "before": "Planned",
+                            "after": "Processing"
+                          }
+                        },
+                        "event_time": 1764147700,
+                        "labels": {
+                          "service": "payment-service",
+                          "env": "prod"
+                        },
+                        "created_at": 1764147700,
+                        "updated_at": 1764147700
+                      }
+                    ],
+                    "notify_target": {
+                      "type": "im_app",
+                      "integration_id": 4102,
+                      "chat_id": "oc_0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+                      "chat_name": "Release announcements"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeInfoRequest"
+              },
+              "example": {
+                "change_id": "664a1b2c3d4e5f6a7b8c9d0e"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change/create": {
+      "post": {
+        "operationId": "change-write-create",
+        "summary": "创建变更",
+        "description": "在协作空间中创建一条变更。变更记为调用方写入，变更键由平台生成。",
+        "tags": [
+          "On-call/变更管理"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- `channel_id` 必须是本账户的协作空间，否则返回 `InvalidParameter`。调用方须有权在该空间写入变更：账户所有者或管理员、该空间的创建者、其所属团队或管理团队的成员；公开协作空间则所有成员均可。否则返回 `AccessDenied`。\n- `change_status` 默认为 `Planned`；创建时可设为六种状态中的任意一种。\n- 返回的 `change_key` 格式为 `CHG-<yyyyMMdd>-<4 位字符>`。如需用自己系统的键定位变更，请改用变更集成推送。\n- `planned_start_time` 和 `planned_end_time` 接受 Unix 秒或毫秒（毫秒会按秒保存）；`planned_end_time` 不能早于 `planned_start_time`。\n- `link` 须为空，或为完整的 `http`/`https` 地址。\n- 标签键不符合 `[a-zA-Z_][a-zA-Z0-9_]*` 时，其中的空格和标点会被替换为 `_` 后保存。\n- `fields` 的每个键都必须是已启用、且可用于变更的自定义字段，取值须符合该字段的类型和选项；否则返回 `InvalidParameter`，并指明 `fields.<字段名>`。\n- 账户变更表单中的必填字段（包括按条件必填的字段）必须填写，否则返回 `InvalidParameter`，信息为 `required fields missing or empty: <字段键>`。\n- `checklist` 中的 `by` 和 `at` 会被忽略：`done` 为 `true` 的清单项记为调用方在本次调用时勾选。\n- 变更表单为该协作空间绑定了通知群组时，会向该群组发送通知。\n- 每次调用都会记录到账户审计日志。",
+          "href": "/zh/api-reference/on-call/changes/change-write-create",
+          "metadata": {
+            "sidebarTitle": "创建变更"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CreateChangeResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                    "change_key": "CHG-20261126-7Q2K"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChangeRequest"
+              },
+              "example": {
+                "title": "Upgrade payment-service to v3.2.0",
+                "description": "Rolling upgrade of payment-service in the production cluster.",
+                "change_status": "Planned",
+                "link": "https://ci.example.com/pipelines/4821",
+                "channel_id": 5001,
+                "labels": {
+                  "service": "payment-service",
+                  "env": "prod"
+                },
+                "planned_start_time": 1764147600,
+                "planned_end_time": 1764151200,
+                "operator": "alice@example.com",
+                "impact": "Payments may be retried for up to 30 seconds per pod.",
+                "backout_plan": "Roll back the deployment to v3.1.4.",
+                "checklist": [
+                  {
+                    "text": "Notify the support team",
+                    "done": false
+                  },
+                  {
+                    "text": "Verify error rate after rollout",
+                    "done": false
+                  }
+                ],
+                "fields": {
+                  "risk_level": "medium"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change/update": {
+      "post": {
+        "operationId": "change-write-update",
+        "summary": "更新变更",
+        "description": "更新变更的标题、描述、状态、链接、标签、计划、执行清单或自定义字段取值。未传的字段保持原值。",
+        "tags": [
+          "On-call/变更管理"
+        ],
+        "x-mint": {
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | 无 —— 持有有效的 `app_key` 即可调用 |\n\n## 使用说明\n\n- 除 `change_id` 外至少要传一个字段，否则返回 `InvalidParameter`。\n- `change_id` 不存在时返回 `InvalidParameter`。调用方须有权写入该变更所在的协作空间，规则与 `POST /change/create` 相同；未关联协作空间（`channel_id` 为 0）的变更只有账户所有者和管理员能更新。否则返回 `AccessDenied`。变更所属的协作空间不能修改。\n- `change_status` 只能按固定流程流转：`Planned` → `Ready`、`Processing` 或 `Canceled`；`Ready` → `Processing` 或 `Canceled`；`Processing` → `Done` 或 `Failed`；`Done` 或 `Failed` → `Processing`（重新打开）。`Canceled` 不能再流转。传当前状态不报错；其他流转返回 `InvalidParameter`。`POST /change/info` 的 `next_statuses` 给出允许的流转。\n- `title` 和 `change_status` 不能为空字符串；其他字符串字段传 `\"\"` 即清空。\n- `labels` 按键新增或覆盖，值为空字符串的键会被删除；`fields` 按键设置取值，值为 `null` 的键会被删除。两者中未传的键都保持不变。\n- `checklist` 会整体替换原清单。`by` 和 `at` 会被忽略：原来已按相同 `text` 勾选的项保留原勾选人和时间，新勾选的项记为调用方勾选。\n- 如果唯一的差别是勾选了哪些清单项（清单项内容和顺序都不变），勾选结果直接保存，不写时间线、不发通知，`last_time` 也不变。\n- `planned_start_time` 和 `planned_end_time` 接受 Unix 秒或毫秒；更新后 `planned_end_time` 不能早于 `planned_start_time`。\n- 变更表单的必填字段按更新后的变更校验，但只拒绝本次更新造成的空缺（返回 `InvalidParameter`，信息为 `required fields missing or empty: <字段键>`）；更新前就为空的必填字段不会阻止更新。\n- 对在控制台或通过 `POST /change/create` 创建的变更，状态流转会向变更表单绑定的群组发送状态通知，修改变更表单上的其他字段会发送编辑通知。由集成上报的变更在这里更新时不发通知。\n- 每次调用都会记录到账户审计日志。",
+          "href": "/zh/api-reference/on-call/changes/change-write-update",
+          "metadata": {
+            "sidebarTitle": "更新变更"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UpdateChangeResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                    "change_key": "CHG-20261126-7Q2K",
+                    "change_status": "Processing"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChangeRequest"
+              },
+              "example": {
+                "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                "change_status": "Processing",
+                "labels": {
+                  "version": "v3.2.0",
+                  "env": ""
+                },
+                "fields": {
+                  "risk_level": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/create": {
       "post": {
         "operationId": "channelCreate",
@@ -44708,7 +45645,7 @@
           "On-call/标签增强"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 需要标准版或更高版本的订阅，否则返回 `NoLicense`。\n- 每个账户默认最多 15 个未删除的自定义字段（部分账户上限更高），超出返回 `InvalidParameter`。\n- `field_name` 为 1–39 个字符，须匹配 `^[a-zA-Z_][a-zA-Z0-9_]*$`，唯一且创建后不可修改。已删除字段的名称只能在 `field_type` 和 `value_type` 都相同时复用。`display_name` 在未删除字段中须唯一。\n- 类型规则：`checkbox` 要求 `value_type=bool` 且不带 `options`；`single_select`/`multi_select` 要求 `value_type=string` 且 `options` 非空、不重复；`text` 要求 `value_type=string` 且不带 `options`。\n- 响应只包含 `field_id` 和 `field_name`，完整信息请调用 `/field/info`。\n- 同一账户并发创建会返回 `RequestTooFrequently`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 需要标准版或更高版本的订阅，否则返回 `NoLicense`。\n- 每个账户默认最多 15 个未删除的自定义字段（部分账户上限更高），超出返回 `InvalidParameter`。\n- `field_name` 为 1–39 个字符，须匹配 `^[a-zA-Z_][a-zA-Z0-9_]*$`，唯一且创建后不可修改。已删除字段的名称只能在 `field_type` 和 `value_type` 都相同时复用。`display_name` 在未删除字段中须唯一。\n- 类型规则：`checkbox` 要求 `value_type=bool` 且不带 `options`；`single_select`/`multi_select` 要求 `value_type=string` 且 `options` 非空、不重复；`text` 要求 `value_type=string` 且不带 `options`。\n- `usage` 决定字段用在哪里：故障、变更，或两者都用。不传则只用于故障。变更的 `fields` 只接受 `usage` 包含 `change` 的字段。\n- 响应只包含 `field_id` 和 `field_name`，完整信息请调用 `/field/info`。\n- 同一账户并发创建会返回 `RequestTooFrequently`。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
           "href": "/zh/api-reference/on-call/alert-enrichment/field-write-create",
           "metadata": {
             "sidebarTitle": "创建自定义字段"
@@ -44945,6 +45882,9 @@
                       "Low"
                     ],
                     "default_value": "Medium",
+                    "usage": [
+                      "incident"
+                    ],
                     "status": "enabled",
                     "creator_id": 80011,
                     "updated_by": 80011,
@@ -45040,6 +45980,9 @@
                           "Low"
                         ],
                         "default_value": "Medium",
+                        "usage": [
+                          "incident"
+                        ],
                         "status": "enabled",
                         "creator_id": 80011,
                         "updated_by": 80011,
@@ -45094,7 +46037,7 @@
           "On-call/标签增强"
         ],
         "x-mint": {
-          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 每次调用都会用请求值覆盖 `display_name`、`description`、`options` 和 `default_value`，不传即被清空，请始终传完整的目标值。\n- `field_name`、`field_type`、`value_type` 不可修改；`options` 和 `default_value` 须满足创建时的类型规则。\n- `field_id` 不存在时返回 `InvalidParameter`；`display_name` 在未删除字段中须保持唯一。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
+          "content": "## 限制说明\n\n| 项目 | 说明 |\n| ---- | ---- |\n| 速率限制 | 每个账户 **300 次/分钟**；**20 次/秒** |\n| 权限要求 | **自定义字段管理**（`on-call`） |\n\n## 使用说明\n\n- 每次调用都会用请求值覆盖 `display_name`、`description`、`options` 和 `default_value`，不传即被清空，请始终传完整的目标值。`usage` 例外：不传时保持原值。\n- `field_name`、`field_type`、`value_type` 不可修改；`options` 和 `default_value` 须满足创建时的类型规则。\n- `field_id` 不存在时返回 `InvalidParameter`；`display_name` 在未删除字段中须保持唯一。\n- 每次调用都会记录到账户审计日志，请不要把敏感信息放在请求字段中。",
           "href": "/zh/api-reference/on-call/alert-enrichment/field-write-update",
           "metadata": {
             "sidebarTitle": "变更自定义字段"
