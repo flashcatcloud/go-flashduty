@@ -14544,13 +14544,13 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划开始时间，Unix 秒或毫秒。"
+            "description": "计划开始时间，Unix 时间戳（秒）。"
           },
           "planned_end_time": {
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划结束时间，Unix 秒或毫秒；不能早于 `planned_start_time`。"
+            "description": "计划结束时间，Unix 时间戳（秒）；不能早于 `planned_start_time`。"
           },
           "operator": {
             "type": "string",
@@ -14615,7 +14615,7 @@
           },
           "description": {
             "type": "string",
-            "description": "变更描述。",
+            "description": "变更描述。不传则保持原值，传空字符串即清空。",
             "x-flashduty-preserve-absence": true
           },
           "change_status": {
@@ -14632,7 +14632,7 @@
           },
           "link": {
             "type": "string",
-            "description": "指向变更记录的外部链接：完整的 `http`/`https` 地址，或为空。",
+            "description": "指向变更记录的外部链接：完整的 `http`/`https` 地址，或为空。不传则保持原值，传空字符串即清空。",
             "x-flashduty-preserve-absence": true
           },
           "labels": {
@@ -14646,29 +14646,29 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划开始时间，Unix 秒或毫秒。",
+            "description": "计划开始时间，Unix 时间戳（秒）。不传则保持原值，传 `0` 即清空。",
             "x-flashduty-preserve-absence": true
           },
           "planned_end_time": {
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划结束时间，Unix 秒或毫秒；不能早于 `planned_start_time`。",
+            "description": "计划结束时间，Unix 时间戳（秒）；不能早于 `planned_start_time`。不传则保持原值，传 `0` 即清空。",
             "x-flashduty-preserve-absence": true
           },
           "operator": {
             "type": "string",
-            "description": "变更执行人，成员邮箱或自由文本姓名。",
+            "description": "变更执行人，成员邮箱或自由文本姓名。不传则保持原值，传空字符串即清空。",
             "x-flashduty-preserve-absence": true
           },
           "impact": {
             "type": "string",
-            "description": "变更影响，Markdown 文本。",
+            "description": "变更影响，Markdown 文本。不传则保持原值，传空字符串即清空。",
             "x-flashduty-preserve-absence": true
           },
           "backout_plan": {
             "type": "string",
-            "description": "变更回滚方案，Markdown 文本。",
+            "description": "变更回滚方案，Markdown 文本。不传则保持原值，传空字符串即清空。",
             "x-flashduty-preserve-absence": true
           },
           "checklist": {
@@ -14676,7 +14676,7 @@
             "items": {
               "$ref": "#/components/schemas/ChangeChecklistItem"
             },
-            "description": "完整的执行清单，整体替换原清单。`by` 和 `at` 会被忽略；原来已按相同 `text` 勾选的项保留原勾选人，新勾选的项记为调用方勾选。",
+            "description": "完整的执行清单，整体替换原清单。`by` 和 `at` 会被忽略；原来已按相同 `text` 勾选的项保留原勾选人，新勾选的项记为调用方勾选。不传则保持原清单，传空数组即清空。",
             "x-flashduty-preserve-absence": true
           },
           "fields": {

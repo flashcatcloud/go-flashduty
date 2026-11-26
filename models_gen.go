@@ -2659,9 +2659,9 @@ type CreateChangeRequest struct {
 	Link string `json:"link,omitempty" toon:"link,omitempty"`
 	// Person performing the change, as a member email or a free-form name.
 	Operator string `json:"operator,omitempty" toon:"operator,omitempty"`
-	// Planned end, Unix seconds or milliseconds; not earlier than `planned_start_time`.
+	// Planned end, Unix timestamp in seconds; not earlier than `planned_start_time`.
 	PlannedEndTime int64 `json:"planned_end_time,omitempty" toon:"planned_end_time,omitempty"`
-	// Planned start, Unix seconds or milliseconds.
+	// Planned start, Unix timestamp in seconds.
 	PlannedStartTime int64 `json:"planned_start_time,omitempty" toon:"planned_start_time,omitempty"`
 	// Change title, non-empty.
 	Title string `json:"title" toon:"title"`
@@ -13405,7 +13405,7 @@ type UnsubscribeRuleItem struct {
 
 // UpdateChangeRequest is generated from the Flashduty OpenAPI schema.
 type UpdateChangeRequest struct {
-	// Rollback plan of the change, as Markdown.
+	// Rollback plan of the change, as Markdown. Omit to keep the current value; send an empty string to clear it.
 	BackoutPlan *string `json:"backout_plan,omitempty" toon:"backout_plan,omitempty"`
 	// ID of the change to update, a 24-character hex string.
 	ChangeID string `json:"change_id" toon:"change_id"`
@@ -13419,23 +13419,23 @@ type UpdateChangeRequest struct {
 	// | `Done` | Completed. |
 	// | `Failed` | Failed. |
 	ChangeStatus string `json:"change_status,omitempty" toon:"change_status,omitempty"`
-	// Full execution checklist, replacing the stored one. `by` and `at` are ignored; an item already ticked under the same `text` keeps who ticked it, and a newly ticked item is recorded as ticked by the caller.
+	// Full execution checklist, replacing the stored one. `by` and `at` are ignored; an item already ticked under the same `text` keeps who ticked it, and a newly ticked item is recorded as ticked by the caller. Omit to keep the current list; send an empty list to clear it.
 	Checklist []ChangeChecklistItem `json:"checklist,omitzero" toon:"checklist,omitempty"`
-	// Change description.
+	// Change description. Omit to keep the current value; send an empty string to clear it.
 	Description *string `json:"description,omitempty" toon:"description,omitempty"`
 	// Custom field values to set, keyed by field name; a `null` value removes the key. Keys not sent are kept.
 	Fields map[string]any `json:"fields,omitempty" toon:"fields,omitempty"`
-	// Impact of the change, as Markdown.
+	// Impact of the change, as Markdown. Omit to keep the current value; send an empty string to clear it.
 	Impact *string `json:"impact,omitempty" toon:"impact,omitempty"`
 	// Labels to add or overwrite; a key with an empty value is removed. Keys not sent are kept.
 	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
-	// External link to the change record: an absolute `http` or `https` URL, or empty.
+	// External link to the change record: an absolute `http` or `https` URL, or empty. Omit to keep the current value; send an empty string to clear it.
 	Link *string `json:"link,omitempty" toon:"link,omitempty"`
-	// Person performing the change, as a member email or a free-form name.
+	// Person performing the change, as a member email or a free-form name. Omit to keep the current value; send an empty string to clear it.
 	Operator *string `json:"operator,omitempty" toon:"operator,omitempty"`
-	// Planned end, Unix seconds or milliseconds; not earlier than `planned_start_time`.
+	// Planned end, Unix timestamp in seconds; not earlier than `planned_start_time`. Omit to keep the current value; send `0` to clear it.
 	PlannedEndTime *int64 `json:"planned_end_time,omitempty" toon:"planned_end_time,omitempty"`
-	// Planned start, Unix seconds or milliseconds.
+	// Planned start, Unix timestamp in seconds. Omit to keep the current value; send `0` to clear it.
 	PlannedStartTime *int64 `json:"planned_start_time,omitempty" toon:"planned_start_time,omitempty"`
 	// Change title, non-empty.
 	Title string `json:"title,omitempty" toon:"title,omitempty"`
