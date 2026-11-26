@@ -14544,13 +14544,13 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划开始时间，Unix 时间戳（秒）。"
+            "description": "计划开始时间，Unix 时间戳（秒或毫秒）。"
           },
           "planned_end_time": {
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划结束时间，Unix 时间戳（秒）；不能早于 `planned_start_time`。"
+            "description": "计划结束时间，Unix 时间戳（秒或毫秒）；不能早于 `planned_start_time`。"
           },
           "operator": {
             "type": "string",
@@ -14646,14 +14646,14 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划开始时间，Unix 时间戳（秒）。不传则保持原值，传 `0` 即清空。",
+            "description": "计划开始时间，Unix 时间戳（秒或毫秒）。不传则保持原值，传 `0` 即清空。",
             "x-flashduty-preserve-absence": true
           },
           "planned_end_time": {
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "计划结束时间，Unix 时间戳（秒）；不能早于 `planned_start_time`。不传则保持原值，传 `0` 即清空。",
+            "description": "计划结束时间，Unix 时间戳（秒或毫秒）；不能早于 `planned_start_time`。不传则保持原值，传 `0` 即清空。",
             "x-flashduty-preserve-absence": true
           },
           "operator": {

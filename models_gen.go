@@ -2659,9 +2659,9 @@ type CreateChangeRequest struct {
 	Link string `json:"link,omitempty" toon:"link,omitempty"`
 	// Person performing the change, as a member email or a free-form name.
 	Operator string `json:"operator,omitempty" toon:"operator,omitempty"`
-	// Planned end, Unix timestamp in seconds; not earlier than `planned_start_time`.
+	// Planned end, Unix timestamp in seconds or milliseconds; not earlier than `planned_start_time`.
 	PlannedEndTime int64 `json:"planned_end_time,omitempty" toon:"planned_end_time,omitempty"`
-	// Planned start, Unix timestamp in seconds.
+	// Planned start, Unix timestamp in seconds or milliseconds.
 	PlannedStartTime int64 `json:"planned_start_time,omitempty" toon:"planned_start_time,omitempty"`
 	// Change title, non-empty.
 	Title string `json:"title" toon:"title"`
@@ -13433,9 +13433,9 @@ type UpdateChangeRequest struct {
 	Link *string `json:"link,omitempty" toon:"link,omitempty"`
 	// Person performing the change, as a member email or a free-form name. Omit to keep the current value; send an empty string to clear it.
 	Operator *string `json:"operator,omitempty" toon:"operator,omitempty"`
-	// Planned end, Unix timestamp in seconds; not earlier than `planned_start_time`. Omit to keep the current value; send `0` to clear it.
+	// Planned end, Unix timestamp in seconds or milliseconds; not earlier than `planned_start_time`. Omit to keep the current value; send `0` to clear it.
 	PlannedEndTime *int64 `json:"planned_end_time,omitempty" toon:"planned_end_time,omitempty"`
-	// Planned start, Unix timestamp in seconds. Omit to keep the current value; send `0` to clear it.
+	// Planned start, Unix timestamp in seconds or milliseconds. Omit to keep the current value; send `0` to clear it.
 	PlannedStartTime *int64 `json:"planned_start_time,omitempty" toon:"planned_start_time,omitempty"`
 	// Change title, non-empty.
 	Title string `json:"title,omitempty" toon:"title,omitempty"`

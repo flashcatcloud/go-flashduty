@@ -14544,13 +14544,13 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "Planned start, Unix timestamp in seconds."
+            "description": "Planned start, Unix timestamp in seconds or milliseconds."
           },
           "planned_end_time": {
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "Planned end, Unix timestamp in seconds; not earlier than `planned_start_time`."
+            "description": "Planned end, Unix timestamp in seconds or milliseconds; not earlier than `planned_start_time`."
           },
           "operator": {
             "type": "string",
@@ -14646,14 +14646,14 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "Planned start, Unix timestamp in seconds. Omit to keep the current value; send `0` to clear it.",
+            "description": "Planned start, Unix timestamp in seconds or milliseconds. Omit to keep the current value; send `0` to clear it.",
             "x-flashduty-preserve-absence": true
           },
           "planned_end_time": {
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "description": "Planned end, Unix timestamp in seconds; not earlier than `planned_start_time`. Omit to keep the current value; send `0` to clear it.",
+            "description": "Planned end, Unix timestamp in seconds or milliseconds; not earlier than `planned_start_time`. Omit to keep the current value; send `0` to clear it.",
             "x-flashduty-preserve-absence": true
           },
           "operator": {
