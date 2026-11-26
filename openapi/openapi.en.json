@@ -4968,6 +4968,58 @@
             "type": "string",
             "description": "External link to the source change record."
           },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Planned start carried by this event, Unix timestamp (seconds); `0` when the event does not set one."
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Planned end carried by this event, Unix timestamp (seconds); `0` when the event does not set one."
+          },
+          "operator": {
+            "type": "string",
+            "description": "Operator carried by this event; empty when the event does not set one."
+          },
+          "impact": {
+            "type": "string",
+            "description": "Impact carried by this event, as Markdown; empty when the event does not set one."
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "Backout plan carried by this event, as Markdown; empty when the event does not set one."
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "Checklist carried by this event; a non-nil list (even empty) replaces the change's stored checklist."
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Custom field values carried by this event, keyed by field name; merged into the change's stored values by key."
+          },
+          "actor": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChangeActor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Member or integration that wrote this event; `null` when the ID resolves to nothing."
+          },
+          "diff": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ChangeDiff"
+            },
+            "description": "Fields this event changed, mapping each field name to its before and after value; omitted when the event changed nothing."
+          },
           "event_time": {
             "type": "integer",
             "format": "int64",
@@ -5009,6 +5061,14 @@
           "change_key",
           "change_status",
           "link",
+          "planned_start_time",
+          "planned_end_time",
+          "operator",
+          "impact",
+          "backout_plan",
+          "checklist",
+          "fields",
+          "actor",
           "event_time",
           "labels",
           "created_at",
@@ -5083,6 +5143,11 @@
             "format": "int64",
             "description": "Unix timestamp in seconds when the change started."
           },
+          "actual_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the change actually started: the event time of its earliest event in a started status (`Processing`, `Done`, `Failed`); `0` when it never started. `start_time` is the first write, which for a planned change is long before execution."
+          },
           "last_time": {
             "type": "integer",
             "format": "int64",
@@ -5107,6 +5172,75 @@
             "type": "string",
             "description": "External link to the source change record."
           },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds of the planned start; `0` when no plan was given."
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds of the planned end; `0` when no plan was given, and never earlier than `planned_start_time`."
+          },
+          "operator": {
+            "type": "string",
+            "description": "Person performing the change, as a member email or a free-form name; empty when not filled."
+          },
+          "impact": {
+            "type": "string",
+            "description": "Impact of the change, as Markdown; empty when not filled."
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "Rollback plan of the change, as Markdown; empty when not filled."
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "Execution checklist of the change; replaced as a whole by a console edit, and by a push whenever it carries one. Empty when the change has none."
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Values of the account's custom change fields, keyed by field name; empty when none are filled."
+          },
+          "can_edit": {
+            "type": "boolean",
+            "description": "Whether the caller may edit this change: admins may edit every change, members only those of their own collaboration spaces, and a change with no collaboration space (`channel_id` 0) is read-only for members."
+          },
+          "is_console": {
+            "type": "boolean",
+            "description": "Whether the change was written through the account's built-in console integration rather than pushed by an external integration."
+          },
+          "next_statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Planned",
+                "Ready",
+                "Processing",
+                "Canceled",
+                "Done",
+                "Failed"
+              ],
+              "description": "Status the change may move to."
+            },
+            "description": "Statuses a console write may move this change to from its current status; `Canceled`, `Done` and `Failed` are terminal and leave this empty. Only `POST /change/info` fills it, so it is omitted from list responses."
+          },
+          "creator": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChangeActor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Actor of the change's first event, `null` when the change has no event or the actor resolves to nothing."
+          },
           "events": {
             "type": "array",
             "items": {
@@ -5128,10 +5262,21 @@
           "change_key",
           "change_status",
           "start_time",
+          "actual_start_time",
           "last_time",
           "end_time",
           "labels",
-          "link"
+          "link",
+          "planned_start_time",
+          "planned_end_time",
+          "operator",
+          "impact",
+          "backout_plan",
+          "checklist",
+          "fields",
+          "can_edit",
+          "is_console",
+          "creator"
         ]
       },
       "ChannelCreateResponse": {
@@ -14187,6 +14332,391 @@
           "has_next_page",
           "items"
         ]
+      },
+      "ChangeChecklistItem": {
+        "type": "object",
+        "description": "One entry of the change's execution checklist.",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Checklist item text."
+          },
+          "done": {
+            "type": "boolean",
+            "description": "Whether the item has been ticked off."
+          },
+          "by": {
+            "type": "string",
+            "description": "Member who ticked it, as an email; omitted when the item is not ticked."
+          },
+          "at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp in seconds when the item was ticked; omitted when the item is not ticked."
+          }
+        }
+      },
+      "ChangeActor": {
+        "type": "object",
+        "description": "The member or integration that wrote the change.",
+        "required": [
+          "type",
+          "id",
+          "name"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "member",
+              "integration"
+            ],
+            "description": "Actor kind: `member` for a console write, `integration` for a push."
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Member ID or integration ID, matching `type`."
+          },
+          "name": {
+            "type": "string",
+            "description": "Member display name or integration name; empty when the ID resolves to nothing."
+          }
+        }
+      },
+      "ChangeDiff": {
+        "type": "object",
+        "description": "One field's before and after value in a change event.",
+        "required": [
+          "before",
+          "after"
+        ],
+        "properties": {
+          "before": {
+            "type": "string",
+            "description": "Value before the event."
+          },
+          "after": {
+            "type": "string",
+            "description": "Value after the event."
+          }
+        }
+      },
+      "ChangeInfoRequest": {
+        "type": "object",
+        "description": "Identifies one change: by `change_id`, or by `integration_id` together with `change_key`.",
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Change ID, a 24-character hex string."
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Integration that reported the change; use together with `change_key`."
+          },
+          "change_key": {
+            "type": "string",
+            "description": "Change key within that integration; use together with `integration_id`."
+          }
+        }
+      },
+      "ChangeInfo": {
+        "description": "Change detail: the change, all of its events, and where its notifications go.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChangeItem"
+          },
+          {
+            "type": "object",
+            "required": [
+              "notify_target"
+            ],
+            "properties": {
+              "events": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChangeEventItem"
+                },
+                "description": "Every event of the change, oldest first."
+              },
+              "notify_target": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ChangeNotifyTarget"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Group the change's notifications go to: the first notification policy of the change form that matches the change's collaboration space. `null` when none matches."
+              }
+            }
+          }
+        ]
+      },
+      "ChangeNotifyTarget": {
+        "type": "object",
+        "description": "A notification group bound in the change form. Webhook URLs and tokens are never returned.",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "im_app",
+              "webhook"
+            ],
+            "description": "How the group is reached.\n| Value | Meaning |\n|---|---|\n| `im_app` | A group chat of an IM application integration. |\n| `webhook` | A group robot or a custom webhook. |"
+          },
+          "integration_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "IM application integration of an `im_app` target; omitted otherwise."
+          },
+          "chat_id": {
+            "type": "string",
+            "description": "Group chat ID of an `im_app` target, or the chat of a Telegram robot; omitted when not set."
+          },
+          "chat_name": {
+            "type": "string",
+            "description": "Group chat name; omitted when not set."
+          },
+          "webhook_type": {
+            "type": "string",
+            "description": "Robot type of a `webhook` target: `feishu`, `dingtalk`, `wecom`, `slack`, `telegram` or `zoom`; `generic` or omitted for a custom webhook."
+          }
+        }
+      },
+      "CreateChangeRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "channel_id"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Change title, non-empty."
+          },
+          "description": {
+            "type": "string",
+            "description": "Change description."
+          },
+          "change_status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Ready",
+              "Processing",
+              "Canceled",
+              "Done",
+              "Failed"
+            ],
+            "description": "Initial status. Defaults to `Planned`.\n| Value | Meaning |\n|---|---|\n| `Planned` | Planned, not started. |\n| `Ready` | Ready for execution. |\n| `Processing` | Being executed. |\n| `Canceled` | Canceled. |\n| `Done` | Completed. |\n| `Failed` | Failed. |",
+            "default": "Planned"
+          },
+          "link": {
+            "type": "string",
+            "description": "External link to the change record: an absolute `http` or `https` URL, or empty."
+          },
+          "channel_id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "description": "Collaboration space the change belongs to. Can't be changed later."
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Key-value labels. Keys outside `[a-zA-Z_][a-zA-Z0-9_]*` are stored with spaces and punctuation replaced by `_`."
+          },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Planned start, Unix seconds or milliseconds."
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Planned end, Unix seconds or milliseconds; not earlier than `planned_start_time`."
+          },
+          "operator": {
+            "type": "string",
+            "description": "Person performing the change, as a member email or a free-form name."
+          },
+          "impact": {
+            "type": "string",
+            "description": "Impact of the change, as Markdown."
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "Rollback plan of the change, as Markdown."
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "Execution checklist. `by` and `at` are ignored; an item with `done: true` is recorded as ticked by the caller."
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Custom field values, keyed by field name. Each key must be an enabled custom field available to changes."
+          }
+        }
+      },
+      "CreateChangeResponse": {
+        "type": "object",
+        "description": "The created change.",
+        "required": [
+          "change_id",
+          "change_key"
+        ],
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "ID of the new change, a 24-character hex string."
+          },
+          "change_key": {
+            "type": "string",
+            "description": "Change key generated by the platform, `CHG-<yyyyMMdd>-<4 characters>`."
+          }
+        }
+      },
+      "UpdateChangeRequest": {
+        "type": "object",
+        "required": [
+          "change_id"
+        ],
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "ID of the change to update, a 24-character hex string."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Change title, non-empty."
+          },
+          "description": {
+            "type": "string",
+            "description": "Change description.",
+            "x-flashduty-preserve-absence": true
+          },
+          "change_status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Ready",
+              "Processing",
+              "Canceled",
+              "Done",
+              "Failed"
+            ],
+            "description": "New status; must be the current status or one it may move to (see `next_statuses` in `POST /change/info`).\n| Value | Meaning |\n|---|---|\n| `Planned` | Planned, not started. |\n| `Ready` | Ready for execution. |\n| `Processing` | Being executed. |\n| `Canceled` | Canceled. |\n| `Done` | Completed. |\n| `Failed` | Failed. |"
+          },
+          "link": {
+            "type": "string",
+            "description": "External link to the change record: an absolute `http` or `https` URL, or empty.",
+            "x-flashduty-preserve-absence": true
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Labels to add or overwrite; a key with an empty value is removed. Keys not sent are kept."
+          },
+          "planned_start_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Planned start, Unix seconds or milliseconds.",
+            "x-flashduty-preserve-absence": true
+          },
+          "planned_end_time": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "description": "Planned end, Unix seconds or milliseconds; not earlier than `planned_start_time`.",
+            "x-flashduty-preserve-absence": true
+          },
+          "operator": {
+            "type": "string",
+            "description": "Person performing the change, as a member email or a free-form name.",
+            "x-flashduty-preserve-absence": true
+          },
+          "impact": {
+            "type": "string",
+            "description": "Impact of the change, as Markdown.",
+            "x-flashduty-preserve-absence": true
+          },
+          "backout_plan": {
+            "type": "string",
+            "description": "Rollback plan of the change, as Markdown.",
+            "x-flashduty-preserve-absence": true
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeChecklistItem"
+            },
+            "description": "Full execution checklist, replacing the stored one. `by` and `at` are ignored; an item already ticked under the same `text` keeps who ticked it, and a newly ticked item is recorded as ticked by the caller.",
+            "x-flashduty-preserve-absence": true
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Custom field values to set, keyed by field name; a `null` value removes the key. Keys not sent are kept."
+          }
+        }
+      },
+      "UpdateChangeResponse": {
+        "type": "object",
+        "description": "The change after the update.",
+        "required": [
+          "change_id",
+          "change_key",
+          "change_status"
+        ],
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "description": "Change ID."
+          },
+          "change_key": {
+            "type": "string",
+            "description": "Change key."
+          },
+          "change_status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "Ready",
+              "Processing",
+              "Canceled",
+              "Done",
+              "Failed"
+            ],
+            "description": "Status of the change after the update.\n| Value | Meaning |\n|---|---|\n| `Planned` | Planned, not started. |\n| `Ready` | Ready for execution. |\n| `Processing` | Being executed. |\n| `Canceled` | Canceled. |\n| `Done` | Completed. |\n| `Failed` | Failed. |"
+          }
+        }
       },
       "ListChannelsRequest": {
         "type": "object",
@@ -39964,6 +40494,375 @@
                 "orderby": "start_time",
                 "asc": false,
                 "include_events": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change/info": {
+      "post": {
+        "operationId": "change-read-info",
+        "summary": "Get change detail",
+        "description": "Return one change with all of its events, by change ID or by integration and change key.",
+        "tags": [
+          "On-call/Changes"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **1,000 requests/minute**; **50 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Send `change_id`, or both `integration_id` and `change_key`; otherwise `InvalidParameter`. When `change_id` is set, the other two are ignored.\n- Unlike `POST /change/list`, there is no time window: a change of any date can be read.\n- `events` holds every event of the change, oldest first. `next_statuses` lists the statuses `POST /change/update` may move the change to.\n- `notify_target` is the group the change's notifications go to, or `null` when the change form binds no group for its collaboration space.\n- An unknown change returns `InvalidParameter`. Changes in public collaboration spaces and changes with no collaboration space are readable by every member; a change in a private space only by the account owner, admins, the space's creator and members of its teams. Otherwise the call returns `AccessDenied`.",
+          "href": "/en/api-reference/on-call/changes/change-read-info",
+          "metadata": {
+            "sidebarTitle": "Get change detail"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChangeInfo"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                    "account_id": 10001,
+                    "channel_id": 5001,
+                    "channel_name": "Production",
+                    "channel_status": "enabled",
+                    "integration_id": 362,
+                    "integration_name": "控制台",
+                    "title": "Upgrade payment-service to v3.2.0",
+                    "description": "Rolling upgrade of payment-service in the production cluster.",
+                    "change_key": "CHG-20261126-7Q2K",
+                    "change_status": "Processing",
+                    "start_time": 1764140400,
+                    "actual_start_time": 1764147700,
+                    "last_time": 1764147700,
+                    "end_time": 0,
+                    "labels": {
+                      "service": "payment-service",
+                      "env": "prod"
+                    },
+                    "link": "https://ci.example.com/pipelines/4821",
+                    "planned_start_time": 1764147600,
+                    "planned_end_time": 1764151200,
+                    "operator": "alice@example.com",
+                    "impact": "Payments may be retried for up to 30 seconds per pod.",
+                    "backout_plan": "Roll back the deployment to v3.1.4.",
+                    "checklist": [
+                      {
+                        "text": "Notify the support team",
+                        "done": true,
+                        "by": "Alice Chen",
+                        "at": 1764147650
+                      },
+                      {
+                        "text": "Verify error rate after rollout",
+                        "done": false
+                      }
+                    ],
+                    "fields": {
+                      "risk_level": "medium"
+                    },
+                    "can_edit": true,
+                    "is_console": true,
+                    "next_statuses": [
+                      "Done",
+                      "Failed"
+                    ],
+                    "creator": {
+                      "type": "member",
+                      "id": 2000001,
+                      "name": "Alice Chen"
+                    },
+                    "events": [
+                      {
+                        "event_id": "664a1b2c3d4e5f6a7b8c9d0f",
+                        "account_id": 10001,
+                        "channel_id": 5001,
+                        "integration_id": 362,
+                        "title": "Upgrade payment-service to v3.2.0",
+                        "description": "Rolling upgrade of payment-service in the production cluster.",
+                        "change_key": "CHG-20261126-7Q2K",
+                        "change_status": "Processing",
+                        "link": "https://ci.example.com/pipelines/4821",
+                        "planned_start_time": 1764147600,
+                        "planned_end_time": 1764151200,
+                        "operator": "alice@example.com",
+                        "impact": "Payments may be retried for up to 30 seconds per pod.",
+                        "backout_plan": "Roll back the deployment to v3.1.4.",
+                        "checklist": [
+                          {
+                            "text": "Notify the support team",
+                            "done": true,
+                            "by": "Alice Chen",
+                            "at": 1764147650
+                          },
+                          {
+                            "text": "Verify error rate after rollout",
+                            "done": false
+                          }
+                        ],
+                        "fields": {
+                          "risk_level": "medium"
+                        },
+                        "actor": {
+                          "type": "member",
+                          "id": 2000001,
+                          "name": "Alice Chen"
+                        },
+                        "diff": {
+                          "change_status": {
+                            "before": "Planned",
+                            "after": "Processing"
+                          }
+                        },
+                        "event_time": 1764147700,
+                        "labels": {
+                          "service": "payment-service",
+                          "env": "prod"
+                        },
+                        "created_at": 1764147700,
+                        "updated_at": 1764147700
+                      }
+                    ],
+                    "notify_target": {
+                      "type": "im_app",
+                      "integration_id": 4102,
+                      "chat_id": "oc_0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+                      "chat_name": "Release announcements"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeInfoRequest"
+              },
+              "example": {
+                "change_id": "664a1b2c3d4e5f6a7b8c9d0e"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change/create": {
+      "post": {
+        "operationId": "change-write-create",
+        "summary": "Create change",
+        "description": "Create a change in a collaboration space. The change is recorded as written by the caller, and its change key is generated by the platform.",
+        "tags": [
+          "On-call/Changes"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- `channel_id` must be a collaboration space of the account; otherwise `InvalidParameter`. The caller must be able to write changes there: the account owner or an admin, the space's creator, a member of its owning or managing teams, or any member for a public space. Otherwise the call returns `AccessDenied`.\n- `change_status` defaults to `Planned`; any of the six statuses can be set on create.\n- The returned `change_key` has the form `CHG-<yyyyMMdd>-<4 characters>`. To address a change by a key of your own, report it through a change integration instead.\n- `planned_start_time` and `planned_end_time` accept Unix seconds or milliseconds (milliseconds are stored as seconds). `planned_end_time` must not be earlier than `planned_start_time`.\n- `link` must be empty or an absolute `http` or `https` URL.\n- Label keys that don't match `[a-zA-Z_][a-zA-Z0-9_]*` are stored with spaces and punctuation replaced by `_`.\n- Each `fields` key must be an enabled custom field available to changes, and its value must fit the field's type and options; otherwise `InvalidParameter` naming `fields.<name>`.\n- Fields the account's change form marks as required, including fields required only under conditions, must be filled; otherwise `InvalidParameter` with `required fields missing or empty: <keys>`.\n- In `checklist`, `by` and `at` are ignored: an item sent with `done: true` is recorded as ticked by the caller at the time of the call.\n- When the change form binds a notification group for the collaboration space, a notification is sent to it.\n- Every call is recorded in the account audit log.",
+          "href": "/en/api-reference/on-call/changes/change-write-create",
+          "metadata": {
+            "sidebarTitle": "Create change"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CreateChangeResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                    "change_key": "CHG-20261126-7Q2K"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChangeRequest"
+              },
+              "example": {
+                "title": "Upgrade payment-service to v3.2.0",
+                "description": "Rolling upgrade of payment-service in the production cluster.",
+                "change_status": "Planned",
+                "link": "https://ci.example.com/pipelines/4821",
+                "channel_id": 5001,
+                "labels": {
+                  "service": "payment-service",
+                  "env": "prod"
+                },
+                "planned_start_time": 1764147600,
+                "planned_end_time": 1764151200,
+                "operator": "alice@example.com",
+                "impact": "Payments may be retried for up to 30 seconds per pod.",
+                "backout_plan": "Roll back the deployment to v3.1.4.",
+                "checklist": [
+                  {
+                    "text": "Notify the support team",
+                    "done": false
+                  },
+                  {
+                    "text": "Verify error rate after rollout",
+                    "done": false
+                  }
+                ],
+                "fields": {
+                  "risk_level": "medium"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change/update": {
+      "post": {
+        "operationId": "change-write-update",
+        "summary": "Update change",
+        "description": "Update a change's title, description, status, link, labels, plan, checklist or custom field values. Fields left out keep their current values.",
+        "tags": [
+          "On-call/Changes"
+        ],
+        "x-mint": {
+          "content": "## Restrictions\n\n| Aspect | Value |\n| ------ | ----- |\n| Rate limits | **300 requests/minute**; **20 requests/second** per account |\n| Permissions | None — any valid `app_key` can call this operation |\n\n## Usage\n\n- Send at least one field besides `change_id`; otherwise `InvalidParameter`.\n- An unknown `change_id` returns `InvalidParameter`. The caller must be able to write the change's collaboration space, under the same rule as `POST /change/create`; a change with no collaboration space (`channel_id` 0) can be updated only by the account owner and admins. Otherwise the call returns `AccessDenied`. A change's collaboration space can't be changed.\n- `change_status` moves follow a fixed flow: `Planned` → `Ready`, `Processing` or `Canceled`; `Ready` → `Processing` or `Canceled`; `Processing` → `Done` or `Failed`; `Done` or `Failed` → `Processing` (reopen). `Canceled` is final. Sending the current status is allowed; any other move returns `InvalidParameter`. `POST /change/info` returns the allowed moves in `next_statuses`.\n- `title` and `change_status` can't be empty strings. Any other string field sent as `\"\"` is cleared.\n- `labels` adds or overwrites keys, and a key sent with an empty value is removed. `fields` sets values by key, and a key sent as `null` is removed. Keys not sent are kept in both.\n- `checklist` replaces the whole list. `by` and `at` are ignored: an item that was already ticked under the same `text` keeps who ticked it and when, and a newly ticked item is recorded as ticked by the caller.\n- When the only difference is which checklist items are ticked (same item texts in the same order), the ticks are saved without a timeline entry or a notification, and `last_time` doesn't change.\n- `planned_start_time` and `planned_end_time` accept Unix seconds or milliseconds. After the update, `planned_end_time` must not be earlier than `planned_start_time`.\n- Required fields of the change form are checked against the change as the update leaves it. Only fields this update leaves empty are refused (`InvalidParameter` with `required fields missing or empty: <keys>`); a required field that was already empty doesn't block the update.\n- For changes created in the console or through `POST /change/create`, a status move sends a status notification to the change form's bound group, and other edits to fields on the change form send an edit notification. Changes reported by an integration are not notified when updated here.\n- Every call is recorded in the account audit log.",
+          "href": "/en/api-reference/on-call/changes/change-write-update",
+          "metadata": {
+            "sidebarTitle": "Update change"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UpdateChangeResponse"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "request_id": "01HK8XQE3Z7JM2NTFQ5YJ8P9R4",
+                  "data": {
+                    "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                    "change_key": "CHG-20261126-7Q2K",
+                    "change_status": "Processing"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChangeRequest"
+              },
+              "example": {
+                "change_id": "664a1b2c3d4e5f6a7b8c9d0e",
+                "change_status": "Processing",
+                "labels": {
+                  "version": "v3.2.0",
+                  "env": ""
+                },
+                "fields": {
+                  "risk_level": null
+                }
               }
             }
           }

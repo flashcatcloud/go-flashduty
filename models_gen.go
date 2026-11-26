@@ -2099,10 +2099,44 @@ type CancelStatusPageMigrationRequest struct {
 	JobID string `json:"job_id" toon:"job_id"`
 }
 
+// ChangeActor is generated from the Flashduty OpenAPI schema.
+type ChangeActor struct {
+	// Member ID or integration ID, matching `type`.
+	ID int64 `json:"id" toon:"id"`
+	// Member display name or integration name; empty when the ID resolves to nothing.
+	Name string `json:"name" toon:"name"`
+	// Actor kind: `member` for a console write, `integration` for a push.
+	Type string `json:"type" toon:"type"`
+}
+
+// ChangeChecklistItem is generated from the Flashduty OpenAPI schema.
+type ChangeChecklistItem struct {
+	// Unix timestamp in seconds when the item was ticked; omitted when the item is not ticked.
+	At int64 `json:"at,omitempty" toon:"at,omitempty"`
+	// Member who ticked it, as an email; omitted when the item is not ticked.
+	By string `json:"by,omitempty" toon:"by,omitempty"`
+	// Whether the item has been ticked off.
+	Done bool `json:"done,omitempty" toon:"done,omitempty"`
+	// Checklist item text.
+	Text string `json:"text" toon:"text"`
+}
+
+// ChangeDiff is generated from the Flashduty OpenAPI schema.
+type ChangeDiff struct {
+	// Value after the event.
+	After string `json:"after" toon:"after"`
+	// Value before the event.
+	Before string `json:"before" toon:"before"`
+}
+
 // ChangeEventItem is generated from the Flashduty OpenAPI schema.
 type ChangeEventItem struct {
 	// Account this change event belongs to.
 	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Member or integration that wrote this event; `null` when the ID resolves to nothing.
+	Actor *ChangeActor `json:"actor" toon:"actor"`
+	// Backout plan carried by this event, as Markdown; empty when the event does not set one.
+	BackoutPlan string `json:"backout_plan" toon:"backout_plan"`
 	// Stable key that groups events belonging to the same change.
 	ChangeKey string `json:"change_key" toon:"change_key"`
 	// Lifecycle status of the change event, reported by the change source as execution progresses.
@@ -2117,32 +2151,52 @@ type ChangeEventItem struct {
 	ChangeStatus string `json:"change_status" toon:"change_status"`
 	// Collaboration channel this change event is routed to.
 	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Checklist carried by this event; a non-nil list (even empty) replaces the change's stored checklist.
+	Checklist []ChangeChecklistItem `json:"checklist" toon:"checklist"`
 	// Unix timestamp in seconds when the change event was created.
 	CreatedAt Timestamp `json:"created_at" toon:"created_at"`
 	// Unix timestamp in seconds when the change event was deleted. Omitted when not deleted.
 	DeletedAt Timestamp `json:"deleted_at" toon:"deleted_at"`
 	// Change event description.
 	Description string `json:"description" toon:"description"`
+	// Fields this event changed, mapping each field name to its before and after value; omitted when the event changed nothing.
+	Diff map[string]ChangeDiff `json:"diff" toon:"diff"`
 	// Change event ID, a MongoDB ObjectID hex string.
 	EventID string `json:"event_id" toon:"event_id"`
 	// Unix timestamp in seconds when the change event occurred.
 	EventTime Timestamp `json:"event_time" toon:"event_time"`
+	// Custom field values carried by this event, keyed by field name; merged into the change's stored values by key.
+	Fields map[string]any `json:"fields" toon:"fields"`
+	// Impact carried by this event, as Markdown; empty when the event does not set one.
+	Impact string `json:"impact" toon:"impact"`
 	// Integration that reported this change event.
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Key-value labels attached to the change event.
 	Labels map[string]string `json:"labels" toon:"labels"`
 	// External link to the source change record.
 	Link string `json:"link" toon:"link"`
+	// Operator carried by this event; empty when the event does not set one.
+	Operator string `json:"operator" toon:"operator"`
+	// Planned end carried by this event, Unix timestamp (seconds); `0` when the event does not set one.
+	PlannedEndTime Timestamp `json:"planned_end_time" toon:"planned_end_time"`
+	// Planned start carried by this event, Unix timestamp (seconds); `0` when the event does not set one.
+	PlannedStartTime Timestamp `json:"planned_start_time" toon:"planned_start_time"`
 	// Change event title.
 	Title string `json:"title" toon:"title"`
 	// Unix timestamp in seconds when the change event was last updated.
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 }
 
-// ChangeItem is generated from the Flashduty OpenAPI schema.
-type ChangeItem struct {
+// ChangeInfo is generated from the Flashduty OpenAPI schema.
+type ChangeInfo struct {
 	// Account this change belongs to.
 	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Unix timestamp in seconds when the change actually started: the event time of its earliest event in a started status (`Processing`, `Done`, `Failed`); `0` when it never started. `start_time` is the first write, which for a planned change is long before execution.
+	ActualStartTime Timestamp `json:"actual_start_time" toon:"actual_start_time"`
+	// Rollback plan of the change, as Markdown; empty when not filled.
+	BackoutPlan string `json:"backout_plan" toon:"backout_plan"`
+	// Whether the caller may edit this change: admins may edit every change, members only those of their own collaboration spaces, and a change with no collaboration space (`channel_id` 0) is read-only for members.
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
 	// Change ID, a MongoDB ObjectID hex string.
 	ChangeID string `json:"change_id" toon:"change_id"`
 	// Stable key that groups events belonging to the same change.
@@ -2163,26 +2217,144 @@ type ChangeItem struct {
 	ChannelName string `json:"channel_name" toon:"channel_name"`
 	// Status of the collaboration channel: `enabled` or `disabled`; an empty string when the change is not routed to an existing channel.
 	ChannelStatus string `json:"channel_status" toon:"channel_status"`
+	// Execution checklist of the change; replaced as a whole by a console edit, and by a push whenever it carries one. Empty when the change has none.
+	Checklist []ChangeChecklistItem `json:"checklist" toon:"checklist"`
+	// Actor of the change's first event, `null` when the change has no event or the actor resolves to nothing.
+	Creator *ChangeActor `json:"creator" toon:"creator"`
 	// Change description.
 	Description string `json:"description" toon:"description"`
 	// Unix timestamp in seconds when the change ended.
 	EndTime Timestamp `json:"end_time" toon:"end_time"`
-	// Raw change events reported by the integration that make up this change. Present only when `include_events` is `true`.
+	// Every event of the change, oldest first.
 	Events []ChangeEventItem `json:"events" toon:"events"`
+	// Values of the account's custom change fields, keyed by field name; empty when none are filled.
+	Fields map[string]any `json:"fields" toon:"fields"`
+	// Impact of the change, as Markdown; empty when not filled.
+	Impact string `json:"impact" toon:"impact"`
 	// Integration that reported this change.
 	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
 	// Name of the reporting integration.
 	IntegrationName string `json:"integration_name" toon:"integration_name"`
+	// Whether the change was written through the account's built-in console integration rather than pushed by an external integration.
+	IsConsole bool `json:"is_console" toon:"is_console"`
 	// Key-value labels attached to the change; `null` when it has none.
 	Labels map[string]string `json:"labels" toon:"labels"`
 	// Unix timestamp in seconds of the most recent change activity.
 	LastTime Timestamp `json:"last_time" toon:"last_time"`
 	// External link to the source change record.
 	Link string `json:"link" toon:"link"`
+	// Statuses a console write may move this change to from its current status; `Canceled`, `Done` and `Failed` are terminal and leave this empty. Only `POST /change/info` fills it, so it is omitted from list responses.
+	NextStatuses []string `json:"next_statuses" toon:"next_statuses"`
+	// Group the change's notifications go to: the first notification policy of the change form that matches the change's collaboration space. `null` when none matches.
+	NotifyTarget *ChangeNotifyTarget `json:"notify_target" toon:"notify_target"`
+	// Person performing the change, as a member email or a free-form name; empty when not filled.
+	Operator string `json:"operator" toon:"operator"`
+	// Unix timestamp in seconds of the planned end; `0` when no plan was given, and never earlier than `planned_start_time`.
+	PlannedEndTime Timestamp `json:"planned_end_time" toon:"planned_end_time"`
+	// Unix timestamp in seconds of the planned start; `0` when no plan was given.
+	PlannedStartTime Timestamp `json:"planned_start_time" toon:"planned_start_time"`
 	// Unix timestamp in seconds when the change started.
 	StartTime Timestamp `json:"start_time" toon:"start_time"`
 	// Change title.
 	Title string `json:"title" toon:"title"`
+}
+
+// ChangeInfoRequest is generated from the Flashduty OpenAPI schema.
+type ChangeInfoRequest struct {
+	// Change ID, a 24-character hex string.
+	ChangeID string `json:"change_id,omitempty" toon:"change_id,omitempty"`
+	// Change key within that integration; use together with `integration_id`.
+	ChangeKey string `json:"change_key,omitempty" toon:"change_key,omitempty"`
+	// Integration that reported the change; use together with `change_key`.
+	IntegrationID int64 `json:"integration_id,omitempty" toon:"integration_id,omitempty"`
+}
+
+// ChangeItem is generated from the Flashduty OpenAPI schema.
+type ChangeItem struct {
+	// Account this change belongs to.
+	AccountID int64 `json:"account_id" toon:"account_id"`
+	// Unix timestamp in seconds when the change actually started: the event time of its earliest event in a started status (`Processing`, `Done`, `Failed`); `0` when it never started. `start_time` is the first write, which for a planned change is long before execution.
+	ActualStartTime Timestamp `json:"actual_start_time" toon:"actual_start_time"`
+	// Rollback plan of the change, as Markdown; empty when not filled.
+	BackoutPlan string `json:"backout_plan" toon:"backout_plan"`
+	// Whether the caller may edit this change: admins may edit every change, members only those of their own collaboration spaces, and a change with no collaboration space (`channel_id` 0) is read-only for members.
+	CanEdit bool `json:"can_edit" toon:"can_edit"`
+	// Change ID, a MongoDB ObjectID hex string.
+	ChangeID string `json:"change_id" toon:"change_id"`
+	// Stable key that groups events belonging to the same change.
+	ChangeKey string `json:"change_key" toon:"change_key"`
+	// Current lifecycle status of the change.
+	// | Value | Meaning |
+	// |---|---|
+	// | `Planned` | Planned, not started. |
+	// | `Ready` | Ready for execution. |
+	// | `Processing` | Being executed. |
+	// | `Canceled` | Canceled. |
+	// | `Done` | Completed. |
+	// | `Failed` | Failed. |
+	ChangeStatus string `json:"change_status" toon:"change_status"`
+	// Collaboration channel this change is routed to.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Name of the collaboration channel; an empty string when the change is not routed to an existing channel.
+	ChannelName string `json:"channel_name" toon:"channel_name"`
+	// Status of the collaboration channel: `enabled` or `disabled`; an empty string when the change is not routed to an existing channel.
+	ChannelStatus string `json:"channel_status" toon:"channel_status"`
+	// Execution checklist of the change; replaced as a whole by a console edit, and by a push whenever it carries one. Empty when the change has none.
+	Checklist []ChangeChecklistItem `json:"checklist" toon:"checklist"`
+	// Actor of the change's first event, `null` when the change has no event or the actor resolves to nothing.
+	Creator *ChangeActor `json:"creator" toon:"creator"`
+	// Change description.
+	Description string `json:"description" toon:"description"`
+	// Unix timestamp in seconds when the change ended.
+	EndTime Timestamp `json:"end_time" toon:"end_time"`
+	// Raw change events reported by the integration that make up this change. Present only when `include_events` is `true`.
+	Events []ChangeEventItem `json:"events" toon:"events"`
+	// Values of the account's custom change fields, keyed by field name; empty when none are filled.
+	Fields map[string]any `json:"fields" toon:"fields"`
+	// Impact of the change, as Markdown; empty when not filled.
+	Impact string `json:"impact" toon:"impact"`
+	// Integration that reported this change.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// Name of the reporting integration.
+	IntegrationName string `json:"integration_name" toon:"integration_name"`
+	// Whether the change was written through the account's built-in console integration rather than pushed by an external integration.
+	IsConsole bool `json:"is_console" toon:"is_console"`
+	// Key-value labels attached to the change; `null` when it has none.
+	Labels map[string]string `json:"labels" toon:"labels"`
+	// Unix timestamp in seconds of the most recent change activity.
+	LastTime Timestamp `json:"last_time" toon:"last_time"`
+	// External link to the source change record.
+	Link string `json:"link" toon:"link"`
+	// Statuses a console write may move this change to from its current status; `Canceled`, `Done` and `Failed` are terminal and leave this empty. Only `POST /change/info` fills it, so it is omitted from list responses.
+	NextStatuses []string `json:"next_statuses" toon:"next_statuses"`
+	// Person performing the change, as a member email or a free-form name; empty when not filled.
+	Operator string `json:"operator" toon:"operator"`
+	// Unix timestamp in seconds of the planned end; `0` when no plan was given, and never earlier than `planned_start_time`.
+	PlannedEndTime Timestamp `json:"planned_end_time" toon:"planned_end_time"`
+	// Unix timestamp in seconds of the planned start; `0` when no plan was given.
+	PlannedStartTime Timestamp `json:"planned_start_time" toon:"planned_start_time"`
+	// Unix timestamp in seconds when the change started.
+	StartTime Timestamp `json:"start_time" toon:"start_time"`
+	// Change title.
+	Title string `json:"title" toon:"title"`
+}
+
+// ChangeNotifyTarget is generated from the Flashduty OpenAPI schema.
+type ChangeNotifyTarget struct {
+	// Group chat ID of an `im_app` target, or the chat of a Telegram robot; omitted when not set.
+	ChatID string `json:"chat_id" toon:"chat_id"`
+	// Group chat name; omitted when not set.
+	ChatName string `json:"chat_name" toon:"chat_name"`
+	// IM application integration of an `im_app` target; omitted otherwise.
+	IntegrationID int64 `json:"integration_id" toon:"integration_id"`
+	// How the group is reached.
+	// | Value | Meaning |
+	// |---|---|
+	// | `im_app` | A group chat of an IM application integration. |
+	// | `webhook` | A group robot or a custom webhook. |
+	Type string `json:"type" toon:"type"`
+	// Robot type of a `webhook` target: `feishu`, `dingtalk`, `wecom`, `slack`, `telegram` or `zoom`; `generic` or omitted for a custom webhook.
+	WebhookType string `json:"webhook_type" toon:"webhook_type"`
 }
 
 // ChannelCreateResponse is generated from the Flashduty OpenAPI schema.
@@ -2455,6 +2627,52 @@ type ConvertWorkItemRequest struct {
 	Version int64 `json:"version" toon:"version"`
 	// Work item ID (opaque string, max 128 characters).
 	WorkItemID string `json:"work_item_id" toon:"work_item_id"`
+}
+
+// CreateChangeRequest is generated from the Flashduty OpenAPI schema.
+type CreateChangeRequest struct {
+	// Rollback plan of the change, as Markdown.
+	BackoutPlan string `json:"backout_plan,omitempty" toon:"backout_plan,omitempty"`
+	// Initial status. Defaults to `Planned`.
+	// | Value | Meaning |
+	// |---|---|
+	// | `Planned` | Planned, not started. |
+	// | `Ready` | Ready for execution. |
+	// | `Processing` | Being executed. |
+	// | `Canceled` | Canceled. |
+	// | `Done` | Completed. |
+	// | `Failed` | Failed. |
+	ChangeStatus string `json:"change_status,omitempty" toon:"change_status,omitempty"`
+	// Collaboration space the change belongs to. Can't be changed later.
+	ChannelID int64 `json:"channel_id" toon:"channel_id"`
+	// Execution checklist. `by` and `at` are ignored; an item with `done: true` is recorded as ticked by the caller.
+	Checklist []ChangeChecklistItem `json:"checklist,omitempty" toon:"checklist,omitempty"`
+	// Change description.
+	Description string `json:"description,omitempty" toon:"description,omitempty"`
+	// Custom field values, keyed by field name. Each key must be an enabled custom field available to changes.
+	Fields map[string]any `json:"fields,omitempty" toon:"fields,omitempty"`
+	// Impact of the change, as Markdown.
+	Impact string `json:"impact,omitempty" toon:"impact,omitempty"`
+	// Key-value labels. Keys outside `[a-zA-Z_][a-zA-Z0-9_]*` are stored with spaces and punctuation replaced by `_`.
+	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	// External link to the change record: an absolute `http` or `https` URL, or empty.
+	Link string `json:"link,omitempty" toon:"link,omitempty"`
+	// Person performing the change, as a member email or a free-form name.
+	Operator string `json:"operator,omitempty" toon:"operator,omitempty"`
+	// Planned end, Unix seconds or milliseconds; not earlier than `planned_start_time`.
+	PlannedEndTime int64 `json:"planned_end_time,omitempty" toon:"planned_end_time,omitempty"`
+	// Planned start, Unix seconds or milliseconds.
+	PlannedStartTime int64 `json:"planned_start_time,omitempty" toon:"planned_start_time,omitempty"`
+	// Change title, non-empty.
+	Title string `json:"title" toon:"title"`
+}
+
+// CreateChangeResponse is generated from the Flashduty OpenAPI schema.
+type CreateChangeResponse struct {
+	// ID of the new change, a 24-character hex string.
+	ChangeID string `json:"change_id" toon:"change_id"`
+	// Change key generated by the platform, `CHG-<yyyyMMdd>-<4 characters>`.
+	ChangeKey string `json:"change_key" toon:"change_key"`
 }
 
 // CreateChannelRequest is generated from the Flashduty OpenAPI schema.
@@ -13183,6 +13401,62 @@ type UnsubscribeRuleItem struct {
 	UpdatedAt Timestamp `json:"updated_at" toon:"updated_at"`
 	// ID of the user who last updated the rule.
 	UpdatedBy int64 `json:"updated_by" toon:"updated_by"`
+}
+
+// UpdateChangeRequest is generated from the Flashduty OpenAPI schema.
+type UpdateChangeRequest struct {
+	// Rollback plan of the change, as Markdown.
+	BackoutPlan *string `json:"backout_plan,omitempty" toon:"backout_plan,omitempty"`
+	// ID of the change to update, a 24-character hex string.
+	ChangeID string `json:"change_id" toon:"change_id"`
+	// New status; must be the current status or one it may move to (see `next_statuses` in `POST /change/info`).
+	// | Value | Meaning |
+	// |---|---|
+	// | `Planned` | Planned, not started. |
+	// | `Ready` | Ready for execution. |
+	// | `Processing` | Being executed. |
+	// | `Canceled` | Canceled. |
+	// | `Done` | Completed. |
+	// | `Failed` | Failed. |
+	ChangeStatus string `json:"change_status,omitempty" toon:"change_status,omitempty"`
+	// Full execution checklist, replacing the stored one. `by` and `at` are ignored; an item already ticked under the same `text` keeps who ticked it, and a newly ticked item is recorded as ticked by the caller.
+	Checklist []ChangeChecklistItem `json:"checklist,omitzero" toon:"checklist,omitempty"`
+	// Change description.
+	Description *string `json:"description,omitempty" toon:"description,omitempty"`
+	// Custom field values to set, keyed by field name; a `null` value removes the key. Keys not sent are kept.
+	Fields map[string]any `json:"fields,omitempty" toon:"fields,omitempty"`
+	// Impact of the change, as Markdown.
+	Impact *string `json:"impact,omitempty" toon:"impact,omitempty"`
+	// Labels to add or overwrite; a key with an empty value is removed. Keys not sent are kept.
+	Labels map[string]string `json:"labels,omitempty" toon:"labels,omitempty"`
+	// External link to the change record: an absolute `http` or `https` URL, or empty.
+	Link *string `json:"link,omitempty" toon:"link,omitempty"`
+	// Person performing the change, as a member email or a free-form name.
+	Operator *string `json:"operator,omitempty" toon:"operator,omitempty"`
+	// Planned end, Unix seconds or milliseconds; not earlier than `planned_start_time`.
+	PlannedEndTime *int64 `json:"planned_end_time,omitempty" toon:"planned_end_time,omitempty"`
+	// Planned start, Unix seconds or milliseconds.
+	PlannedStartTime *int64 `json:"planned_start_time,omitempty" toon:"planned_start_time,omitempty"`
+	// Change title, non-empty.
+	Title string `json:"title,omitempty" toon:"title,omitempty"`
+}
+
+// UpdateChangeResponse is generated from the Flashduty OpenAPI schema.
+type UpdateChangeResponse struct {
+	// Change ID.
+	ChangeID string `json:"change_id" toon:"change_id"`
+	// Change key.
+	ChangeKey string `json:"change_key" toon:"change_key"`
+	// Status of the change after the update.
+	// | Value | Meaning |
+	// |---|---|
+	// | `Planned` | Planned, not started. |
+	// | `Ready` | Ready for execution. |
+	// | `Processing` | Being executed. |
+	// | `Canceled` | Canceled. |
+	// | `Done` | Completed. |
+	// | `Failed` | Failed. |
+	ChangeStatus string `json:"change_status" toon:"change_status"`
 }
 
 // UpdateChannelRequest is generated from the Flashduty OpenAPI schema.
