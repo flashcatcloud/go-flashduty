@@ -93,7 +93,7 @@ func (s *DashboardsService) ReadOutline(ctx context.Context, req *DashboardOutli
 
 // Search dashboards.
 //
-// Search dashboards across every readable folder.
+// Search dashboards in the requested scope.
 //
 // API: POST /monit/dashboard/search (monit-dashboard-read-search).
 func (s *DashboardsService) ReadSearch(ctx context.Context, req *DashboardSearchRequest) (*DashboardListOutput, *Response, error) {

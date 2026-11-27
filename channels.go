@@ -7,6 +7,20 @@ import "context"
 // ChannelsService handles the "On-call/Channels" API resource.
 type ChannelsService service
 
+// List shared integration routes into a channel.
+//
+// List every shared integration whose route delivers into a collaboration space, with the branches that match it.
+//
+// API: POST /channel/inbound-route/list (channel-inbound-route-read-list).
+func (s *ChannelsService) ChannelInboundRouteReadList(ctx context.Context, req *InboundRouteListRequest) (*ListInboundRoutesResponse, *Response, error) {
+	out := new(ListInboundRoutesResponse)
+	resp, err := s.client.do(ctx, "/channel/inbound-route/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Create channel.
 //
 // Create a channel, optionally with a default escalation rule and channel-exclusive integrations.

@@ -7,6 +7,20 @@ import "context"
 // AutomationsService handles the "AI SRE/Automations" API resource.
 type AutomationsService service
 
+// List Gitee trigger deliveries.
+//
+// List the webhook deliveries a Gitee trigger received, with the run each one started.
+//
+// API: POST /safari/automation/delivery/list (automation-delivery-read-list).
+func (s *AutomationsService) DeliveryReadList(ctx context.Context, req *ScmDeliveryListRequest) (*ListGiteeDeliveriesResponse, *Response, error) {
+	out := new(ListGiteeDeliveriesResponse)
+	resp, err := s.client.do(ctx, "/safari/automation/delivery/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get Automation rule.
 //
 // Get one Automation rule by ID, including its trigger settings and execution destination.
@@ -99,6 +113,62 @@ func (s *AutomationsService) RuleWriteUpdate(ctx context.Context, req *Automatio
 func (s *AutomationsService) RunReadList(ctx context.Context, req *AutomationRunListRequest) (*AutomationRunListResponse, *Response, error) {
 	out := new(AutomationRunListResponse)
 	resp, err := s.client.do(ctx, "/safari/automation/run/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// List repository trigger deliveries.
+//
+// List the webhook deliveries a GitHub or GitLab repository trigger received, with the run each one started.
+//
+// API: POST /safari/automation/scm/delivery/list (automation-scm-delivery-read-list).
+func (s *AutomationsService) ScmDeliveryReadList(ctx context.Context, req *ScmDeliveryListRequest) (*ListScmDeliveriesResponse, *Response, error) {
+	out := new(ListScmDeliveriesResponse)
+	resp, err := s.client.do(ctx, "/safari/automation/scm/delivery/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Retry a GitLab trigger's webhook.
+//
+// Re-create the GitLab webhook of one trigger and report the resulting hook status.
+//
+// API: POST /safari/automation/scm/hooks/gitlab/retry (automation-scm-gitlab-hook-write-retry).
+func (s *AutomationsService) ScmGitlabHookWriteRetry(ctx context.Context, req *RetryGitLabHookRequest) (*RetryGitLabHook, *Response, error) {
+	out := new(RetryGitLabHook)
+	resp, err := s.client.do(ctx, "/safari/automation/scm/hooks/gitlab/retry", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// List repository connections.
+//
+// List the GitHub or GitLab connections the account can build a repository trigger on, with their repositories.
+//
+// API: POST /safari/automation/scm/connections (automation-scm-read-connections).
+func (s *AutomationsService) ScmReadConnections(ctx context.Context, req *ScmConnectionsRequest) (*ListScmConnectionsResponse, *Response, error) {
+	out := new(ListScmConnectionsResponse)
+	resp, err := s.client.do(ctx, "/safari/automation/scm/connections", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Describe repository trigger options.
+//
+// Describe which events, actions and filterable fields a GitHub, GitLab or Gitee repository trigger can use.
+//
+// API: POST /safari/automation/scm/options (automation-scm-read-options).
+func (s *AutomationsService) ScmReadOptions(ctx context.Context) (*ScmOptions, *Response, error) {
+	out := new(ScmOptions)
+	resp, err := s.client.do(ctx, "/safari/automation/scm/options", nil, out)
 	if err != nil {
 		return nil, resp, err
 	}

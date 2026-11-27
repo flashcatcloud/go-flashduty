@@ -35,6 +35,20 @@ func (s *IncidentsService) ReadGetWarRoomDefaultObservers(ctx context.Context, r
 	return out, resp, nil
 }
 
+// Get incident summary.
+//
+// Get one incident's headline fields — number, title, severity, progress, channel and assignees — without its content.
+//
+// API: POST /incident/summary (incident-read-summary).
+func (s *IncidentsService) ReadSummary(ctx context.Context, req *IncidentInfoRequest) (*IncidentSummary, *Response, error) {
+	out := new(IncidentSummary)
+	resp, err := s.client.do(ctx, "/incident/summary", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // Get ServiceDeskPlus linked incidents.
 //
 // List synchronization mappings between ServiceDeskPlus requests and Flashduty incidents.

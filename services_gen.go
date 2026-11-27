@@ -41,10 +41,13 @@ type genServices struct {
 	RolesPermissions         *RolesPermissionsService
 	Teams                    *TeamsService
 	Applications             *ApplicationsService
+	BehaviorEvents           *BehaviorEventsService
 	RumDashboards            *RumDashboardsService
 	DataQuery                *DataQueryService
 	ErrorIngestionRules      *ErrorIngestionRulesService
 	Facets                   *FacetsService
+	Funnels                  *FunnelsService
+	Heatmaps                 *HeatmapsService
 	IssuePresetSeverityRules *IssuePresetSeverityRulesService
 	Issues                   *IssuesService
 	Resources                *ResourcesService
@@ -88,10 +91,13 @@ func (c *Client) initServices() {
 	c.RolesPermissions = (*RolesPermissionsService)(&c.common)
 	c.Teams = (*TeamsService)(&c.common)
 	c.Applications = (*ApplicationsService)(&c.common)
+	c.BehaviorEvents = (*BehaviorEventsService)(&c.common)
 	c.RumDashboards = (*RumDashboardsService)(&c.common)
 	c.DataQuery = (*DataQueryService)(&c.common)
 	c.ErrorIngestionRules = (*ErrorIngestionRulesService)(&c.common)
 	c.Facets = (*FacetsService)(&c.common)
+	c.Funnels = (*FunnelsService)(&c.common)
+	c.Heatmaps = (*HeatmapsService)(&c.common)
 	c.IssuePresetSeverityRules = (*IssuePresetSeverityRulesService)(&c.common)
 	c.Issues = (*IssuesService)(&c.common)
 	c.Resources = (*ResourcesService)(&c.common)
