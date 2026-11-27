@@ -12,9 +12,23 @@ type LicensesService service
 // List the current license window's usage and the people counted in it.
 //
 // API: POST /oncall/license/list (oncall-license-read-license-list).
-func (s *LicensesService) List(ctx context.Context) (*LicenseListResponse, *Response, error) {
+func (s *LicensesService) LicenseList(ctx context.Context) (*LicenseListResponse, *Response, error) {
 	out := new(LicenseListResponse)
 	resp, err := s.client.do(ctx, "/oncall/license/list", nil, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
+// Get your License state.
+//
+// Report the caller's own On-call License state and request, and who to ask for a seat.
+//
+// API: POST /oncall/license/request/info (oncall-license-read-request-info).
+func (s *LicensesService) RequestInfo(ctx context.Context) (*LicenseRequestInfo, *Response, error) {
+	out := new(LicenseRequestInfo)
+	resp, err := s.client.do(ctx, "/oncall/license/request/info", nil, out)
 	if err != nil {
 		return nil, resp, err
 	}

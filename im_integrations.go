@@ -7,12 +7,26 @@ import "context"
 // ImIntegrationsService handles the "On-call/IM integrations" API resource.
 type ImIntegrationsService service
 
+// List members linked to an IM app.
+//
+// List the account members already linked to one IM integration's app account.
+//
+// API: POST /datasource/im/person-linked/list (datasource-im-person-linked-read-list).
+func (s *ImIntegrationsService) DatasourceImPersonLinkedReadList(ctx context.Context, req *ListPersonLinkedRequest) (*ListPersonLinkedResponse, *Response, error) {
+	out := new(ListPersonLinkedResponse)
+	resp, err := s.client.do(ctx, "/datasource/im/person-linked/list", req, out)
+	if err != nil {
+		return nil, resp, err
+	}
+	return out, resp, nil
+}
+
 // List war-room-enabled IM integrations.
 //
 // List IM integrations that have the war-room feature enabled for the account.
 //
 // API: POST /datasource/im/war-room-enabled/list (im-war-room-enabled-list).
-func (s *ImIntegrationsService) List(ctx context.Context) (*ListWarRoomEnabledResponse, *Response, error) {
+func (s *ImIntegrationsService) ImWarRoomEnabledList(ctx context.Context) (*ListWarRoomEnabledResponse, *Response, error) {
 	out := new(ListWarRoomEnabledResponse)
 	resp, err := s.client.do(ctx, "/datasource/im/war-room-enabled/list", nil, out)
 	if err != nil {

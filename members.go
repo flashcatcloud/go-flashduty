@@ -41,7 +41,7 @@ func (s *MembersService) MemberInfo(ctx context.Context) (*MemberInfoResponse, *
 
 // Invite members.
 //
-// Batch invite new members to the organization by email or phone.
+// Batch invite new members to the organization by email or phone. Each account can send at most 200 invitations per 24 hours; up to 20 members per request.
 //
 // API: POST /member/invite (memberInvite).
 func (s *MembersService) MemberInvite(ctx context.Context, req *MemberInviteRequest) (*MemberInviteResponse, *Response, error) {
